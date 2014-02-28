@@ -23,10 +23,6 @@ EvolutionaryPairHMM::EvolutionaryPairHMM(Sequences* inputSeqs) : inputSequences(
 	substModel = new GTRModel(dict, maths);
 	DEBUG("Creating the gap model");
 	indelModel = new AffineGeometricGapModel();
-	initializeModels();
-	//initial model calculation
-	calculateModels();
-	initializeStates();
 }
 
 void EvolutionaryPairHMM::runForwardAlgorithm()

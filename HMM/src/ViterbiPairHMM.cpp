@@ -13,9 +13,12 @@ namespace EBC
 ViterbiPairHMM::ViterbiPairHMM(Sequences* inputSeqs) :
 		EvolutionaryPairHMM(inputSeqs)
 {
-	// TODO Auto-generated constructor stub
+	initializeModels();
+	//initial model calculation
+	calculateModels();
 	getSequencePair();
-
+	initializeStates();
+	setTransitionProbabilities();
 }
 
 ViterbiPairHMM::~ViterbiPairHMM()
@@ -25,9 +28,27 @@ ViterbiPairHMM::~ViterbiPairHMM()
 
 void ViterbiPairHMM::initializeModels()
 {
-	generateInitialParameters();
+	//generateInitialParameters();
+
+	 //time is a parameter with both indel and subst, we use 1 common time
+	this->indelParameters = indelModel->getParamsNumber();
+	this->substParameters = substModel->getParamsNumber();
+	this->totalParameters = indelParameters + substParameters -1;
+	this->mlParameters = new double[totalParameters];
+
+	mlParameters[0] = 0.912374;
+	mlParameters[1] = 0.051834;
+	mlParameters[2] = 0.000010;
+	mlParameters[3] = 0.025448;
+	mlParameters[4] = 0.000010;
+	mlParameters[5] = 0.1;		//time
+	mlParameters[6] = 0.1;		//lambda
+	mlParameters[7] = 0.5;		//extension prob
+
+
 	//start time is the first parameter
-	substModel->setObservedFrequencies(inputSequences->getElementFrequencies());
+	double testFreqs[4] = {0.26089, 0.32737, 0.30782, 0.10391};
+	substModel->setObservedFrequencies(testFreqs);
 }
 
 double ViterbiPairHMM::getMax(double m, double x, double y, unsigned int i, unsigned int j, PairHmmState* state)
@@ -48,6 +69,26 @@ double ViterbiPairHMM::getMax(double m, double x, double y, unsigned int i, unsi
 		return y;
 	}
 
+}
+
+void ViterbiPairHMM::getResults()
+{
+	pair<string, string> initialAlignment = std::make_pair("","");
+	initialAlignment.first.reserve(xSize > ySize ? xSize : ySize);
+	initialAlignment.second.reserve(xSize > ySize ? xSize : ySize);
+
+	string a = inputSequences->getRawSequenceAt(0);
+	string b = inputSequences->getRawSequenceAt(1);
+
+
+	M->traceback(a,b, &initialAlignment);
+
+	reverse(initialAlignment.first.begin(), initialAlignment.first.end());
+	reverse(initialAlignment.second.begin(), initialAlignment.second.end());
+
+	cout << "Resulting alignment : " << endl;
+	cout << initialAlignment.first << endl;
+	cout << initialAlignment.second << endl;
 }
 
 void ViterbiPairHMM::runViterbiAlgorithm()

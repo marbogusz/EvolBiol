@@ -13,8 +13,12 @@ namespace EBC
 ForwardPairHMM::ForwardPairHMM(Sequences* inputSeqs) :
 		EvolutionaryPairHMM(inputSeqs)
 {
-	// TODO Auto-generated constructor stub
+	initializeModels();
+	//initial model calculation
+	calculateModels();
 	getSequencePair();
+	initializeStates();
+	setTransitionProbabilities();
 
 }
 
@@ -50,6 +54,9 @@ void ForwardPairHMM::runForwardAlgorithm()
 			emissionM = log(substModel->getPXiYi(seq1[i].getMatrixIndex(), seq2[j].getMatrixIndex()));
 			emissionX = log(substModel->getQXi(seq1[i].getMatrixIndex()));
 			emissionY = log(substModel->getQXi(seq2[j].getMatrixIndex()));
+
+			//Mij = PXiYj((Tmm*Mi-1,j-1)+(Txm*Xi-1,j-1)+(Tym*Yi-1,j-1));
+			//in log space
 
 			xm = (*M)(i-1,j) + X->getTransitionProbability(M);
 			xx = (*X)(i-1,j) + X->getTransitionProbability(X);

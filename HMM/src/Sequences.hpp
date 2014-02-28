@@ -50,6 +50,8 @@ public:
 
 	//void getSequencePair(vector<SequenceElement> s1, vector<SequenceElement> s2 );
 	vector<SequenceElement> getSequencesAt(int pos);
+
+	string getRawSequenceAt(unsigned int pos);
 private:
 
 	void buildDictionary();

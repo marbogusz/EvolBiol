@@ -9,6 +9,9 @@
 #define EVALUATIONMATRIX_H_
 
 #include <limits>
+#include <iostream>
+
+using namespace std;
 
 namespace EBC
 {
@@ -45,6 +48,8 @@ protected:
 public:
 
 	TraceStep ** matrixData;
+
+	void traceback(string& seqA, string& seqB, std::pair<string,string>* alignment);
 
 	DpMatrix(unsigned int xSize, unsigned int ySize);
 

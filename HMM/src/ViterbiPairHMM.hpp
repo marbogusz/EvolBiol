@@ -27,6 +27,8 @@ public:
 	virtual ~ViterbiPairHMM();
 
 	void runViterbiAlgorithm();
+
+	void getResults();
 };
 
 } /* namespace EBC */

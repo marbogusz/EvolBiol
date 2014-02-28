@@ -68,6 +68,14 @@ unsigned int Sequences::getSequenceSize()
 
 }
 
+string Sequences::getRawSequenceAt(unsigned int pos)
+{
+	return this->rawSequences[pos];
+}
+
+
+
+
 double* Sequences::getElementFrequencies()
 {
 	//TODO implement

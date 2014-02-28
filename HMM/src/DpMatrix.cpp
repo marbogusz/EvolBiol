@@ -80,3 +80,46 @@ void EBC::DpMatrix::setVerticalAt(unsigned int i, unsigned int j)
 {
 	matrixData[i][j].vert = true;
 }
+
+void EBC::DpMatrix::traceback(string& seq_a, string& seq_b, std::pair<string,string>* alignment)
+{
+	unsigned int i = xSize-1;
+	unsigned int j = ySize-1;
+
+	while(i>0 || j >0)
+	{
+		if (matrixData[i][j].diag)
+		{
+			alignment->first += seq_a[i-1];
+			alignment->second += seq_b[j-1];
+			i--;
+			j--;
+		}
+		else if (matrixData[i][j].hor)
+		{
+			alignment->second += seq_b[j-1];
+			alignment->first += '-';
+			j--;
+		}
+		//vert
+		else
+		{
+			alignment->first += seq_a[i-1];
+			alignment->second += '-';
+			i--;
+		}
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
