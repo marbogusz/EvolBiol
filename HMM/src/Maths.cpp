@@ -21,7 +21,6 @@ double* Maths::matrixMultiply(double *matA, double *matB, int size)
 {
 	//FIXME - make sure the resulting matrix is zeroed before multiplication!!!
 	double* matResult = new double[size*size];
-	int i;
 
 	for (int i=0; i<size; i++)
 	{

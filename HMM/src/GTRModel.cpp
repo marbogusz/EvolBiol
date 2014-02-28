@@ -34,7 +34,6 @@ void GTRModel::setParametersInMatrix() {
 	this->time = parameters[5];
 
 	int s = this->matrixSize;
-	int currParam =0;
 	int i,j,k;
 
 

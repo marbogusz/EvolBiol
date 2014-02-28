@@ -39,11 +39,6 @@ public:
 	//Return the dictionary for the input set
 	Dictionary* getDictionary();
 
-	unsigned int getSequenceCount();
-
-	//FIXME - assume equal size for all?
-	unsigned int getSequenceSize();
-
 	//Get then in a dictionary order eg. T C A G, check the definitions in constants
 	//FIXME - change to A T C G
 	double* getElementFrequencies();

@@ -13,12 +13,18 @@ namespace EBC
 ViterbiPairHMM::ViterbiPairHMM(Sequences* inputSeqs) :
 		EvolutionaryPairHMM(inputSeqs)
 {
+	DEBUG("initializeModels");
 	initializeModels();
 	//initial model calculation
+	DEBUG("calculateModels");
 	calculateModels();
+	DEBUG("gettingSequences");
 	getSequencePair();
+	DEBUG("initializeStates");
 	initializeStates();
-	setTransitionProbabilities();
+	DEBUG("setting transition probabilities");
+	//no need to set them again, initialized below
+	//setTransitionProbabilities();
 }
 
 ViterbiPairHMM::~ViterbiPairHMM()
@@ -45,9 +51,13 @@ void ViterbiPairHMM::initializeModels()
 	mlParameters[6] = 0.1;		//lambda
 	mlParameters[7] = 0.5;		//extension prob
 
+	testFreqs[0] = 0.26089;
+	testFreqs[1] = 0.32737;
+	testFreqs[2] = 0.30782;
+	testFreqs[3] = 0.10391;
 
 	//start time is the first parameter
-	double testFreqs[4] = {0.26089, 0.32737, 0.30782, 0.10391};
+
 	substModel->setObservedFrequencies(testFreqs);
 }
 
@@ -73,6 +83,9 @@ double ViterbiPairHMM::getMax(double m, double x, double y, unsigned int i, unsi
 
 void ViterbiPairHMM::getResults()
 {
+	M->outputTrace();
+
+	DEBUG("Get Results");
 	pair<string, string> initialAlignment = std::make_pair("","");
 	initialAlignment.first.reserve(xSize > ySize ? xSize : ySize);
 	initialAlignment.second.reserve(xSize > ySize ? xSize : ySize);
@@ -93,6 +106,8 @@ void ViterbiPairHMM::getResults()
 
 void ViterbiPairHMM::runViterbiAlgorithm()
 {
+	DEBUG("Run Viterbi");
+
 	unsigned int i;
 	unsigned int j;
 

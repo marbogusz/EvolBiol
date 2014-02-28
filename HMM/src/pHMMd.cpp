@@ -31,6 +31,7 @@ int main(int argc, char ** argv) {
 		DEBUG("Creating the HMM");
 		ViterbiPairHMM* epHMM = new ViterbiPairHMM(inputSeqs);
 		epHMM->runViterbiAlgorithm();
+		epHMM->getResults();
 	}
 	catch(ProgramException& pe)
 	{

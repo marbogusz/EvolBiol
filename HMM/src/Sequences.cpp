@@ -57,17 +57,6 @@ Dictionary* Sequences::getDictionary()
 	return dict;
 }
 
-unsigned int Sequences::getSequenceCount()
-{
-
-}
-
-//Assuming the longest size
-unsigned int Sequences::getSequenceSize()
-{
-
-}
-
 string Sequences::getRawSequenceAt(unsigned int pos)
 {
 	return this->rawSequences[pos];

@@ -24,7 +24,6 @@ private:
 
 	string filename;
 	ifstream infile;
-	bool endReached;
 	vector<string> sequences;
 	vector<string>::iterator it;
 

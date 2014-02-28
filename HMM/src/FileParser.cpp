@@ -26,7 +26,7 @@ FileParser::FileParser(char* filename)
 
 	while (std::getline(infile, tmp,'\n'))
 	{
-		DEBUG("FILE SEQUENCE " << tmp );
+		//DEBUG("FILE SEQUENCE " << tmp );
 		sequences.push_back(tmp);
 	}
 	infile.close();
@@ -35,7 +35,7 @@ FileParser::FileParser(char* filename)
 
 string FileParser::getNextSequence()
 {
-	DEBUG("Get next sequence it: " << *it);
+	//DEBUG("Get next sequence it: " << *it);
 	return *it++;
 }
 
