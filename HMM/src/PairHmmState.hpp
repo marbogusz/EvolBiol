@@ -38,13 +38,14 @@ public:
 
 	PairHmmState(unsigned int xSize, unsigned int ySize);
 
+	virtual ~PairHmmState();
+
 	void addTransitionProbability(PairHmmState* state, double value);
 
 	void setTransitionProbability(PairHmmState* state, double value);
 
 	double getTransitionProbability(PairHmmState* state);
 
-	virtual ~PairHmmState();
 };
 
 } /* namespace EBC */

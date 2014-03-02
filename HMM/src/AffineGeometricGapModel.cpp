@@ -7,6 +7,8 @@
 
 #include "AffineGeometricGapModel.hpp"
 #include <cmath>
+#include <iostream>
+#include "Maths.hpp"
 
 namespace EBC
 {
@@ -21,6 +23,7 @@ AffineGeometricGapModel::AffineGeometricGapModel(double lambda, double t, double
 
 AffineGeometricGapModel::AffineGeometricGapModel()
 {
+	//logMode = true;
 	this->paramsNumber = 3;
 }
 
@@ -32,15 +35,19 @@ AffineGeometricGapModel::~AffineGeometricGapModel()
 void AffineGeometricGapModel::calculateGeometricProbability(double lambda, double t)
 {
 	//FIXME - this might not be making sense!
-	this->gapOpeningProbability = 1-exp(-1*lambda*t);
+	double exponent = 1-exp(-1*lambda*t);
+	this->gapOpeningProbability = exponent;
 }
 
 void AffineGeometricGapModel::setParameters(double* params)
 {
 	//FIXME - maybe vector instead ?
 	//time goes first
-	this->calculateGeometricProbability(params[1], params[0]);
-	this->gapExtensionProbability = params[2];
+	this->calculateGeometricProbability(Maths::logistic(params[1]),
+			Maths::logistic(params[0]));
+	this->gapExtensionProbability = Maths::logistic(params[2]);
+
+	//std::cerr << " Opening " << this->gapOpeningProbability << "\t" << "Extension " << this->gapExtensionProbability << std::endl;
 
 }
 

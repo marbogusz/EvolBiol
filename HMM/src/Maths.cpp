@@ -17,6 +17,25 @@ Maths::Maths()
 
 }
 
+double Maths::logSum(double a, double b, double c)
+{
+	double partialSum = logSum(a,b);
+	return logSum(partialSum,c);
+}
+
+double Maths::logSum(double a, double b)
+{
+	if (a > b)
+	{
+		return a + log(1+exp(b-a));
+	}
+	else
+	{
+		return b + log(1+exp(a-b));
+	}
+}
+
+
 double* Maths::matrixMultiply(double *matA, double *matB, int size)
 {
 	//FIXME - make sure the resulting matrix is zeroed before multiplication!!!

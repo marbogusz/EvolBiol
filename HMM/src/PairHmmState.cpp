@@ -19,8 +19,9 @@ PairHmmState::PairHmmState(unsigned int xSize, unsigned int ySize):
 
 PairHmmState::~PairHmmState()
 {
-	// TODO Auto-generated destructor stub
+	//delete transitionProbs;
 }
+
 
 void PairHmmState::addTransitionProbability(PairHmmState* state, double value)
 {

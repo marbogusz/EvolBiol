@@ -15,7 +15,7 @@
 #ifdef DEBUG_BUILD
 #  define DEBUG(x) do { std::cerr << "DBG! " << x << std::endl; } while (0)
 #  define DEBUGN(x) do { std::cerr << x ; } while (0)
-#  define DEBUGV(x,n) do { for (int i=0;i<n;i++) std::cerr << x[i] << " "; std::cerr<<std::endl;} while (0)
+#  define DEBUGV(x,n) do { for (int i=0;i<n;i++) std::cerr << x[i] << "\t"; std::cerr<<std::endl;} while (0)
 #else
 #  define DEBUG(x) do {} while (0)
 #  define DEBUGN(x) do {} while (0)

@@ -20,7 +20,7 @@ SubstitutionModel::SubstitutionModel(Dictionary* dict, Maths* alg)
 	this->meanRate=0.0;
 	this-> roots = new double[matrixSize];
 	//set the log mode to true ??
-	this->logMode = false;
+	this->logMode = true;
 }
 
 
@@ -52,7 +52,7 @@ double* SubstitutionModel::calculatePt(double t)
 {
 	//DEBUG("SubstitutionModel::calculateSubstitutionModelPt");
 	//exponentiate
-	algebra->expLambdaT(roots, (logMode?exp(t):t), matrixSize);
+	algebra->expLambdaT(roots, t, matrixSize);
 	//algebra->expLambdaT(roots, logMode?log(t):t, matrixSize);
 	//algebra->vectorMultiply(roots,t,matrixSize);
 	//roots[0] = 0;
@@ -64,12 +64,13 @@ double* SubstitutionModel::calculatePt(double t)
 	}
 	pMatrix = this->algebra->matrixMultiply(uMatrix, vMatrix, matrixSize);
 	//FIXME -  make sure to delete pmatrix after using it!!!!
+	//DEBUGV(pMatrix,16);
 	return pMatrix;
 }
 
 void SubstitutionModel::calculatePt()
 {
-	this->calculatePt(this->time);
+	this->calculatePt(Maths::logistic(this->time));
 }
 
 
@@ -116,20 +117,21 @@ void SubstitutionModel::setObservedFrequencies(double* observedFrequencies)
 
 double SubstitutionModel::getPXiYi(unsigned int xi, unsigned int yi)
 {
-	if (logMode)
-	{
-		return  log(piFreqs[xi]) + log(pMatrix[(xi*matrixSize)+yi]);
-	}
-	else
-	{
+	//if (logMode)
+	//{
+	//	return  log(piFreqs[xi]) + log(pMatrix[(xi*matrixSize)+yi]);
+	//}
+	//else
+	//{
 		return piFreqs[xi]*pMatrix[(xi*matrixSize)+yi];
-	}
+	//}
 }
 
 
 double SubstitutionModel::getQXi(unsigned int xi)
 {
-	return logMode? log(piFreqs[xi]) : piFreqs[xi];
+	//return logMode? log(piFreqs[xi]) :
+	return piFreqs[xi];
 }
 
 } /* namespace EBC */

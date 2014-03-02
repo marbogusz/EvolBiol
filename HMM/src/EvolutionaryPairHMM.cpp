@@ -17,6 +17,7 @@ namespace EBC
 
 EvolutionaryPairHMM::EvolutionaryPairHMM(Sequences* inputSeqs) : inputSequences(inputSeqs)
 {
+	M = X = Y = NULL;
 	dict = inputSeqs->getDictionary();
 	maths  = new Maths();
 	DEBUG("Creating the substitution model");
@@ -57,19 +58,26 @@ void EvolutionaryPairHMM::initializeStates()
 	e = indelModel->getGapExtensionProbability();
 	g = indelModel->getGapOpeningProbability();
 
+	if (M != NULL)
+		delete M;
+	if (X != NULL)
+		delete X;
+	if (Y != NULL)
+		delete Y;
+
 	M = new PairHmmMatchState(xSize,ySize,e,g);
 	X = new PairHmmInsertionState(xSize,ySize,e,g);
 	Y = new PairHmmDeletionState(xSize,ySize,e,g);
 
-	M->addTransitionProbability(M,log(1-2*g));
-	M->addTransitionProbability(X,log((1-e)*(1-2*g)));
-	M->addTransitionProbability(Y,log((1-e)*(1-2*g)));
+	M->addTransitionProbability(M,log(1.0-2.0*g));
+	M->addTransitionProbability(X,log((1.0-e)*(1.0-2.0*g)));
+	M->addTransitionProbability(Y,log((1.0-e)*(1.0-2.0*g)));
 
 	X->addTransitionProbability(X,log(e));
 	Y->addTransitionProbability(Y,log(e));
 
-	X->addTransitionProbability(Y,log((1-e)*g));
-	Y->addTransitionProbability(X,log((1-e)*g));
+	X->addTransitionProbability(Y,log((1.0-e)*g));
+	Y->addTransitionProbability(X,log((1.0-e)*g));
 
 	X->addTransitionProbability(M,log(g));
 	Y->addTransitionProbability(M,log(g));
@@ -92,10 +100,15 @@ void EvolutionaryPairHMM::generateInitialParameters()
 	this->totalParameters = indelParameters + substParameters -1;
 	this->mlParameters = new double[totalParameters];
 
-	mlParameters[0] = 1.0; // first parameter hack
+	mlParameters[0] = 0.0; // first parameter hack
+	unsigned int sp = this->substParameters-2;
+	double tempVal;
+
 	for(unsigned i=1; i< totalParameters; i++)
 	{
-		mlParameters[i] = 0.2 + 0.1*maths->rndu();
+		tempVal = 0.2 + 0.1*maths->rndu();
+		mlParameters[i] = tempVal;//sp>0 ? log(tempVal) : Maths::logit(tempVal);
+		sp --;
 	}
 }
 

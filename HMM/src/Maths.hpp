@@ -59,6 +59,20 @@ public:
 
 	void expLambdaT(double* lambda, double t, int size);
 
+	double logSum(double, double, double);
+
+	double logSum(double, double);
+
+	inline static double logistic(double x)
+	{
+		return 1.0/(1+exp(x*-1.0));
+	}
+
+	inline static double logit(double x)
+	{
+		return log(x/1.0-x);
+	}
+
 };
 
 } /* namespace EBC */

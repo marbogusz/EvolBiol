@@ -48,8 +48,8 @@ void ViterbiPairHMM::initializeModels()
 	mlParameters[3] = 0.025448;
 	mlParameters[4] = 0.000010;
 	mlParameters[5] = 0.1;		//time
-	mlParameters[6] = 0.1;		//lambda
-	mlParameters[7] = 0.5;		//extension prob
+	mlParameters[6] = 0.05;		//lambda
+	mlParameters[7] = 0.4;		//extension prob
 
 	testFreqs[0] = 0.26089;
 	testFreqs[1] = 0.32737;
@@ -83,7 +83,7 @@ double ViterbiPairHMM::getMax(double m, double x, double y, unsigned int i, unsi
 
 void ViterbiPairHMM::getResults()
 {
-	M->outputTrace();
+	//M->outputTrace();
 
 	DEBUG("Get Results");
 	pair<string, string> initialAlignment = std::make_pair("","");

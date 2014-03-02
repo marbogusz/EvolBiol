@@ -20,6 +20,8 @@ protected:
 
 	unsigned int paramsNumber;
 
+	//bool logMode;
+
 public:
 	IndelModel();
 

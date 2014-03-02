@@ -19,6 +19,15 @@ void EBC::DpMatrix::allocateData()
 	}
 }
 
+EBC::DpMatrix::~DpMatrix()
+{
+	for(int i=0; i<xSize; i++)
+	{
+		delete[] matrixData[i];
+	}
+	delete matrixData;
+}
+
 EBC::DpMatrix::DpMatrix(unsigned int xS, unsigned int yS) :
 		xSize(xS), ySize(yS)
 {

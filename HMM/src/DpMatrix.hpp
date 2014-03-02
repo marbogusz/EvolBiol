@@ -53,6 +53,8 @@ public:
 
 	DpMatrix(unsigned int xSize, unsigned int ySize);
 
+	virtual ~DpMatrix();
+
 	void setValue(unsigned int x,unsigned int y, double value);
 
 	double valueAt(unsigned int i, unsigned int j);
