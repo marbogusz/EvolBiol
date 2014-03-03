@@ -23,7 +23,8 @@ PairHmmInsertionState::~PairHmmInsertionState()
 
 void PairHmmInsertionState::initializeData()
 {
-	//for
+	setWholeRow(0,this->minVal);
+	setWholeCol(0,this->minVal);
 }
 
 

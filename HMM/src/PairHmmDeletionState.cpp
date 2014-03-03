@@ -23,6 +23,8 @@ PairHmmDeletionState::~PairHmmDeletionState()
 
 void PairHmmDeletionState::initializeData()
 {
+	setWholeRow(0,this->minVal);
+	setWholeCol(0,this->minVal);
 }
 
 

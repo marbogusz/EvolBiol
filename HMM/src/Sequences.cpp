@@ -71,10 +71,18 @@ double* Sequences::getElementFrequencies()
 	//FIXME !!!!
 	this->observedFrequencies = new double[dict->getAlphabetSize()];
 
-	observedFrequencies[0] = 0.26089;
-	observedFrequencies[1] = 0.32737;
-	observedFrequencies[2] = 0.30782;
-	observedFrequencies[3] = 0.10391;
+	//observedFrequencies[0] = 0.26089;
+	//observedFrequencies[1] = 0.32737;
+	//observedFrequencies[2] = 0.30782;
+	//observedFrequencies[3] = 0.10391;
+
+	//0.321661 0.302651 0.107554 0.268134
+
+	//ACGT
+	observedFrequencies[0] = 0.321661;
+	observedFrequencies[1] = 0.302651;
+	observedFrequencies[2] = 0.107554;
+	observedFrequencies[3] = 0.268134;
 
 
 	//observedFrequencies[0] = 0.25;

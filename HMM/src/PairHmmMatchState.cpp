@@ -23,7 +23,11 @@ PairHmmMatchState::~PairHmmMatchState()
 
 void PairHmmMatchState::initializeData()
 {
-	this->matrixData[0][0].score = 1.0;
+	setWholeRow(0,this->minVal);
+	setWholeCol(0,this->minVal);
+	//FIXME - set to some other value!
+	this->matrixData[1][1].score = 0;
+	//DEBUG("init state");
 }
 
 

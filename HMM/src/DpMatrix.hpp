@@ -45,6 +45,11 @@ protected:
 
 	virtual void initializeData() = 0;
 
+	virtual void setWholeRow(unsigned int row, double value);
+
+	virtual void setWholeCol(unsigned int col, double value);
+
+
 public:
 
 	TraceStep ** matrixData;

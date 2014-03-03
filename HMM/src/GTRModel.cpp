@@ -18,7 +18,7 @@ GTRModel::GTRModel(Dictionary* dict, Maths* alg) : SubstitutionModel(dict, alg)
 	this->parameters = new double[this->paramsNumber];
 	//TODO - set within the model
 	this->modelSetsOwnInitials = false;
-	this->scale = this->logMode==true ? exp(1.0) : 1.0;
+	//this->scale = this->logMode==true ? exp(1.0) : 1.0;
 
 }
 
@@ -31,7 +31,7 @@ void GTRModel::setParametersInMatrix() {
 	this->e = &parameters[4];
 	this->f = &scale;
 
-	this->time = log(parameters[5]);
+	this->time = parameters[5];
 
 	int s = this->matrixSize;
 	int i,j,k;

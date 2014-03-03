@@ -7,7 +7,7 @@
 
 #include "CommandReader.hpp"
 #include "Sequences.hpp"
-//#include "ViterbiPairHMM.hpp"
+#include "ViterbiPairHMM.hpp"
 #include "ForwardPairHMM.hpp"
 #include "ParseException.hpp"
 #include <iostream>
@@ -30,9 +30,10 @@ int main(int argc, char ** argv) {
 		DEBUG("Creating alignment");
 		Sequences* inputSeqs = new Sequences(parser);
 		DEBUG("Creating the HMM");
-		ForwardPairHMM* epHMM = new ForwardPairHMM(inputSeqs);
-		//epHMM->runViterbiAlgorithm();
-		//epHMM->getResults();
+		//ForwardPairHMM* epHMM = new ForwardPairHMM(inputSeqs);
+		ViterbiPairHMM* epHMM = new ViterbiPairHMM(inputSeqs);
+		epHMM->runViterbiAlgorithm();
+		epHMM->getResults();
 	}
 	catch(ProgramException& pe)
 	{

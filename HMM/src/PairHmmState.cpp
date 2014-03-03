@@ -23,7 +23,7 @@ PairHmmState::~PairHmmState()
 }
 
 
-void PairHmmState::addTransitionProbability(PairHmmState* state, double value)
+void PairHmmState::addTransitionProbabilityFrom(PairHmmState* state, double value)
 {
 	this->transitionProbs.insert(std::make_pair(state,value));
 }
@@ -33,7 +33,7 @@ void PairHmmState::setTransitionProbability(PairHmmState* state, double value)
 	this->transitionProbs[state]  = value;
 }
 
-double PairHmmState::getTransitionProbability(PairHmmState* state)
+double PairHmmState::getTransitionProbabilityFrom(PairHmmState* state)
 {
 	return this->transitionProbs[state];
 }

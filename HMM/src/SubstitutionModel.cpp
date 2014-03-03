@@ -20,7 +20,7 @@ SubstitutionModel::SubstitutionModel(Dictionary* dict, Maths* alg)
 	this->meanRate=0.0;
 	this-> roots = new double[matrixSize];
 	//set the log mode to true ??
-	this->logMode = true;
+	this->logMode = false;
 }
 
 
@@ -70,7 +70,7 @@ double* SubstitutionModel::calculatePt(double t)
 
 void SubstitutionModel::calculatePt()
 {
-	this->calculatePt(Maths::logistic(this->time));
+	this->calculatePt(this->time);
 }
 
 
@@ -117,13 +117,14 @@ void SubstitutionModel::setObservedFrequencies(double* observedFrequencies)
 
 double SubstitutionModel::getPXiYi(unsigned int xi, unsigned int yi)
 {
-	//if (logMode)
-	//{
-	//	return  log(piFreqs[xi]) + log(pMatrix[(xi*matrixSize)+yi]);
-	//}
-	//else
-	//{
-		return piFreqs[xi]*pMatrix[(xi*matrixSize)+yi];
+	double mat[4][4] = {{0.307973, 0.000988417, 0.00391426, 0.000775816},
+						{0.00111648,0.274434,0.000124826,0.023757},
+						{0.0350102,0.000988417,0.095185,0.000775816},
+						{0.00111648,0.0302673,0.000124826,0.240077}};
+
+	return piFreqs[xi]*mat[xi][yi];
+
+		//return piFreqs[xi]*pMatrix[(xi*matrixSize)+yi];
 	//}
 }
 

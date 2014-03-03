@@ -13,17 +13,17 @@ namespace EBC
 lbfgsfloatval_t ForwardPairHMM::BFGS::calculateGradients(const lbfgsfloatval_t* x,
 		lbfgsfloatval_t* g, const int n, const lbfgsfloatval_t step)
 {
+	int i;
 
-	for (int i=0; i<5; i++)
+	for (i=0; i<paramsCount; i++)
 	{
-		cerr << exp(x[i]) << "\t";
+		tempParams[i] = Maths::logistic(x[i]);
 	}
-	cerr << endl;
 
-	double localLikelihood = parent->runForwardIteration((const double*)x)*-1.0;
+	double localLikelihood = parent->runForwardIteration((const double*)tempParams)*-1.0;
 	double differentialLikelihood;
 
-	for (int i=0; i<n; i++)
+	for (i=0; i<n; i++)
 	{
 		copyWithSmallDiff(i,x);
 		differentialLikelihood = parent->runForwardIteration((const double*) tempParams)*-1.0;
@@ -37,11 +37,18 @@ void ForwardPairHMM::BFGS::copyWithSmallDiff(int pos, const lbfgsfloatval_t* x)
 {
 	for (int i=0; i<paramsCount; i++)
 	{
+		//tempParams[i] = Maths::logistic(x[i]);
+		//if (i==pos)
+		//{
+		//	tempParams[i] += smallDiff;
+		//}
+
 		tempParams[i] = x[i];
 		if (i==pos)
 		{
 			tempParams[i] += smallDiff;
 		}
+		tempParams[i] = Maths::logistic(tempParams[i]);
 	}
 }
 
@@ -51,11 +58,11 @@ int ForwardPairHMM::BFGS::reportProgress(const lbfgsfloatval_t* x,
 		const lbfgsfloatval_t step, int n, int k, int ls)
 {
 	DEBUG("BFGS value:" << fx << " iteration: " << k);
-	//for (int i=0; i<5; i++)
-	//{
-	//	cerr << exp(x[i]) << "\t";
-	//}
-	//cerr << endl;
+	for (int i=0; i<n; i++)
+	{
+		cerr << Maths::logistic(x[i]) << "\t";
+	}
+	cerr << endl;
 	return 0;
 }
 
@@ -153,23 +160,25 @@ double ForwardPairHMM::runForwardAlgorithm()
 			//in log space
 
 
-			xm = (*M)(i-1,j) + X->getTransitionProbability(M);
-			xx = (*X)(i-1,j) + X->getTransitionProbability(X);
-			xy = (*Y)(i-1,j) + X->getTransitionProbability(Y);
+			xm = (*M)(i-1,j) + X->getTransitionProbabilityFrom(M);
+			xx = (*X)(i-1,j) + X->getTransitionProbabilityFrom(X);
+			xy = (*Y)(i-1,j) + X->getTransitionProbabilityFrom(Y);
 
-			ym = (*M)(i,j-1) + Y->getTransitionProbability(M);
-			yx = (*X)(i,j-1) + Y->getTransitionProbability(X);
-			yy = (*Y)(i,j-1) + Y->getTransitionProbability(Y);
+			ym = (*M)(i,j-1) + Y->getTransitionProbabilityFrom(M);
+			yx = (*X)(i,j-1) + Y->getTransitionProbabilityFrom(X);
+			yy = (*Y)(i,j-1) + Y->getTransitionProbabilityFrom(Y);
 
-			mm = (*M)(i-1,j-1) + M->getTransitionProbability(M);
-			mx = (*X)(i-1,j-1) + M->getTransitionProbability(X);
-			my = (*Y)(i-1,j-1) + M->getTransitionProbability(Y);
+			mm = (*M)(i-1,j-1) + M->getTransitionProbabilityFrom(M);
+			mx = (*X)(i-1,j-1) + M->getTransitionProbabilityFrom(X);
+			my = (*Y)(i-1,j-1) + M->getTransitionProbabilityFrom(Y);
 
 
 			X->setValue(i,j, emissionX + maths->logSum(xm,xx,xy));
 			Y->setValue(i,j, emissionY + maths->logSum(ym,yx,yy));
-			M->setValue(i,j, emissionM + maths->logSum(mm,mx,my));
-
+			if (i!=1 && j!=1)
+			{
+				M->setValue(i,j, emissionM + maths->logSum(mm,mx,my));
+			}
 		}
 	}
 	return (*M)(xSize-1,ySize-1);

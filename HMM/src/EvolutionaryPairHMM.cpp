@@ -58,6 +58,11 @@ void EvolutionaryPairHMM::initializeStates()
 	e = indelModel->getGapExtensionProbability();
 	g = indelModel->getGapOpeningProbability();
 
+
+	DEBUG ("Opening probs " << g);
+	DEBUG ("Extension probs " << e);
+
+
 	if (M != NULL)
 		delete M;
 	if (X != NULL)
@@ -69,18 +74,18 @@ void EvolutionaryPairHMM::initializeStates()
 	X = new PairHmmInsertionState(xSize,ySize,e,g);
 	Y = new PairHmmDeletionState(xSize,ySize,e,g);
 
-	M->addTransitionProbability(M,log(1.0-2.0*g));
-	M->addTransitionProbability(X,log((1.0-e)*(1.0-2.0*g)));
-	M->addTransitionProbability(Y,log((1.0-e)*(1.0-2.0*g)));
+	M->addTransitionProbabilityFrom(M,log(1.0-2.0*g));
+	M->addTransitionProbabilityFrom(X,log((1.0-e)*(1.0-2.0*g)));
+	M->addTransitionProbabilityFrom(Y,log((1.0-e)*(1.0-2.0*g)));
 
-	X->addTransitionProbability(X,log(e));
-	Y->addTransitionProbability(Y,log(e));
+	X->addTransitionProbabilityFrom(X,log(e));
+	Y->addTransitionProbabilityFrom(Y,log(e));
 
-	X->addTransitionProbability(Y,log((1.0-e)*g));
-	Y->addTransitionProbability(X,log((1.0-e)*g));
+	X->addTransitionProbabilityFrom(Y,log((1.0-e)*g));
+	Y->addTransitionProbabilityFrom(X,log((1.0-e)*g));
 
-	X->addTransitionProbability(M,log(g));
-	Y->addTransitionProbability(M,log(g));
+	X->addTransitionProbabilityFrom(M,log(g));
+	Y->addTransitionProbabilityFrom(M,log(g));
 }
 
 

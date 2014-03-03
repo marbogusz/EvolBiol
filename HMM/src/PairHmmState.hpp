@@ -40,11 +40,11 @@ public:
 
 	virtual ~PairHmmState();
 
-	void addTransitionProbability(PairHmmState* state, double value);
+	void addTransitionProbabilityFrom(PairHmmState* state, double value);
 
 	void setTransitionProbability(PairHmmState* state, double value);
 
-	double getTransitionProbability(PairHmmState* state);
+	double getTransitionProbabilityFrom(PairHmmState* state);
 
 };
 

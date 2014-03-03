@@ -42,6 +42,22 @@ void EBC::DpMatrix::setValue(unsigned int x, unsigned int y, double value)
 	matrixData[x][y].score = value;
 }
 
+void EBC::DpMatrix::setWholeRow(unsigned int row, double value)
+{
+	for (int i=0; i<ySize; i++)
+	{
+		matrixData[row][i].score = value;
+	}
+}
+
+void EBC::DpMatrix::setWholeCol(unsigned int col, double value)
+{
+	for (int i=0; i<xSize; i++)
+	{
+		matrixData[i][col].score = value;
+	}
+}
+
 
 double EBC::DpMatrix::valueAt(unsigned int i, unsigned int j)
 {
