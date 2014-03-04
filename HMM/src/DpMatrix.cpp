@@ -32,7 +32,7 @@ EBC::DpMatrix::DpMatrix(unsigned int xS, unsigned int yS) :
 		xSize(xS), ySize(yS)
 {
 	maxVal = std::numeric_limits<double>::max();
-	minVal = std::numeric_limits<double>::min();
+	minVal = -10000;//std::numeric_limits<double>::min();
 	allocateData();
 }
 
@@ -64,11 +64,14 @@ double EBC::DpMatrix::valueAt(unsigned int i, unsigned int j)
 	return matrixData[i][j].score;
 }
 
-void EBC::DpMatrix::outputTrace()
+void EBC::DpMatrix::outputTrace(unsigned int bound=0)
 {
-	for(int i=0; i < xSize; i++)
+	unsigned int xl = bound !=0 ? bound : xSize;
+	unsigned int yl = bound !=0 ? bound : ySize;
+
+	for(int i=0; i < xl; i++)
 	{
-		for(int j=0; j < ySize; j++)
+		for(int j=0; j < yl; j++)
 		{
 			TraceStep& ts = matrixData[i][j];
 					if (ts.vert &&  !ts.hor && !ts.diag)
@@ -90,6 +93,25 @@ void EBC::DpMatrix::outputTrace()
 		cout << endl;
 	}
 }
+
+void EBC::DpMatrix::outputValues(unsigned int bound=0)
+{
+	unsigned int xl = bound !=0 ? bound : xSize;
+	unsigned int yl = bound !=0 ? bound : ySize;
+
+	for(int i=0; i < xl; i++)
+	{
+		for(int j=0; j < yl; j++)
+		{
+			TraceStep& ts = matrixData[i][j];
+
+			cout << (-1.0*ts.score) << "\t";
+		}
+		cout << endl;
+	}
+}
+
+
 
 void EBC::DpMatrix::setDiagonalAt(unsigned int i, unsigned int j)
 {

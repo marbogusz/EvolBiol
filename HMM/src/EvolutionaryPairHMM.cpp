@@ -7,6 +7,7 @@
 
 #include "EvolutionaryPairHMM.hpp"
 #include "GTRModel.hpp"
+#include "HKY85Model.hpp"
 #include "AffineGeometricGapModel.hpp"
 #include "PairHmmMatchState.hpp"
 #include "PairHmmInsertionState.hpp"
@@ -21,7 +22,8 @@ EvolutionaryPairHMM::EvolutionaryPairHMM(Sequences* inputSeqs) : inputSequences(
 	dict = inputSeqs->getDictionary();
 	maths  = new Maths();
 	DEBUG("Creating the substitution model");
-	substModel = new GTRModel(dict, maths);
+	substModel = new HKY85Model(dict, maths);
+	//substModel = new HKY85Model(dict, maths);
 	DEBUG("Creating the gap model");
 	indelModel = new AffineGeometricGapModel();
 }
@@ -63,6 +65,7 @@ void EvolutionaryPairHMM::initializeStates()
 	DEBUG ("Extension probs " << e);
 
 
+
 	if (M != NULL)
 		delete M;
 	if (X != NULL)
@@ -70,9 +73,9 @@ void EvolutionaryPairHMM::initializeStates()
 	if (Y != NULL)
 		delete Y;
 
-	M = new PairHmmMatchState(xSize,ySize,e,g);
-	X = new PairHmmInsertionState(xSize,ySize,e,g);
-	Y = new PairHmmDeletionState(xSize,ySize,e,g);
+	M = new PairHmmMatchState(xSize,ySize,g,e);
+	X = new PairHmmInsertionState(xSize,ySize,g,e);
+	Y = new PairHmmDeletionState(xSize,ySize,g,e);
 
 	M->addTransitionProbabilityFrom(M,log(1.0-2.0*g));
 	M->addTransitionProbabilityFrom(X,log((1.0-e)*(1.0-2.0*g)));

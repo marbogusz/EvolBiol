@@ -23,10 +23,22 @@ PairHmmMatchState::~PairHmmMatchState()
 
 void PairHmmMatchState::initializeData()
 {
-	setWholeRow(0,this->minVal);
-	setWholeCol(0,this->minVal);
-	//FIXME - set to some other value!
-	this->matrixData[1][1].score = 0;
+	double logOpen = log(gapOpen);
+	double logExtension = log(gapExtension);
+
+
+
+	for (int i=0;i<xSize; i++)
+	{
+		this->matrixData[i][0].score = logOpen + i*logExtension;
+	}
+
+	for (int j=0;j<ySize; j++)
+	{
+		this->matrixData[0][j].score = logOpen + j*logExtension;
+	}
+
+	this->matrixData[0][0].score = 0;
 	//DEBUG("init state");
 }
 

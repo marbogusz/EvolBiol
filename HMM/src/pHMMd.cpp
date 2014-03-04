@@ -17,8 +17,8 @@ using namespace std;
 using namespace EBC;
 
 int main(int argc, char ** argv) {
-	cout << fixed << setprecision(7);
-	cerr << fixed << setprecision(7);
+	cout << fixed << setprecision(6);
+	cerr << fixed << setprecision(6);
 
 	cout << "Pair-HMM Distance estimation" << endl; // prints ML
 
@@ -33,6 +33,7 @@ int main(int argc, char ** argv) {
 		//ForwardPairHMM* epHMM = new ForwardPairHMM(inputSeqs);
 		ViterbiPairHMM* epHMM = new ViterbiPairHMM(inputSeqs);
 		epHMM->runViterbiAlgorithm();
+		//epHMM->runForwardAlgorithm();
 		epHMM->getResults();
 	}
 	catch(ProgramException& pe)

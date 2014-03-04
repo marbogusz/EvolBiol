@@ -70,7 +70,10 @@ public:
 
 	void setVerticalAt(unsigned int i, unsigned int j);
 
-	void outputTrace();
+
+	void outputTrace(unsigned int);
+
+	void outputValues(unsigned int);
 
 
 };

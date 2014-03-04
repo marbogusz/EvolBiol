@@ -27,8 +27,10 @@ string Dictionary::getSymbolAt(short index)
 	return alphabet[index];
 }
 
-//const char Dictionary::nucleotides[] = {'T', 'C', 'A', 'G'};
-const char Dictionary::nucleotides[] = {'A', 'C', 'G', 'T'};
+const char Dictionary::nucleotides[] = {'T', 'C', 'A', 'G'};
+
+
+//const char Dictionary::nucleotides[] = {'A', 'C', 'G', 'T'};
 const char Dictionary::aminoacids[] = {'A','R','N','D','C','Q','E','G','H','I','L','K','M','F','P','S','T','W','Y','V'};
 
 unsigned short Dictionary::getAlphabetSize()

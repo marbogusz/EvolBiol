@@ -67,9 +67,26 @@ string Sequences::getRawSequenceAt(unsigned int pos)
 
 double* Sequences::getElementFrequencies()
 {
-	//TODO implement
-	//FIXME !!!!
 	this->observedFrequencies = new double[dict->getAlphabetSize()];
+	int i;
+
+	for (i=0; i<dict->getAlphabetSize(); i++)
+		this->observedFrequencies[i] = 0;
+
+	unsigned int count =0;
+
+	for (vector<vector<SequenceElement> >::iterator it1 = translatedSequences.begin() ; it1 != translatedSequences.end(); ++it1)
+	{
+		for(vector<SequenceElement>::iterator it2 = it1->begin(); it2 != it1->end(); ++it2)
+		{
+			count++;
+			observedFrequencies[it2->getMatrixIndex()]++;
+		}
+	}
+
+	for (i=0; i<dict->getAlphabetSize(); i++)
+		this->observedFrequencies[i]/=count;
+
 
 	//observedFrequencies[0] = 0.26089;
 	//observedFrequencies[1] = 0.32737;
@@ -79,10 +96,10 @@ double* Sequences::getElementFrequencies()
 	//0.321661 0.302651 0.107554 0.268134
 
 	//ACGT
-	observedFrequencies[0] = 0.321661;
-	observedFrequencies[1] = 0.302651;
-	observedFrequencies[2] = 0.107554;
-	observedFrequencies[3] = 0.268134;
+	//observedFrequencies[0] = 0.321661;
+	//observedFrequencies[1] = 0.302651;
+	//observedFrequencies[2] = 0.107554;
+	//observedFrequencies[3] = 0.268134;
 
 
 	//observedFrequencies[0] = 0.25;
@@ -90,7 +107,11 @@ double* Sequences::getElementFrequencies()
 	//observedFrequencies[2] = 0.25;
 	//observedFrequencies[3] = 0.25;
 
+	DEBUGV(observedFrequencies, dict->getAlphabetSize());
+
 	return observedFrequencies;
+
+
 }
 
 void Sequences::buildDictionary()

@@ -13,6 +13,7 @@
 
 #include <map>
 #include <algorithm>
+#include <cmath>
 
 
 namespace EBC

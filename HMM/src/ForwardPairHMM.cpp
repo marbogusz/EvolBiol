@@ -110,8 +110,9 @@ ForwardPairHMM::ForwardPairHMM(Sequences* inputSeqs) :
 {
 	initializeModels();
 	getSequencePair();
-	this-> bfgs = new BFGS(this);
-	bfgs->optimize();
+	//this-> bfgs = new BFGS(this);
+	//bfgs->optimize();
+
 }
 
 ForwardPairHMM::~ForwardPairHMM()
@@ -119,12 +120,41 @@ ForwardPairHMM::~ForwardPairHMM()
 	// TODO Auto-generated destructor stub
 }
 
+/*
 void ForwardPairHMM::initializeModels()
 {
 	generateInitialParameters();
 	//start time is the first parameter
 	substModel->setObservedFrequencies(inputSequences->getElementFrequencies());
 }
+*/
+
+void ForwardPairHMM::initializeModels()
+{
+	//generateInitialParameters();
+
+	 //time is a parameter with both indel and subst, we use 1 common time
+	this->indelParameters = indelModel->getParamsNumber();
+	this->substParameters = substModel->getParamsNumber();
+	this->totalParameters = indelParameters + substParameters -1;
+	this->mlParameters = new double[totalParameters];
+
+	mlParameters[0] = 0.912374;
+	mlParameters[1] = 0.051834;
+	mlParameters[2] = 0.000010;
+	mlParameters[3] = 0.025448;
+	mlParameters[4] = 0.000010;
+	mlParameters[5] = 0.0905152;	//time
+	mlParameters[6] = 0.111341;		//lambda
+	mlParameters[7] = 0.521122;		//extension prob
+
+
+
+	//start time is the first parameter
+
+	substModel->setObservedFrequencies(inputSequences->getElementFrequencies());
+}
+
 double ForwardPairHMM::runForwardIteration(const double * bfgsParameters)
 {
 	this->mlParameters = (double*) bfgsParameters;
@@ -137,8 +167,16 @@ double ForwardPairHMM::runForwardIteration(const double * bfgsParameters)
 
 double ForwardPairHMM::runForwardAlgorithm()
 {
+
+	calculateModels();
+	initializeStates();
+	setTransitionProbabilities();
+
+
 	unsigned int i;
 	unsigned int j;
+
+	double sX,sY,sM, sS;
 
 	double xx,xy,xm,yx,yy,ym,mx,my,mm;
 
@@ -175,13 +213,27 @@ double ForwardPairHMM::runForwardAlgorithm()
 
 			X->setValue(i,j, emissionX + maths->logSum(xm,xx,xy));
 			Y->setValue(i,j, emissionY + maths->logSum(ym,yx,yy));
-			if (i!=1 && j!=1)
-			{
+			//if (i!=1 && j!=1)
+			//{
 				M->setValue(i,j, emissionM + maths->logSum(mm,mx,my));
-			}
+			//}
 		}
 	}
-	return (*M)(xSize-1,ySize-1);
+	sM = (*M)(xSize-1,ySize-1);
+	sX = (*X)(xSize-1,ySize-1);
+	sY = (*Y)(xSize-1,ySize-1);
+	sS = maths->logSum(sM,sX,sY);
+
+	DEBUG (" sX, sY, sM, sS " << sX << "\t" << sY << "\t" << sM << "\t" << sS);
+
+	cout << "M" << endl;
+	M->outputValues(0);
+	cout << "X" << endl;
+	X->outputValues(0);
+	cout << "Y" << endl;
+	Y->outputValues(0);
+
+	return sS;
 }
 
 } /* namespace EBC */

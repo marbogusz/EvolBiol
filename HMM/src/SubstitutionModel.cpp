@@ -64,7 +64,10 @@ double* SubstitutionModel::calculatePt(double t)
 	}
 	pMatrix = this->algebra->matrixMultiply(uMatrix, vMatrix, matrixSize);
 	//FIXME -  make sure to delete pmatrix after using it!!!!
-	//DEBUGV(pMatrix,16);
+
+	DEBUG("P(t) matrix");
+	DEBUGV(pMatrix,16);
+
 	return pMatrix;
 }
 
@@ -122,9 +125,10 @@ double SubstitutionModel::getPXiYi(unsigned int xi, unsigned int yi)
 						{0.0350102,0.000988417,0.095185,0.000775816},
 						{0.00111648,0.0302673,0.000124826,0.240077}};
 
-	return piFreqs[xi]*mat[xi][yi];
 
-		//return piFreqs[xi]*pMatrix[(xi*matrixSize)+yi];
+	//return mat[xi][yi];
+
+		return piFreqs[xi]*pMatrix[(xi*matrixSize)+yi];
 	//}
 }
 

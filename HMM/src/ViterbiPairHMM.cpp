@@ -67,22 +67,35 @@ void ViterbiPairHMM::initializeModels()
 */
 
 
-	mlParameters[0] = 0.912374;
+	/*mlParameters[0] = 0.912374;
 	mlParameters[1] = 0.051834;
 	mlParameters[2] = 0.000010;
 	mlParameters[3] = 0.025448;
 	mlParameters[4] = 0.000010;
-	mlParameters[5] = 0.0905152;		//time
-	mlParameters[6] = 0.111341;		//lambda
-	mlParameters[7] = 0.521122;		//extension prob
+	//mlParameters[5] = 0.0905152;	//time
+	//mlParameters[6] = 0.111341;		//lambda
+	//mlParameters[7] = 0.521122;		//extension prob
 
-	testFreqs[0] = 0.321661;
-	testFreqs[1] = 0.302651;
-	testFreqs[2] = 0.107554;
-	testFreqs[3] = 0.268134;
+	//0.624253	0.624960	0.995102
+
+	//mlParameters[5] = 0.624253;		//time
+	//mlParameters[6] = 0.624960;		//lambda
+	//mlParameters[7] = 0.995102;		//extension prob
+	*/
+
+	testFreqs[0] = 0.4;
+	testFreqs[1] = 0.2;
+	testFreqs[2] = 0.1;
+	testFreqs[3] = 0.3;
+
+	mlParameters[0] = 2;
+	mlParameters[1] = 0.1;
+	mlParameters[2] = 0.01;
+	mlParameters[3] = 0.25;
 
 	//start time is the first parameter
 
+	//substModel->setObservedFrequencies(inputSequences->getElementFrequencies());
 	substModel->setObservedFrequencies(testFreqs);
 }
 
@@ -95,12 +108,14 @@ double ViterbiPairHMM::getMax(double m, double x, double y, unsigned int i, unsi
 	}
 	else if(x >= y)
 	{
-		state->setHorizontalAt(i,j);
+
+		state->setVerticalAt(i,j);
+
 		return x;
 	}
 	else
 	{
-		state->setVerticalAt(i,j);
+		state->setHorizontalAt(i,j);
 		return y;
 	}
 
@@ -108,7 +123,22 @@ double ViterbiPairHMM::getMax(double m, double x, double y, unsigned int i, unsi
 
 void ViterbiPairHMM::getResults()
 {
-	//M->outputTrace();
+
+	cout << "M" << endl;
+	M->outputTrace(0);
+	cout << "X" << endl;
+	X->outputTrace(0);
+	cout << "Y" << endl;
+	Y->outputTrace(0);
+
+
+	cout << "M" << endl;
+	M->outputValues(0);
+	cout << "X" << endl;
+	X->outputValues(0);
+	cout << "Y" << endl;
+	Y->outputValues(0);
+
 
 	DEBUG("Get Results");
 	pair<string, string> initialAlignment = std::make_pair("","");
