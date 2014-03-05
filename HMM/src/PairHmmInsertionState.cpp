@@ -26,6 +26,7 @@ void PairHmmInsertionState::initializeData()
 	double logOpen = log(gapOpen);
 	double logExtension = log(gapExtension);
 
+	/*
 	for (int i=0;i<xSize; i++)
 	{
 		this->matrixData[i][0].score = logOpen + i*logExtension;
@@ -35,7 +36,14 @@ void PairHmmInsertionState::initializeData()
 	{
 		this->matrixData[0][j].score = logOpen + j*logExtension;
 	}
+	 */
+
+	this->setWholeRow(0,-100000000);
 }
 
+void PairHmmInsertionState::setDirection(unsigned int i, unsigned int j)
+{
+	this->matrixData[i][j].vert = true;
+}
 
 } /* namespace EBC */

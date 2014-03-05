@@ -88,9 +88,10 @@ void ViterbiPairHMM::initializeModels()
 	testFreqs[2] = 0.1;
 	testFreqs[3] = 0.3;
 
+
 	mlParameters[0] = 2;
 	mlParameters[1] = 0.1;
-	mlParameters[2] = 0.01;
+	mlParameters[2] = 0.05;
 	mlParameters[3] = 0.25;
 
 	//start time is the first parameter
@@ -103,19 +104,28 @@ double ViterbiPairHMM::getMax(double m, double x, double y, unsigned int i, unsi
 {
 	if(m >=x && m >=y)
 	{
-		state->setDiagonalAt(i,j);
+		//state->setDiagonalAt(i,j);
+
+		//cout << i << " " << j << " coming from M" << endl;
+		state->setDirection(i,j);
+		state->setSrc(i,j,M);
 		return m;
 	}
 	else if(x >= y)
 	{
 
-		state->setVerticalAt(i,j);
-
+		//state->setVerticalAt(i,j);
+		//cout << i << " " << j << " coming from X" << endl;
+		state->setDirection(i,j);
+		state->setSrc(i,j,X);
 		return x;
 	}
 	else
 	{
-		state->setHorizontalAt(i,j);
+		//state->setHorizontalAt(i,j);
+		//cout << i << " " << j << " coming from Y" << endl;
+		state->setDirection(i,j);
+		state->setSrc(i,j,Y);
 		return y;
 	}
 
@@ -124,12 +134,7 @@ double ViterbiPairHMM::getMax(double m, double x, double y, unsigned int i, unsi
 void ViterbiPairHMM::getResults()
 {
 
-	cout << "M" << endl;
-	M->outputTrace(0);
-	cout << "X" << endl;
-	X->outputTrace(0);
-	cout << "Y" << endl;
-	Y->outputTrace(0);
+	double mv, xv, yv;
 
 
 	cout << "M" << endl;
@@ -148,8 +153,27 @@ void ViterbiPairHMM::getResults()
 	string a = inputSequences->getRawSequenceAt(0);
 	string b = inputSequences->getRawSequenceAt(1);
 
+	mv =  (*M)(xSize-1,ySize-1) ;
+	xv =  (*X)(xSize-1,ySize-1) ;
+	yv =  (*Y)(xSize-1,ySize-1) ;
 
-	M->traceback(a,b, &initialAlignment);
+
+	if(mv >=xv && mv >=yv)
+	{
+		M->traceback(a,b, &initialAlignment);
+	}
+	else if(xv >= yv)
+	{
+		X->traceback(a,b, &initialAlignment);
+	}
+	else
+	{
+		Y->traceback(a,b, &initialAlignment);
+	}
+
+
+
+	//M->traceback(a,b, &initialAlignment);
 
 	reverse(initialAlignment.first.begin(), initialAlignment.first.end());
 	reverse(initialAlignment.second.begin(), initialAlignment.second.end());
@@ -172,42 +196,55 @@ void ViterbiPairHMM::runViterbiAlgorithm()
 	double emissionX;
 	double emissionY;
 
-	while (i != xSize && j != ySize)
+	//while (i != xSize && j != ySize)
 
-	for (i = 1; i<xSize; i++)
+
+	for (i = 0; i<xSize; i++)
 	{
-		for (j = 1; j<ySize; j++)
+		for (j = 0; j<ySize; j++)
 		{
-			emissionM = log(substModel->getPXiYi(seq1[i-1].getMatrixIndex(), seq2[j-1].getMatrixIndex()));
-			emissionX = log(substModel->getQXi(seq1[i-1].getMatrixIndex()));
-			emissionY = log(substModel->getQXi(seq2[j-1].getMatrixIndex()));
 
-			xm = (*M)(i-1,j);
-			xm += X->getTransitionProbabilityFrom(M);
-			xx = (*X)(i-1,j);
-			xx += X->getTransitionProbabilityFrom(X);
-			xy = (*Y)(i-1,j);
-			xy += X->getTransitionProbabilityFrom(Y);
+			if(i!=0)
+			{
+				emissionX = log(substModel->getQXi(seq1[i-1].getMatrixIndex()));
 
-			X->setValue(i,j,getMax(xm,xx,xy,i,j,X) + emissionX);
+				xm = (*M)(i-1,j);
+				xm += X->getTransitionProbabilityFrom(M);
+				xx = (*X)(i-1,j);
+				xx += X->getTransitionProbabilityFrom(X);
+				xy = (*Y)(i-1,j);
+				xy += X->getTransitionProbabilityFrom(Y);
 
-			ym = (*M)(i,j-1);
-			ym += Y->getTransitionProbabilityFrom(M);
-			yx = (*X)(i,j-1);
-			yx += Y->getTransitionProbabilityFrom(X);
-			yy = (*Y)(i,j-1);
-			yy += Y->getTransitionProbabilityFrom(Y);
+				//cout << "X state ";
+				X->setValue(i,j,getMax(xm,xx,xy,i,j,X) + emissionX);
+			}
+			if(j!=0)
+			{
+				emissionY = log(substModel->getQXi(seq2[j-1].getMatrixIndex()));
 
-			Y->setValue(i,j,getMax(ym,yx,yy,i,j,Y) + emissionY);
+				ym = (*M)(i,j-1);
+				ym += Y->getTransitionProbabilityFrom(M);
+				yx = (*X)(i,j-1);
+				yx += Y->getTransitionProbabilityFrom(X);
+				yy = (*Y)(i,j-1);
+				yy += Y->getTransitionProbabilityFrom(Y);
+				//cout << "Y state ";
+				Y->setValue(i,j,getMax(ym,yx,yy,i,j,Y) + emissionY);
+			}
 
-			mm = (*M)(i-1,j-1);
-			mm += M->getTransitionProbabilityFrom(M);
-			mx = (*X)(i-1,j-1);
-			mx += M->getTransitionProbabilityFrom(X);
-			my = (*Y)(i-1,j-1);
-			my += M->getTransitionProbabilityFrom(Y);
+			if(i!=0 && j!=0)
+			{
+				emissionM = log(substModel->getPXiYi(seq1[i-1].getMatrixIndex(), seq2[j-1].getMatrixIndex()));
 
-			M->setValue(i,j,getMax(mm,mx,my,i,j,M) + emissionM);
+				mm = (*M)(i-1,j-1);
+				mm += M->getTransitionProbabilityFrom(M);
+				mx = (*X)(i-1,j-1);
+				mx += M->getTransitionProbabilityFrom(X);
+				my = (*Y)(i-1,j-1);
+				my += M->getTransitionProbabilityFrom(Y);
+				//cout << "M state ";
+				M->setValue(i,j,getMax(mm,mx,my,i,j,M) + emissionM);
+			}
 		}
 	}
 	DEBUG("Final Viterbi M  " << (*M)(xSize-1,ySize-1) );

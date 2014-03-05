@@ -47,6 +47,9 @@ public:
 
 	double getTransitionProbabilityFrom(PairHmmState* state);
 
+
+	virtual void setDirection(unsigned int i, unsigned int j)=0;
+
 };
 
 } /* namespace EBC */

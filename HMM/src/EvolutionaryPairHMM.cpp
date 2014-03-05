@@ -66,6 +66,7 @@ void EvolutionaryPairHMM::initializeStates()
 
 
 
+
 	if (M != NULL)
 		delete M;
 	if (X != NULL)
@@ -108,15 +109,12 @@ void EvolutionaryPairHMM::generateInitialParameters()
 	this->totalParameters = indelParameters + substParameters -1;
 	this->mlParameters = new double[totalParameters];
 
-	mlParameters[0] = 0.0; // first parameter hack
-	unsigned int sp = this->substParameters-2;
+	mlParameters[0] = 1; // first parameter hack
 	double tempVal;
-
 	for(unsigned i=1; i< totalParameters; i++)
 	{
 		tempVal = 0.2 + 0.1*maths->rndu();
-		mlParameters[i] = tempVal;//sp>0 ? log(tempVal) : Maths::logit(tempVal);
-		sp --;
+		mlParameters[i] = tempVal;
 	}
 }
 

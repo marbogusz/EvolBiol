@@ -28,7 +28,7 @@ void PairHmmMatchState::initializeData()
 
 
 
-	for (int i=0;i<xSize; i++)
+	/*for (int i=0;i<xSize; i++)
 	{
 		this->matrixData[i][0].score = logOpen + i*logExtension;
 	}
@@ -37,9 +37,16 @@ void PairHmmMatchState::initializeData()
 	{
 		this->matrixData[0][j].score = logOpen + j*logExtension;
 	}
-
+*/
+	this->setWholeCol(0,-100000000);
+	this->setWholeRow(0,-100000000);
 	this->matrixData[0][0].score = 0;
 	//DEBUG("init state");
+}
+
+void PairHmmMatchState::setDirection(unsigned int i, unsigned int j)
+{
+	this->matrixData[i][j].diag = true;
 }
 
 

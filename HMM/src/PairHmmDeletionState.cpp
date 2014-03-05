@@ -30,7 +30,9 @@ void PairHmmDeletionState::initializeData()
 
 
 
-	for (int i=0;i<xSize; i++)
+
+
+	/*for (int i=0;i<xSize; i++)
 	{
 		this->matrixData[i][0].score = logOpen + i*logExtension;
 	}
@@ -39,7 +41,14 @@ void PairHmmDeletionState::initializeData()
 	{
 		this->matrixData[0][j].score = logOpen + j*logExtension;
 	}
+	 */
 
+	this->setWholeCol(0,-100000000);
+}
+
+void PairHmmDeletionState::setDirection(unsigned int i, unsigned int j)
+{
+	this->matrixData[i][j].hor = true;
 }
 
 

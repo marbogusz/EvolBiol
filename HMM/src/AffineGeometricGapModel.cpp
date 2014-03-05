@@ -36,8 +36,9 @@ void AffineGeometricGapModel::calculateGeometricProbability(double lambda, doubl
 {
 	//FIXME - this might not be making sense!
 	double exponent = 1-exp(-1*lambda*t);
-	//FIXME -- hardcode!!!
-	this->gapOpeningProbability = 0.05;//exponent;
+
+
+	this->gapOpeningProbability = exponent;
 }
 
 void AffineGeometricGapModel::setParameters(double* params)

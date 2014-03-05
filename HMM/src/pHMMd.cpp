@@ -31,6 +31,7 @@ int main(int argc, char ** argv) {
 		Sequences* inputSeqs = new Sequences(parser);
 		DEBUG("Creating the HMM");
 		//ForwardPairHMM* epHMM = new ForwardPairHMM(inputSeqs);
+
 		ViterbiPairHMM* epHMM = new ViterbiPairHMM(inputSeqs);
 		epHMM->runViterbiAlgorithm();
 		//epHMM->runForwardAlgorithm();

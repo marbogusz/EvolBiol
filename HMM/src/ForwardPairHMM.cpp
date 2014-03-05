@@ -14,10 +14,13 @@ lbfgsfloatval_t ForwardPairHMM::BFGS::calculateGradients(const lbfgsfloatval_t* 
 		lbfgsfloatval_t* g, const int n, const lbfgsfloatval_t step)
 {
 	int i;
+	double tmp;
 
 	for (i=0; i<paramsCount; i++)
 	{
-		tempParams[i] = Maths::logistic(x[i]);
+		//kappa hack
+		tmp = Maths::logistic(x[i]);
+		tempParams[i] = i==0 ? 3*tmp : tmp;
 	}
 
 	double localLikelihood = parent->runForwardIteration((const double*)tempParams)*-1.0;
@@ -37,18 +40,19 @@ void ForwardPairHMM::BFGS::copyWithSmallDiff(int pos, const lbfgsfloatval_t* x)
 {
 	for (int i=0; i<paramsCount; i++)
 	{
-		//tempParams[i] = Maths::logistic(x[i]);
-		//if (i==pos)
-		//{
-		//	tempParams[i] += smallDiff;
-		//}
+		tempParams[i] = i==0 ? 3*Maths::logistic(x[i]) : Maths::logistic(x[i]);
+		if (i==pos)
+		{
+			tempParams[i] += smallDiff;
+		}
 
-		tempParams[i] = x[i];
+		/*tempParams[i] = x[i];
 		if (i==pos)
 		{
 			tempParams[i] += smallDiff;
 		}
 		tempParams[i] = Maths::logistic(tempParams[i]);
+		*/
 	}
 }
 
@@ -110,8 +114,8 @@ ForwardPairHMM::ForwardPairHMM(Sequences* inputSeqs) :
 {
 	initializeModels();
 	getSequencePair();
-	//this-> bfgs = new BFGS(this);
-	//bfgs->optimize();
+	this-> bfgs = new BFGS(this);
+	bfgs->optimize();
 
 }
 
@@ -120,15 +124,15 @@ ForwardPairHMM::~ForwardPairHMM()
 	// TODO Auto-generated destructor stub
 }
 
-/*
+
 void ForwardPairHMM::initializeModels()
 {
 	generateInitialParameters();
 	//start time is the first parameter
 	substModel->setObservedFrequencies(inputSequences->getElementFrequencies());
 }
-*/
 
+/*
 void ForwardPairHMM::initializeModels()
 {
 	//generateInitialParameters();
@@ -150,11 +154,23 @@ void ForwardPairHMM::initializeModels()
 
 
 
-	//start time is the first parameter
+		testFreqs[0] = 0.4;
+		testFreqs[1] = 0.2;
+		testFreqs[2] = 0.1;
+		testFreqs[3] = 0.3;
 
-	substModel->setObservedFrequencies(inputSequences->getElementFrequencies());
+
+		mlParameters[0] = 2;
+		mlParameters[1] = 0.1;
+		mlParameters[2] = 0.05;
+		mlParameters[3] = 0.5;
+
+		//start time is the first parameter
+
+		//substModel->setObservedFrequencies(inputSequences->getElementFrequencies());
+		substModel->setObservedFrequencies(testFreqs);
 }
-
+*/
 double ForwardPairHMM::runForwardIteration(const double * bfgsParameters)
 {
 	this->mlParameters = (double*) bfgsParameters;
@@ -168,9 +184,9 @@ double ForwardPairHMM::runForwardIteration(const double * bfgsParameters)
 double ForwardPairHMM::runForwardAlgorithm()
 {
 
-	calculateModels();
-	initializeStates();
-	setTransitionProbabilities();
+	//calculateModels();
+	//initializeStates();
+	//setTransitionProbabilities();
 
 
 	unsigned int i;
@@ -186,37 +202,36 @@ double ForwardPairHMM::runForwardAlgorithm()
 
 	while (i != xSize && j != ySize)
 
-	for (i = 1; i<xSize; i++)
+	for (i = 0; i<xSize; i++)
 	{
-		for (j = 1; j<ySize; j++)
+		for (j = 0; j<ySize; j++)
 		{
-			emissionM = log(substModel->getPXiYi(seq1[i-1].getMatrixIndex(), seq2[j-1].getMatrixIndex()));
-			emissionX = log(substModel->getQXi(seq1[i-1].getMatrixIndex()));
-			emissionY = log(substModel->getQXi(seq2[j-1].getMatrixIndex()));
+			if(i!=0)
+			{
+				emissionX = log(substModel->getQXi(seq1[i-1].getMatrixIndex()));
+				xm = (*M)(i-1,j) + X->getTransitionProbabilityFrom(M);
+				xx = (*X)(i-1,j) + X->getTransitionProbabilityFrom(X);
+				xy = (*Y)(i-1,j) + X->getTransitionProbabilityFrom(Y);
+				X->setValue(i,j, emissionX + maths->logSum(xm,xx,xy));
+			}
 
-			//Mij = PXiYj((Tmm*Mi-1,j-1)+(Txm*Xi-1,j-1)+(Tym*Yi-1,j-1));
-			//in log space
+			if(j!=0)
+			{
+				emissionY = log(substModel->getQXi(seq2[j-1].getMatrixIndex()));
+				ym = (*M)(i,j-1) + Y->getTransitionProbabilityFrom(M);
+				yx = (*X)(i,j-1) + Y->getTransitionProbabilityFrom(X);
+				yy = (*Y)(i,j-1) + Y->getTransitionProbabilityFrom(Y);
+				Y->setValue(i,j, emissionY + maths->logSum(ym,yx,yy));
+			}
 
-
-			xm = (*M)(i-1,j) + X->getTransitionProbabilityFrom(M);
-			xx = (*X)(i-1,j) + X->getTransitionProbabilityFrom(X);
-			xy = (*Y)(i-1,j) + X->getTransitionProbabilityFrom(Y);
-
-			ym = (*M)(i,j-1) + Y->getTransitionProbabilityFrom(M);
-			yx = (*X)(i,j-1) + Y->getTransitionProbabilityFrom(X);
-			yy = (*Y)(i,j-1) + Y->getTransitionProbabilityFrom(Y);
-
-			mm = (*M)(i-1,j-1) + M->getTransitionProbabilityFrom(M);
-			mx = (*X)(i-1,j-1) + M->getTransitionProbabilityFrom(X);
-			my = (*Y)(i-1,j-1) + M->getTransitionProbabilityFrom(Y);
-
-
-			X->setValue(i,j, emissionX + maths->logSum(xm,xx,xy));
-			Y->setValue(i,j, emissionY + maths->logSum(ym,yx,yy));
-			//if (i!=1 && j!=1)
-			//{
+			if(i!=0 && j!=0 )
+			{
+				emissionM = log(substModel->getPXiYi(seq1[i-1].getMatrixIndex(), seq2[j-1].getMatrixIndex()));
+				mm = (*M)(i-1,j-1) + M->getTransitionProbabilityFrom(M);
+				mx = (*X)(i-1,j-1) + M->getTransitionProbabilityFrom(X);
+				my = (*Y)(i-1,j-1) + M->getTransitionProbabilityFrom(Y);
 				M->setValue(i,j, emissionM + maths->logSum(mm,mx,my));
-			//}
+			}
 		}
 	}
 	sM = (*M)(xSize-1,ySize-1);
@@ -224,15 +239,16 @@ double ForwardPairHMM::runForwardAlgorithm()
 	sY = (*Y)(xSize-1,ySize-1);
 	sS = maths->logSum(sM,sX,sY);
 
-	DEBUG (" sX, sY, sM, sS " << sX << "\t" << sY << "\t" << sM << "\t" << sS);
 
-	cout << "M" << endl;
+	//DEBUG (" sX, sY, sM, sS " << sX << "\t" << sY << "\t" << sM << "\t" << sS);
+
+	/*cout << "M" << endl;
 	M->outputValues(0);
 	cout << "X" << endl;
 	X->outputValues(0);
 	cout << "Y" << endl;
 	Y->outputValues(0);
-
+	 */
 	return sS;
 }
 

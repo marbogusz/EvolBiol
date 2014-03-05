@@ -12,8 +12,9 @@ namespace EBC
 
 HKY85Model::HKY85Model(Dictionary* dict, Maths* alg) : SubstitutionModel(dict, alg)
 {
-	//6 elements to estimate - a, b, c, d, e, f=1
-	//6th element is divergence time;
+
+	//6 parameters - 4 frequencies + kappa + time
+	//2 parameters to estimate - k and t
 	this->paramsNumber = 2;
 	this->parameters = new double[this->paramsNumber];
 	//TODO - set within the model

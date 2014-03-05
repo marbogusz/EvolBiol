@@ -21,7 +21,6 @@ protected:
 
 	virtual void initializeModels();
 
-	double testFreqs[4];
 
 public:
 	ViterbiPairHMM(Sequences* inputSeqs);

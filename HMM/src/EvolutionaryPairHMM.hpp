@@ -39,6 +39,9 @@ protected:
 
 	unsigned int xSize, ySize;
 
+	//TODO - remove after testing
+	double testFreqs[4];
+
 	vector<SequenceElement> seq1;
 	vector<SequenceElement> seq2;
 	vector<SequenceElement>::iterator itS1, itS2;

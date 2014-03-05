@@ -65,8 +65,8 @@ double* SubstitutionModel::calculatePt(double t)
 	pMatrix = this->algebra->matrixMultiply(uMatrix, vMatrix, matrixSize);
 	//FIXME -  make sure to delete pmatrix after using it!!!!
 
-	DEBUG("P(t) matrix");
-	DEBUGV(pMatrix,16);
+	//DEBUG("P(t) matrix");
+	//DEBUGV(pMatrix,16);
 
 	return pMatrix;
 }

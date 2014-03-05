@@ -16,21 +16,23 @@ using namespace std;
 namespace EBC
 {
 
-struct TraceStep
-{
-	//3 traceback elements
-	bool vert;
-	bool hor;
-	bool diag;
-	//score/probability
-	double score;
-
-	TraceStep() : vert(false), hor(false), 
-		diag(false), score(0) {}
-};
-
 class DpMatrix
 {
+	struct TraceStep
+	{
+		//3 traceback elements
+		bool vert;
+		bool hor;
+		bool diag;
+		//score/probability
+		double score;
+		DpMatrix* src;
+
+
+		TraceStep() : vert(false), hor(false),
+			diag(false), score(0), src(NULL) {}
+	};
+
 
 private:
 
@@ -70,6 +72,7 @@ public:
 
 	void setVerticalAt(unsigned int i, unsigned int j);
 
+	void setSrc(unsigned int i, unsigned int j, DpMatrix*);
 
 	void outputTrace(unsigned int);
 

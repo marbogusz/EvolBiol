@@ -25,6 +25,8 @@ protected:
 public:
 	PairHmmInsertionState(unsigned int x, unsigned int y, double gapOpening, double gapExtension);
 
+	void setDirection(unsigned int i, unsigned int j);
+
 
 	virtual ~PairHmmInsertionState();
 };
