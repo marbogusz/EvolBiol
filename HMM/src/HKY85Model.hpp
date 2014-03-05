@@ -23,7 +23,11 @@ double *k;
 public:
 	HKY85Model(Dictionary* dict, Maths* alg);
 
+
 	void setParametersInMatrix();
+
+
+	void summarize();
 };
 
 } /* namespace EBC */

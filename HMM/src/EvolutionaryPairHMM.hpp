@@ -74,6 +74,8 @@ public:
 	virtual ~EvolutionaryPairHMM();
 
 	void runForwardAlgorithm();
+
+	void summarize();
 };
 
 } /* namespace EBC */

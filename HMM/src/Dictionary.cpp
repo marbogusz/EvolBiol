@@ -22,6 +22,18 @@ void Dictionary::setAlphabet(char dict[], unsigned short size)
 	this->alphabetSize = size;
 }
 
+void Dictionary::outputAlphabet()
+{
+	cout << "Model dictionary: " << endl;
+	vector<string>::iterator it = alphabet.begin();
+	while (it != alphabet.end())
+	{
+		cout << *it << "\t";
+		it++;
+	}
+	cout << endl;
+}
+
 string Dictionary::getSymbolAt(short index)
 {
 	return alphabet[index];

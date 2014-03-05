@@ -25,6 +25,8 @@ public:
 	GTRModel(Dictionary* dict, Maths* alg);
 
 	void setParametersInMatrix();
+
+	void summarize();
 };
 
 } /* namespace EBC */

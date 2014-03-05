@@ -28,6 +28,8 @@ public:
 	//set parameters - time + the rest of parameters
 	virtual void setParameters(double*) = 0;
 
+	virtual void summarize()=0;
+
 	double getGapExtensionProbability() const
 	{
 		return gapExtensionProbability;

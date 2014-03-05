@@ -22,7 +22,6 @@ HKY85Model::HKY85Model(Dictionary* dict, Maths* alg) : SubstitutionModel(dict, a
 
 }
 
-
 void HKY85Model::setParametersInMatrix() {
 	this->k = &parameters[0];
 	this->time = parameters[1];
@@ -39,14 +38,15 @@ void HKY85Model::setParametersInMatrix() {
 		}
 	qMatrix[1] = qMatrix[4]= qMatrix[11] = qMatrix[14] = parameters[0];
 
-		
+}
 
-	//this->qMatrix[(s-1)*s+2] = this->qMatrix[(s-2)*s+3] =  1.0;//scale;  /* r_AG = r_GA = 1. */ //FIXME - exponent
-	//for(i=0,k=0; i<s-1; i++) for (j=i+1; j<s; j++)
-	//	if(i*s+j != 2*s+3)
-	//		this->qMatrix[i*s+j] = this->qMatrix[j*s+i] = parameters[k++];
+void HKY85Model::summarize()
+{
+	cout << endl << "HKY85 model summary:" << endl;
+	cout << "kappa\ttime" << endl;
+	cout << *k << "\t" << time << endl;
 
-
+	this->outputPtPi();
 }
 
 } /* namespace EBC */

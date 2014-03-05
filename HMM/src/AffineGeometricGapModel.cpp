@@ -10,6 +10,8 @@
 #include <iostream>
 #include "Maths.hpp"
 
+using namespace std;
+
 namespace EBC
 {
 
@@ -43,15 +45,22 @@ void AffineGeometricGapModel::calculateGeometricProbability(double lambda, doubl
 
 void AffineGeometricGapModel::setParameters(double* params)
 {
-	//FIXME - maybe vector instead ?
-	//time goes first
-	//this->calculateGeometricProbability(Maths::logistic(params[1]),Maths::logistic(params[0]));
-	//this->gapExtensionProbability = Maths::logistic(params[2]);
+
+	this->lambda = params[1];
+	this->time = params[0];
+
 	this->calculateGeometricProbability(params[1],params[0]);
 	this->gapExtensionProbability = params[2];
 
 	//std::cerr << " Opening " << this->gapOpeningProbability << "\t" << "Extension " << this->gapExtensionProbability << std::endl;
 
+}
+
+void AffineGeometricGapModel::summarize()
+{
+	cout << endl << " Affine geometric gap model parameters : " << endl;
+	cout << "lambda\t\ttime\text. prob\topen. prob" << endl;
+	cout << lambda <<"\t" << time << "\t" <<  gapExtensionProbability << "\t" << gapOpeningProbability << endl;
 }
 
 } /* namespace EBC */

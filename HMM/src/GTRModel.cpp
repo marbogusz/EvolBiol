@@ -60,4 +60,9 @@ void GTRModel::setParametersInMatrix() {
 	*/
 }
 
+void GTRModel::summarize()
+{
+
+}
+
 } /* namespace EBC */

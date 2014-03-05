@@ -61,8 +61,8 @@ void EvolutionaryPairHMM::initializeStates()
 	g = indelModel->getGapOpeningProbability();
 
 
-	DEBUG ("Opening probs " << g);
-	DEBUG ("Extension probs " << e);
+	//DEBUG ("Opening probs " << g);
+	//DEBUG ("Extension probs " << e);
 
 
 
@@ -116,6 +116,24 @@ void EvolutionaryPairHMM::generateInitialParameters()
 		tempVal = 0.2 + 0.1*maths->rndu();
 		mlParameters[i] = tempVal;
 	}
+}
+
+void EvolutionaryPairHMM::summarize()
+{
+	double e,g;
+	e = indelModel->getGapExtensionProbability();
+	g = indelModel->getGapOpeningProbability();
+
+	cout << " Transition probabilities: " << endl;
+	cout << "M->M : " << 1-2*g << endl;
+	cout << "I->I : " << e << endl;
+	cout << "M->I : " << g << endl;
+	cout << "I->M : " << (1-2*g)*(1-e) << endl;
+	cout << "I->D : " << (1-e)*g << endl << endl;
+
+	indelModel->summarize();
+	substModel->summarize();
+
 }
 
 

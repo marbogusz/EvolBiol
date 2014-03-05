@@ -35,6 +35,8 @@ namespace EBC
 
 		virtual string getSymbolAt(short i);
 
+		virtual void outputAlphabet();
+
 
 	protected:
 		virtual void setAlphabet(char alphabet[], unsigned short size);

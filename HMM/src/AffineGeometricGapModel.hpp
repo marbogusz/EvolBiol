@@ -15,6 +15,9 @@ namespace EBC
 
 class AffineGeometricGapModel: public EBC::IndelModel
 {
+protected:
+	double lambda;
+	double time;
 
 public:
 
@@ -27,6 +30,8 @@ public:
 	void calculateGeometricProbability(double lambda, double t);
 
 	void setParameters(double* params);
+
+	void summarize();
 };
 
 } /* namespace EBC */

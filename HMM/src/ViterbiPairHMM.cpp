@@ -137,6 +137,8 @@ void ViterbiPairHMM::getResults()
 	double mv, xv, yv;
 
 
+	this->summarize();
+
 	cout << "M" << endl;
 	M->outputValues(0);
 	cout << "X" << endl;
@@ -145,7 +147,7 @@ void ViterbiPairHMM::getResults()
 	Y->outputValues(0);
 
 
-	DEBUG("Get Results");
+	//DEBUG("Get Results");
 	pair<string, string> initialAlignment = std::make_pair("","");
 	initialAlignment.first.reserve(xSize > ySize ? xSize : ySize);
 	initialAlignment.second.reserve(xSize > ySize ? xSize : ySize);

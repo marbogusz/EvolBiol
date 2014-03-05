@@ -60,6 +60,8 @@ protected:
 
 	double time;
 
+	void outputPtPi();
+
 private:
 	//Allocate the memory;
 	void allocateMatrices();
@@ -75,6 +77,8 @@ public:
 	SubstitutionModel(Dictionary*, Maths*);
 
 	~SubstitutionModel();
+
+	virtual void summarize()=0;
 
 	void setObservedFrequencies(double* observedFrequencies);
 

@@ -77,6 +77,41 @@ void SubstitutionModel::calculatePt()
 }
 
 
+void SubstitutionModel::outputPtPi()
+{
+	int i, j;
+	dictionary->outputAlphabet();
+
+	cout << endl <<" P(t) matrix :" << endl;
+	for (i=0; i< this->matrixSize; i++)
+	{
+		for (j=0; j< this->matrixSize; j++)
+		{
+			cout << pMatrix[i*matrixSize + j] << "\t";
+		}
+		cout << endl;
+	}
+
+	cout << endl <<"Pi * P(t) matrix :" << endl;
+	for (i=0; i< this->matrixSize; i++)
+	{
+		for (j=0; j< this->matrixSize; j++)
+		{
+			cout << pMatrix[i*matrixSize + j]*piFreqs[j]<< "\t";
+		}
+		cout << endl;
+	}
+
+	cout << endl << "Equilibrium frequencies :" << endl;
+	for (i=0; i< this->matrixSize; i++)
+	{
+		cout << piFreqs[i] << "\t";
+	}
+	cout << endl;
+
+
+}
+
 void SubstitutionModel::setDiagMeans()
 {
 		int i,j;
@@ -120,16 +155,7 @@ void SubstitutionModel::setObservedFrequencies(double* observedFrequencies)
 
 double SubstitutionModel::getPXiYi(unsigned int xi, unsigned int yi)
 {
-	double mat[4][4] = {{0.307973, 0.000988417, 0.00391426, 0.000775816},
-						{0.00111648,0.274434,0.000124826,0.023757},
-						{0.0350102,0.000988417,0.095185,0.000775816},
-						{0.00111648,0.0302673,0.000124826,0.240077}};
-
-
-	//return mat[xi][yi];
-
 		return piFreqs[xi]*pMatrix[(xi*matrixSize)+yi];
-	//}
 }
 
 
