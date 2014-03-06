@@ -74,7 +74,7 @@ protected:
 	BFGS* bfgs;
 
 public:
-	ForwardPairHMM(Sequences* inputSeqs);
+	ForwardPairHMM(Sequences* inputSeqs, bool optimize);
 
 	virtual ~ForwardPairHMM();
 

@@ -32,10 +32,15 @@ int main(int argc, char ** argv) {
 		DEBUG("Creating the HMM");
 		//ForwardPairHMM* epHMM = new ForwardPairHMM(inputSeqs);
 
-		ViterbiPairHMM* epHMM = new ViterbiPairHMM(inputSeqs);
-		epHMM->runViterbiAlgorithm();
+		//ViterbiPairHMM* epHMM = new ViterbiPairHMM(inputSeqs);
+		//epHMM->runViterbiAlgorithm();
 		//epHMM->runForwardAlgorithm();
-		epHMM->getResults();
+		//epHMM->getResults();
+
+		//delete epHMM;
+
+		cout << "FORWARD : ";
+		ForwardPairHMM* fwdHMM = new ForwardPairHMM(inputSeqs,false);
 	}
 	catch(ProgramException& pe)
 	{

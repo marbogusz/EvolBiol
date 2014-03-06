@@ -37,6 +37,7 @@ void EvolutionaryPairHMM::setTransitionProbabilities()
 {
 	double e,g;
 
+
 	e = indelModel->getGapExtensionProbability();
 	g = indelModel->getGapOpeningProbability();
 
@@ -44,8 +45,8 @@ void EvolutionaryPairHMM::setTransitionProbabilities()
 	M->setTransitionProbability(X,log((1-e)*(1-2*g)));
 	M->setTransitionProbability(Y,log((1-e)*(1-2*g)));
 
-	X->setTransitionProbability(X,log(e));
-	Y->setTransitionProbability(Y,log(e));
+	X->setTransitionProbability(X,log(e+((1-e)*g)));
+	Y->setTransitionProbability(Y,log(e+((1-e)*g)));
 
 	X->setTransitionProbability(Y,log((1-e)*g));
 	Y->setTransitionProbability(X,log((1-e)*g));
@@ -82,8 +83,8 @@ void EvolutionaryPairHMM::initializeStates()
 	M->addTransitionProbabilityFrom(X,log((1.0-e)*(1.0-2.0*g)));
 	M->addTransitionProbabilityFrom(Y,log((1.0-e)*(1.0-2.0*g)));
 
-	X->addTransitionProbabilityFrom(X,log(e));
-	Y->addTransitionProbabilityFrom(Y,log(e));
+	X->addTransitionProbabilityFrom(X,log(e+((1-e)*g)));
+	Y->addTransitionProbabilityFrom(Y,log(e+((1-e)*g)));
 
 	X->addTransitionProbabilityFrom(Y,log((1.0-e)*g));
 	Y->addTransitionProbabilityFrom(X,log((1.0-e)*g));
@@ -126,7 +127,7 @@ void EvolutionaryPairHMM::summarize()
 
 	cout << " Transition probabilities: " << endl;
 	cout << "M->M : " << 1-2*g << endl;
-	cout << "I->I : " << e << endl;
+	cout << "I->I : " << e+((1-e)*g) << endl;
 	cout << "M->I : " << g << endl;
 	cout << "I->M : " << (1-2*g)*(1-e) << endl;
 	cout << "I->D : " << (1-e)*g << endl << endl;

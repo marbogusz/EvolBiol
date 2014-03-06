@@ -109,13 +109,42 @@ void ForwardPairHMM::BFGS::optimize()
 }
 
 
-ForwardPairHMM::ForwardPairHMM(Sequences* inputSeqs) :
+ForwardPairHMM::ForwardPairHMM(Sequences* inputSeqs, bool optimize) :
 		EvolutionaryPairHMM(inputSeqs)
 {
-	initializeModels();
-	getSequencePair();
-	this-> bfgs = new BFGS(this);
-	bfgs->optimize();
+	if (optimize)
+	{
+		initializeModels();
+		getSequencePair();
+		this-> bfgs = new BFGS(this);
+		bfgs->optimize();
+	}
+	else
+	{
+		this->indelParameters = indelModel->getParamsNumber();
+		this->substParameters = substModel->getParamsNumber();
+		this->totalParameters = indelParameters + substParameters -1;
+		this->mlParameters = new double[totalParameters];
+
+		testFreqs[0] = 0.4;
+		testFreqs[1] = 0.2;
+		testFreqs[2] = 0.1;
+		testFreqs[3] = 0.3;
+
+		mlParameters[0] = 2;
+		mlParameters[1] = 0.1;
+		mlParameters[2] = 0.05;
+		mlParameters[3] = 0.25;
+
+		substModel->setObservedFrequencies(testFreqs);
+
+		getSequencePair();
+
+		calculateModels();
+		initializeStates();
+		setTransitionProbabilities();
+		runForwardAlgorithm();
+	}
 
 }
 
@@ -240,7 +269,8 @@ double ForwardPairHMM::runForwardAlgorithm()
 	sS = maths->logSum(sM,sX,sY);
 
 
-	//DEBUG (" sX, sY, sM, sS " << sX << "\t" << sY << "\t" << sM << "\t" << sS);
+	DEBUG ("Forward results:");
+	DEBUG (" sX, sY, sM, sS " << sX << "\t" << sY << "\t" << sM << "\t" << sS);
 
 	/*cout << "M" << endl;
 	M->outputValues(0);
