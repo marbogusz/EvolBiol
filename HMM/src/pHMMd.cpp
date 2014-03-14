@@ -40,7 +40,7 @@ int main(int argc, char ** argv) {
 		//delete epHMM;
 
 		cout << "FORWARD : ";
-		ForwardPairHMM* fwdHMM = new ForwardPairHMM(inputSeqs,false);
+		ForwardPairHMM* fwdHMM = new ForwardPairHMM(inputSeqs,true);
 	}
 	catch(ProgramException& pe)
 	{
