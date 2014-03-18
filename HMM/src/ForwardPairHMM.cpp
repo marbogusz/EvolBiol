@@ -10,102 +10,59 @@
 namespace EBC
 {
 
-lbfgsfloatval_t ForwardPairHMM::BFGS::calculateGradients(const lbfgsfloatval_t* x,
-		lbfgsfloatval_t* g, const int n, const lbfgsfloatval_t step)
-{
-	int i;
-	double tmp;
-
-	for (i=0; i<paramsCount; i++)
-	{
-		//kappa hack
-		tmp = Maths::logistic(x[i]);
-		tempParams[i] = i==0 ? 3*tmp : tmp;
-	}
-
-	double localLikelihood = parent->runForwardIteration((const double*)tempParams)*-1.0;
-	double differentialLikelihood;
-
-	for (i=0; i<n; i++)
-	{
-		copyWithSmallDiff(i,x);
-		differentialLikelihood = parent->runForwardIteration((const double*) tempParams)*-1.0;
-		g[i] = (differentialLikelihood - localLikelihood) * smallDiffInverse;
-	}
-
-	return localLikelihood;
-}
-
-void ForwardPairHMM::BFGS::copyWithSmallDiff(int pos, const lbfgsfloatval_t* x)
-{
-	for (int i=0; i<paramsCount; i++)
-	{
-		tempParams[i] = i==0 ? 3*Maths::logistic(x[i]) : Maths::logistic(x[i]);
-		if (i==pos)
-		{
-			tempParams[i] += smallDiff;
-		}
-
-		/*tempParams[i] = x[i];
-		if (i==pos)
-		{
-			tempParams[i] += smallDiff;
-		}
-		tempParams[i] = Maths::logistic(tempParams[i]);
-		*/
-	}
-}
-
-int ForwardPairHMM::BFGS::reportProgress(const lbfgsfloatval_t* x,
-		const lbfgsfloatval_t* g, const lbfgsfloatval_t fx,
-		const lbfgsfloatval_t xnorm, const lbfgsfloatval_t gnorm,
-		const lbfgsfloatval_t step, int n, int k, int ls)
-{
-	DEBUG("BFGS value:" << fx << " iteration: " << k);
-	for (int i=0; i<n; i++)
-	{
-		cerr << Maths::logistic(x[i]) << "\t";
-	}
-	cerr << endl;
-	return 0;
-}
-
-double ForwardPairHMM::BFGS::logistic(double x)
-{
-	return 1.0/(1+exp(x*-1));
-}
 
 ForwardPairHMM::BFGS::BFGS(ForwardPairHMM* enclosing)
 {
 	parent = enclosing;
-	//get a pointer to params
-	this->currentParameters = enclosing->mlParameters;
-	//get a local parmas count
 	paramsCount = enclosing->totalParameters;
-	DEBUG("++++++++libBFGS init with " << paramsCount << " parameters");
-	smallDiff = 1e-6;
-	smallDiffExp = exp(smallDiff);
-	smallDiffInverse = 1000000;
-	smallDiffExpInverse = 1/smallDiffExp;
+	this->initParams.set_size(paramsCount);
+	this->lowerBounds.set_size(paramsCount);
+	this->upperBounds.set_size(paramsCount);
 
+	for (int i=0; i<paramsCount; i++)
+	{
+		initParams(i) = enclosing->mlParameters[i];
+		//default probs bounds
+		lowerBounds(i) = 0.0;
+		upperBounds(i) = 1.0;
+	}
+
+	//FIXME - hardcoding bounds
+	//kappa
+	upperBounds(0) = 10;
+
+	DEBUG("++++++++BFGS init with " << paramsCount << " parameters");
 }
 
 ForwardPairHMM::BFGS::~BFGS()
 {
 }
 
+double ForwardPairHMM::BFGS::objectiveFunction(const column_vector& bfgsParameters)
+{
+	return parent->runForwardIteration(bfgsParameters);
+}
+
+
+const column_vector ForwardPairHMM::BFGS::objectiveFunctionDerivative(const column_vector& bfgsParameters)
+{
+	column_vector results(this->paramsCount);
+	return results;
+}
+
+
 void ForwardPairHMM::BFGS::optimize()
 {
-	lbfgs_parameter_t param;
-	lbfgs_parameter_init(&param);
-	param.max_iterations  = 100;
-	//param.wolfe = 0.11;
-	//param.gtol = 0.11;
-	//param.min_step = 0.001;
-	//param.max_step = 1;
-	int ret = lbfgs(paramsCount, currentParameters, &likelihood, _evaluate, _progress, this, &param);
-	DEBUG("BFGS return: " << ret << " likelihood " << likelihood);
-	DEBUGV(currentParameters,paramsCount);
+	dlib::find_min_box_constrained(dlib::bfgs_search_strategy(),
+			dlib::objective_delta_stop_strategy(1e-9),
+			objectiveFunction,
+			objectiveFunctionDerivative,
+			initParams,
+			lowerBounds,
+			upperBounds);
+
+
+		DEBUG("BFGS return: " << initParams );
 }
 
 
@@ -208,6 +165,20 @@ double ForwardPairHMM::runForwardIteration(const double * bfgsParameters)
 	setTransitionProbabilities();
 	return this->runForwardAlgorithm();
 }
+
+double ForwardPairHMM::runForwardIteration(const column_vector& bfgsParameters)
+{
+	for(int i=0; i<totalParameters; i++)
+	{
+		mlParameters[i] = bfgsParameters(i);
+	}
+	calculateModels();
+	initializeStates();
+	setTransitionProbabilities();
+	//minimize the negative
+	return this->runForwardAlgorithm() * -1;
+}
+
 
 
 double ForwardPairHMM::runForwardAlgorithm()
