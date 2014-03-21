@@ -105,12 +105,14 @@ void EvolutionaryPairHMM::getSequencePair()
 void EvolutionaryPairHMM::generateInitialParameters()
 {
 	 //time is a parameter with both indel and subst, we use 1 common time
+
 	this->indelParameters = indelModel->getParamsNumber();
 	this->substParameters = substModel->getParamsNumber();
 	this->totalParameters = indelParameters + substParameters -1;
 	this->mlParameters = new double[totalParameters];
 
-	mlParameters[0] = 1; // first parameter hack
+
+	mlParameters[0] = 3; // first parameter hack
 	double tempVal;
 	for(unsigned i=1; i< totalParameters; i++)
 	{

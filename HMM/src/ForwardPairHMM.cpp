@@ -7,6 +7,7 @@
 
 #include "ForwardPairHMM.hpp"
 
+
 namespace EBC
 {
 
@@ -23,13 +24,14 @@ ForwardPairHMM::BFGS::BFGS(ForwardPairHMM* enclosing)
 	{
 		initParams(i) = enclosing->mlParameters[i];
 		//default probs bounds
-		lowerBounds(i) = 0.0;
+		lowerBounds(i) = 0.000001;
 		upperBounds(i) = 1.0;
 	}
 
 	//FIXME - hardcoding bounds
 	//kappa
-	upperBounds(0) = 10;
+
+	upperBounds(0) = 5;
 
 	DEBUG("++++++++BFGS init with " << paramsCount << " parameters");
 }
@@ -53,16 +55,23 @@ const column_vector ForwardPairHMM::BFGS::objectiveFunctionDerivative(const colu
 
 void ForwardPairHMM::BFGS::optimize()
 {
-	dlib::find_min_box_constrained(dlib::bfgs_search_strategy(),
+	using std::placeholders::_1;
+	std::function<double(const column_vector&)> f_objective= std::bind( &ForwardPairHMM::BFGS::objectiveFunction, this, _1 );
+
+/*	dlib::find_min_box_constrained(dlib::bfgs_search_strategy(),
 			dlib::objective_delta_stop_strategy(1e-9),
-			objectiveFunction,
-			objectiveFunctionDerivative,
+			f_objective,
+			derivative(f_objective),
 			initParams,
 			lowerBounds,
 			upperBounds);
 
+*/
 
-		DEBUG("BFGS return: " << initParams );
+	dlib::find_min_bobyqa(f_objective, initParams, 10,
+			lowerBounds,upperBounds, 0.05, 1e-6, 350 );
+
+	DEBUG("BFGS return: " << initParams );
 }
 
 
@@ -172,10 +181,19 @@ double ForwardPairHMM::runForwardIteration(const column_vector& bfgsParameters)
 	{
 		mlParameters[i] = bfgsParameters(i);
 	}
+
+
+	DEBUGV(mlParameters, totalParameters);
+
 	calculateModels();
 	initializeStates();
 	setTransitionProbabilities();
 	//minimize the negative
+
+
+	//this->substModel->summarize();
+	//this->indelModel->summarize();
+
 	return this->runForwardAlgorithm() * -1;
 }
 
