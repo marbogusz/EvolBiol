@@ -35,17 +35,20 @@ public:
 	//Shamelessly copied from Ziheng Yang's PAML
 	int eigenRealSym(double A[], int n, double Root[], double work[]);
 
-		//Shamelessly copied from Ziheng Yang's PAML
+	//Shamelessly copied from Ziheng Yang's PAML
 	int eigenQREV (double Q[], double pi[], int n,
 			double Root[], double U[], double V[], double spacesqrtpi[]);
 
+	//From PAML
 	void HouseholderRealSym(double a[], int n, double d[], double e[]);
 
 	//Ziheng Yang's PAML fast random
 	double rndu (void);
 
+	//From PAML
 	void EigenSort(double d[], double U[], int n);
 
+	//From PAML
 	int EigenTridagQLImplicit(double d[], double e[], int n, double z[]);
 
 	//returns new matrix
