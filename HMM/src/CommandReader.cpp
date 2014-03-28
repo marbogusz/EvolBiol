@@ -2,7 +2,7 @@
  * CommandReader.cpp
  *
  *  Created on: Oct 7, 2013
- *      Author: mbogusz
+ *      Author: Marcin Bogusz
  */
 
 #include "CommandReader.hpp"
