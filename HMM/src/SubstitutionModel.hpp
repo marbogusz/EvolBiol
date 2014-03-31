@@ -56,8 +56,6 @@ protected:
 
 	double meanRate;
 
-	bool modelSetsOwnInitials;
-
 	double time;
 
 	void outputPtPi();
@@ -113,10 +111,6 @@ public:
 
 	double* getParameters() {
 		return parameters;
-	}
-
-	bool isSubstitutionModelSetsOwnInitials() const {
-		return modelSetsOwnInitials;
 	}
 
 };

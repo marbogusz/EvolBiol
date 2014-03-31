@@ -256,8 +256,8 @@ double ForwardPairHMM::runForwardAlgorithm()
 	sS = maths->logSum(sM,sX,sY);
 
 
-	//DEBUG ("Forward results:");
-	//DEBUG (" sX, sY, sM, sS " << sX << "\t" << sY << "\t" << sM << "\t" << sS);
+	DEBUG ("Forward results:");
+	DEBUG (" sX, sY, sM, sS " << sX << "\t" << sY << "\t" << sM << "\t" << sS);
 
 	/*cout << "M" << endl;
 	M->outputValues(0);

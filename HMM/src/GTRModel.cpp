@@ -17,7 +17,6 @@ GTRModel::GTRModel(Dictionary* dict, Maths* alg) : SubstitutionModel(dict, alg)
 	this->paramsNumber = 6;
 	this->parameters = new double[this->paramsNumber];
 	//TODO - set within the model
-	this->modelSetsOwnInitials = false;
 	//this->scale = this->logMode==true ? exp(1.0) : 1.0;
 
 }

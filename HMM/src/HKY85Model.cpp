@@ -18,7 +18,6 @@ HKY85Model::HKY85Model(Dictionary* dict, Maths* alg) : SubstitutionModel(dict, a
 	this->paramsNumber = 2;
 	this->parameters = new double[this->paramsNumber];
 	//TODO - set within the model
-	this->modelSetsOwnInitials = false;
 
 }
 
