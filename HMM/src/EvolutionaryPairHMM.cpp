@@ -22,21 +22,16 @@ EvolutionaryPairHMM::EvolutionaryPairHMM(Sequences* inputSeqs) : inputSequences(
 	dict = inputSeqs->getDictionary();
 	maths  = new Maths();
 	DEBUG("Creating the substitution model");
+	//TODO - init by
 	substModel = new HKY85Model(dict, maths);
 	//substModel = new HKY85Model(dict, maths);
 	DEBUG("Creating the gap model");
 	indelModel = new AffineGeometricGapModel();
 }
 
-void EvolutionaryPairHMM::runForwardAlgorithm()
-{
-
-}
-
 void EvolutionaryPairHMM::setTransitionProbabilities()
 {
 	double e,g;
-
 
 	e = indelModel->getGapExtensionProbability();
 	g = indelModel->getGapOpeningProbability();
@@ -55,45 +50,6 @@ void EvolutionaryPairHMM::setTransitionProbabilities()
 	Y->setTransitionProbability(M,log(g));
 }
 
-void EvolutionaryPairHMM::initializeStates()
-{
-	double e,g;
-	e = indelModel->getGapExtensionProbability();
-	g = indelModel->getGapOpeningProbability();
-
-
-	//DEBUG ("Opening probs " << g);
-	//DEBUG ("Extension probs " << e);
-
-
-
-
-	if (M != NULL)
-		delete M;
-	if (X != NULL)
-		delete X;
-	if (Y != NULL)
-		delete Y;
-
-	M = new PairHmmMatchState(xSize,ySize,g,e);
-	X = new PairHmmInsertionState(xSize,ySize,g,e);
-	Y = new PairHmmDeletionState(xSize,ySize,g,e);
-
-	M->addTransitionProbabilityFrom(M,log(1.0-2.0*g));
-	M->addTransitionProbabilityFrom(X,log((1.0-e)*(1.0-2.0*g)));
-	M->addTransitionProbabilityFrom(Y,log((1.0-e)*(1.0-2.0*g)));
-
-	X->addTransitionProbabilityFrom(X,log(e+((1-e)*g)));
-	Y->addTransitionProbabilityFrom(Y,log(e+((1-e)*g)));
-
-	X->addTransitionProbabilityFrom(Y,log((1.0-e)*g));
-	Y->addTransitionProbabilityFrom(X,log((1.0-e)*g));
-
-	X->addTransitionProbabilityFrom(M,log(g));
-	Y->addTransitionProbabilityFrom(M,log(g));
-}
-
-
 void EvolutionaryPairHMM::getSequencePair()
 {
 	this->seq1 = inputSequences->getSequencesAt(0);
@@ -110,7 +66,6 @@ void EvolutionaryPairHMM::generateInitialParameters()
 	this->substParameters = substModel->getParamsNumber();
 	this->totalParameters = indelParameters + substParameters -1;
 	this->mlParameters = new double[totalParameters];
-
 
 	mlParameters[0] = 3; // first parameter hack
 	double tempVal;

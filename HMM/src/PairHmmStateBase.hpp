@@ -33,6 +33,7 @@ public:
 	void setTransitionProbability(PairHmmStateBase* state, double value);
 
 	double getTransitionProbabilityFrom(PairHmmStateBase* state);
+
 };
 
 } /* namespace EBC */

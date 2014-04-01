@@ -9,7 +9,7 @@
 #define VITERBIPAIRHMM_HPP_
 
 #include "EvolutionaryPairHMM.hpp"
-
+/*
 namespace EBC
 {
 
@@ -32,5 +32,7 @@ public:
 	void getResults();
 };
 
-} /* namespace EBC */
+}
+*/
+/* namespace EBC */
 #endif /* VITERBIPAIRHMM_HPP_ */

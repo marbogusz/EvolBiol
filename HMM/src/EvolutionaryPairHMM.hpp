@@ -14,7 +14,7 @@
 #include "IndelModel.hpp"
 #include "Sequences.hpp"
 #include "Maths.hpp"
-#include "PairHmmState.hpp"
+#include "PairHmmStateBase.hpp"
 #include "SequenceElement.hpp"
 
 namespace EBC
@@ -47,11 +47,11 @@ protected:
 	vector<SequenceElement>::iterator itS1, itS2;
 
 	//Match state
-	PairHmmState* M;
+	PairHmmStateBase* M;
 	//Insert state
-	PairHmmState* X;
+	PairHmmStateBase* X;
 	//Delete state
-	PairHmmState* Y;
+	PairHmmStateBase* Y;
 
 	//the following assumes a fix HMM structure
 	virtual void setTransitionProbabilities();
@@ -64,7 +64,7 @@ protected:
 
 	virtual void getSequencePair();
 
-	virtual void initializeStates();
+	virtual void initializeStates() = 0;
 
 
 
@@ -72,8 +72,6 @@ public:
 	EvolutionaryPairHMM(Sequences* inputSeqs);
 
 	virtual ~EvolutionaryPairHMM();
-
-	void runForwardAlgorithm();
 
 	void summarize();
 };

@@ -14,8 +14,8 @@ void EBC::DpReducedMatrix::allocateData()
 {
 	buffer[0] = new double[xSize];
 	buffer[1] = new double[xSize];
-	firstRow = buffer;
-	secondRow = buffer + 1;
+	previousRow = buffer[0];
+	currentRow = buffer[1];
 }
 
 EBC::DpReducedMatrix::~DpReducedMatrix()
@@ -32,43 +32,31 @@ EBC::DpReducedMatrix::DpReducedMatrix(unsigned int xS, unsigned int yS) :
 	allocateData();
 	//set to the beginning;
 	//always associated with the second ptr.
-	currentRowNo = 1;
 }
 
-void EBC::DpReducedMatrix::setValue(unsigned int x, unsigned int y, double value)
+void EBC::DpReducedMatrix::setValue(unsigned int col, double value)
 {
-	//TODO - auto switch ?
-	unsigned int diff = currentRowNo - x;
-	switch(diff)
-	{
-	case 0:
-		secondRow[y] = value;
-		break;
-	case 1:
-		firstRow[y] = value;
-	}
+		currentRow[col] = value;
 }
 
-void EBC::DpReducedMatrix::setWholeRow(unsigned int row, double value)
+double EBC::DpReducedMatrix::valueAtColumn(unsigned int col)
 {
-	for (int i=0; i<ySize; i++)
-	{
-
-	}
+	return currentRow[col];
 }
 
-void EBC::DpReducedMatrix::setWholeCol(unsigned int col, double value)
+double EBC::DpReducedMatrix::valueAtLeft(unsigned int col)
 {
-	for (int i=0; i<xSize; i++)
-	{
-
-	}
+	return currentRow[col-1];
 }
 
-
-double EBC::DpReducedMatrix::valueAt(unsigned int i, unsigned int j)
+double EBC::DpReducedMatrix::valueAtTop(unsigned int col)
 {
-	return secondRow[j];
+	return previousRow[col];
+}
+
+double EBC::DpReducedMatrix::valueAtDiagonal(unsigned int col)
+{
+	return previousRow[col-1];
 }
 
 

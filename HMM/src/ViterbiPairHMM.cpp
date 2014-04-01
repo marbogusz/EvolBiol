@@ -4,7 +4,7 @@
  *  Created on: Feb 26, 2014
  *      Author: root
  */
-
+/*
 #include "ViterbiPairHMM.hpp"
 
 namespace EBC
@@ -27,6 +27,40 @@ ViterbiPairHMM::ViterbiPairHMM(Sequences* inputSeqs) :
 	//setTransitionProbabilities();
 }
 
+void ViterbiPairHMM::initializeStates()
+{
+	double e,g;
+	e = indelModel->getGapExtensionProbability();
+	g = indelModel->getGapOpeningProbability();
+
+	//DEBUG ("Opening probs " << g);
+	//DEBUG ("Extension probs " << e);
+
+	if (M != NULL)
+		delete M;
+	if (X != NULL)
+		delete X;
+	if (Y != NULL)
+		delete Y;
+
+	M = new PairHmmMatchState(xSize,ySize,g,e);
+	X = new PairHmmInsertionState(xSize,ySize,g,e);
+	Y = new PairHmmDeletionState(xSize,ySize,g,e);
+
+	M->addTransitionProbabilityFrom(M,log(1.0-2.0*g));
+	M->addTransitionProbabilityFrom(X,log((1.0-e)*(1.0-2.0*g)));
+	M->addTransitionProbabilityFrom(Y,log((1.0-e)*(1.0-2.0*g)));
+
+	X->addTransitionProbabilityFrom(X,log(e+((1-e)*g)));
+	Y->addTransitionProbabilityFrom(Y,log(e+((1-e)*g)));
+
+	X->addTransitionProbabilityFrom(Y,log((1.0-e)*g));
+	Y->addTransitionProbabilityFrom(X,log((1.0-e)*g));
+
+	X->addTransitionProbabilityFrom(M,log(g));
+	Y->addTransitionProbabilityFrom(M,log(g));
+}
+
 ViterbiPairHMM::~ViterbiPairHMM()
 {
 	// TODO Auto-generated destructor stub
@@ -41,7 +75,7 @@ void ViterbiPairHMM::initializeModels()
 	this->substParameters = substModel->getParamsNumber();
 	this->totalParameters = indelParameters + substParameters -1;
 	this->mlParameters = new double[totalParameters];
-
+*/
 
 /*
 	--- PairHMM model details ---
@@ -82,7 +116,7 @@ void ViterbiPairHMM::initializeModels()
 	//mlParameters[6] = 0.624960;		//lambda
 	//mlParameters[7] = 0.995102;		//extension prob
 	*/
-
+/*
 	testFreqs[0] = 0.4;
 	testFreqs[1] = 0.2;
 	testFreqs[2] = 0.1;
@@ -254,4 +288,6 @@ void ViterbiPairHMM::runViterbiAlgorithm()
 	DEBUG("Final Viterbi Y  " << (*Y)(xSize-1,ySize-1) );
 }
 
-} /* namespace EBC */
+}*/
+
+/* namespace EBC */

@@ -47,7 +47,9 @@ private:
 
 protected:
 
-	virtual void initializeModels();
+	void initializeModels();
+
+	void initializeStates();
 
 	BFGS* bfgs;
 
@@ -57,8 +59,6 @@ public:
 	virtual ~ForwardPairHMM();
 
 	double runForwardAlgorithm();
-
-	double runForwardIteration(const double * bfgsParameters);
 
 	double runForwardIteration(const column_vector& m);
 };
