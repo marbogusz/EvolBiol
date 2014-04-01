@@ -25,6 +25,8 @@ public:
 
 	inline void nextRow()
 	{
+		//DEBUG("DC");
+		//DEBUGV(currentRow, ySize);
 		double* tmp = previousRow;
 		previousRow = currentRow;
 		currentRow = tmp;

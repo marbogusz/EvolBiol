@@ -83,8 +83,9 @@ ForwardPairHMM::ForwardPairHMM(Sequences* inputSeqs, bool optimize) :
 	if (optimize)
 	{
 		initializeModels();
-		initializeStates();
 		getSequencePair();
+		calculateModels();
+		initializeStates();
 		this-> bfgs = new BFGS(this);
 		bfgs->optimize();
 	}
@@ -148,12 +149,6 @@ double ForwardPairHMM::runForwardIteration(const column_vector& bfgsParameters)
 
 	DEBUGV(mlParameters, totalParameters);
 
-	calculateModels();
-	setTransitionProbabilities();
-
-	//this->substModel->summarize();
-	//this->indelModel->summarize();
-
 	return this->runForwardAlgorithm() * -1;
 }
 
@@ -162,10 +157,8 @@ double ForwardPairHMM::runForwardIteration(const column_vector& bfgsParameters)
 double ForwardPairHMM::runForwardAlgorithm()
 {
 
-	//calculateModels();
-	//initializeStates();
-	//setTransitionProbabilities();
-
+	calculateModels();
+	setTransitionProbabilities();
 
 	unsigned int i;
 	unsigned int j;
@@ -221,6 +214,11 @@ double ForwardPairHMM::runForwardAlgorithm()
 		pY->nextRow();
 		pM->nextRow();
 	}
+
+	pX->nextRow();
+	pY->nextRow();
+	pM->nextRow();
+
 	sM = pM->valueAtColumn(ySize-1);
 	sX = pX->valueAtColumn(ySize-1);
 	sY = pY->valueAtColumn(ySize-1);
