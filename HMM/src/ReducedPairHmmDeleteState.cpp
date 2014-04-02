@@ -25,7 +25,15 @@ void ReducedPairHmmDeleteState::initializeData()
 {
 	previousRow = buffer[0];
 	currentRow = buffer[1];
-	currentRow[0] = previousRow[0] = minVal;
+
+	//TODO - check if right
+	for (unsigned int i=0; i< xSize; i++)
+		{
+			currentRow[i] = previousRow[i] = minVal;
+		}
+
+
+	//currentRow[0] = previousRow[0] = minVal;
 }
 
 } /* namespace EBC */

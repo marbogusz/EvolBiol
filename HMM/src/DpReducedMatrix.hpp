@@ -23,9 +23,6 @@ private:
 
 	void allocateData();
 
-	unsigned int xBound;
-	unsigned int yBound;
-
 protected:
 
 	unsigned int xSize, ySize;

@@ -45,6 +45,7 @@ private:
 	};
 
 
+
 protected:
 
 	void initializeModels();
@@ -52,6 +53,23 @@ protected:
 	void initializeStates();
 
 	BFGS* bfgs;
+
+	//Bound scale
+	unsigned int bandFactor;
+	unsigned int bandSpan;
+
+	void getBandWidth()
+	{
+		this->bandSpan = ySize/(2*bandFactor);
+		DEBUG("Band span " << bandSpan);
+	}
+
+	inline bool withinBand(unsigned int line, unsigned int position, unsigned int width)
+	{
+		int low = line - width;
+		int high = line + width;
+		return (position > low && position < high);
+	}
 
 public:
 	ForwardPairHMM(Sequences* inputSeqs, bool optimize);

@@ -12,10 +12,12 @@ using namespace std;
 
 void EBC::DpReducedMatrix::allocateData()
 {
-	buffer[0] = new double[xSize];
-	buffer[1] = new double[xSize];
+
+	buffer[0] = new double[ySize];
+	buffer[1] = new double[ySize];
 	previousRow = buffer[0];
 	currentRow = buffer[1];
+
 }
 
 EBC::DpReducedMatrix::~DpReducedMatrix()

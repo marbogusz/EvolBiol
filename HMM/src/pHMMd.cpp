@@ -37,8 +37,10 @@ int main(int argc, char ** argv) {
 		//epHMM->runForwardAlgorithm();
 		//epHMM->getResults();
 		//delete epHMM;
+
+
 		cout << "FORWARD : ";
-		ForwardPairHMM* fwdHMM = new ForwardPairHMM(inputSeqs,true);
+		ForwardPairHMM* fwdHMM = new ForwardPairHMM(inputSeqs,false);
 		fwdHMM->summarize();
 	}
 	catch(ProgramException& pe)
