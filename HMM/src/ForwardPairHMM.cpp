@@ -186,27 +186,27 @@ double ForwardPairHMM::runForwardAlgorithm()
 			if(i!=0)
 			{
 				emissionX = log(substModel->getQXi(seq1[i-1].getMatrixIndex()));
-				xm = pM->valueAtTop(j) + X->getTransitionProbabilityFrom(M);
-				xx = pX->valueAtTop(j) + X->getTransitionProbabilityFrom(X);
-				xy = pY->valueAtTop(j) + X->getTransitionProbabilityFrom(Y);
+				xm = pM->valueAtTop(j) + X->getTransitionProbabilityFromMatch();
+				xx = pX->valueAtTop(j) + X->getTransitionProbabilityFromInsert();
+				xy = pY->valueAtTop(j) + X->getTransitionProbabilityFromDelete();
 				pX->setValue(j, emissionX + maths->logSum(xm,xx,xy));
 			}
 
 			if(j!=0)
 			{
 				emissionY = log(substModel->getQXi(seq2[j-1].getMatrixIndex()));
-				ym = pM->valueAtLeft(j) + Y->getTransitionProbabilityFrom(M);
-				yx = pX->valueAtLeft(j) + Y->getTransitionProbabilityFrom(X);
-				yy = pY->valueAtLeft(j) + Y->getTransitionProbabilityFrom(Y);
+				ym = pM->valueAtLeft(j) + Y->getTransitionProbabilityFromMatch();
+				yx = pX->valueAtLeft(j) + Y->getTransitionProbabilityFromInsert();
+				yy = pY->valueAtLeft(j) + Y->getTransitionProbabilityFromDelete();
 				pY->setValue(j, emissionY + maths->logSum(ym,yx,yy));
 			}
 
 			if(i!=0 && j!=0 )
 			{
 				emissionM = log(substModel->getPXiYi(seq1[i-1].getMatrixIndex(), seq2[j-1].getMatrixIndex()));
-				mm = pM->valueAtDiagonal(j) + M->getTransitionProbabilityFrom(M);
-				mx = pX->valueAtDiagonal(j) + M->getTransitionProbabilityFrom(X);
-				my = pY->valueAtDiagonal(j) + M->getTransitionProbabilityFrom(Y);
+				mm = pM->valueAtDiagonal(j) + M->getTransitionProbabilityFromMatch();
+				mx = pX->valueAtDiagonal(j) + M->getTransitionProbabilityFromInsert();
+				my = pY->valueAtDiagonal(j) + M->getTransitionProbabilityFromDelete();
 				pM->setValue(j, emissionM + maths->logSum(mm,mx,my));
 			}
 		}

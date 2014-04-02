@@ -24,15 +24,45 @@ protected:
 	//map of transitions TO the current state
 
 	//TODO - maybe a pointer TO a model class member...
-	std::map<PairHmmStateBase*, double> transitionProbs;
+	//std::map<PairHmmStateBase*, double> transitionProbs;
+
+	double transFromMatch;
+	double transFromInsert;
+	double transFromDelete;
 
 public:
 
-	void addTransitionProbabilityFrom(PairHmmStateBase* state, double value);
+	//void addTransitionProbabilityFrom(PairHmmStateBase* state, double value);
 
-	void setTransitionProbability(PairHmmStateBase* state, double value);
+	inline void setTransitionProbabilityFromMatch(double value)
+	{
+		transFromMatch = value;
+	}
 
-	double getTransitionProbabilityFrom(PairHmmStateBase* state);
+	inline void setTransitionProbabilityFromInsert(double value)
+	{
+		transFromInsert = value;
+	}
+
+	inline void setTransitionProbabilityFromDelete(double value)
+	{
+		transFromDelete = value;
+	}
+
+	inline double getTransitionProbabilityFromMatch()
+	{
+		return transFromMatch;
+	}
+
+	inline double getTransitionProbabilityFromInsert()
+	{
+		return transFromInsert;
+	}
+	inline double getTransitionProbabilityFromDelete()
+	{
+		return transFromDelete;
+	}
+
 
 };
 

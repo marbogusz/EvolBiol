@@ -36,10 +36,7 @@ int main(int argc, char ** argv) {
 		//epHMM->runViterbiAlgorithm();
 		//epHMM->runForwardAlgorithm();
 		//epHMM->getResults();
-
 		//delete epHMM;
-
-
 		cout << "FORWARD : ";
 		ForwardPairHMM* fwdHMM = new ForwardPairHMM(inputSeqs,true);
 		fwdHMM->summarize();

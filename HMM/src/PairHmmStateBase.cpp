@@ -6,7 +6,7 @@
  */
 
 #include "PairHmmStateBase.hpp"
-
+/*
 namespace EBC
 {
 
@@ -25,6 +25,8 @@ double PairHmmStateBase::getTransitionProbabilityFrom(PairHmmStateBase* state)
 	return this->transitionProbs[state];
 }
 
-} /* namespace EBC */
+}
+*/
+/* namespace EBC */
 
 

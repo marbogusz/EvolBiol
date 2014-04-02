@@ -36,18 +36,18 @@ void EvolutionaryPairHMM::setTransitionProbabilities()
 	e = indelModel->getGapExtensionProbability();
 	g = indelModel->getGapOpeningProbability();
 
-	M->setTransitionProbability(M,log(1-2*g));
-	M->setTransitionProbability(X,log((1-e)*(1-2*g)));
-	M->setTransitionProbability(Y,log((1-e)*(1-2*g)));
+	M->setTransitionProbabilityFromMatch(log(1-2*g));
+	M->setTransitionProbabilityFromInsert(log((1-e)*(1-2*g)));
+	M->setTransitionProbabilityFromDelete(log((1-e)*(1-2*g)));
 
-	X->setTransitionProbability(X,log(e+((1-e)*g)));
-	Y->setTransitionProbability(Y,log(e+((1-e)*g)));
+	X->setTransitionProbabilityFromInsert(log(e+((1-e)*g)));
+	Y->setTransitionProbabilityFromDelete(log(e+((1-e)*g)));
 
-	X->setTransitionProbability(Y,log((1-e)*g));
-	Y->setTransitionProbability(X,log((1-e)*g));
+	X->setTransitionProbabilityFromDelete(log((1-e)*g));
+	Y->setTransitionProbabilityFromInsert(log((1-e)*g));
 
-	X->setTransitionProbability(M,log(g));
-	Y->setTransitionProbability(M,log(g));
+	X->setTransitionProbabilityFromMatch(log(g));
+	Y->setTransitionProbabilityFromMatch(log(g));
 }
 
 void EvolutionaryPairHMM::getSequencePair()
