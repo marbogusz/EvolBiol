@@ -27,10 +27,10 @@ void ReducedPairHmmDeleteState::initializeData()
 	currentRow = buffer[1];
 
 	//TODO - check if right
-	for (unsigned int i=0; i< xSize; i++)
-		{
-			currentRow[i] = previousRow[i] = minVal;
-		}
+	for (unsigned int i=0; i< ySize; i++)
+	{
+		currentRow[i] = previousRow[i] = minVal;
+	}
 
 
 	//currentRow[0] = previousRow[0] = minVal;

@@ -81,7 +81,7 @@ ForwardPairHMM::ForwardPairHMM(Sequences* inputSeqs, bool optimize) :
 		EvolutionaryPairHMM(inputSeqs)
 {
 
-	bandFactor = 1;
+	bandFactor = 30;
 
 	if (optimize)
 	{
@@ -191,9 +191,8 @@ double ForwardPairHMM::runForwardAlgorithm()
 	{
 		for (j = 0; j<ySize; j++)
 		{
-			//if(this->withinBand(i,j,this->bandSpan))
-			//{
-
+			if(this->withinBand(i,j,this->bandSpan))
+			{
 				if(i!=0)
 				{
 					emissionX = log(substModel->getQXi(seq1[i-1].getMatrixIndex()));
@@ -220,12 +219,16 @@ double ForwardPairHMM::runForwardAlgorithm()
 					my = pY->valueAtDiagonal(j) + M->getTransitionProbabilityFromDelete();
 					pM->setValue(j, emissionM + maths->logSum(mm,mx,my));
 				}
-			//}
+			}
 		}
+
+		//pM->outputRow();
 		pX->nextRow();
 		pY->nextRow();
 		pM->nextRow();
 	}
+
+
 
 	pX->nextRow();
 	pY->nextRow();

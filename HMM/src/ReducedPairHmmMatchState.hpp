@@ -23,6 +23,11 @@ public:
 
 	void initializeData();
 
+	inline void outputRow()
+	{
+		DEBUGV(currentRow, ySize);
+	}
+
 	inline void nextRow()
 	{
 		//DEBUG("MC");

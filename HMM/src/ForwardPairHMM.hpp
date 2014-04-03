@@ -58,18 +58,27 @@ protected:
 	unsigned int bandFactor;
 	unsigned int bandSpan;
 
+
 	void getBandWidth()
 	{
-		this->bandSpan = ySize/(2*bandFactor);
+		this->bandSpan = ySize/(bandFactor);
 		DEBUG("Band span " << bandSpan);
 	}
 
-	inline bool withinBand(unsigned int line, unsigned int position, unsigned int width)
+	inline bool withinBand(unsigned int line, int position, unsigned int width)
 	{
 		int low = line - width;
 		int high = line + width;
-		return (position > low && position < high);
+		bool result = ((position >= low) && (position <= high));
+
+		//if(result == false)
+		//{
+		//	DEBUG("FALSE RESULT FOR l :" << line << " position " << position << " low " << low << " high " << high);
+		//}
+
+		return result;
 	}
+
 
 public:
 	ForwardPairHMM(Sequences* inputSeqs, bool optimize);

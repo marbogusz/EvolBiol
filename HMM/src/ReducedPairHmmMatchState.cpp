@@ -26,11 +26,12 @@ void ReducedPairHmmMatchState::initializeData()
 	previousRow = buffer[0];
 	currentRow = buffer[1];
 
-	for (unsigned int i=0; i< xSize; i++)
+	for (unsigned int i=0; i< ySize; i++)
 	{
 		currentRow[i] = previousRow[i] = minVal;
 	}
 	currentRow[0] = 0;
+
 }
 
 } /* namespace EBC */
