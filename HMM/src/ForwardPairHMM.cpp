@@ -22,6 +22,7 @@ ForwardPairHMM::BFGS::BFGS(ForwardPairHMM* enclosing)
 	this->lowerBounds.set_size(paramsCount);
 	this->upperBounds.set_size(paramsCount);
 
+
 	for (int i=0; i<paramsCount; i++)
 	{
 		initParams(i) = enclosing->mlParameters[i];
@@ -29,14 +30,14 @@ ForwardPairHMM::BFGS::BFGS(ForwardPairHMM* enclosing)
 		lowerBounds(i) = 0.000001;
 		upperBounds(i) = 1.0;
 	}
-
 	//FIXME - hardcoding bounds
 	//kappa
-
 	upperBounds(0) = 5;
 
 	DEBUG("DLIB optimizer init with " << paramsCount << " parameters");
 }
+
+
 
 ForwardPairHMM::BFGS::~BFGS()
 {
@@ -59,9 +60,9 @@ void ForwardPairHMM::BFGS::optimize()
 {
 	using std::placeholders::_1;
 	std::function<double(const column_vector&)> f_objective= std::bind( &ForwardPairHMM::BFGS::objectiveFunction, this, _1 );
-
-/*	dlib::find_min_box_constrained(dlib::bfgs_search_strategy(),
-			dlib::objective_delta_stop_strategy(1e-9),
+/*
+	dlib::find_min_box_constrained(dlib::bfgs_search_strategy(),
+			dlib::objective_delta_stop_strategy(1e-8),
 			f_objective,
 			derivative(f_objective),
 			initParams,
@@ -69,9 +70,8 @@ void ForwardPairHMM::BFGS::optimize()
 			upperBounds);
 
 */
-
 	dlib::find_min_bobyqa(f_objective, initParams, 10,
-			lowerBounds,upperBounds, 0.05, 1e-6, 350 );
+			lowerBounds,upperBounds, 0.05, 1e-6, 10000 );
 
 	DEBUG("BFGS return: " << initParams );
 }

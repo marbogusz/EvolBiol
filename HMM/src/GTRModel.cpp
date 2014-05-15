@@ -61,6 +61,11 @@ void GTRModel::setParametersInMatrix() {
 
 void GTRModel::summarize()
 {
+	cout << endl << "REV model summary:" << endl;
+	cout << "a\tb\tc\td\te\tttime" << endl;
+	cout << *a << "\t" << *b << "\t"<< *c << "\t"<< *d << "\t"<< *e << "\t"<< time << endl;
+
+	//this->outputPtPi();
 
 }
 

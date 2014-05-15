@@ -22,9 +22,9 @@ EvolutionaryPairHMM::EvolutionaryPairHMM(Sequences* inputSeqs) : inputSequences(
 	dict = inputSeqs->getDictionary();
 	maths  = new Maths();
 	DEBUG("Creating the substitution model");
-	//TODO - init by
+	//substModel = new GTRModel(dict, maths);
+
 	substModel = new HKY85Model(dict, maths);
-	//substModel = new HKY85Model(dict, maths);
 	DEBUG("Creating the gap model");
 	indelModel = new AffineGeometricGapModel();
 }
@@ -67,9 +67,10 @@ void EvolutionaryPairHMM::generateInitialParameters()
 	this->totalParameters = indelParameters + substParameters -1;
 	this->mlParameters = new double[totalParameters];
 
-	mlParameters[0] = 3; // first parameter hack
+
+	//mlParameters[0] = 3; // first parameter hack
 	double tempVal;
-	for(unsigned i=1; i< totalParameters; i++)
+	for(unsigned i=0; i< totalParameters; i++)
 	{
 		tempVal = 0.2 + 0.1*maths->rndu();
 		mlParameters[i] = tempVal;
