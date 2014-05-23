@@ -10,6 +10,7 @@
 
 #include "IParser.hpp"
 #include "ParseException.hpp"
+#include <dlib/cmd_line_parser.h>
 
 namespace EBC
 {
@@ -22,9 +23,34 @@ private:
 	char** args;		//command line arguments
 
 public:
+
+	dlib::command_line_parser parser;
+
 	CommandReader(int argc, char** argv);
 	IParser* getParser() throw (ProgramException&);
 
+	inline bool isViterbi()
+	{
+		return parser.option("V");
+	}
+
+	inline bool isForward()
+	{
+		return parser.option("F");
+	}
+
+
+	Definitions::ModelType getModelType()
+	{
+		if (parser.option("rev"))
+		{
+			return Definitions::ModelType::GTR;
+		}
+		if (parser.option("hky"))
+		{
+			return Definitions::ModelType::HKY85;
+		}
+	}
 };
 
 } /* namespace EBC */

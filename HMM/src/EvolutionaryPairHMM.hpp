@@ -56,8 +56,6 @@ protected:
 	//the following assumes a fix HMM structure
 	virtual void setTransitionProbabilities();
 
-	virtual void generateInitialParameters();
-
 	virtual void initializeModels()=0;
 
 	virtual void calculateModels();

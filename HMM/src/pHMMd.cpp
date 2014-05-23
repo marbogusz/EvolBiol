@@ -17,19 +17,43 @@ using namespace std;
 using namespace EBC;
 
 int main(int argc, char ** argv) {
+
+	//Set output Precision to 6
 	cout << fixed << setprecision(6);
 	cerr << fixed << setprecision(6);
 
-	cout << "Pair-HMM Distance estimation" << endl; // prints ML
-
 	try
 	{
-		CommandReader* reader = new CommandReader(argc, argv);
+		CommandReader* cmdReader = new CommandReader(argc, argv);
 		DEBUG("Get parser" << endl);
-		IParser* parser = reader->getParser();
+
+		IParser* parser = cmdReader->getParser();
 		DEBUG("Creating alignment");
+
 		Sequences* inputSeqs = new Sequences(parser);
 		DEBUG("Creating the HMM");
+
+		if(cmdReader->isForward())
+		{
+			//Check model
+
+			//check evol model parameters provided
+
+			//check indel parameters
+
+			//ForwardPairHMM* fwdHMM = new ForwardPairHMM(inputSeqs,);
+
+		}
+
+		else if (cmdReader->isViterbi())
+		{
+
+		}
+
+		else
+		{
+			throw ProgramException("specify either V or F option");
+		}
 		//ForwardPairHMM* epHMM = new ForwardPairHMM(inputSeqs);
 
 		//ViterbiPairHMM* epHMM = new ViterbiPairHMM(inputSeqs);
@@ -39,8 +63,8 @@ int main(int argc, char ** argv) {
 		//delete epHMM;
 
 		cout << "FORWARD : ";
-		ForwardPairHMM* fwdHMM = new ForwardPairHMM(inputSeqs,true);
-		fwdHMM->summarize();
+		//ForwardPairHMM* fwdHMM = new ForwardPairHMM(inputSeqs,true);
+		//fwdHMM->summarize();
 	}
 	catch(ProgramException& pe)
 	{

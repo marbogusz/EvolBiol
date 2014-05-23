@@ -27,11 +27,16 @@
 namespace EBC
 {
 
+
+
 class Definitions
 {
+public:
 	enum SequenceType {Nucleotide, Aminoacid, Codon};
 	//TODO - CODON lookup table
+	enum ModelType {GTR, HKY85};
 
+	enum OptimizationType {BFGS, BOBYQA};
 
 };
 

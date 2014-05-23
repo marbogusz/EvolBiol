@@ -59,6 +59,7 @@ protected:
 	unsigned int bandFactor;
 	unsigned int bandSpan;
 
+	void generateInitialParameters();
 
 	void getBandWidth()
 	{
@@ -82,7 +83,8 @@ protected:
 
 
 public:
-	ForwardPairHMM(Sequences* inputSeqs, bool optimize);
+	ForwardPairHMM(Sequences* inputSeqs, Definitions::ModelType model,std::vector<double>& indel_params,
+			std::vector<double>& subst_params, Definitions::OptimizationType ot, bool banding);
 
 	virtual ~ForwardPairHMM();
 

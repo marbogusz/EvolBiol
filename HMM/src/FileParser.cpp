@@ -12,7 +12,7 @@
 namespace EBC
 {
 
-FileParser::FileParser(char* filename)
+FileParser::FileParser(const char* filename)
 {
 	this->filename = filename;
 	//this->infile.exceptions(ifstream::failbit | ifstream::badbit);

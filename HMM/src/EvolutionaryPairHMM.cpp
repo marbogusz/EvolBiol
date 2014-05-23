@@ -6,8 +6,6 @@
  */
 
 #include "EvolutionaryPairHMM.hpp"
-#include "GTRModel.hpp"
-#include "HKY85Model.hpp"
 #include "AffineGeometricGapModel.hpp"
 #include "PairHmmMatchState.hpp"
 #include "PairHmmInsertionState.hpp"
@@ -21,12 +19,10 @@ EvolutionaryPairHMM::EvolutionaryPairHMM(Sequences* inputSeqs) : inputSequences(
 	M = X = Y = NULL;
 	dict = inputSeqs->getDictionary();
 	maths  = new Maths();
-	DEBUG("Creating the substitution model");
-	substModel = new GTRModel(dict, maths);
-
-	//substModel = new HKY85Model(dict, maths);
 	DEBUG("Creating the gap model");
 	indelModel = new AffineGeometricGapModel();
+
+	//substitution model created by the parent class
 }
 
 void EvolutionaryPairHMM::setTransitionProbabilities()
@@ -56,25 +52,6 @@ void EvolutionaryPairHMM::getSequencePair()
 	this->seq2 = inputSequences->getSequencesAt(1);
 	this->xSize = seq1.size() +1;
 	this->ySize = seq2.size() +1;
-}
-
-void EvolutionaryPairHMM::generateInitialParameters()
-{
-	 //time is a parameter with both indel and subst, we use 1 common time
-
-	this->indelParameters = indelModel->getParamsNumber();
-	this->substParameters = substModel->getParamsNumber();
-	this->totalParameters = indelParameters + substParameters -1;
-	this->mlParameters = new double[totalParameters];
-
-
-	//mlParameters[0] = 3; // first parameter hack
-	double tempVal;
-	for(unsigned i=0; i< totalParameters; i++)
-	{
-		tempVal = 0.2 + 0.1*maths->rndu();
-		mlParameters[i] = tempVal;
-	}
 }
 
 void EvolutionaryPairHMM::summarize()

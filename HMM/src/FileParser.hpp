@@ -29,7 +29,7 @@ private:
 
 public:
 
-	FileParser(char* filename);
+	FileParser(const char* filename);
 	string getNextSequence();
 
 	unsigned int getSequenceCount();

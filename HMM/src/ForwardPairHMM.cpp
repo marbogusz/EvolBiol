@@ -9,6 +9,8 @@
 #include "ReducedPairHmmInsertState.hpp"
 #include "ReducedPairHmmDeleteState.hpp"
 #include "ReducedPairHmmMatchState.hpp"
+#include "GTRModel.hpp"
+#include "HKY85Model.hpp"
 
 namespace EBC
 {
@@ -28,16 +30,16 @@ ForwardPairHMM::BFGS::BFGS(ForwardPairHMM* enclosing)
 		initParams(i) = enclosing->mlParameters[i];
 		//default probs bounds
 		lowerBounds(i) = 0.000001;
-		upperBounds(i) = 1.0;
+		upperBounds(i) = 1.5;
 	}
 	//FIXME - hardcoding bounds
-	//kappa
-	upperBounds(0) = 1.5;
+	//time
+	upperBounds(5) = 2.0;
+	upperBounds(6) = 1.0;
+	upperBounds(7) = 1.0;
 
 	DEBUG("DLIB optimizer init with " << paramsCount << " parameters");
 }
-
-
 
 ForwardPairHMM::BFGS::~BFGS()
 {
@@ -77,22 +79,31 @@ void ForwardPairHMM::BFGS::optimize()
 }
 
 
-ForwardPairHMM::ForwardPairHMM(Sequences* inputSeqs, bool optimize) :
+ForwardPairHMM::ForwardPairHMM(Sequences* inputSeqs, Definitions::ModelType model ,std::vector<double>& indel_params, std::vector<double>& subst_params, Definitions::OptimizationType ot, bool banding) :
 		EvolutionaryPairHMM(inputSeqs)
 {
+	DEBUG("Creating the substitution model");
+	if (model == Definitions::ModelType::GTR)
+	{
+		substModel = new GTRModel(dict, maths);
+	}
+	else if (model == Definitions::ModelType::HKY85)
+	{
+		substModel = new HKY85Model(dict, maths);
+	}
 
 	bandFactor = 30;
 
-	if (optimize)
-	{
-		initializeModels();
-		getSequencePair();
-		getBandWidth();
-		calculateModels();
-		initializeStates();
-		this-> bfgs = new BFGS(this);
-		bfgs->optimize();
-	}
+	initializeModels();
+	getSequencePair();
+	getBandWidth();
+	calculateModels();
+	initializeStates();
+	this-> bfgs = new BFGS(this);
+	bfgs->optimize();
+
+
+	/*
 	else
 	{
 		this->indelParameters = indelModel->getParamsNumber();
@@ -120,7 +131,7 @@ ForwardPairHMM::ForwardPairHMM(Sequences* inputSeqs, bool optimize) :
 		setTransitionProbabilities();
 		runForwardAlgorithm();
 	}
-
+	 */
 }
 
 ForwardPairHMM::~ForwardPairHMM()
@@ -157,7 +168,23 @@ double ForwardPairHMM::runForwardIteration(const column_vector& bfgsParameters)
 	return this->runForwardAlgorithm() * -1;
 }
 
+void ForwardPairHMM::generateInitialParameters()
+{
+	 //time is a parameter with both indel and subst, we use 1 common time
 
+	this->indelParameters = indelModel->getParamsNumber();
+	this->substParameters = substModel->getParamsNumber();
+	this->totalParameters = indelParameters + substParameters -1;
+	this->mlParameters = new double[totalParameters];
+
+	//mlParameters[0] = 3; // first parameter hack
+	double tempVal;
+	for(unsigned i=0; i< totalParameters; i++)
+	{
+		tempVal = 0.2 + 0.1*maths->rndu();
+		mlParameters[i] = tempVal;
+	}
+}
 
 double ForwardPairHMM::runForwardAlgorithm()
 {
