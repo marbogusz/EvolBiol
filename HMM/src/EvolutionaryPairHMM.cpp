@@ -22,9 +22,9 @@ EvolutionaryPairHMM::EvolutionaryPairHMM(Sequences* inputSeqs) : inputSequences(
 	dict = inputSeqs->getDictionary();
 	maths  = new Maths();
 	DEBUG("Creating the substitution model");
-	//substModel = new GTRModel(dict, maths);
+	substModel = new GTRModel(dict, maths);
 
-	substModel = new HKY85Model(dict, maths);
+	//substModel = new HKY85Model(dict, maths);
 	DEBUG("Creating the gap model");
 	indelModel = new AffineGeometricGapModel();
 }

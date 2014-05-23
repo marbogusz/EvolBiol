@@ -24,6 +24,7 @@ private:
 public:
 	CommandReader(int argc, char** argv);
 	IParser* getParser() throw (ProgramException&);
+
 };
 
 } /* namespace EBC */
