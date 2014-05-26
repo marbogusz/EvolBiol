@@ -35,8 +35,10 @@ private:
 
 		ForwardPairHMM* parent;
 
+		Definitions::OptimizationType optimizationType;
+
 	public:
-		BFGS(ForwardPairHMM* enclosing);
+		BFGS(ForwardPairHMM* enclosing, Definitions::OptimizationType ot);
 		virtual ~BFGS();
 		void optimize();
 
@@ -59,7 +61,18 @@ protected:
 	unsigned int bandFactor;
 	unsigned int bandSpan;
 
-	void generateInitialParameters();
+	bool bandingEnabled;
+
+	bool estimateSubstitutionParams;
+	bool estimateIndelParams;
+
+	vector<double> userIndelParameters;
+	vector<double> userSubstParameters;
+
+	double* optParameters;
+	unsigned int optParametersCount;
+
+	void setParameters();
 
 	void getBandWidth()
 	{
@@ -83,8 +96,8 @@ protected:
 
 
 public:
-	ForwardPairHMM(Sequences* inputSeqs, Definitions::ModelType model,std::vector<double>& indel_params,
-			std::vector<double>& subst_params, Definitions::OptimizationType ot, bool banding);
+	ForwardPairHMM(Sequences* inputSeqs, Definitions::ModelType model,std::vector<double> indel_params,
+			std::vector<double> subst_params, Definitions::OptimizationType ot, bool banding);
 
 	virtual ~ForwardPairHMM();
 

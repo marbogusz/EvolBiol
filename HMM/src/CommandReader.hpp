@@ -39,6 +39,9 @@ public:
 		return parser.option("F");
 	}
 
+	vector<double> getIndelParams();
+
+	vector<double> getSubstParams();
 
 	Definitions::ModelType getModelType()
 	{
@@ -51,6 +54,13 @@ public:
 			return Definitions::ModelType::HKY85;
 		}
 	}
+
+	Definitions::OptimizationType getOptimizationType()
+	{
+			unsigned int opt = get_option(parser,"o",1);
+			return (Definitions::OptimizationType) opt;
+	}
+
 };
 
 } /* namespace EBC */

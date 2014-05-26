@@ -31,14 +31,14 @@ CommandReader::CommandReader(int argc, char** argv) : count(argc), args(argv)
 		parser.set_group_name("Miscellaneous Options");
 		parser.add_option("h","Display this help message.");
 		parser.add_option("b","Set banding 0/1, default is 0",1);
-		parser.add_option("o","Set optimizer, default is bfgs",1);
+		parser.add_option("o","Set optimizer, 0- BFGS, 1- BOBYQA default is 1",1);
 		parser.add_option("param_rev","GTR model parameters",5);
 		parser.add_option("param_hky","HKY85 model parameters",1);
 		parser.add_option("ov","Output viterbi alignment for estimated parameters");
 
 		parser.parse(argc,argv);
 
-		const char* one_time_opts[] = {"V", "F", "in", "m", "s", "i","d","h","b","o"};
+		const char* one_time_opts[] = {"V", "F", "in", "i","d" ,"h","b","o", "ov"};
 		parser.check_one_time_options(one_time_opts);
 
 		parser.check_incompatible_options("V", "F");
@@ -55,20 +55,73 @@ CommandReader::CommandReader(int argc, char** argv) : count(argc), args(argv)
 		parser.check_option_arg_range("param_hky", 0.0000001, 20.0);
 		parser.check_option_arg_range("param_rev", 0.0000001, 10.0);
 		parser.check_option_arg_range("i", 0.0000001, 1.0);
-		parser.check_option_arg_range("d", 0.0000001, 2.0);
+		parser.check_option_arg_range("d", 0.0000001, 3.0);
 
+		if (!parser.option("V") && !parser.option("F"))
+		{
+		    cout << "Usage: HMM (-F|-V) --in input_file (rev|hky) [param_rev .... | param_hky ...] [i indel parameters] [d distance] [b] [o=0|1] [ov]\n";
+		    parser.print_options();
+			throw ProgramException("Specify which algorithm you want to run!\n");
+		}
 
-		//if (parser.option("h"))
-		//{
+		parser.check_option_arg_range("o", 0, 1);
+		if (parser.option("h"))
+		{
 			// display all the command line options
-		//    cout << "Usage: HMM (-F|-V) --in input_file model poarameters misc options\n";
-		 //   parser.print_options();
-		//}
+		    cout << "Usage: HMM (-F|-V) --in input_file (rev|hky) [param_rev .... | param_hky ...] [i indel parameters] [d distance] [b] [o=0|1] [ov]\n";
+		    parser.print_options();
+		}
 	}
 	catch (exception& e)
 	{
 	        throw ProgramException(e.what());
 	}
+}
+
+vector<double> CommandReader::getSubstParams()
+{
+	int i;
+	vector<double> vec;
+	if (parser.option("hky"))
+	{
+		if(parser.option("param_hky"))
+		{
+			for (i=0; i< 1; i++)
+			{
+				DEBUG("hky parameter " << i <<  ": " << parser.option("param_hky").argument(i));
+				vec.push_back(atof(parser.option("param_hky").argument(i).c_str()));
+			}
+		}
+	}
+	else if (parser.option("rev"))
+	{
+		if (parser.option("param_rev"))
+		{
+			for (i=0; i< 5; i++)
+			{
+				DEBUG("Rev parameter " << i <<  ": " << parser.option("param_rev").argument(i));
+				vec.push_back(atof(parser.option("param_rev").argument(i).c_str()));
+			}
+		}
+	}
+	else throw ProgramException("Model not specified");
+
+	return vec;
+}
+
+vector<double> CommandReader::getIndelParams()
+{
+	int i;
+	vector<double> vec;
+	if (parser.option("i"))
+	{
+		for (i=0; i< 2; i++)
+		{
+			DEBUG("indel parameter " << i << ": " << parser.option("i").argument(i));
+			vec.push_back(atof(parser.option("i").argument(i).c_str()));
+		}
+	}
+	return vec;
 }
 
 IParser* CommandReader::getParser() throw (ProgramException&)

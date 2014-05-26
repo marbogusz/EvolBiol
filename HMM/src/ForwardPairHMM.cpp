@@ -16,10 +16,10 @@ namespace EBC
 {
 
 
-ForwardPairHMM::BFGS::BFGS(ForwardPairHMM* enclosing)
+ForwardPairHMM::BFGS::BFGS(ForwardPairHMM* enclosing, Definitions::OptimizationType ot) : optimizationType(ot)
 {
 	parent = enclosing;
-	paramsCount = enclosing->totalParameters;
+	paramsCount = enclosing->optParametersCount;
 	this->initParams.set_size(paramsCount);
 	this->lowerBounds.set_size(paramsCount);
 	this->upperBounds.set_size(paramsCount);
@@ -27,17 +27,12 @@ ForwardPairHMM::BFGS::BFGS(ForwardPairHMM* enclosing)
 
 	for (int i=0; i<paramsCount; i++)
 	{
-		initParams(i) = enclosing->mlParameters[i];
+		initParams(i) = enclosing->optParameters[i];
 		//default probs bounds
 		lowerBounds(i) = 0.000001;
-		upperBounds(i) = 1.5;
+		//FIXME - provide external bounds????????????
+		upperBounds(i) = 5;
 	}
-	//FIXME - hardcoding bounds
-	//time
-	upperBounds(5) = 2.0;
-	upperBounds(6) = 1.0;
-	upperBounds(7) = 1.0;
-
 	DEBUG("DLIB optimizer init with " << paramsCount << " parameters");
 }
 
@@ -62,27 +57,36 @@ void ForwardPairHMM::BFGS::optimize()
 {
 	using std::placeholders::_1;
 	std::function<double(const column_vector&)> f_objective= std::bind( &ForwardPairHMM::BFGS::objectiveFunction, this, _1 );
-/*
-	dlib::find_min_box_constrained(dlib::bfgs_search_strategy(),
-			dlib::objective_delta_stop_strategy(1e-8),
-			f_objective,
-			derivative(f_objective),
-			initParams,
-			lowerBounds,
-			upperBounds);
 
-*/
-	dlib::find_min_bobyqa(f_objective, initParams, 10,
-			lowerBounds,upperBounds, 0.05, 1e-6, 10000 );
-
+	switch(optimizationType)
+	{
+		case Definitions::OptimizationType::BFGS:
+		{
+			dlib::find_min_box_constrained(dlib::bfgs_search_strategy(),
+					dlib::objective_delta_stop_strategy(1e-8),
+					f_objective,
+					derivative(f_objective),
+					initParams,
+					lowerBounds,
+					upperBounds);
+			break;
+		}
+		case Definitions::OptimizationType::BOBYQA:
+		{
+			dlib::find_min_bobyqa(f_objective, initParams, 10,
+					lowerBounds,upperBounds, 0.05, 1e-6, 10000 );
+			break;
+		}
+	}
 	DEBUG("BFGS return: " << initParams );
 }
 
 
-ForwardPairHMM::ForwardPairHMM(Sequences* inputSeqs, Definitions::ModelType model ,std::vector<double>& indel_params, std::vector<double>& subst_params, Definitions::OptimizationType ot, bool banding) :
-		EvolutionaryPairHMM(inputSeqs)
+ForwardPairHMM::ForwardPairHMM(Sequences* inputSeqs, Definitions::ModelType model ,std::vector<double> indel_params,
+		std::vector<double> subst_params, Definitions::OptimizationType ot, bool banding) :
+		EvolutionaryPairHMM(inputSeqs), userIndelParameters(indel_params), userSubstParameters(subst_params)
 {
-	DEBUG("Creating the substitution model");
+	DEBUG("Creating the model");
 	if (model == Definitions::ModelType::GTR)
 	{
 		substModel = new GTRModel(dict, maths);
@@ -92,51 +96,42 @@ ForwardPairHMM::ForwardPairHMM(Sequences* inputSeqs, Definitions::ModelType mode
 		substModel = new HKY85Model(dict, maths);
 	}
 
+	estimateSubstitutionParams = (subst_params.size() == 0);
+	estimateIndelParams = (indel_params.size() == 0);
+
+	//FIXME
+	//Hardcode the band for now
 	bandFactor = 30;
 
+	//initialize parameter arrays
 	initializeModels();
+
+
+	//TODO - set parameters depending on the values provided
+	setParameters();
+
 	getSequencePair();
 	getBandWidth();
 	calculateModels();
 	initializeStates();
-	this-> bfgs = new BFGS(this);
+	this-> bfgs = new BFGS(this,ot);
 	bfgs->optimize();
-
-
-	/*
-	else
-	{
-		this->indelParameters = indelModel->getParamsNumber();
-		this->substParameters = substModel->getParamsNumber();
-		this->totalParameters = indelParameters + substParameters -1;
-		this->mlParameters = new double[totalParameters];
-
-		testFreqs[0] = 0.4;
-		testFreqs[1] = 0.2;
-		testFreqs[2] = 0.1;
-		testFreqs[3] = 0.3;
-
-		mlParameters[0] = 2;
-		mlParameters[1] = 0.1;
-		mlParameters[2] = 0.05;
-		mlParameters[3] = 0.25;
-
-		substModel->setObservedFrequencies(testFreqs);
-
-		getSequencePair();
-		getBandWidth();
-
-		calculateModels();
-		initializeStates();
-		setTransitionProbabilities();
-		runForwardAlgorithm();
-	}
-	 */
 }
 
 ForwardPairHMM::~ForwardPairHMM()
 {
 	// TODO Auto-generated destructor stub
+	delete[] mlParameters;
+	delete[] optParameters;
+
+	delete M;
+	delete X;
+	delete Y;
+
+	delete indelModel;
+	delete substModel;
+	delete bfgs;
+
 }
 
 void ForwardPairHMM::initializeStates()
@@ -157,33 +152,71 @@ void ForwardPairHMM::initializeStates()
 
 double ForwardPairHMM::runForwardIteration(const column_vector& bfgsParameters)
 {
-	for(int i=0; i<totalParameters; i++)
+	unsigned int optPointer = estimateSubstitutionParams ? 0 : substParameters -1;
+
+	for(int i=0; i<optParametersCount; i++)
 	{
-		mlParameters[i] = bfgsParameters(i);
+		mlParameters[i+optPointer] = bfgsParameters(i);
 	}
 
-
+	//paste the opt parameters to mlVector
 	DEBUGV(mlParameters, totalParameters);
 
 	return this->runForwardAlgorithm() * -1;
 }
 
-void ForwardPairHMM::generateInitialParameters()
+void ForwardPairHMM::setParameters()
 {
-	 //time is a parameter with both indel and subst, we use 1 common time
+	//Models are initialized at this stage
+	double* initialSubstData;
+	double* initialIndelData;
+	double initialDistance = this->generateInitialDistanceParameter();
+	unsigned int optPointer = 0;
 
-	this->indelParameters = indelModel->getParamsNumber();
-	this->substParameters = substModel->getParamsNumber();
-	this->totalParameters = indelParameters + substParameters -1;
-	this->mlParameters = new double[totalParameters];
-
-	//mlParameters[0] = 3; // first parameter hack
-	double tempVal;
-	for(unsigned i=0; i< totalParameters; i++)
+	if (estimateSubstitutionParams)
 	{
-		tempVal = 0.2 + 0.1*maths->rndu();
-		mlParameters[i] = tempVal;
+		initialSubstData=this->generateInitialSubstitutionParameters();
+		for (int i=0; i< this->substParameters-1; i++)
+		{
+			this->mlParameters[i] = initialSubstData[i];
+			this->optParameters[i]= initialSubstData[i];
+		}
+		delete[] initialSubstData;
+		optPointer += substParameters -1;
 	}
+	else
+	{
+		for (int i=0; i< this->substParameters-1; i++)
+		{
+			this->mlParameters[i] = userSubstParameters[i];
+		}
+	}
+
+	//set time
+
+	this->mlParameters[substParameters-1] = initialDistance;
+	this->optParameters[optPointer] = initialDistance;
+	optPointer++;
+
+	if(estimateIndelParams)
+	{
+		initialIndelData = this->generateInitialIndelParameters();
+		for (int i=0; i< this->indelParameters-1; i++)
+		{
+			this->mlParameters[i+substParameters] = initialIndelData[i];
+			this->optParameters[i+optPointer]= initialIndelData[i];
+		}
+		delete[] initialIndelData;
+	}
+	else
+	{
+		//set provided vales
+		for (int i=0; i< this->indelParameters-1; i++)
+		{
+			this->mlParameters[i+substParameters] = userIndelParameters[i];
+		}
+	}
+
 }
 
 double ForwardPairHMM::runForwardAlgorithm()
@@ -282,48 +315,20 @@ double ForwardPairHMM::runForwardAlgorithm()
 
 void ForwardPairHMM::initializeModels()
 {
-	generateInitialParameters();
-	substModel->setObservedFrequencies(inputSequences->getElementFrequencies());
-}
-
-/*
-void ForwardPairHMM::initializeModels()
-{
-	//generateInitialParameters();
-
-	 //time is a parameter with both indel and subst, we use 1 common time
+	//set the counts and params!
 	this->indelParameters = indelModel->getParamsNumber();
 	this->substParameters = substModel->getParamsNumber();
 	this->totalParameters = indelParameters + substParameters -1;
 	this->mlParameters = new double[totalParameters];
 
-	mlParameters[0] = 0.912374;
-	mlParameters[1] = 0.051834;
-	mlParameters[2] = 0.000010;
-	mlParameters[3] = 0.025448;
-	mlParameters[4] = 0.000010;
-	mlParameters[5] = 0.0905152;	//time
-	mlParameters[6] = 0.111341;		//lambda
-	mlParameters[7] = 0.521122;		//extension prob
+	unsigned int substMLParamCount = this->estimateSubstitutionParams == true ? this->substParameters-1 : 0;
+	unsigned int indelMLParamCount = this->estimateIndelParams == true ? this->indelParameters-1 : 0;
 
+	optParametersCount = substMLParamCount  + indelMLParamCount + 1;
+	//estimate the distance at the minimum
+	this->optParameters = new double[optParametersCount];
 
-
-		testFreqs[0] = 0.4;
-		testFreqs[1] = 0.2;
-		testFreqs[2] = 0.1;
-		testFreqs[3] = 0.3;
-
-
-		mlParameters[0] = 2;
-		mlParameters[1] = 0.1;
-		mlParameters[2] = 0.05;
-		mlParameters[3] = 0.5;
-
-		//start time is the first parameter
-
-		//substModel->setObservedFrequencies(inputSequences->getElementFrequencies());
-		substModel->setObservedFrequencies(testFreqs);
+	substModel->setObservedFrequencies(inputSequences->getElementFrequencies());
 }
-*/
 
 } /* namespace EBC */

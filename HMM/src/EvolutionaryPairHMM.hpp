@@ -64,6 +64,11 @@ protected:
 
 	virtual void initializeStates() = 0;
 
+	double* generateInitialSubstitutionParameters();
+
+	double* generateInitialIndelParameters();
+
+	double generateInitialDistanceParameter();
 
 
 public:

@@ -35,14 +35,13 @@ int main(int argc, char ** argv) {
 
 		if(cmdReader->isForward())
 		{
-			//Check model
+			//Check model type
 
 			//check evol model parameters provided
 
 			//check indel parameters
 
-			//ForwardPairHMM* fwdHMM = new ForwardPairHMM(inputSeqs,);
-
+			ForwardPairHMM* fwdHMM = new ForwardPairHMM(inputSeqs, cmdReader->getModelType() ,cmdReader->getIndelParams(),cmdReader->getSubstParams(), cmdReader->getOptimizationType(), false);
 		}
 
 		else if (cmdReader->isViterbi())
@@ -61,8 +60,6 @@ int main(int argc, char ** argv) {
 		//epHMM->runForwardAlgorithm();
 		//epHMM->getResults();
 		//delete epHMM;
-
-		cout << "FORWARD : ";
 		//ForwardPairHMM* fwdHMM = new ForwardPairHMM(inputSeqs,true);
 		//fwdHMM->summarize();
 	}

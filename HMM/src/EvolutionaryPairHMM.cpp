@@ -54,6 +54,33 @@ void EvolutionaryPairHMM::getSequencePair()
 	this->ySize = seq2.size() +1;
 }
 
+double* EvolutionaryPairHMM::generateInitialSubstitutionParameters()
+{
+	//don't include time
+	double* params = new double[this->substParameters-1];
+	for(unsigned int i=0; i< this->substParameters-1; i++)
+	{
+		params[i] = 0.2 + 0.1*maths->rndu();
+	}
+	return params;
+}
+double* EvolutionaryPairHMM::generateInitialIndelParameters()
+{
+	//don't include time
+	double* params = new double[this->indelParameters-1];
+	for(unsigned int i=0; i< this->indelParameters-1; i++)
+	{
+		params[i] = 0.2 + 0.1*maths->rndu();
+	}
+	return params;
+}
+
+double EvolutionaryPairHMM::generateInitialDistanceParameter()
+{
+	return 0.2 + 0.1*maths->rndu();
+}
+
+
 void EvolutionaryPairHMM::summarize()
 {
 	double e,g;
