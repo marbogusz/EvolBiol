@@ -65,6 +65,7 @@ CommandReader::CommandReader(int argc, char** argv) : count(argc), args(argv)
 		}
 
 		parser.check_option_arg_range("o", 0, 1);
+		parser.check_option_arg_range("b", 0, 1);
 		if (parser.option("h"))
 		{
 			// display all the command line options

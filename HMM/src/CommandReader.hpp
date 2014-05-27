@@ -71,6 +71,12 @@ public:
 			return (Definitions::OptimizationType) opt;
 	}
 
+	bool getBanding()
+	{
+		unsigned int opt = get_option(parser,"b",0);
+		return (opt == 1);
+	}
+
 };
 
 } /* namespace EBC */

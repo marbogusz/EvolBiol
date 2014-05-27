@@ -42,7 +42,7 @@ int main(int argc, char ** argv) {
 
 			//check indel parameters
 
-			ForwardPairHMM* fwdHMM = new ForwardPairHMM(inputSeqs, cmdReader->getModelType() ,cmdReader->getIndelParams(),cmdReader->getSubstParams(), cmdReader->getOptimizationType(), false);
+			ForwardPairHMM* fwdHMM = new ForwardPairHMM(inputSeqs, cmdReader->getModelType() ,cmdReader->getIndelParams(),cmdReader->getSubstParams(), cmdReader->getOptimizationType(), cmdReader->getBanding());
 
 			double* estimatedParams = fwdHMM->getMlParameters();
 

@@ -23,15 +23,48 @@ ForwardPairHMM::BFGS::BFGS(ForwardPairHMM* enclosing, Definitions::OptimizationT
 	this->initParams.set_size(paramsCount);
 	this->lowerBounds.set_size(paramsCount);
 	this->upperBounds.set_size(paramsCount);
+	int i;
+	unsigned int ptr =0;
 
-
-	for (int i=0; i<paramsCount; i++)
+	if(enclosing->estimateSubstitutionParams)
 	{
-		initParams(i) = enclosing->optParameters[i];
+		for (i=0; i<enclosing->substParameters-1; i++)
+		{
+			initParams(i) = enclosing->optParameters[i];
+			//default probs bounds
+			lowerBounds(i) = 0.000001;
+			//FIXME - provide external bounds????????????
+			upperBounds(i) = 5;
+		}
+		ptr += enclosing->substParameters-1;
+	}
+	//set time
+	initParams(ptr) = enclosing->optParameters[ptr];
+	//default probs bounds
+	lowerBounds(ptr) = 0.000001;
+	//FIXME - provide external bounds????????????
+	upperBounds(ptr) = 3;
+	ptr++;
+
+	if(enclosing->estimateIndelParams)
+	{
+		//indel rate FIXME
+		initParams(ptr) = enclosing->optParameters[ptr];
+		lowerBounds(ptr) = 0.000001;
+		upperBounds(ptr) = 0.2;
+		//geometric rate
+		initParams(ptr+1) = enclosing->optParameters[ptr+1];
+		lowerBounds(ptr+1) = 0.000001;
+		upperBounds(ptr+1) = 0.999999;
+
+		/*for (i=0; i<enclosing->indelParameters-1; i++)
+		{
+			initParams(ptr+i) = enclosing->optParameters[ptr+i];
 		//default probs bounds
-		lowerBounds(i) = 0.000001;
+			lowerBounds(ptr+i) = 0.000001;
 		//FIXME - provide external bounds????????????
-		upperBounds(i) = 5;
+			upperBounds(ptr+i) = 0.999999;
+		}*/
 	}
 	DEBUG("DLIB optimizer init with " << paramsCount << " parameters");
 }
@@ -102,6 +135,7 @@ ForwardPairHMM::ForwardPairHMM(Sequences* inputSeqs, Definitions::ModelType mode
 	//FIXME
 	//Hardcode the band for now
 	bandFactor = 30;
+	bandingEnabled = banding;
 
 	//initialize parameter arrays
 	initializeModels();
@@ -151,10 +185,11 @@ void ForwardPairHMM::initializeStates()
 double ForwardPairHMM::runForwardIteration(const column_vector& bfgsParameters)
 {
 	unsigned int optPointer = estimateSubstitutionParams ? 0 : substParameters -1;
-
+	cerr << " optimizing : ";
 	for(int i=0; i<optParametersCount; i++)
 	{
 		mlParameters[i+optPointer] = bfgsParameters(i);
+		cerr << "\t" << bfgsParameters(i);
 	}
 
 	//paste the opt parameters to mlVector
@@ -249,8 +284,8 @@ double ForwardPairHMM::runForwardAlgorithm()
 	{
 		for (j = 0; j<ySize; j++)
 		{
-			//if(this->withinBand(i,j,this->bandSpan))
-			//{
+			if(this->withinBand(i,j,this->bandSpan) || !bandingEnabled)
+			{
 				if(i!=0)
 				{
 					emissionX = log(substModel->getQXi(seq1[i-1].getMatrixIndex()));
@@ -277,10 +312,10 @@ double ForwardPairHMM::runForwardAlgorithm()
 					my = pY->valueAtDiagonal(j) + M->getTransitionProbabilityFromDelete();
 					pM->setValue(j, emissionM + maths->logSum(mm,mx,my));
 				}
-			//}
+			}
 		}
 
-		//pM->outputRow();
+		pM->outputRow();
 		pX->nextRow();
 		pY->nextRow();
 		pM->nextRow();
@@ -297,6 +332,7 @@ double ForwardPairHMM::runForwardAlgorithm()
 	sY = pY->valueAtColumn(ySize-1);
 	sS = maths->logSum(sM,sX,sY);
 
+	cerr << "\t" << sS << endl;
 
 	DEBUG ("Forward results:");
 	DEBUG (" sX, sY, sM, sS " << sX << "\t" << sY << "\t" << sM << "\t" << sS);

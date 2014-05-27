@@ -10,6 +10,7 @@
 
 #include "DpReducedMatrix.hpp"
 #include "PairHmmStateBase.hpp"
+#include <iomanip>
 
 namespace EBC
 {
@@ -25,7 +26,11 @@ public:
 
 	inline void outputRow()
 	{
-		DEBUGV(currentRow, ySize);
+		cout << fixed << setprecision(1);
+		for (int i=0; i < ySize; i++ )
+			cout << currentRow[i] << "\t";
+		cout << endl;
+		cout << fixed << setprecision(6);
 	}
 
 	inline void nextRow()
