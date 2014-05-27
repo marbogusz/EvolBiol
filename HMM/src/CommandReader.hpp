@@ -43,6 +43,11 @@ public:
 
 	vector<double> getSubstParams();
 
+	bool isOutputViterbiAlignment()
+	{
+		return parser.option("ov");
+	}
+
 	Definitions::ModelType getModelType()
 	{
 		if (parser.option("rev"))
@@ -53,6 +58,11 @@ public:
 		{
 			return Definitions::ModelType::HKY85;
 		}
+	}
+
+	string getInputFileName()
+	{
+		return parser.option("in").argument();
 	}
 
 	Definitions::OptimizationType getOptimizationType()

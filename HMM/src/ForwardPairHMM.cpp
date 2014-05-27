@@ -121,17 +121,15 @@ ForwardPairHMM::ForwardPairHMM(Sequences* inputSeqs, Definitions::ModelType mode
 ForwardPairHMM::~ForwardPairHMM()
 {
 	// TODO Auto-generated destructor stub
-	delete[] mlParameters;
-	delete[] optParameters;
-
-	delete M;
-	delete X;
-	delete Y;
-
-	delete indelModel;
-	delete substModel;
 	delete bfgs;
-
+	//delete Y;
+	//delete X;
+	//delete M;
+	delete[] optParameters;
+	delete[] mlParameters;
+	//delete substModel;
+	//delete indelModel;
+    delete maths;
 }
 
 void ForwardPairHMM::initializeStates()

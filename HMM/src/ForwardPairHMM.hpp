@@ -104,6 +104,11 @@ public:
 	double runForwardAlgorithm();
 
 	double runForwardIteration(const column_vector& m);
+
+	inline double* getMlParameters()
+	{
+		return this->mlParameters;
+	}
 };
 
 } /* namespace EBC */

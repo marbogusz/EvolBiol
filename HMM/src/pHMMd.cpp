@@ -7,10 +7,11 @@
 
 #include "CommandReader.hpp"
 #include "Sequences.hpp"
-#include "ViterbiPairHMM.hpp"
+#include "BasicViterbi.hpp"
 #include "ForwardPairHMM.hpp"
 #include "ParseException.hpp"
 #include <iostream>
+#include <fstream>
 #include <iomanip>
 
 using namespace std;
@@ -42,6 +43,35 @@ int main(int argc, char ** argv) {
 			//check indel parameters
 
 			ForwardPairHMM* fwdHMM = new ForwardPairHMM(inputSeqs, cmdReader->getModelType() ,cmdReader->getIndelParams(),cmdReader->getSubstParams(), cmdReader->getOptimizationType(), false);
+
+			double* estimatedParams = fwdHMM->getMlParameters();
+
+			string vitFile = cmdReader->getInputFileName();
+
+			for (unsigned int i = 0; i< fwdHMM->getTotalParameters(); i++)
+			{
+				cout << estimatedParams[i] << "\t";
+			}
+			cout <<  vitFile << endl;
+
+			if(cmdReader->isOutputViterbiAlignment())
+			{
+				string vitFile = cmdReader->getInputFileName();
+				vitFile.insert(0,"viterbi_");
+				vitFile.replace(vitFile.end()-3,vitFile.end(),"fas");
+				vector<double> a,b;
+				stringstream ss;
+				BasicViterbi* bv = new BasicViterbi(inputSeqs, cmdReader->getModelType(),a,0,b,estimatedParams);
+				bv->runViterbiAlgorithm();
+				bv->getResults(ss);
+
+				ofstream of(vitFile);
+				of << ss.str();
+				of.close();
+
+				delete bv;
+			}
+			delete fwdHMM;
 		}
 
 		else if (cmdReader->isViterbi())

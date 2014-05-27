@@ -1,12 +1,12 @@
 /*
- * EvolutionaryPairHMM.hpp
+ * BasicViterbi.hpp
  *
  *  Created on: Feb 25, 2014
  *      Author: root
  */
 
-#ifndef EVOLUTIONARYPAIRHMM_HPP_
-#define EVOLUTIONARYPAIRHMM_HPP_
+#ifndef BASICVITERBI_HPP_
+#define BASICVITERBI_HPP_
 
 #include "SubstitutionModel.hpp"
 #include "Maths.hpp"
@@ -14,7 +14,7 @@
 #include "IndelModel.hpp"
 #include "Sequences.hpp"
 #include "Maths.hpp"
-#include "PairHmmStateBase.hpp"
+#include "PairHmmState.hpp"
 #include "SequenceElement.hpp"
 
 namespace EBC
@@ -22,7 +22,7 @@ namespace EBC
 
 //Thats a 3 state pair-HMM with an insertion,deletion and match state
 //The states are connected by the silent (blank) state
-class EvolutionaryPairHMM
+class BasicViterbi
 {
 protected:
 
@@ -44,42 +44,36 @@ protected:
 	vector<SequenceElement>::iterator itS1, itS2;
 
 	//Match state
-	PairHmmStateBase* M;
+	PairHmmState* M;
 	//Insert state
-	PairHmmStateBase* X;
+	PairHmmState* X;
 	//Delete state
-	PairHmmStateBase* Y;
+	PairHmmState* Y;
 
 	//the following assumes a fix HMM structure
-	virtual void setTransitionProbabilities();
+	void setTransitionProbabilities();
 
-	virtual void initializeModels()=0;
+	void generateInitialParameters();
 
-	virtual void calculateModels();
+	void initializeModels();
 
-	virtual void getSequencePair();
+	void calculateModels();
 
-	virtual void initializeStates() = 0;
+	void getSequencePair();
 
-	double* generateInitialSubstitutionParameters();
+	void initializeStates();
 
-	double* generateInitialIndelParameters();
-
-	double generateInitialDistanceParameter();
-
+	double getMax(double m, double x, double y, unsigned int i, unsigned int j, PairHmmState* state);
 
 public:
-	EvolutionaryPairHMM(Sequences* inputSeqs);
+	BasicViterbi(Sequences* inputSeqs, Definitions::ModelType model,std::vector<double> substParams, double distance, std::vector<double> indelParams, double* estimatedPArams = NULL);
 
-	virtual ~EvolutionaryPairHMM();
+	virtual ~BasicViterbi();
 
-	void summarize();
+	void runViterbiAlgorithm();
 
-	unsigned int getTotalParameters() const
-	{
-		return totalParameters;
-	}
+	void getResults(stringstream&);
 };
 
 } /* namespace EBC */
-#endif /* EVOLUTIONARYPAIRHMM_HPP_ */
+#endif 
