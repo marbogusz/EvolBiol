@@ -65,6 +65,7 @@ protected:
 
 	bool estimateSubstitutionParams;
 	bool estimateIndelParams;
+	bool estimateDivergence;
 
 	vector<double> userIndelParameters;
 	vector<double> userSubstParameters;
@@ -97,7 +98,8 @@ protected:
 
 public:
 	ForwardPairHMM(Sequences* inputSeqs, Definitions::ModelType model,std::vector<double> indel_params,
-			std::vector<double> subst_params, Definitions::OptimizationType ot, bool banding);
+			std::vector<double> subst_params, Definitions::OptimizationType ot, bool banding,
+			unsigned int bandPercentage, double evolDistance);
 
 	virtual ~ForwardPairHMM();
 

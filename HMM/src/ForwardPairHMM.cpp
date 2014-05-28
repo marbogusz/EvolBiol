@@ -116,7 +116,7 @@ void ForwardPairHMM::BFGS::optimize()
 
 
 ForwardPairHMM::ForwardPairHMM(Sequences* inputSeqs, Definitions::ModelType model ,std::vector<double> indel_params,
-		std::vector<double> subst_params, Definitions::OptimizationType ot, bool banding) :
+		std::vector<double> subst_params, Definitions::OptimizationType ot, bool banding, unsigned int bandPercentage, double evolDistance) :
 		EvolutionaryPairHMM(inputSeqs), userIndelParameters(indel_params), userSubstParameters(subst_params)
 {
 	DEBUG("Creating the model");
@@ -131,10 +131,11 @@ ForwardPairHMM::ForwardPairHMM(Sequences* inputSeqs, Definitions::ModelType mode
 
 	estimateSubstitutionParams = (subst_params.size() == 0);
 	estimateIndelParams = (indel_params.size() == 0);
+	estimateDivergence = (evolDistance < 0);
 
 	//FIXME
 	//Hardcode the band for now
-	bandFactor = 30;
+	bandFactor = bandPercentage;
 	bandingEnabled = banding;
 
 	//initialize parameter arrays
@@ -143,13 +144,23 @@ ForwardPairHMM::ForwardPairHMM(Sequences* inputSeqs, Definitions::ModelType mode
 
 	//TODO - set parameters depending on the values provided
 	setParameters();
+	if(!estimateDivergence)
+	{
+		this->mlParameters[this->substParameters-1] = evolDistance;
+	}
 
 	getSequencePair();
 	getBandWidth();
 	calculateModels();
 	initializeStates();
-	this-> bfgs = new BFGS(this,ot);
-	bfgs->optimize();
+
+	if (estimateDivergence)
+	{
+		this-> bfgs = new BFGS(this,ot);
+		bfgs->optimize();
+	}
+	else
+		this->runForwardAlgorithm();
 }
 
 ForwardPairHMM::~ForwardPairHMM()
@@ -315,7 +326,7 @@ double ForwardPairHMM::runForwardAlgorithm()
 			}
 		}
 
-		pM->outputRow();
+		//pM->outputRow();
 		pX->nextRow();
 		pY->nextRow();
 		pM->nextRow();
@@ -323,16 +334,16 @@ double ForwardPairHMM::runForwardAlgorithm()
 
 
 
-	pX->nextRow();
-	pY->nextRow();
-	pM->nextRow();
+	//pX->nextRow();
+	//pY->nextRow();
+	//pM->nextRow();
 
-	sM = pM->valueAtColumn(ySize-1);
-	sX = pX->valueAtColumn(ySize-1);
-	sY = pY->valueAtColumn(ySize-1);
+	sM = pM->valueAtTop(ySize-1);
+	sX = pX->valueAtTop(ySize-1);
+	sY = pY->valueAtTop(ySize-1);
 	sS = maths->logSum(sM,sX,sY);
 
-	cerr << "\t" << sS << endl;
+	cerr << "\t" << sX << "\t" << sY << "\t"<< sM << "\t" << sS << endl;
 
 	DEBUG ("Forward results:");
 	DEBUG (" sX, sY, sM, sS " << sX << "\t" << sY << "\t" << sM << "\t" << sS);

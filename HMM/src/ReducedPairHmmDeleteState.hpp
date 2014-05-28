@@ -30,6 +30,7 @@ public:
 		double* tmp = previousRow;
 		previousRow = currentRow;
 		currentRow = tmp;
+		std::fill(currentRow,currentRow+ySize, -10000.0);
 	}
 
 };

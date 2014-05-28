@@ -77,6 +77,17 @@ public:
 		return (opt == 1);
 	}
 
+	unsigned int getBandFactor()
+	{
+		unsigned int opt = get_option(parser,"bf",5);
+		return opt;
+	}
+
+	double getDistance()
+	{
+		double opt = get_option(parser,"d",-1.0);
+		return opt;
+	}
 };
 
 } /* namespace EBC */

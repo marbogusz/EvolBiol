@@ -28,7 +28,12 @@ public:
 	{
 		cout << fixed << setprecision(1);
 		for (int i=0; i < ySize; i++ )
-			cout << currentRow[i] << "\t";
+			if (currentRow[i] < -9999.9)
+			{
+				cout << "-10k" << "\t";
+			}
+			else
+				cout << currentRow[i] << "\t";
 		cout << endl;
 		cout << fixed << setprecision(6);
 	}
@@ -41,6 +46,7 @@ public:
 		previousRow = currentRow;
 		currentRow = tmp;
 		currentRow[0] = minVal;
+		std::fill(currentRow,currentRow+ySize, -10000.0);
 	}
 
 };
