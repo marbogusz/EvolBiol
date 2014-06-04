@@ -10,7 +10,8 @@
 namespace EBC
 {
 
-HKY85Model::HKY85Model(Dictionary* dict, Maths* alg) : SubstitutionModel(dict, alg)
+HKY85Model::HKY85Model(Dictionary* dict, Maths* alg, unsigned int rates)
+	: NucleotideSubstitutionModel(dict, alg, rates)
 {
 
 	//6 parameters - 4 frequencies + kappa + time
@@ -21,7 +22,7 @@ HKY85Model::HKY85Model(Dictionary* dict, Maths* alg) : SubstitutionModel(dict, a
 
 }
 
-void HKY85Model::setParametersInMatrix() {
+void HKY85Model::buildSmatrix() {
 	this->k = &parameters[0];
 	this->time = parameters[1];
 
@@ -44,8 +45,6 @@ void HKY85Model::summarize()
 	cout << endl << "HKY85 model summary:" << endl;
 	cout << "kappa\ttime" << endl;
 	cout << *k << "\t" << time << endl;
-
-	this->outputPtPi();
 }
 
 } /* namespace EBC */

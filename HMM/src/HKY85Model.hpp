@@ -8,12 +8,12 @@
 #ifndef HKY85MODEL_H_
 #define HKY85MODEL_H_
 
-#include "SubstitutionModel.hpp"
+#include "NucleotideSubstitutionModel.hpp"
 
 namespace EBC
 {
 
-class HKY85Model: public EBC::SubstitutionModel
+class HKY85Model: public EBC::NucleotideSubstitutionModel
 {
 protected:
 
@@ -21,10 +21,10 @@ double *k;
 
 
 public:
-	HKY85Model(Dictionary* dict, Maths* alg);
+	HKY85Model(Dictionary* dict, Maths* alg, unsigned int);
 
 
-	void setParametersInMatrix();
+	void buildSmatrix();
 
 
 	void summarize();

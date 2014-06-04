@@ -122,11 +122,11 @@ ForwardPairHMM::ForwardPairHMM(Sequences* inputSeqs, Definitions::ModelType mode
 	DEBUG("Creating the model");
 	if (model == Definitions::ModelType::GTR)
 	{
-		substModel = new GTRModel(dict, maths);
+		substModel = new GTRModel(dict, maths,0);
 	}
 	else if (model == Definitions::ModelType::HKY85)
 	{
-		substModel = new HKY85Model(dict, maths);
+		substModel = new HKY85Model(dict, maths,0);
 	}
 
 	estimateSubstitutionParams = (subst_params.size() == 0);

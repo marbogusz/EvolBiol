@@ -104,9 +104,9 @@ void EvolutionaryPairHMM::calculateModels()
 {
 	indelModel->setParameters(mlParameters+substParameters-1);
 	substModel->setParameters(mlParameters);
-	substModel->setParametersInMatrix();
-	substModel->setDiagMeans();
-	substModel->doEigenDecomposition();
+	//substModel->setParametersInMatrix();
+	//substModel->setDiagMeans();
+	//substModel->doEigenDecomposition();
 	substModel->calculatePt();
 }
 

@@ -8,7 +8,7 @@
 #ifndef EVOLUTIONARYPAIRHMM_HPP_
 #define EVOLUTIONARYPAIRHMM_HPP_
 
-#include "SubstitutionModel.hpp"
+#include "SubstitutionModelBase.hpp"
 #include "Maths.hpp"
 #include "Dictionary.hpp"
 #include "IndelModel.hpp"
@@ -27,7 +27,7 @@ class EvolutionaryPairHMM
 protected:
 
 	Dictionary* dict;
-	SubstitutionModel* substModel;
+	SubstitutionModelBase* substModel;
 	IndelModel* indelModel;
 	Sequences* inputSequences;
 	Maths* maths;

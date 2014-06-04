@@ -10,7 +10,8 @@
 namespace EBC
 {
 
-GTRModel::GTRModel(Dictionary* dict, Maths* alg) : SubstitutionModel(dict, alg)
+GTRModel::GTRModel(Dictionary* dict, Maths* alg, unsigned int rates)
+	: NucleotideSubstitutionModel(dict, alg, rates)
 {
 	//6 elements to estimate - a, b, c, d, e, f=1
 	//6th element is divergence time;
@@ -22,7 +23,7 @@ GTRModel::GTRModel(Dictionary* dict, Maths* alg) : SubstitutionModel(dict, alg)
 }
 
 
-void GTRModel::setParametersInMatrix() {
+void GTRModel::buildSmatrix() {
 	this->a = &parameters[0];
 	this->b = &parameters[1];
 	this->c = &parameters[2];
@@ -30,6 +31,7 @@ void GTRModel::setParametersInMatrix() {
 	this->e = &parameters[4];
 	this->f = &scale;
 
+	//FIXME - deal with alpha somehow
 	this->time = parameters[5];
 
 	int s = this->matrixSize;
@@ -41,22 +43,6 @@ void GTRModel::setParametersInMatrix() {
 		if(i*s+j != 2*s+3)
 			this->qMatrix[i*s+j] = this->qMatrix[j*s+i] = parameters[k++];
 
-
-	/*
-	this->qMatrix[s-2][s-1] = this->qMatrix[s-1][s-2] =
-			this->sMatrix[s-2][s-1] = this->sMatrix[s-1][s-2] = *f;
-
-	for (int i=0; i < this->matrixSize; i++)
-	{
-		for (int j=i+1; j < this->matrixSize; j++)
-		{
-			if ((i==s-2 || j==s-1) && (i==s-1 || j==s-2))
-			{
-				qMatrix[i][j]=qMatrix[j][i] = sMatrix[i][j] = sMatrix[j][i] = parameters[currParam++];
-			}
-		}
-	}
-	*/
 }
 
 void GTRModel::summarize()
@@ -64,9 +50,6 @@ void GTRModel::summarize()
 	cout << endl << "REV model summary:" << endl;
 	cout << "a\tb\tc\td\te\tttime" << endl;
 	cout << *a << "\t" << *b << "\t"<< *c << "\t"<< *d << "\t"<< *e << "\t"<< time << endl;
-
-	//this->outputPtPi();
-
 }
 
 } /* namespace EBC */

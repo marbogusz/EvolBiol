@@ -8,7 +8,7 @@
 #ifndef BASICVITERBI_HPP_
 #define BASICVITERBI_HPP_
 
-#include "SubstitutionModel.hpp"
+#include "SubstitutionModelBase.hpp"
 #include "Maths.hpp"
 #include "Dictionary.hpp"
 #include "IndelModel.hpp"
@@ -27,7 +27,7 @@ class BasicViterbi
 protected:
 
 	Dictionary* dict;
-	SubstitutionModel* substModel;
+	SubstitutionModelBase* substModel;
 	IndelModel* indelModel;
 	Sequences* inputSequences;
 	Maths* maths;

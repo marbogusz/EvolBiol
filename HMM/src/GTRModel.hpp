@@ -8,12 +8,12 @@
 #ifndef GTRMODEL_H_
 #define GTRMODEL_H_
 
-#include "SubstitutionModel.hpp"
+#include "NucleotideSubstitutionModel.hpp"
 
 namespace EBC
 {
 
-class GTRModel: public EBC::SubstitutionModel
+class GTRModel: public EBC::NucleotideSubstitutionModel
 {
 protected:
 
@@ -22,9 +22,9 @@ double scale;
 
 
 public:
-	GTRModel(Dictionary* dict, Maths* alg);
+	GTRModel(Dictionary* dict, Maths* alg,unsigned int rates);
 
-	void setParametersInMatrix();
+	void buildSmatrix();
 
 	void summarize();
 };
