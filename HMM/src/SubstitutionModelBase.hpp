@@ -11,6 +11,7 @@
 #include "Dictionary.hpp"
 #include "Definitions.hpp"
 #include "Maths.hpp"
+#include "ParseException.hpp"
 #include <cmath>
 
 namespace EBC
@@ -30,6 +31,10 @@ protected:
 
 	//gamma distribution alpha parameter
 	double alpha;
+
+	double* gammaFrequencies;
+
+	double* gammaRates;
 
 	//equilibrium frequencies
 	double* piFreqs;
@@ -55,7 +60,7 @@ protected:
 
 	Dictionary* dictionary;
 
-	Maths* algebra;
+	Maths* maths;
 
 	unsigned int paramsNumber;
 
@@ -74,6 +79,8 @@ protected:
 	virtual void doEigenDecomposition()=0;
 
 	void setDiagonalMeans();
+
+	void calculateGamma();
 
 public:
 
@@ -96,6 +103,7 @@ public:
 	void setAlpha(double a)
 	{
 		this->alpha = a;
+		calculateGamma();
 	}
 
 	double getAlpha()

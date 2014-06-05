@@ -55,16 +55,35 @@ public:
 	double* matrixMultiply(double *matA, double *matB, int size);
 
 	//modifies an existing one
-	void matrixByDiagonalMultiply(double *matA, double *matDiag, int size);
+	double* matrixByDiagonalMultiply(double *matA, double *matDiag, int size);
 
 	//modifies existing one
 	void vectorMultiply(double* vector, double factor, int size);
 
-	void expLambdaT(double* lambda, double t, int size);
+	//append B to A (add matrix components
+	void matrixAppend(double* matA, double* matB, int size);
+
+	void matrixScale(double* matrix, double factor, int size);
+
+	double* expLambdaT(double* lambda, double t, int size);
 
 	double logSum(double, double, double);
 
 	double logSum(double, double);
+
+	//PAML
+	double IncompleteGamma (double x, double alpha, double ln_gamma_alpha);
+	//PAML
+	double QuantileNormal (double prob);
+	//PAML
+	double QuantileChi2 (double prob, double v);
+	//PAML
+	long factorial (int n);
+	//PAML
+	double LnGamma (double x);
+	//PAML
+	int  DiscreteGamma (double freqK[], double rK[], double alpha, double beta, int K, int UseMedian);
+
 
 	inline static double logistic(double x)
 	{

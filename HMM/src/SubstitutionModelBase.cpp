@@ -11,13 +11,16 @@ namespace EBC
 {
 
 SubstitutionModelBase::SubstitutionModelBase(Dictionary* dict, Maths* alg, unsigned int rateCategories)
-	: dictionary(dict), algebra(alg), rateCategories(rateCategories)
+	: dictionary(dict), maths(alg), rateCategories(rateCategories)
 {
 	this->matrixSize = dict->getAlphabetSize();
 	this->matrixFullSize = matrixSize*matrixSize;
 	this->allocateMatrices();
 	this->meanRate=0.0;
 	this-> roots = new double[matrixSize];
+	//no alpha provided
+	this->alpha = 0;
+	//FIXME - maybe initial alpha set to a value ?
 }
 
 
@@ -27,6 +30,18 @@ void SubstitutionModelBase::allocateMatrices()
 	this->uMatrix = new double[matrixFullSize];
 	this->vMatrix = new double[matrixFullSize];
 	this->squareRoots = new double[matrixFullSize];
+
+	if (rateCategories > 0)
+	{
+		gammaFrequencies = new double[rateCategories];
+		gammaRates = new double[rateCategories];
+	}
+	else
+	{
+		gammaFrequencies = new double[1];
+		gammaRates = new double[1];
+		gammaFrequencies[0] = gammaRates[0] = 1;
+	}
 }
 
 void SubstitutionModelBase::destroyMatrices()
@@ -40,7 +55,7 @@ void SubstitutionModelBase::setDiagonalMeans()
 		int i,j;
 		double sum;
 
-		algebra->matrixByDiagonalMultiply(qMatrix,piFreqs,matrixSize);
+		maths->matrixByDiagonalMultiply(qMatrix,piFreqs,matrixSize);
 		meanRate = 0;
 
 		for (i=0; i< this->matrixSize; i++)
@@ -67,6 +82,22 @@ void SubstitutionModelBase::setDiagonalMeans()
 SubstitutionModelBase::~SubstitutionModelBase()
 {
 	destroyMatrices();
+	if (this->gammaFrequencies !=NULL )
+		delete[] gammaFrequencies;
+	if (this->gammaRates !=NULL )
+		delete[] gammaRates;
+
+}
+
+void SubstitutionModelBase::calculateGamma()
+{
+	int useMedian = 0;
+	if(alpha <=0 || rateCategories == 0)
+	{
+		throw ProgramException("attempting to calculate gamma with wrong alpha or rate categories\n");
+	}
+	else
+		this->maths->DiscreteGamma(gammaFrequencies, gammaRates, alpha, alpha, rateCategories, useMedian);
 }
 
 void SubstitutionModelBase::setObservedFrequencies(double* observedFrequencies)
