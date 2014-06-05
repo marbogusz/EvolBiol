@@ -116,18 +116,22 @@ void ForwardPairHMM::BFGS::optimize()
 
 
 ForwardPairHMM::ForwardPairHMM(Sequences* inputSeqs, Definitions::ModelType model ,std::vector<double> indel_params,
-		std::vector<double> subst_params, Definitions::OptimizationType ot, bool banding, unsigned int bandPercentage, double evolDistance) :
-		EvolutionaryPairHMM(inputSeqs), userIndelParameters(indel_params), userSubstParameters(subst_params)
+		std::vector<double> subst_params, Definitions::OptimizationType ot, bool banding, unsigned int bandPercentage, double evolDistance,
+		unsigned int rateCategories, double alpha, bool estimateAlpha) :
+		EvolutionaryPairHMM(inputSeqs), userIndelParameters(indel_params), userSubstParameters(subst_params),
+		gammaRateCategories(rateCategories), initialAlpha(alpha), estimateAlpha(estimateAlpha)
 {
 	DEBUG("Creating the model");
 	if (model == Definitions::ModelType::GTR)
 	{
-		substModel = new GTRModel(dict, maths,0);
+		substModel = new GTRModel(dict, maths,gammaRateCategories);
 	}
 	else if (model == Definitions::ModelType::HKY85)
 	{
-		substModel = new HKY85Model(dict, maths,0);
+		substModel = new HKY85Model(dict, maths,gammaRateCategories);
 	}
+
+	substModel->setAlpha(initialAlpha);
 
 	estimateSubstitutionParams = (subst_params.size() == 0);
 	estimateIndelParams = (indel_params.size() == 0);

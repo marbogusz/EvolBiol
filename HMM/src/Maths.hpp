@@ -57,6 +57,8 @@ public:
 	//modifies an existing one
 	double* matrixByDiagonalMultiply(double *matA, double *matDiag, int size);
 
+	void matrixByDiagonalMultiplyMutable(double *matA, double *matDiag, int size);
+
 	//modifies existing one
 	void vectorMultiply(double* vector, double factor, int size);
 

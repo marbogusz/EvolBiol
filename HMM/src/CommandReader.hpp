@@ -88,6 +88,22 @@ public:
 		double opt = get_option(parser,"d",-1.0);
 		return opt;
 	}
+
+	double getAlpha()
+	{
+		return get_option(parser,"initAlpha",0.5);
+	}
+
+	double getCategories()
+	{
+		return get_option(parser,"rateCat",0);
+	}
+
+	bool estimateAlpha()
+	{
+		int res = get_option(parser,"estimateAlpha",0);
+		return res == 1;
+	}
 };
 
 } /* namespace EBC */

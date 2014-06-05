@@ -23,6 +23,8 @@ namespace EBC
 BasicViterbi::BasicViterbi(Sequences* inputSeqs, Definitions::ModelType model,std::vector<double> substParams, double distance, std::vector<double> indelParams, double* estimatedParams)
 	: inputSequences(inputSeqs)
 {
+	//FIXME - deal with alpha!
+
 	M = X = Y = NULL;
 
 	dict = inputSeqs->getDictionary();

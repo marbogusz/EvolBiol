@@ -60,12 +60,16 @@ protected:
 	//Bound scale
 	unsigned int bandFactor;
 	unsigned int bandSpan;
+	unsigned int gammaRateCategories;
+
+	double initialAlpha;
 
 	bool bandingEnabled;
 
 	bool estimateSubstitutionParams;
 	bool estimateIndelParams;
 	bool estimateDivergence;
+	bool estimateAlpha;
 
 	vector<double> userIndelParameters;
 	vector<double> userSubstParameters;
@@ -99,7 +103,8 @@ protected:
 public:
 	ForwardPairHMM(Sequences* inputSeqs, Definitions::ModelType model,std::vector<double> indel_params,
 			std::vector<double> subst_params, Definitions::OptimizationType ot, bool banding,
-			unsigned int bandPercentage, double evolDistance);
+			unsigned int bandPercentage, double evolDistance, unsigned int rateCategories, double alpha,
+			bool estimateAlpha);
 
 	virtual ~ForwardPairHMM();
 

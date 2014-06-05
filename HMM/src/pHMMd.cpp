@@ -44,7 +44,8 @@ int main(int argc, char ** argv) {
 
 			ForwardPairHMM* fwdHMM = new ForwardPairHMM(inputSeqs, cmdReader->getModelType() ,
 					cmdReader->getIndelParams(),cmdReader->getSubstParams(), cmdReader->getOptimizationType(),
-					cmdReader->getBanding(), cmdReader->getBandFactor(), cmdReader->getDistance());
+					cmdReader->getBanding(), cmdReader->getBandFactor(), cmdReader->getDistance(),
+					cmdReader->getCategories(), cmdReader->getAlpha(), cmdReader->estimateAlpha());
 
 			double* estimatedParams = fwdHMM->getMlParameters();
 

@@ -55,7 +55,7 @@ void SubstitutionModelBase::setDiagonalMeans()
 		int i,j;
 		double sum;
 
-		maths->matrixByDiagonalMultiply(qMatrix,piFreqs,matrixSize);
+		maths->matrixByDiagonalMultiplyMutable(qMatrix,piFreqs,matrixSize);
 		meanRate = 0;
 
 		for (i=0; i< this->matrixSize; i++)
@@ -92,11 +92,7 @@ SubstitutionModelBase::~SubstitutionModelBase()
 void SubstitutionModelBase::calculateGamma()
 {
 	int useMedian = 0;
-	if(alpha <=0 || rateCategories == 0)
-	{
-		throw ProgramException("attempting to calculate gamma with wrong alpha or rate categories\n");
-	}
-	else
+	if(!(alpha <=0 || rateCategories == 0))
 		this->maths->DiscreteGamma(gammaFrequencies, gammaRates, alpha, alpha, rateCategories, useMedian);
 }
 

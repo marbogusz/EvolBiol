@@ -65,6 +65,13 @@ double* Maths::matrixByDiagonalMultiply(double *matA, double *matDiag, int size)
 	return res;
 }
 
+void Maths::matrixByDiagonalMultiplyMutable(double *matA, double *matDiag, int size)
+{
+	for (int i=0; i<size; i++)
+		for (int j=0; j<size; j++)
+			matA[i*size+j] *=  matDiag[j];
+}
+
 void Maths::vectorMultiply(double* vector, double factor, int size)
 {
 	for(int i=0; i<size; i++)

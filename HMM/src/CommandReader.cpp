@@ -36,6 +36,9 @@ CommandReader::CommandReader(int argc, char** argv) : count(argc), args(argv)
 		parser.add_option("param_rev","GTR model parameters",5);
 		parser.add_option("param_hky","HKY85 model parameters",1);
 		parser.add_option("ov","Output viterbi alignment for estimated parameters");
+		parser.add_option("rateCat", "Specify gamma rate categories, default is 0(no gamma)",1);
+		parser.add_option("initAlpha", "Specify initial alpha parameter, default is 0.5",1 );
+		parser.add_option("estimateAlpha", "Specify to estimate alpha 0|1, default is 0",1 );
 
 		parser.parse(argc,argv);
 
@@ -59,6 +62,7 @@ CommandReader::CommandReader(int argc, char** argv) : count(argc), args(argv)
 		parser.check_option_arg_range("param_rev", 0.0000001, 10.0);
 		parser.check_option_arg_range("i", 0.0000001, 1.0);
 		parser.check_option_arg_range("d", 0.0000001, 3.0);
+		parser.check_option_arg_range("initAlpha", 0.0000001, 1000.0);
 		parser.check_option_arg_range("bf", 1, 100);
 
 		if (!parser.option("V") && !parser.option("F"))
@@ -70,6 +74,9 @@ CommandReader::CommandReader(int argc, char** argv) : count(argc), args(argv)
 
 		parser.check_option_arg_range("o", 0, 1);
 		parser.check_option_arg_range("b", 0, 1);
+		parser.check_option_arg_range("estimateAlpha", 0, 1);
+		parser.check_option_arg_range("rateCat", 0, 20);
+
 		parser.check_option_arg_range("bf", 0, 100);
 		if (parser.option("h"))
 		{

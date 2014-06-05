@@ -30,7 +30,7 @@ void NucleotideSubstitutionModel::calculatePt()
 	unsigned int i;
 	int matrixCount = rateCategories == 0 ? 1 : rateCategories;
 
-	std::vector<double*> pMatVector(rateCategories);
+	std::vector<double*> pMatVector(matrixCount);
 
 	this->buildSmatrix();
 	this->setDiagonalMeans();
@@ -42,16 +42,16 @@ void NucleotideSubstitutionModel::calculatePt()
 
 		tmpRoots = maths->expLambdaT(roots, time*gammaRates[i], matrixSize);
 		tmpUroots = maths->matrixByDiagonalMultiply(uMatrix, tmpRoots, matrixSize);
-		tmpPmatrix = this->maths->matrixMultiply(tmpUroots, vMatrix, matrixSize);
-		pMatVector.push_back(tmpPmatrix);
+		//tmpPmatrix = this->maths->matrixMultiply(tmpUroots, vMatrix, matrixSize);
+		pMatVector[i] = this->maths->matrixMultiply(tmpUroots, vMatrix, matrixSize);
 		delete[] tmpRoots;
 		delete[] tmpUroots;
 	}
 	//now we have a vector of p-mats, combine into 1 matrix since the probs are equal in this model
 	for (i=1; i<matrixCount; i++)
 	{
-		maths->matrixAppend((double*)pMatVector[0],(double*)pMatVector[i],matrixSize);
-		delete[] (double*)pMatVector[i];
+		maths->matrixAppend(pMatVector[0],pMatVector[i],matrixSize);
+		delete[] pMatVector[i];
 	}
 	this->pMatrix = pMatVector[0];
 	if(rateCategories != 0)
