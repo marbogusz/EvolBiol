@@ -58,6 +58,10 @@ public:
 		{
 			return Definitions::ModelType::HKY85;
 		}
+		if (parser.option("lg"))
+		{
+			return Definitions::ModelType::LG;
+		}
 	}
 
 	string getInputFileName()
@@ -103,6 +107,13 @@ public:
 	{
 		int res = get_option(parser,"estimateAlpha",0);
 		return res == 1;
+	}
+	Definitions::SequenceType getSequenceType()
+	{
+		if (parser.option("rev") || parser.option("hky"))
+			return Definitions::SequenceType::Nucleotide;
+		else return Definitions::SequenceType::Aminoacid;
+		//FIXME codons
 	}
 };
 

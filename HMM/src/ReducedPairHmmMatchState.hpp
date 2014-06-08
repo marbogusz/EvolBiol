@@ -27,7 +27,7 @@ public:
 	inline void outputRow()
 	{
 		cout << fixed << setprecision(1);
-		for (int i=0; i < ySize; i++ )
+		for (unsigned int i=0; i < ySize; i++ )
 			if (currentRow[i] < -9999.9)
 			{
 				cout << "-10k" << "\t";

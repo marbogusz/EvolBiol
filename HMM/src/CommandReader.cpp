@@ -26,6 +26,7 @@ CommandReader::CommandReader(int argc, char** argv) : count(argc), args(argv)
 		parser.add_option("in","This option takes one argument which specifies the name of the file we want to analyze",1);
 		parser.add_option("rev", "REV Substitution Model");
 		parser.add_option("hky", "HKY85 Substitution Model");
+		parser.add_option("lg", "Le & Gasquel AA Substitution Model");
 		parser.add_option("i","indel parameters (NB probability and rate)",2);
 		parser.add_option("d","evolutionary distance",1);
 		parser.set_group_name("Miscellaneous Options");
@@ -81,7 +82,7 @@ CommandReader::CommandReader(int argc, char** argv) : count(argc), args(argv)
 		if (parser.option("h"))
 		{
 			// display all the command line options
-		    cout << "Usage: HMM (-F|-V) --in input_file (rev|hky) [param_rev .... | param_hky ...] [i indel parameters] [d distance] [b] [o=0|1] [ov]\n";
+		    cout << "Usage: HMM (-F|-V) --in input_file (rev|hky|lg) [param_rev .... | param_hky ...] [i indel parameters] [d distance] [b] [o=0|1] [ov]\n";
 		    parser.print_options();
 		}
 	}
@@ -117,6 +118,7 @@ vector<double> CommandReader::getSubstParams()
 			}
 		}
 	}
+	else if (parser.option("lg")){}
 	else throw ProgramException("Model not specified");
 
 	return vec;

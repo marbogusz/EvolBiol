@@ -15,49 +15,15 @@ NucleotideSubstitutionModel::NucleotideSubstitutionModel(Dictionary* dict, Maths
 {
 }
 
-void NucleotideSubstitutionModel::doEigenDecomposition()
-{
-	std::fill(roots, roots+matrixSize, 0);
-	std::fill(uMatrix, uMatrix+matrixFullSize, 0);
-	std::fill(vMatrix, vMatrix+matrixFullSize, 0);
-	std::fill(squareRoots, squareRoots+matrixFullSize, 0);
-	this->maths->eigenQREV(qMatrix, piFreqs, matrixSize, roots, uMatrix, vMatrix, squareRoots);
-}
 
 void NucleotideSubstitutionModel::calculatePt()
 {
-	double *tmpRoots, *tmpUroots, *tmpPmatrix;
-	unsigned int i;
-	int matrixCount = rateCategories == 0 ? 1 : rateCategories;
-
-	std::vector<double*> pMatVector(matrixCount);
-
 	this->buildSmatrix();
 	this->setDiagonalMeans();
 	this->doEigenDecomposition();
 	//qMatrix, roots, u and v matrices
 
-	for(i = 0; i< matrixCount; i++)
-	{
-
-		tmpRoots = maths->expLambdaT(roots, time*gammaRates[i], matrixSize);
-		tmpUroots = maths->matrixByDiagonalMultiply(uMatrix, tmpRoots, matrixSize);
-		//tmpPmatrix = this->maths->matrixMultiply(tmpUroots, vMatrix, matrixSize);
-		pMatVector[i] = this->maths->matrixMultiply(tmpUroots, vMatrix, matrixSize);
-		delete[] tmpRoots;
-		delete[] tmpUroots;
-	}
-	//now we have a vector of p-mats, combine into 1 matrix since the probs are equal in this model
-	for (i=1; i<matrixCount; i++)
-	{
-		maths->matrixAppend(pMatVector[0],pMatVector[i],matrixSize);
-		delete[] pMatVector[i];
-	}
-	this->pMatrix = pMatVector[0];
-	if(rateCategories != 0)
-	{
-		this->maths->matrixScale(pMatrix,gammaFrequencies[0],matrixSize);
-	}
+	calculateGammaPtMatrices();
 }
 
 NucleotideSubstitutionModel::~NucleotideSubstitutionModel()

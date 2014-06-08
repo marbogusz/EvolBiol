@@ -5,12 +5,14 @@
  *      Author: root
  */
 
+#include "Definitions.hpp"
 #include "ForwardPairHMM.hpp"
 #include "ReducedPairHmmInsertState.hpp"
 #include "ReducedPairHmmDeleteState.hpp"
 #include "ReducedPairHmmMatchState.hpp"
 #include "GTRModel.hpp"
 #include "HKY85Model.hpp"
+#include "AminoacidSubstitutionModel.hpp"
 
 namespace EBC
 {
@@ -130,10 +132,14 @@ ForwardPairHMM::ForwardPairHMM(Sequences* inputSeqs, Definitions::ModelType mode
 	{
 		substModel = new HKY85Model(dict, maths,gammaRateCategories);
 	}
+	else if (model == Definitions::ModelType::LG)
+	{
+			substModel = new AminoacidSubstitutionModel(dict, maths,gammaRateCategories,Definitions::aaLgModel);
+	}
 
 	substModel->setAlpha(initialAlpha);
 
-	estimateSubstitutionParams = (subst_params.size() == 0);
+	estimateSubstitutionParams = (subst_params.size() == 0 && substModel->getParamsNumber() > 1);
 	estimateIndelParams = (indel_params.size() == 0);
 	estimateDivergence = (evolDistance < 0);
 

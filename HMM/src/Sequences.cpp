@@ -10,7 +10,7 @@
 namespace EBC
 {
 
-Sequences::Sequences(IParser* iParser) throw (ProgramException&)
+Sequences::Sequences(IParser* iParser,Definitions::SequenceType st) throw (ProgramException&)
 {
 	//use the file parser to get sequences and build the dictionary
 	unsigned int size = iParser->getSequenceCount();
@@ -19,7 +19,7 @@ Sequences::Sequences(IParser* iParser) throw (ProgramException&)
 		throw ProgramException("No sequences found. Quitting");
 	}
 
-	this->buildDictionary();
+	this->buildDictionary(st);
 
 	this->sequenceCount = size;
 
@@ -114,10 +114,19 @@ double* Sequences::getElementFrequencies()
 
 }
 
-void Sequences::buildDictionary()
+void Sequences::buildDictionary(Definitions::SequenceType st)
 {
 	//TODO differentiate based on the contents of the file!!!
-	dict = new NucleotideDictionary();
+	switch(st)
+	{
+	case (Definitions::SequenceType::Aminoacid):
+		dict = new AminoacidDictionary();
+		break;
+
+	case (Definitions::SequenceType::Nucleotide):
+		dict = new NucleotideDictionary();
+		break;
+	}
 }
 
 

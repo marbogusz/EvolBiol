@@ -21,7 +21,7 @@ class NucleotideSubstitutionModel : public EBC::SubstitutionModelBase
 {
 protected:
 
-	void doEigenDecomposition();
+	virtual void buildSmatrix()=0;
 
 public:
 

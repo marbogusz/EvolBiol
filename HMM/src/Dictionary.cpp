@@ -18,6 +18,7 @@ void Dictionary::setAlphabet(char dict[], unsigned short size)
 	for(i=0; i<size; i++)
 	{
 		this->alphabet.push_back(string(1,dict[i]));
+		this->translator.insert(std::make_pair(string(1,dict[i]),i));
 	}
 	this->alphabetSize = size;
 }
@@ -39,43 +40,19 @@ string Dictionary::getSymbolAt(short index)
 	return alphabet[index];
 }
 
-const char Dictionary::nucleotides[] = {'T', 'C', 'A', 'G'};
 
-
-//const char Dictionary::nucleotides[] = {'A', 'C', 'G', 'T'};
-const char Dictionary::aminoacids[] = {'A','R','N','D','C','Q','E','G','H','I','L','K','M','F','P','S','T','W','Y','V'};
-
-unsigned short Dictionary::getAlphabetSize()
+short Dictionary::getSymbolIndex(string& symbol)
 {
-	return this->alphabetSize;
+	return translator[symbol];
 }
 
-
-NucleotideDictionary::NucleotideDictionary()
-{
-	this->setAlphabet((char*)Dictionary::nucleotides,4);
-}
-
-NucleotideDictionary::~NucleotideDictionary()
-{
-
-
-}
-
-
-//Fixme - implement something faster based on map collection
-short NucleotideDictionary::getSymbolIndex(string symbol)
-{
-	return find(alphabet.begin(), alphabet.end(), symbol) - alphabet.begin();
-}
-
-short NucleotideDictionary::getSymbolIndex(char symbol)
+short Dictionary::getSymbolIndex(char symbol)
 {
 	string tmpSearchstring(1,symbol);
-	return find(alphabet.begin(), alphabet.end(), tmpSearchstring) - alphabet.begin();
+	return translator[tmpSearchstring];
 }
 
-vector<SequenceElement> NucleotideDictionary::translate(string& sequence, bool disregardIndels)
+vector<SequenceElement> Dictionary::translate(string& sequence, bool disregardIndels)
 {
 	//FIXME - deal with indels!
 	vector<SequenceElement> translatedVector;
@@ -92,6 +69,29 @@ vector<SequenceElement> NucleotideDictionary::translate(string& sequence, bool d
 	return translatedVector;
 
 }
+
+const char Dictionary::nucleotides[] = {'T', 'C', 'A', 'G'};
+//const char Dictionary::nucleotides[] = {'A', 'C', 'G', 'T'};
+const char Dictionary::aminoacids[] = {'A','R','N','D','C','Q','E','G','H','I','L','K','M','F','P','S','T','W','Y','V'};
+
+unsigned short Dictionary::getAlphabetSize()
+{
+	return this->alphabetSize;
+}
+
+
+NucleotideDictionary::NucleotideDictionary()
+{
+	this->setAlphabet((char*)Dictionary::nucleotides,4);
+}
+
+
+AminoacidDictionary::AminoacidDictionary()
+{
+	this->setAlphabet((char*)Dictionary::aminoacids,20);
+}
+
+
 
 }
 

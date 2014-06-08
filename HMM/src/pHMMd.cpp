@@ -31,7 +31,7 @@ int main(int argc, char ** argv) {
 		IParser* parser = cmdReader->getParser();
 		DEBUG("Creating alignment");
 
-		Sequences* inputSeqs = new Sequences(parser);
+		Sequences* inputSeqs = new Sequences(parser, cmdReader->getSequenceType());
 		DEBUG("Creating the HMM");
 
 		if(cmdReader->isForward())

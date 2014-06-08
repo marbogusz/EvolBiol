@@ -74,13 +74,13 @@ protected:
 
 	void destroyMatrices();
 
-	virtual void buildSmatrix()=0;
-
-	virtual void doEigenDecomposition()=0;
+	void doEigenDecomposition();
 
 	void setDiagonalMeans();
 
 	void calculateGamma();
+
+	void calculateGammaPtMatrices();
 
 public:
 
@@ -114,7 +114,7 @@ public:
 
 	void setParameters(const double* params)
 	{
-		for (int i=0;i<paramsNumber;i++)
+		for (unsigned int i=0;i<paramsNumber;i++)
 			this->parameters[i] = params[i];
 			//this->parameters[i] = fabs(params[i]);
 	}

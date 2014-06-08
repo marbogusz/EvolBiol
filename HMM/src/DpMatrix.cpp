@@ -13,7 +13,7 @@ using namespace std;
 void EBC::DpMatrix::allocateData()
 {
 	matrixData = new TraceStep*[xSize];
-	for(int i=0; i<xSize; i++)
+	for(unsigned int i=0; i<xSize; i++)
 	{
 		matrixData[i] = new TraceStep[ySize];
 	}
@@ -21,7 +21,7 @@ void EBC::DpMatrix::allocateData()
 
 EBC::DpMatrix::~DpMatrix()
 {
-	for(int i=0; i<xSize; i++)
+	for(unsigned int i=0; i<xSize; i++)
 	{
 		delete[] matrixData[i];
 	}
@@ -44,7 +44,7 @@ void EBC::DpMatrix::setValue(unsigned int x, unsigned int y, double value)
 
 void EBC::DpMatrix::setWholeRow(unsigned int row, double value)
 {
-	for (int i=0; i<ySize; i++)
+	for (unsigned int i=0; i<ySize; i++)
 	{
 		matrixData[row][i].score = value;
 		matrixData[row][i].hor = true;
@@ -54,7 +54,7 @@ void EBC::DpMatrix::setWholeRow(unsigned int row, double value)
 
 void EBC::DpMatrix::setWholeCol(unsigned int col, double value)
 {
-	for (int i=0; i<xSize; i++)
+	for (unsigned int i=0; i<xSize; i++)
 	{
 		matrixData[i][col].score = value;
 		matrixData[i][col].vert = true;
@@ -73,9 +73,9 @@ void EBC::DpMatrix::outputTrace(unsigned int bound=0)
 	unsigned int xl = bound !=0 ? bound : xSize;
 	unsigned int yl = bound !=0 ? bound : ySize;
 
-	for(int i=0; i < xl; i++)
+	for(unsigned int i=0; i < xl; i++)
 	{
-		for(int j=0; j < yl; j++)
+		for(unsigned int j=0; j < yl; j++)
 		{
 			TraceStep& ts = matrixData[i][j];
 					if (ts.vert &&  !ts.hor && !ts.diag)
@@ -103,9 +103,9 @@ void EBC::DpMatrix::outputValues(unsigned int bound=0)
 	unsigned int xl = bound !=0 ? bound : xSize;
 	unsigned int yl = bound !=0 ? bound : ySize;
 
-	for(int i=0; i < xl; i++)
+	for(unsigned int i=0; i < xl; i++)
 	{
-		for(int j=0; j < yl; j++)
+		for(unsigned int j=0; j < yl; j++)
 		{
 			TraceStep& ts = matrixData[i][j];
 

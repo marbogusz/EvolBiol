@@ -11,10 +11,12 @@
 #include "BasicViterbi.hpp"
 #include "GTRModel.hpp"
 #include "HKY85Model.hpp"
+#include "AminoacidSubstitutionModel.hpp"
 #include "AffineGeometricGapModel.hpp"
 #include "PairHmmMatchState.hpp"
 #include "PairHmmInsertionState.hpp"
 #include "PairHmmDeletionState.hpp"
+#include "Definitions.hpp"
 #include <sstream>
 
 namespace EBC
@@ -40,6 +42,10 @@ BasicViterbi::BasicViterbi(Sequences* inputSeqs, Definitions::ModelType model,st
     {
     	substModel = new HKY85Model(dict, maths,0);
     }
+    else if (model == Definitions::ModelType::LG)
+    {
+    	substModel = new AminoacidSubstitutionModel(dict, maths,0,Definitions::aaLgModel);
+    }
 
 	
     DEBUG("Creating the gap model");
@@ -50,7 +56,7 @@ BasicViterbi::BasicViterbi(Sequences* inputSeqs, Definitions::ModelType model,st
 
 	if (estimatedParams != NULL)
 	{
-		for (int idx=0; idx < totalParameters; idx++)
+		for (unsigned int idx=0; idx < totalParameters; idx++)
 		{
 			mlParameters[idx] = estimatedParams[idx];
 		}

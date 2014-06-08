@@ -14,6 +14,7 @@
 #include "Dictionary.hpp"
 #include "ParseException.hpp"
 #include "SequenceElement.hpp"
+#include "Definitions.hpp"
 
 namespace EBC
 {
@@ -32,7 +33,7 @@ private:
 public:
 
 	//Input from file or console
-	Sequences(IParser*) throw (ProgramException&);
+	Sequences(IParser*, Definitions::SequenceType) throw (ProgramException&);
 
 	~Sequences();
 
@@ -49,7 +50,7 @@ public:
 	string getRawSequenceAt(unsigned int pos);
 private:
 
-	void buildDictionary();
+	void buildDictionary(Definitions::SequenceType);
 
 };
 
