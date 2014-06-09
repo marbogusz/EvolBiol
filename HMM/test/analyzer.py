@@ -1,3 +1,4 @@
+#!/usr/local/bin/python3
 import os 
 import sys
 import re
@@ -14,6 +15,7 @@ def analysePaml(dist):
     p = re.compile(r'(\d+)')
     mafft_res = []
     true_res = []
+    viterbi_res = []
     #search for all the paml output files
     for pamlentry in os.listdir():
         if pamlentry.startswith('paml'):
@@ -33,6 +35,10 @@ def analysePaml(dist):
                 #print ('true')
                 values.append('true')
                 true_res.append(values)
+            if pamlentry.find('viterbi') != -1:
+                #print ('true')
+                values.append('viterbi')
+                viterbi_res.append(values)
             #print(values)
             #for val in values:
             outfile.write(values[0] + '\t' + values[1] + '\t' +values[2])
@@ -71,15 +77,15 @@ mafft_ext = 'mafft'
 rates_match = 'Rate parameters:'
 tree_match = 'tree length ='
 
-if len(sys.argv) != 3:
-    print('Usage: script.py seqence_length indel_rate', file=sys.stderr)
+if len(sys.argv) != 4:
+    print('Usage: script.py seqence_length indel_rate replicate_no', file=sys.stderr)
     raise SystemExit(1)
 
 seq_len = int(sys.argv[1])
 rate = round(float(sys.argv[2]),2)
 
 outfile = open('out' + str(seq_len) + '_' + sys.argv[2] + '.txt', 'w')
-hmmfile = open('hmm_'+  str(seq_len) + '_' + sys.argv[2] +'_16','r')
+hmmfile = open('hmm_'+  str(seq_len) + '_' + sys.argv[2] +'_' + sys.argv[3],'r')
 
 outfile.write('infer\treal\ttype\n')
 

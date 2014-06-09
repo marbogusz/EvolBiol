@@ -1,3 +1,5 @@
+#!/usr/local/bin/python3
+
 import subprocess
 import sys
 import os
@@ -24,7 +26,7 @@ def callHMM(executable, filename, descriptor):
     params.append(executable)
     params += hmm_base_params
     params.append(filename)
-    params += hmm_gtr_params
+    #params += hmm_gtr_params
     params += hmm_indel_params
     params += hmm_misc_params
 
@@ -58,22 +60,23 @@ def runPaml(count, paml_template):
     for i in range(count):
         paml_true_fc = paml_template.format(seqfile=indelible_output + '_TRUE_' + str(i+1) + '.fas', outfile='paml_true_' + str(i+1), modelno=modelno);
         paml_mafft_fc = paml_template.format(seqfile='mafft_' + str(i+1) + '.fas', outfile='paml_mafft_' + str(i+1), modelno=modelno);
-        paml_viterbi_fc = paml_template.format(seqfile='viterbi_' + str(i+1) + '.fas', outfile='paml_viterbi_' + str(i+1), modelno=modelno);
-        pt = open('baseml_true.ctl','w')
-        pm = open('baseml_mafft.ctl','w')
-        pv = open('baseml_viterbi.ctl','w')
+        paml_viterbi_fc = paml_template.format(seqfile='viterbi_' + indelible_output + '_' + str(i+1) + '.fas', outfile='paml_viterbi_' + str(i+1), modelno=modelno);
+        pt = open(paml_binary + '_true.ctl','w')
+        pm = open(paml_binary + '_mafft.ctl','w')
+        pv = open(paml_binary + '_viterbi.ctl','w')
         pt.write(paml_true_fc);
         pm.write(paml_mafft_fc);
-        pm.write(paml_viterbi_fc);
+        pv.write(paml_viterbi_fc);
         pt.close()
         pm.close()
         pv.close()
-        subprocess.call(['baseml', 'baseml_true.ctl'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
-        subprocess.call(['baseml', 'baseml_mafft.ctl'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
-        subprocess.call(['baseml', 'baseml_viterbi.ctl'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+        subprocess.call([paml_binary, paml_binary + '_true.ctl'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+        subprocess.call([paml_binary, paml_binary + '_mafft.ctl'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+        subprocess.call([paml_binary, paml_binary + '_viterbi.ctl'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
 
-def simulate(s,r):
-    ifile = open(file_prefix+model_suffix+file_suffix, 'r')
+def simulate(s,r,modelname):
+
+    ifile = open(file_prefix+modelname+file_suffix, 'r')
     ictl_template = ifile.read()
     ifile.close()
 
@@ -101,9 +104,8 @@ def simulate(s,r):
         s -= 1
 
 
-
-def analyze(s,r):
-    pfl = open('baseml.paml', 'r');
+def analyze(s,r,model):
+    pfl = open(paml_binary +'.paml', 'r');
     outfile = open('hmm_' + str(seq_len) + '_' + str(round(indel_rate,2))+ '_' + str(r),'w',1)
     pml_template = pfl.read()
     pfl.close()
@@ -129,8 +131,8 @@ def analyze(s,r):
 
 #definitions
 
-if len(sys.argv) != 4:
-    print('Usage: script.py seqence_length replicates indel_rate', file=sys.stderr)
+if len(sys.argv) != 5:
+    print('Usage: script.py seqence_length replicates indel_rate model', file=sys.stderr)
     raise SystemExit(1)
 
 
@@ -145,22 +147,32 @@ indel_rate  = float(sys.argv[3])
 #distance step 
 distance_step = 0.1
 
+model = sys.argv[4]
+
+
+
 paml_binary = 'baseml'
+
+if (model == 'LG'):
+    paml_binary = 'codeml'
+
 indelible_binary = 'indelible'
 hmm_binary = 'HMMest'
 
-hmm_base_params = ['-F','--rev','--in']
+hmm_base_params = ['-F','--in']
 hmm_gtr_params = ['--param_rev','1.39','0.2','0.22','0.3','0.25']
+hmm_hky_params = ['--param_hky','2']
 hmm_indel_params = ['-i', '0.05', '0.5'] 
-hmm_misc_params = ['-b', '1', '-o', '0', '--ov']
+hmm_misc_params = ['-b', '0', '-o', '0', '--ov', '--lg']
 
 file_prefix = 'control'
 file_suffix = '.indelible'
 
 gtr_suffix = 'GTR'
 hky_suffix = 'HKY85'
+lg_suffix = 'LG'
 
-model_suffix = gtr_suffix
+model_suffix = model
 modelno = '7';
 
 indelible_output = 'idlbl';
@@ -175,8 +187,8 @@ mafft_exec = 'mafft-linsi'
 
 print("HMM analysis for {} steps with {} replicates. Step size : {}".format(steps,replicates,distance_step))
 
-simulate(steps,replicates);
-analyze(steps,replicates);
+simulate(steps,replicates,model);
+analyze(steps,replicates,model);
 
 #def processStep(distance):    #phylogenetic distance
 #    pass
