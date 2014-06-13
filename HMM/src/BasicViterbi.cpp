@@ -22,7 +22,8 @@
 namespace EBC
 {
 
-BasicViterbi::BasicViterbi(Sequences* inputSeqs, Definitions::ModelType model,std::vector<double> substParams, double distance, std::vector<double> indelParams, double* estimatedParams)
+BasicViterbi::BasicViterbi(Sequences* inputSeqs, Definitions::ModelType model,std::vector<double> substParams, double distance,
+		std::vector<double> indelParams, unsigned int rateCategories, double alpha, double* estimatedParams)
 	: inputSequences(inputSeqs)
 {
 	//FIXME - deal with alpha!
@@ -36,18 +37,19 @@ BasicViterbi::BasicViterbi(Sequences* inputSeqs, Definitions::ModelType model,st
     DEBUG("Creating the model");
     if (model == Definitions::ModelType::GTR)
     {
-    	substModel = new GTRModel(dict, maths,0);
+    	substModel = new GTRModel(dict, maths,rateCategories);
     }
     else if (model == Definitions::ModelType::HKY85)
     {
-    	substModel = new HKY85Model(dict, maths,0);
+    	substModel = new HKY85Model(dict, maths,rateCategories);
     }
     else if (model == Definitions::ModelType::LG)
     {
-    	substModel = new AminoacidSubstitutionModel(dict, maths,0,Definitions::aaLgModel);
+    	substModel = new AminoacidSubstitutionModel(dict, maths,rateCategories,Definitions::aaLgModel);
     }
 
-	
+    substModel->setAlpha(alpha);
+
     DEBUG("Creating the gap model");
 	indelModel = new AffineGeometricGapModel();
 

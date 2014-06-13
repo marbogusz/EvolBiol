@@ -66,7 +66,8 @@ protected:
 	double getMax(double m, double x, double y, unsigned int i, unsigned int j, PairHmmState* state);
 
 public:
-	BasicViterbi(Sequences* inputSeqs, Definitions::ModelType model,std::vector<double> substParams, double distance, std::vector<double> indelParams, double* estimatedPArams = NULL);
+	BasicViterbi(Sequences* inputSeqs, Definitions::ModelType model,std::vector<double> substParams, double distance, std::vector<double> indelParams,
+			unsigned int rateCategories, double alpha, double* estimatedPArams = NULL);
 
 	virtual ~BasicViterbi();
 

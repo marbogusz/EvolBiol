@@ -64,7 +64,7 @@ int main(int argc, char ** argv) {
 				vitFile.replace(vitFile.end()-3,vitFile.end(),"fas");
 				vector<double> a,b;
 				stringstream ss;
-				BasicViterbi* bv = new BasicViterbi(inputSeqs, cmdReader->getModelType(),a,0,b,estimatedParams);
+				BasicViterbi* bv = new BasicViterbi(inputSeqs, cmdReader->getModelType(),a,0,b, cmdReader->getCategories(), cmdReader->getAlpha(), estimatedParams);
 				bv->runViterbiAlgorithm();
 				bv->getResults(ss);
 

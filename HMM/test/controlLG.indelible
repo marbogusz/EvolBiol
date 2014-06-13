@@ -1,0 +1,23 @@
+//THIS IS A PYTHON SCRIPT INPTUT TEMPLATE, NOT AN ACTUAL INDELIBLE FILE
+
+[TYPE] AMINOACID 1
+
+[SETTINGS]
+  [output]	FASTA
+  [fileperrep]	TRUE
+
+[MODEL]    modelname  	//  Evolutionary models are defined in [MODEL] blocks.
+  [submodel]     LG
+  [indelmodel]   NB  0.5 1  //  Geometric indel length distribution (q=0.4, r=1)
+  [insertrate]   {rate}       //  insertion rate = 0.08 relative to substitution rate of 1
+  [deleterate]   {rate}      //  deletion rate = 0.12 relative to substitution rate of 1
+  
+[TREE] treename  (A:{distance},B:{distance});        //  User trees are defined here
+
+[PARTITIONS] partitionname             //  [PARTITIONS] blocks say which models go with
+  [treename modelname {length}]            //  which trees and define the length of the
+
+[EVOLVE] partitionname {replicates} {output}  //  This will generate n replicate datasets 
+
+
+
