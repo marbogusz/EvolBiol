@@ -1,16 +1,16 @@
 /*
- * DpMatrix.cpp
+ * DpMatrixFull.cpp
  *
  *  Created on: Feb 10, 2014
  *      Author: root
  */
 
-#include "DpMatrix.hpp"
+#include "DpMatrixFull.hpp"
 #include <iostream>
 
 using namespace std;
 
-void EBC::DpMatrix::allocateData()
+void EBC::DpMatrixFull::allocateData()
 {
 	matrixData = new TraceStep*[xSize];
 	for(unsigned int i=0; i<xSize; i++)
@@ -19,7 +19,7 @@ void EBC::DpMatrix::allocateData()
 	}
 }
 
-EBC::DpMatrix::~DpMatrix()
+EBC::DpMatrixFull::~DpMatrixFull()
 {
 	for(unsigned int i=0; i<xSize; i++)
 	{
@@ -28,7 +28,7 @@ EBC::DpMatrix::~DpMatrix()
 	delete matrixData;
 }
 
-EBC::DpMatrix::DpMatrix(unsigned int xS, unsigned int yS) :
+EBC::DpMatrixFull::DpMatrixFull(unsigned int xS, unsigned int yS) :
 		xSize(xS), ySize(yS)
 {
 	maxVal = std::numeric_limits<double>::max();
@@ -36,13 +36,13 @@ EBC::DpMatrix::DpMatrix(unsigned int xS, unsigned int yS) :
 	allocateData();
 }
 
-void EBC::DpMatrix::setValue(unsigned int x, unsigned int y, double value)
+void EBC::DpMatrixFull::setValue(unsigned int x, unsigned int y, double value)
 {
 	//TODO - check bounds
 	matrixData[x][y].score = value;
 }
 
-void EBC::DpMatrix::setWholeRow(unsigned int row, double value)
+void EBC::DpMatrixFull::setWholeRow(unsigned int row, double value)
 {
 	for (unsigned int i=0; i<ySize; i++)
 	{
@@ -52,7 +52,7 @@ void EBC::DpMatrix::setWholeRow(unsigned int row, double value)
 	}
 }
 
-void EBC::DpMatrix::setWholeCol(unsigned int col, double value)
+void EBC::DpMatrixFull::setWholeCol(unsigned int col, double value)
 {
 	for (unsigned int i=0; i<xSize; i++)
 	{
@@ -63,12 +63,12 @@ void EBC::DpMatrix::setWholeCol(unsigned int col, double value)
 }
 
 
-double EBC::DpMatrix::valueAt(unsigned int i, unsigned int j)
+double EBC::DpMatrixFull::valueAt(unsigned int i, unsigned int j)
 {
 	return matrixData[i][j].score;
 }
 
-void EBC::DpMatrix::outputTrace(unsigned int bound=0)
+void EBC::DpMatrixFull::outputTrace(unsigned int bound=0)
 {
 	unsigned int xl = bound !=0 ? bound : xSize;
 	unsigned int yl = bound !=0 ? bound : ySize;
@@ -98,7 +98,7 @@ void EBC::DpMatrix::outputTrace(unsigned int bound=0)
 	}
 }
 
-void EBC::DpMatrix::outputValues(unsigned int bound=0)
+void EBC::DpMatrixFull::outputValues(unsigned int bound=0)
 {
 	unsigned int xl = bound !=0 ? bound : xSize;
 	unsigned int yl = bound !=0 ? bound : ySize;
@@ -118,32 +118,32 @@ void EBC::DpMatrix::outputValues(unsigned int bound=0)
 
 
 
-void EBC::DpMatrix::setDiagonalAt(unsigned int i, unsigned int j)
+void EBC::DpMatrixFull::setDiagonalAt(unsigned int i, unsigned int j)
 {
 	matrixData[i][j].diag = true;
 }
 
-void EBC::DpMatrix::setHorizontalAt(unsigned int i, unsigned int j)
+void EBC::DpMatrixFull::setHorizontalAt(unsigned int i, unsigned int j)
 {
 	matrixData[i][j].hor = true;
 }
 
-void EBC::DpMatrix::setVerticalAt(unsigned int i, unsigned int j)
+void EBC::DpMatrixFull::setVerticalAt(unsigned int i, unsigned int j)
 {
 	matrixData[i][j].vert = true;
 }
 
-void EBC::DpMatrix::setSrc(unsigned int i, unsigned int j, DpMatrix* src)
+void EBC::DpMatrixFull::setSrc(unsigned int i, unsigned int j, DpMatrixBase* src)
 {
 	matrixData[i][j].src = src;
 }
 
-void EBC::DpMatrix::traceback(string& seq_a, string& seq_b, std::pair<string,string>* alignment)
+void EBC::DpMatrixFull::traceback(string& seq_a, string& seq_b, std::pair<string,string>* alignment)
 {
 	unsigned int i = xSize-1;
 	unsigned int j = ySize-1;
 
-	DpMatrix* currentMat = this;
+	DpMatrixFull* currentMat = this;
 
 	while(i>0 || j >0)
 	{
