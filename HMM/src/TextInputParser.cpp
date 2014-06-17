@@ -11,14 +11,14 @@ using namespace std;
 
 namespace EBC {
 
-TextInputParser::TextInputParser(char* s1, char* s2, bool debug) throw (ProgramException&) : sequenceA (s1), sequenceB (s2)
+TextInputParser::TextInputParser(char* s1, char* s2, bool debug) throw (HmmException&) : sequenceA (s1), sequenceB (s2)
 {
 	this->dbg = debug;
 	this->moreData = true;
 
 	if(this->sequenceA.length() == 0 || this->sequenceB.length() == 0)
 	{
-		throw ProgramException("Zero length sequence. Quitting");
+		throw HmmException("Zero length sequence. Quitting");
 	}
 
 	if (this->dbg)

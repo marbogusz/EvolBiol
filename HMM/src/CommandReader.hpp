@@ -27,7 +27,7 @@ public:
 	dlib::command_line_parser parser;
 
 	CommandReader(int argc, char** argv);
-	IParser* getParser() throw (ProgramException&);
+	IParser* getParser() throw (HmmException&);
 
 	inline bool isViterbi()
 	{

@@ -16,11 +16,10 @@ namespace EBC
 
 class PairwiseHmmMatchState: public EBC::PairwiseHmmStateBase
 {
-protected:
-
-	void initializeData();
 
 public:
+	void initializeData();
+
 	PairwiseHmmMatchState(unsigned int x, unsigned int y);
 
 	PairwiseHmmMatchState(DpMatrixBase*);

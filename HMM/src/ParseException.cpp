@@ -9,23 +9,23 @@
 
 namespace EBC {
 
-ProgramException::ProgramException()
+HmmException::HmmException()
 {
 	// TODO Auto-generated constructor stub
 	// General message
 	msg = "Parse Exception";
 }
 
-ProgramException::~ProgramException() throw()
+HmmException::~HmmException() throw()
 {
 	// TODO Auto-generated destructor stub
 }
 
-ProgramException::ProgramException(string message) : msg(message)
+HmmException::HmmException(string message) : msg(message)
 {
 }
 
-const char* ProgramException::what() const throw ()
+const char* HmmException::what() const throw ()
 {
 	return this->msg.c_str();
 }

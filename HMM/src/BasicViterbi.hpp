@@ -14,7 +14,7 @@
 #include "IndelModel.hpp"
 #include "Sequences.hpp"
 #include "Maths.hpp"
-#include "PairHmmState.hpp"
+#include "PairwiseHmmStateBase.hpp"
 #include "SequenceElement.hpp"
 
 namespace EBC
@@ -44,11 +44,11 @@ protected:
 	vector<SequenceElement>::iterator itS1, itS2;
 
 	//Match state
-	PairHmmState* M;
+	PairwiseHmmStateBase* M;
 	//Insert state
-	PairHmmState* X;
+	PairwiseHmmStateBase* X;
 	//Delete state
-	PairHmmState* Y;
+	PairwiseHmmStateBase* Y;
 
 	//the following assumes a fix HMM structure
 	void setTransitionProbabilities();
@@ -63,7 +63,7 @@ protected:
 
 	void initializeStates();
 
-	double getMax(double m, double x, double y, unsigned int i, unsigned int j, PairHmmState* state);
+	double getMax(double m, double x, double y, unsigned int i, unsigned int j, PairwiseHmmStateBase* state);
 
 public:
 	BasicViterbi(Sequences* inputSeqs, Definitions::ModelType model,std::vector<double> substParams, double distance, std::vector<double> indelParams,

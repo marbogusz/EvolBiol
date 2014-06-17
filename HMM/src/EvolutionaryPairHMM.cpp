@@ -7,9 +7,6 @@
 
 #include "EvolutionaryPairHMM.hpp"
 #include "AffineGeometricGapModel.hpp"
-#include "PairHmmMatchState.hpp"
-#include "PairHmmInsertionState.hpp"
-#include "PairHmmDeletionState.hpp"
 
 namespace EBC
 {

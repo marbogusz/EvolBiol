@@ -20,7 +20,7 @@ FileParser::FileParser(const char* filename)
 
 	if(!this->infile)
 	{
-		throw ProgramException("Can't open the file");
+		throw HmmException("Can't open the file");
 	}
 	string tmp;
 

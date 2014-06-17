@@ -13,9 +13,9 @@
 #include "HKY85Model.hpp"
 #include "AminoacidSubstitutionModel.hpp"
 #include "AffineGeometricGapModel.hpp"
-#include "PairHmmMatchState.hpp"
-#include "PairHmmInsertionState.hpp"
-#include "PairHmmDeletionState.hpp"
+#include "PairwiseHmmMatchState.hpp"
+#include "PairwiseHmmInsertState.hpp"
+#include "PairwiseHmmDeleteState.hpp"
 #include "Definitions.hpp"
 #include <sstream>
 
@@ -68,9 +68,9 @@ BasicViterbi::BasicViterbi(Sequences* inputSeqs, Definitions::ModelType model,st
 		//Now copy ml params to the model
 		if (totalParameters != substParams.size()+indelParams.size()+1)
 		{
-			throw ProgramException("Provided parameters count does not match the model\n");
+			throw HmmException("Provided parameters count does not match the model\n");
 		}
-		throw ProgramException("Not implemented yet\n");
+		throw HmmException("Not implemented yet\n");
 	}
 
 	DEBUG("calculateModels");
@@ -110,22 +110,22 @@ void BasicViterbi::initializeStates()
 	if (Y != NULL)
 		delete Y;
 
-	M = new PairHmmMatchState(xSize,ySize,g,e);
-	X = new PairHmmInsertionState(xSize,ySize,g,e);
-	Y = new PairHmmDeletionState(xSize,ySize,g,e);
+	M = new PairwiseHmmMatchState(xSize,ySize);
+	X = new PairwiseHmmInsertState(xSize,ySize);
+	Y = new PairwiseHmmDeleteState(xSize,ySize);
 
-	M->addTransitionProbabilityFrom(M,log(1.0-2.0*g));
-	M->addTransitionProbabilityFrom(X,log((1.0-e)*(1.0-2.0*g)));
-	M->addTransitionProbabilityFrom(Y,log((1.0-e)*(1.0-2.0*g)));
+	M->setTransitionProbabilityFromMatch(log(1-2*g));
+	M->setTransitionProbabilityFromInsert(log((1-e)*(1-2*g)));
+	M->setTransitionProbabilityFromDelete(log((1-e)*(1-2*g)));
 
-	X->addTransitionProbabilityFrom(X,log(e+((1-e)*g)));
-	Y->addTransitionProbabilityFrom(Y,log(e+((1-e)*g)));
+	X->setTransitionProbabilityFromInsert(log(e+((1-e)*g)));
+	Y->setTransitionProbabilityFromDelete(log(e+((1-e)*g)));
 
-	X->addTransitionProbabilityFrom(Y,log((1.0-e)*g));
-	Y->addTransitionProbabilityFrom(X,log((1.0-e)*g));
+	X->setTransitionProbabilityFromDelete(log((1-e)*g));
+	Y->setTransitionProbabilityFromInsert(log((1-e)*g));
 
-	X->addTransitionProbabilityFrom(M,log(g));
-	Y->addTransitionProbabilityFrom(M,log(g));
+	X->setTransitionProbabilityFromMatch(log(g));
+	Y->setTransitionProbabilityFromMatch(log(g));
 }
 
 
@@ -148,7 +148,7 @@ void BasicViterbi::calculateModels()
 	substModel->calculatePt();
 }
 
-double BasicViterbi::getMax(double m, double x, double y, unsigned int i, unsigned int j, PairHmmState* state)
+double BasicViterbi::getMax(double m, double x, double y, unsigned int i, unsigned int j, PairwiseHmmStateBase* state)
 {
 	if(m >=x && m >=y)
 	{
@@ -156,7 +156,7 @@ double BasicViterbi::getMax(double m, double x, double y, unsigned int i, unsign
 
 		//cout << i << " " << j << " coming from M" << endl;
 		state->setDirection(i,j);
-		state->setSrc(i,j,M);
+		state->setSourceMatrixPtr(i,j,M);
 		return m;
 	}
 	else if(x >= y)
@@ -165,7 +165,7 @@ double BasicViterbi::getMax(double m, double x, double y, unsigned int i, unsign
 		//state->setVerticalAt(i,j);
 		//cout << i << " " << j << " coming from X" << endl;
 		state->setDirection(i,j);
-		state->setSrc(i,j,X);
+		state->setSourceMatrixPtr(i,j,X);
 		return x;
 	}
 	else
@@ -173,7 +173,7 @@ double BasicViterbi::getMax(double m, double x, double y, unsigned int i, unsign
 		//state->setHorizontalAt(i,j);
 		//cout << i << " " << j << " coming from Y" << endl;
 		state->setDirection(i,j);
-		state->setSrc(i,j,Y);
+		state->setSourceMatrixPtr(i,j,Y);
 		return y;
 	}
 
@@ -199,9 +199,9 @@ void BasicViterbi::getResults(stringstream& ss)
 	string a = inputSequences->getRawSequenceAt(0);
 	string b = inputSequences->getRawSequenceAt(1);
 
-	mv =  (*M)(xSize-1,ySize-1) ;
-	xv =  (*X)(xSize-1,ySize-1) ;
-	yv =  (*Y)(xSize-1,ySize-1) ;
+	mv =  M->getValueAt(xSize-1,ySize-1) ;
+	xv =  X->getValueAt(xSize-1,ySize-1) ;
+	yv =  Y->getValueAt(xSize-1,ySize-1) ;
 
 
 	if(mv >=xv && mv >=yv)
@@ -235,8 +235,7 @@ void BasicViterbi::runViterbiAlgorithm()
 {
 	DEBUG("Run Viterbi");
 
-	unsigned int i;
-	unsigned int j;
+	unsigned int i,j,k,l;
 
 	double xx,xy,xm,yx,yy,ym,mx,my,mm;
 
@@ -254,50 +253,40 @@ void BasicViterbi::runViterbiAlgorithm()
 
 			if(i!=0)
 			{
+
+				k = i-1;
 				emissionX = log(substModel->getQXi(seq1[i-1].getMatrixIndex()));
+				xm = M->getValueAt(k,j) + X->getTransitionProbabilityFromMatch();
+				xx = X->getValueAt(k,j) + X->getTransitionProbabilityFromInsert();
+				xy = Y->getValueAt(k,j) + X->getTransitionProbabilityFromDelete();
 
-				xm = (*M)(i-1,j);
-				xm += X->getTransitionProbabilityFrom(M);
-				xx = (*X)(i-1,j);
-				xx += X->getTransitionProbabilityFrom(X);
-				xy = (*Y)(i-1,j);
-				xy += X->getTransitionProbabilityFrom(Y);
-
-				//cout << "X state ";
-				X->setValue(i,j,getMax(xm,xx,xy,i,j,X) + emissionX);
+				X->setValueAt(i,j,getMax(xm,xx,xy,i,j,X) + emissionX);
 			}
 			if(j!=0)
 			{
+				k = j-1;
 				emissionY = log(substModel->getQXi(seq2[j-1].getMatrixIndex()));
-
-				ym = (*M)(i,j-1);
-				ym += Y->getTransitionProbabilityFrom(M);
-				yx = (*X)(i,j-1);
-				yx += Y->getTransitionProbabilityFrom(X);
-				yy = (*Y)(i,j-1);
-				yy += Y->getTransitionProbabilityFrom(Y);
-				//cout << "Y state ";
-				Y->setValue(i,j,getMax(ym,yx,yy,i,j,Y) + emissionY);
+				ym = M->getValueAt(i,k) + Y->getTransitionProbabilityFromMatch();
+				yx = X->getValueAt(i,k) + Y->getTransitionProbabilityFromInsert();
+				yy = Y->getValueAt(i,k) + Y->getTransitionProbabilityFromDelete();
+				Y->setValueAt(i,j,getMax(ym,yx,yy,i,j,Y) + emissionY);
 			}
 
 			if(i!=0 && j!=0)
 			{
+				k = i-1;
+				l = j-1;
 				emissionM = log(substModel->getPXiYi(seq1[i-1].getMatrixIndex(), seq2[j-1].getMatrixIndex()));
-
-				mm = (*M)(i-1,j-1);
-				mm += M->getTransitionProbabilityFrom(M);
-				mx = (*X)(i-1,j-1);
-				mx += M->getTransitionProbabilityFrom(X);
-				my = (*Y)(i-1,j-1);
-				my += M->getTransitionProbabilityFrom(Y);
-				//cout << "M state ";
-				M->setValue(i,j,getMax(mm,mx,my,i,j,M) + emissionM);
+				mm = M->getValueAt(k,l) + M->getTransitionProbabilityFromMatch();
+				mx = X->getValueAt(k,l) + M->getTransitionProbabilityFromInsert();
+				my = Y->getValueAt(k,l) + M->getTransitionProbabilityFromDelete();
+				M->setValueAt(i,j,getMax(mm,mx,my,i,j,M) + emissionM);
 			}
 		}
 	}
-	DEBUG("Final Viterbi M  " << (*M)(xSize-1,ySize-1) );
-	DEBUG("Final Viterbi X  " << (*X)(xSize-1,ySize-1) );
-	DEBUG("Final Viterbi Y  " << (*Y)(xSize-1,ySize-1) );
+	DEBUG("Final Viterbi M  " << M->getValueAt(xSize-1,ySize-1) );
+	DEBUG("Final Viterbi X  " << X->getValueAt(xSize-1,ySize-1) );
+	DEBUG("Final Viterbi Y  " << Y->getValueAt(xSize-1,ySize-1) );
 }
 
 

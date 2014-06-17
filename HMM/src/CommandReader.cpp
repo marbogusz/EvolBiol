@@ -70,7 +70,7 @@ CommandReader::CommandReader(int argc, char** argv) : count(argc), args(argv)
 		{
 		    cout << "Usage: HMM (-F|-V) --in input_file (rev|hky) [param_rev .... | param_hky ...] [i indel parameters] [d distance] [b] [o=0|1] [ov]\n";
 		    parser.print_options();
-			throw ProgramException("Specify which algorithm you want to run!\n");
+			throw HmmException("Specify which algorithm you want to run!\n");
 		}
 
 		parser.check_option_arg_range("o", 0, 1);
@@ -88,7 +88,7 @@ CommandReader::CommandReader(int argc, char** argv) : count(argc), args(argv)
 	}
 	catch (exception& e)
 	{
-	        throw ProgramException(e.what());
+	        throw HmmException(e.what());
 	}
 }
 
@@ -119,7 +119,7 @@ vector<double> CommandReader::getSubstParams()
 		}
 	}
 	else if (parser.option("lg")){}
-	else throw ProgramException("Model not specified");
+	else throw HmmException("Model not specified");
 
 	return vec;
 }
@@ -139,14 +139,14 @@ vector<double> CommandReader::getIndelParams()
 	return vec;
 }
 
-IParser* CommandReader::getParser() throw (ProgramException&)
+IParser* CommandReader::getParser() throw (HmmException&)
 {
 	if (parser.option("in"))
 	{
 		return new FileParser((string(parser.option("in").argument())).c_str());
 	}
 	else
-		throw ProgramException("input file not specified");
+		throw HmmException("input file not specified");
 }
 
 } /* namespace EBC */

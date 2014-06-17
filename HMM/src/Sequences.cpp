@@ -10,13 +10,13 @@
 namespace EBC
 {
 
-Sequences::Sequences(IParser* iParser,Definitions::SequenceType st) throw (ProgramException&)
+Sequences::Sequences(IParser* iParser,Definitions::SequenceType st) throw (HmmException&)
 {
 	//use the file parser to get sequences and build the dictionary
 	unsigned int size = iParser->getSequenceCount();
 	if (size <= 0)
 	{
-		throw ProgramException("No sequences found. Quitting");
+		throw HmmException("No sequences found. Quitting");
 	}
 
 	this->buildDictionary(st);

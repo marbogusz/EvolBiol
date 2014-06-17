@@ -7,6 +7,7 @@
 
 #include "DpMatrixLoMem.hpp"
 #include <iostream>
+#include "ParseException.hpp"
 
 using namespace std;
 
@@ -16,14 +17,21 @@ void EBC::DpMatrixLoMem::allocateData()
 	buffer[0] = new double[ySize];
 	buffer[1] = new double[ySize];
 
-	previousRow = buffer[0];
-	currentRow = buffer[1];
+	clear();
 
 	for (unsigned int i=0; i< ySize; i++)
 	{
 		currentRow[i] = previousRow[i] = minVal;
 	}
+}
+
+void EBC::DpMatrixLoMem::clear()
+{
+	previousRow = buffer[0];
+	currentRow = buffer[1];
 	currentRowIndex = 0;
+	nextRowIndex =1;
+	previousRowIndex = -1;
 }
 
 EBC::DpMatrixLoMem::~DpMatrixLoMem()
@@ -32,28 +40,42 @@ EBC::DpMatrixLoMem::~DpMatrixLoMem()
 	delete[] buffer[1];
 }
 
-EBC::DpMatrixLoMem::DpMatrixLoMem(unsigned int xS, unsigned int yS) :
-		xSize(xS), ySize(yS)
+EBC::DpMatrixLoMem::DpMatrixLoMem(unsigned int xS, unsigned int yS) : DpMatrixBase(xS,yS)
 {
-	maxVal = std::numeric_limits<double>::max();
-	minVal = -10000;//std::numeric_limits<double>::min();
-	allocateData();
-	//set to the beginning;
-	//always associated with the second ptr.
+	this->allocateData();
 }
 
-void EBC::DpMatrixLoMem::setValue(unsigned int x,unsigned int y, double value)
+void EBC::DpMatrixLoMem::setValue(unsigned int i,unsigned int j, double value)
+{
+	if(i==nextRowIndex)
+			nextRow();
+
+	if(i==currentRowIndex)
+	{
+		currentRow[j] = value;
+	}
+	else if(i==previousRowIndex)
+	{
+		previousRow[j] = value;
+	}
+	else throw HmmException("Reduced Dp matrix index out of bounds");
+}
 
 double EBC::DpMatrixLoMem::valueAt(unsigned int i, unsigned int j)
 {
+	if(i==nextRowIndex)
+		nextRow();
+
 	if(i==currentRowIndex)
 	{
 		return currentRow[j];
 	}
-	else if((i==currentRowIndex-1))
+	//FIXME - check casting to int
+	else if(i==previousRowIndex)
 	{
 		return previousRow[j];
 	}
+	else throw HmmException("Reduced Dp matrix index out of bounds");
 }
 
 void EBC::DpMatrixLoMem::setSrc(unsigned int i, unsigned int j, DpMatrixBase*){}
@@ -66,18 +88,17 @@ void EBC::DpMatrixLoMem::setVerticalAt(unsigned int i, unsigned int j){}
 
 void EBC::DpMatrixLoMem::setWholeRow(unsigned int row, double value)
 {
+	clear();
 	if(row == currentRowIndex)
 	{
 		std::fill(currentRow,currentRow+ySize, value);
-		currentRowIndex++;
 	}
 }
 
-
-
 void EBC::DpMatrixLoMem::setWholeCol(unsigned int col, double value)
 {
-	this->buffer[0] = this->buffer[1] = minVal;
+	clear();
+	this->buffer[0][0] = this->buffer[1][0] = this->minVal;
 }
 
 void EBC::DpMatrixLoMem::nextRow()
@@ -86,10 +107,14 @@ void EBC::DpMatrixLoMem::nextRow()
 	previousRow = currentRow;
 	currentRow = tmp;
 	std::fill(currentRow,currentRow+ySize, -10000.0);
+	currentRowIndex++;
+	nextRowIndex++;
+	previousRowIndex++;
 }
 
 void EBC::DpMatrixLoMem::setValue(unsigned int col, double value)
 {
+
 		currentRow[col] = value;
 }
 

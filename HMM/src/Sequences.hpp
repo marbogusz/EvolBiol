@@ -33,7 +33,7 @@ private:
 public:
 
 	//Input from file or console
-	Sequences(IParser*, Definitions::SequenceType) throw (ProgramException&);
+	Sequences(IParser*, Definitions::SequenceType) throw (HmmException&);
 
 	~Sequences();
 

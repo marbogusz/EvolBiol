@@ -15,11 +15,9 @@ namespace EBC
 
 class PairwiseHmmDeleteState: public EBC::PairwiseHmmStateBase
 {
-protected:
-
+public:
 	void initializeData();
 
-public:
 	PairwiseHmmDeleteState(unsigned int x, unsigned int y);
 
 	PairwiseHmmDeleteState(DpMatrixBase*);

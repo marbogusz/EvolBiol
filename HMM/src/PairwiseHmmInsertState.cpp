@@ -6,7 +6,7 @@
  */
 
 #include "PairwiseHmmInsertState.hpp"
-#include "DpMatrixFull.hpp";
+#include "DpMatrixFull.hpp"
 
 namespace EBC
 {
@@ -17,19 +17,24 @@ PairwiseHmmInsertState::PairwiseHmmInsertState(unsigned int x, unsigned int y)
 	initializeData();
 }
 
-PairwiseHmmInsertState::PairwiseHmmInsertState(DpMatrixBase *matrix) : dpMatrix(matrix)
+PairwiseHmmInsertState::PairwiseHmmInsertState(DpMatrixBase *matrix)
 {
+	this->dpMatrix = matrix;
 	initializeData();
 }
 
 void PairwiseHmmInsertState::initializeData()
 {
-	dpMatrix->setWholeRow(0,-100000000);
+	dpMatrix->setWholeRow(0,-100000);
 }
 
 void PairwiseHmmInsertState::setDirection(unsigned int i, unsigned int j)
 {
 	dpMatrix->setVerticalAt(i,j);
+}
+
+PairwiseHmmInsertState::~PairwiseHmmInsertState()
+{
 }
 
 } /* namespace EBC */

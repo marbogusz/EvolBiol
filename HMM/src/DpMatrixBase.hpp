@@ -24,17 +24,22 @@ protected:
 	unsigned int xSize, ySize;
 
 	double minVal;
-	double maxVal;
 
+	virtual void allocateData()=0;
 public:
 
 	virtual void setWholeRow(unsigned int row, double value)=0;
 
 	virtual void setWholeCol(unsigned int col, double value)=0;
 
-	DpMatrixBase(unsigned int xSize, unsigned int ySize);
+	DpMatrixBase(unsigned int xSize, unsigned int ySize)
+	{
+		this->xSize = xSize;
+		this->ySize = ySize;
+		this->minVal = -100000;
+	}
 
-	virtual ~DpMatrixBase();
+	virtual ~DpMatrixBase() {}
 
 	virtual void setValue(unsigned int x,unsigned int y, double value)=0;
 
@@ -47,6 +52,8 @@ public:
 	virtual void setHorizontalAt(unsigned int i, unsigned int j)=0;
 
 	virtual void setVerticalAt(unsigned int i, unsigned int j)=0;
+
+	virtual void traceback(string& seq_a, string& seq_b, std::pair<string,string>* alignment)=0;
 };
 
 } /* namespace EBC */

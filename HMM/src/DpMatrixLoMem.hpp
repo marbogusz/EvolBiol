@@ -31,6 +31,8 @@ protected:
 	double* currentRow;
 
 	unsigned int currentRowIndex;
+	unsigned int nextRowIndex;
+	int previousRowIndex;
 
 	void setValue(unsigned int col, double value);
 
@@ -42,7 +44,9 @@ protected:
 
 	double valueAtDiagonal(unsigned int col);
 
-	void nextRow();
+	inline void nextRow();
+
+	void clear();
 
 public:
 
@@ -61,6 +65,8 @@ public:
 	void setWholeRow(unsigned int row, double value);
 
 	void setWholeCol(unsigned int col, double value);
+
+	void traceback(string& seq_a, string& seq_b, std::pair<string,string>* alignment) {}
 
 
 	DpMatrixLoMem(unsigned int xSize, unsigned int ySize);

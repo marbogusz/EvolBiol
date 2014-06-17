@@ -28,12 +28,9 @@ EBC::DpMatrixFull::~DpMatrixFull()
 	delete matrixData;
 }
 
-EBC::DpMatrixFull::DpMatrixFull(unsigned int xS, unsigned int yS) :
-		xSize(xS), ySize(yS)
+EBC::DpMatrixFull::DpMatrixFull(unsigned int xS, unsigned int yS) : DpMatrixBase(xS,yS)
 {
-	maxVal = std::numeric_limits<double>::max();
-	minVal = -10000;//std::numeric_limits<double>::min();
-	allocateData();
+	this->allocateData();
 }
 
 void EBC::DpMatrixFull::setValue(unsigned int x, unsigned int y, double value)
@@ -135,7 +132,7 @@ void EBC::DpMatrixFull::setVerticalAt(unsigned int i, unsigned int j)
 
 void EBC::DpMatrixFull::setSrc(unsigned int i, unsigned int j, DpMatrixBase* src)
 {
-	matrixData[i][j].src = src;
+	matrixData[i][j].src = static_cast<DpMatrixFull*>(src);
 }
 
 void EBC::DpMatrixFull::traceback(string& seq_a, string& seq_b, std::pair<string,string>* alignment)

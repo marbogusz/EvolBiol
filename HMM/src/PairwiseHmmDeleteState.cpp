@@ -6,7 +6,7 @@
  */
 
 #include "PairwiseHmmDeleteState.hpp"
-#include "DpMatrixFull.hpp";
+#include "DpMatrixFull.hpp"
 
 namespace EBC
 {
@@ -17,8 +17,9 @@ PairwiseHmmDeleteState::PairwiseHmmDeleteState(unsigned int x, unsigned int y)
 	initializeData();
 }
 
-PairwiseHmmDeleteState::PairwiseHmmDeleteState(DpMatrixBase *matrix) : dpMatrix(matrix)
+PairwiseHmmDeleteState::PairwiseHmmDeleteState(DpMatrixBase *matrix)
 {
+	this->dpMatrix = matrix;
 	initializeData();
 }
 
@@ -26,7 +27,7 @@ void PairwiseHmmDeleteState::initializeData()
 {
 
 
-	dpMatrix->setWholeCol(0,-100000000);
+	dpMatrix->setWholeCol(0,-100000);
 }
 
 void PairwiseHmmDeleteState::setDirection(unsigned int i, unsigned int j)
@@ -34,5 +35,8 @@ void PairwiseHmmDeleteState::setDirection(unsigned int i, unsigned int j)
 	dpMatrix->setHorizontalAt(i,j);
 }
 
+PairwiseHmmDeleteState::~PairwiseHmmDeleteState()
+{
+}
 
 } /* namespace EBC */

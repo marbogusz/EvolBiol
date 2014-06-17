@@ -15,11 +15,10 @@ namespace EBC
 
 class PairwiseHmmInsertState: public EBC::PairwiseHmmStateBase
 {
-protected:
-
-	void initializeData();
 
 public:
+
+	void initializeData();
 
 	PairwiseHmmInsertState(unsigned int x, unsigned int y);
 

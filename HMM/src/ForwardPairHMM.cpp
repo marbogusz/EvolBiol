@@ -7,12 +7,13 @@
 
 #include "Definitions.hpp"
 #include "ForwardPairHMM.hpp"
-#include "ReducedPairHmmInsertState.hpp"
-#include "ReducedPairHmmDeleteState.hpp"
-#include "ReducedPairHmmMatchState.hpp"
+#include "PairwiseHmmInsertState.hpp"
+#include "PairwiseHmmDeleteState.hpp"
+#include "PairwiseHmmMatchState.hpp"
 #include "GTRModel.hpp"
 #include "HKY85Model.hpp"
 #include "AminoacidSubstitutionModel.hpp"
+#include "DpMatrixLoMem.hpp"
 
 namespace EBC
 {
@@ -197,9 +198,13 @@ void ForwardPairHMM::initializeStates()
 	if (Y != NULL)
 		delete Y;
 
-	M = new ReducedPairHmmMatchState(xSize,ySize);
-	X = new ReducedPairHmmInsertState(xSize,ySize);
-	Y = new ReducedPairHmmDeleteState(xSize,ySize);
+	//M = new PairwiseHmmMatchState(xSize,ySize);
+	//X = new PairwiseHmmInsertState(xSize,ySize);
+	//Y = new PairwiseHmmDeleteState(xSize,ySize);
+
+	M = new PairwiseHmmMatchState(new DpMatrixLoMem(xSize,ySize));
+	X = new PairwiseHmmInsertState(new DpMatrixLoMem(xSize,ySize));
+	Y = new PairwiseHmmDeleteState(new DpMatrixLoMem(xSize,ySize));
 }
 
 
@@ -281,6 +286,8 @@ double ForwardPairHMM::runForwardAlgorithm()
 
 	unsigned int i;
 	unsigned int j;
+	unsigned int k;
+	unsigned int l;
 
 	double sX,sY,sM, sS;
 
@@ -291,14 +298,14 @@ double ForwardPairHMM::runForwardAlgorithm()
 	double emissionY;
 
 
-	ReducedPairHmmMatchState* pM = static_cast<ReducedPairHmmMatchState*>(M);
-	ReducedPairHmmInsertState* pX = static_cast<ReducedPairHmmInsertState*>(X);
-	ReducedPairHmmDeleteState* pY = static_cast<ReducedPairHmmDeleteState*>(Y);
+	//ReducedPairHmmMatchState* pM = static_cast<ReducedPairHmmMatchState*>(M);
+	//ReducedPairHmmInsertState* pX = static_cast<ReducedPairHmmInsertState*>(X);
+	//ReducedPairHmmDeleteState* pY = static_cast<ReducedPairHmmDeleteState*>(Y);
 
 
-	pM->initializeData();
-	pX->initializeData();
-	pY->initializeData();
+	M->initializeData();
+	X->initializeData();
+	Y->initializeData();
 
 
 	for (i = 0; i<xSize; i++)
@@ -309,48 +316,42 @@ double ForwardPairHMM::runForwardAlgorithm()
 			{
 				if(i!=0)
 				{
+					k = i-1;
 					emissionX = log(substModel->getQXi(seq1[i-1].getMatrixIndex()));
-					xm = pM->valueAtTop(j) + X->getTransitionProbabilityFromMatch();
-					xx = pX->valueAtTop(j) + X->getTransitionProbabilityFromInsert();
-					xy = pY->valueAtTop(j) + X->getTransitionProbabilityFromDelete();
-					pX->setValue(j, emissionX + maths->logSum(xm,xx,xy));
+					xm = M->getValueAt(k,j) + X->getTransitionProbabilityFromMatch();
+					xx = X->getValueAt(k,j) + X->getTransitionProbabilityFromInsert();
+					xy = Y->getValueAt(k,j) + X->getTransitionProbabilityFromDelete();
+					X->setValueAt(i,j, emissionX + maths->logSum(xm,xx,xy));
 				}
 
 				if(j!=0)
 				{
+					k = j-1;
 					emissionY = log(substModel->getQXi(seq2[j-1].getMatrixIndex()));
-					ym = pM->valueAtLeft(j) + Y->getTransitionProbabilityFromMatch();
-					yx = pX->valueAtLeft(j) + Y->getTransitionProbabilityFromInsert();
-					yy = pY->valueAtLeft(j) + Y->getTransitionProbabilityFromDelete();
-					pY->setValue(j, emissionY + maths->logSum(ym,yx,yy));
+					ym = M->getValueAt(i,k) + Y->getTransitionProbabilityFromMatch();
+					yx = X->getValueAt(i,k) + Y->getTransitionProbabilityFromInsert();
+					yy = Y->getValueAt(i,k) + Y->getTransitionProbabilityFromDelete();
+					Y->setValueAt(i,j, emissionY + maths->logSum(ym,yx,yy));
 				}
 
 				if(i!=0 && j!=0 )
 				{
+					k = i-1;
+					l = j-1;
 					emissionM = log(substModel->getPXiYi(seq1[i-1].getMatrixIndex(), seq2[j-1].getMatrixIndex()));
-					mm = pM->valueAtDiagonal(j) + M->getTransitionProbabilityFromMatch();
-					mx = pX->valueAtDiagonal(j) + M->getTransitionProbabilityFromInsert();
-					my = pY->valueAtDiagonal(j) + M->getTransitionProbabilityFromDelete();
-					pM->setValue(j, emissionM + maths->logSum(mm,mx,my));
+					mm = M->getValueAt(k,l) + M->getTransitionProbabilityFromMatch();
+					mx = X->getValueAt(k,l) + M->getTransitionProbabilityFromInsert();
+					my = Y->getValueAt(k,l) + M->getTransitionProbabilityFromDelete();
+					M->setValueAt(i,j, emissionM + maths->logSum(mm,mx,my));
 				}
 			}
 		}
-
 		//pM->outputRow();
-		pX->nextRow();
-		pY->nextRow();
-		pM->nextRow();
 	}
 
-
-
-	//pX->nextRow();
-	//pY->nextRow();
-	//pM->nextRow();
-
-	sM = pM->valueAtTop(ySize-1);
-	sX = pX->valueAtTop(ySize-1);
-	sY = pY->valueAtTop(ySize-1);
+	sM = M->getValueAt(xSize-1, ySize-1);
+	sX = X->getValueAt(xSize-1, ySize-1);
+	sY = Y->getValueAt(xSize-1, ySize-1);
 	sS = maths->logSum(sM,sX,sY);
 
 	cerr << "\t" << sX << "\t" << sY << "\t"<< sM << "\t" << sS << endl;

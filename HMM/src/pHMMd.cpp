@@ -84,7 +84,7 @@ int main(int argc, char ** argv) {
 
 		else
 		{
-			throw ProgramException("specify either V or F option");
+			throw HmmException("specify either V or F option");
 		}
 		//ForwardPairHMM* epHMM = new ForwardPairHMM(inputSeqs);
 
@@ -96,7 +96,7 @@ int main(int argc, char ** argv) {
 		//ForwardPairHMM* fwdHMM = new ForwardPairHMM(inputSeqs,true);
 		//fwdHMM->summarize();
 	}
-	catch(ProgramException& pe)
+	catch(HmmException& pe)
 	{
 		cerr << pe.what();
 	}

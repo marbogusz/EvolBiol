@@ -29,9 +29,11 @@ protected:
 
 	DpMatrixBase* dpMatrix;
 
-	virtual void initializeData()=0;
+
 
 public:
+
+	virtual void initializeData()=0;
 
 	inline double getValueAt(unsigned int row, unsigned int column)
 	{
@@ -48,7 +50,15 @@ public:
 		delete this->dpMatrix;
 	}
 
-	void setSourceMatrixPtr(unsigned int row, unsigned int column, DpMatrixBase* ptr);
+	void setSourceMatrixPtr(unsigned int row, unsigned int column, PairwiseHmmStateBase* ptr)
+	{
+		dpMatrix->setSrc(row,column, ptr->getDpMatrix());
+	}
+
+	DpMatrixBase* getDpMatrix()
+	{
+		return this->dpMatrix;
+	}
 
 	virtual void setDirection(unsigned int, unsigned int)=0;
 
@@ -81,6 +91,11 @@ public:
 	inline double getTransitionProbabilityFromDelete()
 	{
 		return transFromDelete;
+	}
+
+	void traceback(string& seqA, string& seqB, std::pair<string,string>* alignment)
+	{
+		this->dpMatrix->traceback(seqA,seqB,alignment);
 	}
 
 
