@@ -42,23 +42,38 @@ int main(int argc, char ** argv) {
 
 			//check indel parameters
 
+			/*
 			ForwardPairHMM* fwdHMM = new ForwardPairHMM(inputSeqs, cmdReader->getModelType() ,
 					cmdReader->getIndelParams(),cmdReader->getSubstParams(), cmdReader->getOptimizationType(),
 					cmdReader->getBanding(), cmdReader->getBandFactor(), cmdReader->getDistance(),
 					cmdReader->getCategories(), cmdReader->getAlpha(), cmdReader->estimateAlpha());
 
+			*/
+
+			ForwardPairHMM* fwdHMM = new ForwardPairHMM(inputSeqs->getSequencesAt(0), inputSeqs->getSequencesAt(1),
+					inputSeqs->getDictionary(), cmdReader->getModelType() , cmdReader->getBanding(), cmdReader->getBandFactor(),
+					cmdReader->getCategories(), cmdReader->getAlpha());
+
+
+			fwdHMM->setModelFrequencies(inputSeqs->getElementFrequencies());
+			fwdHMM->setModelParameters(cmdReader->getIndelParams(),cmdReader->getSubstParams(), cmdReader->getDistance());
+			fwdHMM->runForwardAlgorithm();
+
+
+
 			double* estimatedParams = fwdHMM->getMlParameters();
 
 			string vitFile = cmdReader->getInputFileName();
 
-			for (unsigned int i = 0; i< fwdHMM->getTotalParameters(); i++)
-			{
-				cout << estimatedParams[i] << "\t";
-			}
+			//for (unsigned int i = 0; i< fwdHMM->getTotalParameters(); i++)
+			//{
+			//	cout << estimatedParams[i] << "\t";
+			//}
 			cout <<  vitFile << endl;
 
 			if(cmdReader->isOutputViterbiAlignment())
 			{
+
 				string vitFile = cmdReader->getInputFileName();
 				vitFile.insert(0,"viterbi_");
 				vitFile.replace(vitFile.end()-3,vitFile.end(),"fas");
@@ -73,6 +88,7 @@ int main(int argc, char ** argv) {
 				of.close();
 
 				delete bv;
+
 			}
 			delete fwdHMM;
 		}

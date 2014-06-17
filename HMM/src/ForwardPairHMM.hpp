@@ -9,11 +9,6 @@
 #define FORWARDPAIRHMM_HPP_
 
 #include "EvolutionaryPairHMM.hpp"
-#include <dlib/optimization.h>
-
-typedef dlib::matrix<double,0,1> column_vector;
-
-
 
 namespace EBC
 {
@@ -21,63 +16,10 @@ namespace EBC
 class ForwardPairHMM: public EBC::EvolutionaryPairHMM
 {
 
-private:
-
-	//BFGS optimization wrapper for dlib
-	class BFGS
-	{
-	protected:
-		column_vector initParams;
-		column_vector lowerBounds;
-		column_vector upperBounds;
-
-		unsigned int paramsCount;
-
-		ForwardPairHMM* parent;
-
-		Definitions::OptimizationType optimizationType;
-
-	public:
-		BFGS(ForwardPairHMM* enclosing, Definitions::OptimizationType ot);
-		virtual ~BFGS();
-		void optimize();
-
-		double objectiveFunction(const column_vector& m);
-
-		const column_vector objectiveFunctionDerivative(const column_vector& m);
-	};
-
-
-
 protected:
-
-	void initializeModels();
-
-	void initializeStates();
-
-	BFGS* bfgs;
-
-	//Bound scale
-	unsigned int bandFactor;
-	unsigned int bandSpan;
-	unsigned int gammaRateCategories;
-
-	double initialAlpha;
-
-	bool bandingEnabled;
-
-	bool estimateSubstitutionParams;
-	bool estimateIndelParams;
-	bool estimateDivergence;
-	bool estimateAlpha;
 
 	vector<double> userIndelParameters;
 	vector<double> userSubstParameters;
-
-	double* optParameters;
-	unsigned int optParametersCount;
-
-	void setParameters();
 
 	void getBandWidth()
 	{
@@ -90,27 +32,17 @@ protected:
 		int low = line - width;
 		int high = line + width;
 		bool result = ((position >= low) && (position <= high));
-
-		//if(result == false)
-		//{
-		//	DEBUG("FALSE RESULT FOR l :" << line << " position " << position << " low " << low << " high " << high);
-		//}
-
 		return result;
 	}
 
 
 public:
-	ForwardPairHMM(Sequences* inputSeqs, Definitions::ModelType model,std::vector<double> indel_params,
-			std::vector<double> subst_params, Definitions::OptimizationType ot, bool banding,
-			unsigned int bandPercentage, double evolDistance, unsigned int rateCategories, double alpha,
-			bool estimateAlpha);
+	ForwardPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dict,  Definitions::ModelType model, bool banding,
+			unsigned int bandPercentage, unsigned int rateCategories, double alpha);
 
 	virtual ~ForwardPairHMM();
 
 	double runForwardAlgorithm();
-
-	double runForwardIteration(const column_vector& m);
 
 	inline double* getMlParameters()
 	{

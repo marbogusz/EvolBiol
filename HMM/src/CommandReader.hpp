@@ -17,11 +17,6 @@ namespace EBC
 
 class CommandReader
 {
-private:
-
-	int count;			//parameter count
-	char** args;		//command line arguments
-
 public:
 
 	dlib::command_line_parser parser;

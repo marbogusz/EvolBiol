@@ -11,15 +11,59 @@
 namespace EBC
 {
 
-EvolutionaryPairHMM::EvolutionaryPairHMM(Sequences* inputSeqs) : inputSequences(inputSeqs)
+EvolutionaryPairHMM::EvolutionaryPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dct,
+		unsigned int rateCategories, double alpha) : gammaRateCategories(rateCategories), initialAlpha(alpha)
 {
 	M = X = Y = NULL;
-	dict = inputSeqs->getDictionary();
+	mlParameters = NULL;
+	this->dict = dct;
+
+	this->seq1 = s1;
+	this->seq2 = s2;
+
+	this->xSize = seq1.size() +1;
+	this->ySize = seq2.size() +1;
+
 	maths  = new Maths();
 	DEBUG("Creating the gap model");
 	indelModel = new AffineGeometricGapModel();
 
-	//substitution model created by the parent class
+	//substitution model created by the subclass
+}
+
+void EvolutionaryPairHMM::setModelParameters(std::vector<double> indel_params,
+		std::vector<double> subst_params,double evolDistance)
+{
+	this->indelParameters = indelModel->getParamsNumber();
+	this->substParameters = substModel->getParamsNumber();
+	this->totalParameters = indelParameters + substParameters -1;
+
+	if (mlParameters == NULL)
+		mlParameters = new double[totalParameters];
+
+	for (int i=0; i< this->substParameters-1; i++)
+	{
+		mlParameters[i] = subst_params[i];
+	}
+
+	mlParameters[substParameters-1] = evolDistance;
+
+	for (int i=0; i< this->indelParameters-1; i++)
+	{
+		mlParameters[i+substParameters] = indel_params[i];
+	}
+
+
+	indelModel->setParameters(mlParameters+substParameters-1);
+	substModel->setParameters(mlParameters);
+	//substModel->setParametersInMatrix();
+	//substModel->setDiagMeans();
+	//substModel->doEigenDecomposition();
+}
+
+void EvolutionaryPairHMM::setModelFrequencies(double* freqs)
+{
+	substModel->setObservedFrequencies(freqs);
 }
 
 void EvolutionaryPairHMM::setTransitionProbabilities()
@@ -41,14 +85,6 @@ void EvolutionaryPairHMM::setTransitionProbabilities()
 
 	X->setTransitionProbabilityFromMatch(log(g));
 	Y->setTransitionProbabilityFromMatch(log(g));
-}
-
-void EvolutionaryPairHMM::getSequencePair()
-{
-	this->seq1 = inputSequences->getSequencesAt(0);
-	this->seq2 = inputSequences->getSequencesAt(1);
-	this->xSize = seq1.size() +1;
-	this->ySize = seq2.size() +1;
 }
 
 double* EvolutionaryPairHMM::generateInitialSubstitutionParameters()
@@ -96,14 +132,27 @@ void EvolutionaryPairHMM::summarize()
 
 }
 
+void EvolutionaryPairHMM::initializeStates()
+{
+
+	if (M != NULL)
+		delete M;
+	if (X != NULL)
+		delete X;
+	if (Y != NULL)
+		delete Y;
+
+	//M = new PairwiseHmmMatchState(xSize,ySize);
+	//X = new PairwiseHmmInsertState(xSize,ySize);
+	//Y = new PairwiseHmmDeleteState(xSize,ySize);
+
+	M = new PairwiseHmmMatchState(new DpMatrixLoMem(xSize,ySize));
+	X = new PairwiseHmmInsertState(new DpMatrixLoMem(xSize,ySize));
+	Y = new PairwiseHmmDeleteState(new DpMatrixLoMem(xSize,ySize));
+}
 
 void EvolutionaryPairHMM::calculateModels()
 {
-	indelModel->setParameters(mlParameters+substParameters-1);
-	substModel->setParameters(mlParameters);
-	//substModel->setParametersInMatrix();
-	//substModel->setDiagMeans();
-	//substModel->doEigenDecomposition();
 	substModel->calculatePt();
 }
 

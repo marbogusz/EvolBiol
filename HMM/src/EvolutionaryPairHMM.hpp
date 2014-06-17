@@ -16,6 +16,10 @@
 #include "Maths.hpp"
 #include "PairwiseHmmStateBase.hpp"
 #include "SequenceElement.hpp"
+#include "PairwiseHmmInsertState.hpp"
+#include "PairwiseHmmDeleteState.hpp"
+#include "PairwiseHmmMatchState.hpp"
+#include "DpMatrixLoMem.hpp"
 
 namespace EBC
 {
@@ -39,6 +43,15 @@ protected:
 
 	unsigned int xSize, ySize;
 
+	//Bound scale
+	unsigned int bandFactor;
+	unsigned int bandSpan;
+	unsigned int gammaRateCategories;
+
+	double initialAlpha;
+
+	bool bandingEnabled;
+
 	vector<SequenceElement> seq1;
 	vector<SequenceElement> seq2;
 	vector<SequenceElement>::iterator itS1, itS2;
@@ -53,13 +66,9 @@ protected:
 	//the following assumes a fix HMM structure
 	virtual void setTransitionProbabilities();
 
-	virtual void initializeModels()=0;
-
 	virtual void calculateModels();
 
-	virtual void getSequencePair();
-
-	virtual void initializeStates() = 0;
+	virtual void initializeStates();
 
 	double* generateInitialSubstitutionParameters();
 
@@ -69,11 +78,26 @@ protected:
 
 
 public:
-	EvolutionaryPairHMM(Sequences* inputSeqs);
+
+	EvolutionaryPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dict, unsigned int rateCategories, double alpha);
 
 	virtual ~EvolutionaryPairHMM();
 
 	void summarize();
+
+	void setModelParameters(std::vector<double> indel_params, std::vector<double> subst_params,double evolDistance);
+
+	void setModelFrequencies(double*);
+
+	unsigned int getIndelParameterCount()
+	{
+		return this->indelModel->getParamsNumber();
+	}
+
+	unsigned int getSubstitutionParameterCount()
+	{
+		return this->substModel->getParamsNumber();
+	}
 
 	unsigned int getTotalParameters() const
 	{
