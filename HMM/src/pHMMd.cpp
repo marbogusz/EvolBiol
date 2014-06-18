@@ -9,7 +9,7 @@
 #include "Sequences.hpp"
 #include "BasicViterbi.hpp"
 #include "ForwardPairHMM.hpp"
-#include "ParseException.hpp"
+#include "HmmException.hpp"
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -52,11 +52,11 @@ int main(int argc, char ** argv) {
 
 			ForwardPairHMM* fwdHMM = new ForwardPairHMM(inputSeqs->getSequencesAt(0), inputSeqs->getSequencesAt(1),
 					inputSeqs->getDictionary(), cmdReader->getModelType() , cmdReader->getBanding(), cmdReader->getBandFactor(),
-					cmdReader->getCategories(), cmdReader->getAlpha());
+					cmdReader->getCategories(), cmdReader->getAlpha(), new Maths());
 
 
 			fwdHMM->setModelFrequencies(inputSeqs->getElementFrequencies());
-			fwdHMM->setModelParameters(cmdReader->getIndelParams(),cmdReader->getSubstParams(), cmdReader->getDistance());
+			fwdHMM->setModelParameters(cmdReader->getIndelParams(),cmdReader->getSubstParams(), cmdReader->getDistance(),0);
 			fwdHMM->runForwardAlgorithm();
 
 

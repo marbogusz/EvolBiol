@@ -9,7 +9,7 @@
 
 namespace EBC
 {
-	IndelModel::IndelModel()
+	IndelModel::IndelModel() : parameterHiBounds(paramsNumber), parameterLoBounds(paramsNumber)
 	{
 
 	}

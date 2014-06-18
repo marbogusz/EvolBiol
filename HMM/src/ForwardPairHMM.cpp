@@ -17,8 +17,8 @@ namespace EBC
 
 
 ForwardPairHMM::ForwardPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dict, Definitions::ModelType model,
-		bool banding, unsigned int bandPercentage, unsigned int rateCategories, double alpha) :
-		EvolutionaryPairHMM(s1,s2, dict, rateCategories, alpha)
+		bool banding, unsigned int bandPercentage, unsigned int rateCategories, double alpha, Maths* mt) :
+		EvolutionaryPairHMM(s1,s2, dict, rateCategories, alpha, mt)
 {
 	DEBUG("Creating the model");
 	if (model == Definitions::ModelType::GTR)

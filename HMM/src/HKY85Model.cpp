@@ -16,15 +16,27 @@ HKY85Model::HKY85Model(Dictionary* dict, Maths* alg, unsigned int rates)
 
 	//6 parameters - 4 frequencies + kappa + time
 	//2 parameters to estimate - k and t
-	this->paramsNumber = 2;
+	this->paramsNumber = 1;
 	this->parameters = new double[this->paramsNumber];
+
+	this->parameterHiBounds[0] = 5;
+	this->parameterLoBounds[0] = 0.000001;
+
+
 	//TODO - set within the model
 
 }
 
+void HKY85Model::setParameters(vector<double>& par)
+{
+	for (int i = 0; i< paramsNumber; i++)
+	{
+		this->parameters[i] = par[i];
+	}
+}
+
 void HKY85Model::buildSmatrix() {
 	this->k = &parameters[0];
-	this->time = parameters[1];
 
 	int s = this->matrixSize;
 

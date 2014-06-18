@@ -10,6 +10,15 @@
 
 
 #include "OptimizedModelParameters.hpp"
+#include "Definitions.hpp"
+#include "PairwiseEstimator.hpp"
+#include "ForwardPairHMM.hpp"
+#include "SubstitutionModelBase.hpp"
+#include "Maths.hpp"
+#include "Dictionary.hpp"
+#include "IndelModel.hpp"
+#include "Sequences.hpp"
+
 #include <vector>
 
 using namespace std;
@@ -48,17 +57,19 @@ private:
 	};
 
 
-
 protected:
 
-
 	BFGS* bfgs;
+
+	Dictionary* dict;
+	SubstitutionModelBase* substModel;
+	IndelModel* indelModel;
+	Sequences* inputSequences;
+	Maths* maths;
 
 	unsigned int bandFactor;
 	unsigned int bandSpan;
 	unsigned int gammaRateCategories;
-
-	double initialAlpha;
 
 	bool bandingEnabled;
 
@@ -67,9 +78,11 @@ protected:
 	bool estimateDivergence;
 	bool estimateAlpha;
 
-	vector<double> userIndelParameters;
-	vector<double> userSubstParameters;
-	vector<double> divergenceTimes;
+	unsigned int pairCount;
+
+	vector<ForwardPairHMM*> hmms;
+
+	OptimizedModelParameters modelParams;
 
 public:
 	PairwiseEstimator(Sequences* inputSeqs, Definitions::ModelType model,std::vector<double> indel_params,
@@ -80,7 +93,7 @@ public:
 
 	void runIteration(const column_vector& bfgsParameters);
 
-	double runOptimization();
+	double runIteration();
 
 	//ModelParameters getMlParameters()
 	//{

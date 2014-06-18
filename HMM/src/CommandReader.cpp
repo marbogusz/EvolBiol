@@ -17,7 +17,7 @@ using namespace std;
 namespace EBC
 {
 
-CommandReader::CommandReader(int argc, char** argv) : count(argc), args(argv)
+CommandReader::CommandReader(int argc, char** argv)
 {
 	try
 	{

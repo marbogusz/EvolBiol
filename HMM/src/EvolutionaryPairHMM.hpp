@@ -79,13 +79,13 @@ protected:
 
 public:
 
-	EvolutionaryPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dict, unsigned int rateCategories, double alpha);
+	EvolutionaryPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dict, unsigned int rateCategories, double alpha, Maths*);
 
 	virtual ~EvolutionaryPairHMM();
 
 	void summarize();
 
-	void setModelParameters(std::vector<double> indel_params, std::vector<double> subst_params,double evolDistance);
+	void setModelParameters(std::vector<double> indel_params, std::vector<double> subst_params,double evolDistance, double alpha);
 
 	void setModelFrequencies(double*);
 

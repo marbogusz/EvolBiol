@@ -1,35 +1,37 @@
 /*
- * AffineGeometricGapModel.h
+ * NegativeBinomialGapModel.h
  *
  *  Created on: Feb 25, 2014
  *      Author: root
  */
 
-#ifndef AFFINEGEOMETRICGAPMODEL_H_
-#define AFFINEGEOMETRICGAPMODEL_H_
+#ifndef NBGAPMODEL_H_
+#define NBGAPMODEL_H_
 
 #include "IndelModel.hpp"
+
 
 namespace EBC
 {
 
-class AffineGeometricGapModel: public EBC::IndelModel
+class NegativeBinomialGapModel: public EBC::IndelModel
 {
 protected:
 	double lambda;
-	double time;
 
 public:
 
-	AffineGeometricGapModel(double lambda, double t, double gapExtenstionProbs);
+	NegativeBinomialGapModel();
 
-	AffineGeometricGapModel();
-
-	virtual ~AffineGeometricGapModel();
+	virtual ~NegativeBinomialGapModel();
 
 	void calculateGeometricProbability(double lambda, double t);
 
 	void setParameters(double* params);
+
+	void setParameters(vector<double>&);
+
+	void calculate();
 
 	void summarize();
 };

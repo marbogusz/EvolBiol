@@ -15,11 +15,24 @@ GTRModel::GTRModel(Dictionary* dict, Maths* alg, unsigned int rates)
 {
 	//6 elements to estimate - a, b, c, d, e, f=1
 	//6th element is divergence time;
-	this->paramsNumber = 6;
+	this->paramsNumber = 5;
 	this->parameters = new double[this->paramsNumber];
 	//TODO - set within the model
 	//this->scale = this->logMode==true ? exp(1.0) : 1.0;
 
+	for (int i=0;i<5;i++)
+	{
+		this->parameterLoBounds[i] = 0.000001;
+		this->parameterHiBounds[i] = 5;
+	}
+}
+
+void GTRModel::setParameters(vector<double>& par)
+{
+	for (int i = 0; i< paramsNumber; i++)
+	{
+		this->parameters[i] = par[i];
+	}
 }
 
 
@@ -32,7 +45,7 @@ void GTRModel::buildSmatrix() {
 	this->f = &scale;
 
 	//FIXME - deal with alpha somehow
-	this->time = parameters[5];
+	//this->time = parameters[5];
 
 	int s = this->matrixSize;
 	int i,j,k;

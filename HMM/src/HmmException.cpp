@@ -5,7 +5,7 @@
  *      Author: mbogusz
  */
 
-#include "ParseException.hpp"
+#include "HmmException.hpp"
 
 namespace EBC {
 

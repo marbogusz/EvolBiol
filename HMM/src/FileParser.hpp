@@ -9,7 +9,7 @@
 #define FILEPARSER_H_
 
 #include <fstream>
-#include "ParseException.hpp"
+#include "HmmException.hpp"
 #include "IParser.hpp"
 #include <vector>
 

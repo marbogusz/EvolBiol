@@ -9,7 +9,7 @@
 #define COMMANDREADER_H_
 
 #include "IParser.hpp"
-#include "ParseException.hpp"
+#include "HmmException.hpp"
 #include <dlib/cmd_line_parser.h>
 
 namespace EBC

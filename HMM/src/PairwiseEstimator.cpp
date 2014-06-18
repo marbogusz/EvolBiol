@@ -5,9 +5,7 @@
  *      Author: root
  */
 
-#include "Definitions.hpp"
 #include "PairwiseEstimator.hpp"
-#include "ForwardPairHMM.hpp"
 
 namespace EBC
 {
@@ -16,53 +14,13 @@ namespace EBC
 PairwiseEstimator::BFGS::BFGS(PairwiseEstimator* enclosing, Definitions::OptimizationType ot) : optimizationType(ot)
 {
 	parent = enclosing;
-	paramsCount = enclosing->optParametersCount;
+	paramsCount = parent->modelParams.optParamCount();
 	this->initParams.set_size(paramsCount);
 	this->lowerBounds.set_size(paramsCount);
 	this->upperBounds.set_size(paramsCount);
-	int i;
-	unsigned int ptr =0;
 
-	if(enclosing->estimateSubstitutionParams)
-	{
-		for (i=0; i<enclosing->substParameters-1; i++)
-		{
-			initParams(i) = enclosing->optParameters[i];
-			//default probs bounds
-			lowerBounds(i) = 0.000001;
-			//FIXME - provide external bounds????????????
-			upperBounds(i) = 5;
-		}
-		ptr += enclosing->substParameters-1;
-	}
-	//set time
-	initParams(ptr) = enclosing->optParameters[ptr];
-	//default probs bounds
-	lowerBounds(ptr) = 0.000001;
-	//FIXME - provide external bounds????????????
-	upperBounds(ptr) = 3;
-	ptr++;
+	parent->modelParams.toDlibVector(initParams,lowerBounds,upperBounds);
 
-	if(enclosing->estimateIndelParams)
-	{
-		//indel rate FIXME
-		initParams(ptr) = enclosing->optParameters[ptr];
-		lowerBounds(ptr) = 0.000001;
-		upperBounds(ptr) = 0.2;
-		//geometric rate
-		initParams(ptr+1) = enclosing->optParameters[ptr+1];
-		lowerBounds(ptr+1) = 0.000001;
-		upperBounds(ptr+1) = 0.999999;
-
-		/*for (i=0; i<enclosing->indelParameters-1; i++)
-		{
-			initParams(ptr+i) = enclosing->optParameters[ptr+i];
-		//default probs bounds
-			lowerBounds(ptr+i) = 0.000001;
-		//FIXME - provide external bounds????????????
-			upperBounds(ptr+i) = 0.999999;
-		}*/
-	}
 	DEBUG("DLIB optimizer init with " << paramsCount << " parameters");
 }
 
@@ -72,7 +30,8 @@ PairwiseEstimator::BFGS::~BFGS()
 
 double PairwiseEstimator::BFGS::objectiveFunction(const column_vector& bfgsParameters)
 {
-	return parent->runIteration(bfgsParameters);
+	this->parent->modelParams.fromDlibVector(bfgsParameters);
+	return parent->runIteration();
 }
 
 
@@ -113,12 +72,18 @@ void PairwiseEstimator::BFGS::optimize()
 
 
 PairwiseEstimator::PairwiseEstimator(Sequences* inputSeqs, Definitions::ModelType model ,std::vector<double> indel_params,
-		std::vector<double> subst_params, Definitions::OptimizationType ot, bool banding, unsigned int bandPercentage, double evolDistance,
-		unsigned int rateCategories, double alpha, bool estimateAlpha) :
-		EvolutionaryPairHMM(inputSeqs), userIndelParameters(indel_params), userSubstParameters(subst_params),
-		gammaRateCategories(rateCategories), initialAlpha(alpha), estimateAlpha(estimateAlpha)
+		std::vector<double> subst_params, Definitions::OptimizationType ot, bool banding, unsigned int bandPercentage,
+		unsigned int rateCategories, double alpha, bool estimateAlpha) : inputSequences(inputSeqs), gammaRateCategories(rateCategories)
 {
-	DEBUG("Creating the model");
+	this->pairCount = inputSequences->getPairCount();
+
+	this->hmms(pairCount);
+
+	maths = new Maths();
+	dict = inputSequences->getDictionary();
+
+	//Helper models
+	//FIXME - get some static definitions or sth!!
 	if (model == Definitions::ModelType::GTR)
 	{
 		substModel = new GTRModel(dict, maths,gammaRateCategories);
@@ -131,41 +96,37 @@ PairwiseEstimator::PairwiseEstimator(Sequences* inputSeqs, Definitions::ModelTyp
 	{
 			substModel = new AminoacidSubstitutionModel(dict, maths,gammaRateCategories,Definitions::aaLgModel);
 	}
+	indelModel = new NegativeBinomialGapModel();
 
-	substModel->setAlpha(initialAlpha);
+	estimateSubstitutionParams = subst_params.size() == 0;
+	estimateIndelParams = indel_params.size() == 0;
+	this->estimateAlpha = estimateAlpha;
 
-	estimateSubstitutionParams = (subst_params.size() == 0 && substModel->getParamsNumber() > 1);
-	estimateIndelParams = (indel_params.size() == 0);
-	estimateDivergence = (evolDistance < 0);
+	this->modelParams(substModel, indelModel, pairCount, estimateSubstitutionParams,
+			estimateIndelParams, estimateAlpha, maths);
 
-	//FIXME
-	//Hardcode the band for now
+	if(!estimateIndelParams)
+		modelParams.setUserIndelParams(indel_params);
+	if(!estimateSubstitutionParams)
+		modelParams.setUserSubstParams(subst_params);
+	if(!estimateAlpha)
+		modelParams.setAlpha(alpha);
+
+
 	bandFactor = bandPercentage;
 	bandingEnabled = banding;
 
-	//initialize parameter arrays
-	initializeModels();
+	ForwardPairHMM* hmm;
 
-
-	//TODO - set parameters depending on the values provided
-	setParameters();
-	if(!estimateDivergence)
+	for(unsigned int i =0; i<pairCount; i++)
 	{
-		this->mlParameters[this->substParameters-1] = evolDistance;
+		hmm = hmms[i] = new ForwardPairHMM(inputSequences->getSequencesAt(0), inputSequences->getSequencesAt(1),
+				dict, ot , banding, bandPercentage,rateCategories, alpha, maths);
+		hmm->setModelFrequencies(inputSequences->getElementFrequencies());
 	}
 
-	getSequencePair();
-	getBandWidth();
-	calculateModels();
-	initializeStates();
-
-	if (estimateDivergence)
-	{
-		this-> bfgs = new BFGS(this,ot);
-		bfgs->optimize();
-	}
-	else
-		this->runForwardAlgorithm();
+	bfgs = new BFGS(this,ot);
+	bfgs->optimize();
 }
 
 PairwiseEstimator::~PairwiseEstimator()
@@ -175,190 +136,23 @@ PairwiseEstimator::~PairwiseEstimator()
 	//delete Y;
 	//delete X;
 	//delete M;
-	delete[] optParameters;
-	delete[] mlParameters;
 	//delete substModel;
 	//delete indelModel;
     delete maths;
 }
 
-double PairwiseEstimator::runForwardIteration(const column_vector& bfgsParameters)
+double PairwiseEstimator::runIteration()
 {
-	unsigned int optPointer = estimateSubstitutionParams ? 0 : substParameters -1;
-	cerr << " optimizing : ";
-	for(int i=0; i<optParametersCount; i++)
+	double result = 0;
+	ForwardPairHMM* hmm;
+
+	for(unsigned int i =0; i<pairCount; i++)
 	{
-		mlParameters[i+optPointer] = bfgsParameters(i);
-		cerr << "\t" << bfgsParameters(i);
+		hmm = hmms[i];
+		hmm>setModelParameters(modelParams.getIndelParameters(),modelParams.getSubstParameters(),
+				modelParams.getDivergenceTime(i), modelParams.getAlpha());
+		result += hmm->runForwardAlgorithm();
 	}
-
-	//paste the opt parameters to mlVector
-	DEBUGV(mlParameters, totalParameters);
-
-	return this->runForwardAlgorithm() * -1;
-}
-
-void PairwiseEstimator::setParameters()
-{
-	//Models are initialized at this stage
-	double* initialSubstData;
-	double* initialIndelData;
-	double initialDistance = this->generateInitialDistanceParameter();
-	unsigned int optPointer = 0;
-
-	if (estimateSubstitutionParams)
-	{
-		initialSubstData=this->generateInitialSubstitutionParameters();
-		for (int i=0; i< this->substParameters-1; i++)
-		{
-			this->mlParameters[i] = initialSubstData[i];
-			this->optParameters[i]= initialSubstData[i];
-		}
-		delete[] initialSubstData;
-		optPointer += substParameters -1;
-	}
-	else
-	{
-		for (int i=0; i< this->substParameters-1; i++)
-		{
-			this->mlParameters[i] = userSubstParameters[i];
-		}
-	}
-
-	//set time
-
-	this->mlParameters[substParameters-1] = initialDistance;
-	this->optParameters[optPointer] = initialDistance;
-	optPointer++;
-
-	if(estimateIndelParams)
-	{
-		initialIndelData = this->generateInitialIndelParameters();
-		for (int i=0; i< this->indelParameters-1; i++)
-		{
-			this->mlParameters[i+substParameters] = initialIndelData[i];
-			this->optParameters[i+optPointer]= initialIndelData[i];
-		}
-		delete[] initialIndelData;
-	}
-	else
-	{
-		//set provided vales
-		for (int i=0; i< this->indelParameters-1; i++)
-		{
-			this->mlParameters[i+substParameters] = userIndelParameters[i];
-		}
-	}
-
-}
-
-double PairwiseEstimator::runForwardAlgorithm()
-{
-
-	calculateModels();
-	setTransitionProbabilities();
-
-	unsigned int i;
-	unsigned int j;
-	unsigned int k;
-	unsigned int l;
-
-	double sX,sY,sM, sS;
-
-	double xx,xy,xm,yx,yy,ym,mx,my,mm;
-
-	double emissionM;
-	double emissionX;
-	double emissionY;
-
-
-	//ReducedPairHmmMatchState* pM = static_cast<ReducedPairHmmMatchState*>(M);
-	//ReducedPairHmmInsertState* pX = static_cast<ReducedPairHmmInsertState*>(X);
-	//ReducedPairHmmDeleteState* pY = static_cast<ReducedPairHmmDeleteState*>(Y);
-
-
-	M->initializeData();
-	X->initializeData();
-	Y->initializeData();
-
-
-	for (i = 0; i<xSize; i++)
-	{
-		for (j = 0; j<ySize; j++)
-		{
-			if(this->withinBand(i,j,this->bandSpan) || !bandingEnabled)
-			{
-				if(i!=0)
-				{
-					k = i-1;
-					emissionX = log(substModel->getQXi(seq1[i-1].getMatrixIndex()));
-					xm = M->getValueAt(k,j) + X->getTransitionProbabilityFromMatch();
-					xx = X->getValueAt(k,j) + X->getTransitionProbabilityFromInsert();
-					xy = Y->getValueAt(k,j) + X->getTransitionProbabilityFromDelete();
-					X->setValueAt(i,j, emissionX + maths->logSum(xm,xx,xy));
-				}
-
-				if(j!=0)
-				{
-					k = j-1;
-					emissionY = log(substModel->getQXi(seq2[j-1].getMatrixIndex()));
-					ym = M->getValueAt(i,k) + Y->getTransitionProbabilityFromMatch();
-					yx = X->getValueAt(i,k) + Y->getTransitionProbabilityFromInsert();
-					yy = Y->getValueAt(i,k) + Y->getTransitionProbabilityFromDelete();
-					Y->setValueAt(i,j, emissionY + maths->logSum(ym,yx,yy));
-				}
-
-				if(i!=0 && j!=0 )
-				{
-					k = i-1;
-					l = j-1;
-					emissionM = log(substModel->getPXiYi(seq1[i-1].getMatrixIndex(), seq2[j-1].getMatrixIndex()));
-					mm = M->getValueAt(k,l) + M->getTransitionProbabilityFromMatch();
-					mx = X->getValueAt(k,l) + M->getTransitionProbabilityFromInsert();
-					my = Y->getValueAt(k,l) + M->getTransitionProbabilityFromDelete();
-					M->setValueAt(i,j, emissionM + maths->logSum(mm,mx,my));
-				}
-			}
-		}
-		//pM->outputRow();
-	}
-
-	sM = M->getValueAt(xSize-1, ySize-1);
-	sX = X->getValueAt(xSize-1, ySize-1);
-	sY = Y->getValueAt(xSize-1, ySize-1);
-	sS = maths->logSum(sM,sX,sY);
-
-	cerr << "\t" << sX << "\t" << sY << "\t"<< sM << "\t" << sS << endl;
-
-	DEBUG ("Forward results:");
-	DEBUG (" sX, sY, sM, sS " << sX << "\t" << sY << "\t" << sM << "\t" << sS);
-
-	/*cout << "M" << endl;
-	M->outputValues(0);
-	cout << "X" << endl;
-	X->outputValues(0);
-	cout << "Y" << endl;
-	Y->outputValues(0);
-	 */
-	return sS;
-}
-
-void PairwiseEstimator::initializeModels()
-{
-	//set the counts and params!
-	this->indelParameters = indelModel->getParamsNumber();
-	this->substParameters = substModel->getParamsNumber();
-	this->totalParameters = indelParameters + substParameters -1;
-	this->mlParameters = new double[totalParameters];
-
-	unsigned int substMLParamCount = this->estimateSubstitutionParams == true ? this->substParameters-1 : 0;
-	unsigned int indelMLParamCount = this->estimateIndelParams == true ? this->indelParameters-1 : 0;
-
-	optParametersCount = substMLParamCount  + indelMLParamCount + 1;
-	//estimate the distance at the minimum
-	this->optParameters = new double[optParametersCount];
-
-	substModel->setObservedFrequencies(inputSequences->getElementFrequencies());
 }
 
 } /* namespace EBC */

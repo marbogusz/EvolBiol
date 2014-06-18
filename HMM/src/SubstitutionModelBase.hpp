@@ -11,8 +11,9 @@
 #include "Dictionary.hpp"
 #include "Definitions.hpp"
 #include "Maths.hpp"
-#include "ParseException.hpp"
+#include "HmmException.hpp"
 #include <cmath>
+#include <vector>
 
 namespace EBC
 {
@@ -21,6 +22,9 @@ class SubstitutionModelBase
 {
 
 protected:
+
+	vector<double> parameterHiBounds;
+	vector<double> parameterLoBounds;
 
 	unsigned int matrixSize;
 
@@ -98,7 +102,23 @@ public:
 
 	double getQXi(unsigned int xi);
 
+	virtual void setParameters(vector<double>&)=0;
+
+	void setTime(double t)
+	{
+		this->time = t;
+	}
 //getters and setters
+
+	inline double getHiBound(unsigned int pos)
+	{
+		return parameterHiBounds[pos];
+	}
+
+	inline double getLoBound(unsigned int pos)
+	{
+		return parameterLoBounds[pos];
+	}
 
 	void setAlpha(double a)
 	{

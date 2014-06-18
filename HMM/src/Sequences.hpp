@@ -12,7 +12,7 @@
 #include "Definitions.hpp"
 #include "IParser.hpp"
 #include "Dictionary.hpp"
-#include "ParseException.hpp"
+#include "HmmException.hpp"
 #include "SequenceElement.hpp"
 #include "Definitions.hpp"
 
@@ -46,6 +46,12 @@ public:
 
 	//void getSequencePair(vector<SequenceElement> s1, vector<SequenceElement> s2 );
 	vector<SequenceElement> getSequencesAt(int pos);
+
+	unsigned int getPairCount()
+	{
+		unsigned int ct = translatedSequences.size();
+		return (ct*(ct-1))/2;
+	}
 
 	string getRawSequenceAt(unsigned int pos);
 private:

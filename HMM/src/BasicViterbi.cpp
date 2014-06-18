@@ -12,7 +12,7 @@
 #include "GTRModel.hpp"
 #include "HKY85Model.hpp"
 #include "AminoacidSubstitutionModel.hpp"
-#include "AffineGeometricGapModel.hpp"
+#include "NegativeBinomialGapModel.hpp"
 #include "PairwiseHmmMatchState.hpp"
 #include "PairwiseHmmInsertState.hpp"
 #include "PairwiseHmmDeleteState.hpp"
@@ -51,7 +51,7 @@ BasicViterbi::BasicViterbi(Sequences* inputSeqs, Definitions::ModelType model,st
     substModel->setAlpha(alpha);
 
     DEBUG("Creating the gap model");
-	indelModel = new AffineGeometricGapModel();
+	indelModel = new NegativeBinomialGapModel();
 
 	DEBUG("initializeModels");
 	initializeModels();

@@ -1,5 +1,5 @@
 /*
- * Dictionary.hpppp
+ * Dictionary.hpp
  *
  *  Created on: Jan 13, 2014
  *      Author: root

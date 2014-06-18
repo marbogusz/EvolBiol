@@ -7,7 +7,7 @@
 
 #include "DpMatrixLoMem.hpp"
 #include <iostream>
-#include "ParseException.hpp"
+#include "HmmException.hpp"
 
 using namespace std;
 

@@ -27,6 +27,8 @@ public:
 	void buildSmatrix();
 
 	void summarize();
+
+	void setParameters(vector<double>&);
 };
 
 } /* namespace EBC */

@@ -27,13 +27,15 @@ protected:
 
 public:
 
-	AminoacidSubstitutionModel(Dictionary*, Maths*i, unsigned int, Definitions::aaModelDefinition);
+	AminoacidSubstitutionModel(Dictionary*, Maths*, unsigned int, Definitions::aaModelDefinition);
 
 	virtual ~AminoacidSubstitutionModel();
 
 	void calculatePt();
 
 	void summarize();
+
+	void setParameters(vector<double>&){}
 };
 
 } /* namespace EBC */

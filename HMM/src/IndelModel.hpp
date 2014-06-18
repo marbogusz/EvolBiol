@@ -8,6 +8,10 @@
 #ifndef INDELMODEL_HPP_
 #define INDELMODEL_HPP_
 
+#include <vector>
+
+using namespace std;
+
 namespace EBC
 {
 
@@ -18,7 +22,13 @@ protected:
 
 	double gapOpeningProbability;
 
+	//divergence time
+	double time;
+
 	unsigned int paramsNumber;
+
+	vector<double> parameterHiBounds;
+	vector<double> parameterLoBounds;
 
 	//bool logMode;
 
@@ -28,7 +38,16 @@ public:
 	//set parameters - time + the rest of parameters
 	virtual void setParameters(double*) = 0;
 
+	virtual void setParameters(vector<double>&)=0;
+
+	void setTime(double t)
+	{
+		this->time = t;
+	}
+
 	virtual void summarize()=0;
+
+	virtual void calculate()=0;
 
 	double getGapExtensionProbability() const
 	{
@@ -43,6 +62,16 @@ public:
 	unsigned int getParamsNumber() const
 	{
 		return paramsNumber;
+	}
+
+	inline double getHiBound(unsigned int pos)
+	{
+		return parameterHiBounds[pos];
+	}
+
+	inline double getLoBound(unsigned int pos)
+	{
+		return parameterLoBounds[pos];
 	}
 };
 

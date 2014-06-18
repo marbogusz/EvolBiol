@@ -6,13 +6,14 @@
  */
 
 #include "EvolutionaryPairHMM.hpp"
-#include "AffineGeometricGapModel.hpp"
+#include "NegativeBinomialGapModel.hpp"
 
 namespace EBC
 {
 
 EvolutionaryPairHMM::EvolutionaryPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dct,
-		unsigned int rateCategories, double alpha) : gammaRateCategories(rateCategories), initialAlpha(alpha)
+		unsigned int rateCategories, double alpha, Maths* mt) : gammaRateCategories(rateCategories),
+				maths(mt), initialAlpha(alpha)
 {
 	M = X = Y = NULL;
 	mlParameters = NULL;
@@ -26,39 +27,30 @@ EvolutionaryPairHMM::EvolutionaryPairHMM(vector<SequenceElement> s1, vector<Sequ
 
 	maths  = new Maths();
 	DEBUG("Creating the gap model");
-	indelModel = new AffineGeometricGapModel();
+	indelModel = new NegativeBinomialGapModel();
 
 	//substitution model created by the subclass
 }
 
 void EvolutionaryPairHMM::setModelParameters(std::vector<double> indel_params,
-		std::vector<double> subst_params,double evolDistance)
+		std::vector<double> subst_params,double evolDistance, double alpha)
 {
 	this->indelParameters = indelModel->getParamsNumber();
 	this->substParameters = substModel->getParamsNumber();
-	this->totalParameters = indelParameters + substParameters -1;
+	this->totalParameters = indelParameters + substParameters +1; //plus time
 
-	if (mlParameters == NULL)
-		mlParameters = new double[totalParameters];
-
-	for (int i=0; i< this->substParameters-1; i++)
+	if (indelParameters == indel_params.size() && substParameters == subst_params.size())
 	{
-		mlParameters[i] = subst_params[i];
+		indelModel->setParameters(mlParameters+substParameters-1);
+		indelModel->setTime(evolDistance);
+		substModel->setAlpha(alpha);
+		substModel->setParameters(subst_params);
+		substModel->setTime(evolDistance);
 	}
-
-	mlParameters[substParameters-1] = evolDistance;
-
-	for (int i=0; i< this->indelParameters-1; i++)
+	else
 	{
-		mlParameters[i+substParameters] = indel_params[i];
+		throw HmmException("setModelParameters : wrong number of parameters provided");
 	}
-
-
-	indelModel->setParameters(mlParameters+substParameters-1);
-	substModel->setParameters(mlParameters);
-	//substModel->setParametersInMatrix();
-	//substModel->setDiagMeans();
-	//substModel->doEigenDecomposition();
 }
 
 void EvolutionaryPairHMM::setModelFrequencies(double* freqs)
@@ -154,6 +146,7 @@ void EvolutionaryPairHMM::initializeStates()
 void EvolutionaryPairHMM::calculateModels()
 {
 	substModel->calculatePt();
+	indelModel->calculate();
 }
 
 EvolutionaryPairHMM::~EvolutionaryPairHMM()

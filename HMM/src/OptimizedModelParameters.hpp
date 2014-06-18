@@ -10,6 +10,9 @@
 
 #include <vector>
 #include <dlib/optimization.h>
+#include "SubstitutionModelBase.hpp"
+#include "Maths.hpp"
+#include "IndelModel.hpp"
 
 typedef dlib::matrix<double,0,1> column_vector;
 
@@ -26,6 +29,7 @@ protected:
 	vector<double> substParameters;
 	vector<double> divergenceTimes;
 	double alpha;
+	double divergenceBound;
 
 	bool estimateIndelParams;
 	bool estimateSubstParams;
@@ -36,14 +40,50 @@ protected:
 	unsigned int distCount;
 	unsigned int optCount;
 
+	//FIXME - static bound vectors!
+	SubstitutionModelBase* sm;
+	IndelModel* im;
+
+	Maths* maths;
+
+	void generateInitialIndelParameters();
+	void generateInitialSubstitutionParameters();
+	void generateInitialDistanceParameters();
+
 public:
-	OptimizedModelParameters(unsigned int, unsigned int, unsigned int, bool, bool, bool);
+	OptimizedModelParameters(SubstitutionModelBase*, IndelModel*, unsigned int, bool, bool, bool, Maths*);
 
 	unsigned int optParamCount();
 
-	void toDlibVector(column_vector&);
+	void toDlibVector(column_vector&,column_vector&,column_vector&);
+
 	void fromDlibVector(const column_vector&);
 
+	void setAlpha(double);
+
+	void setUserIndelParams(vector<double>);
+
+	void setUserSubstParams(vector<double>);
+
+	double getAlpha() const
+	{
+		return alpha;
+	}
+
+	double getDivergenceTime(unsigned int index)
+	{
+		return divergenceTimes[index];
+	}
+
+	const vector<double>& getIndelParameters() const
+	{
+		return indelParameters;
+	}
+
+	const vector<double>& getSubstParameters() const
+	{
+		return substParameters;
+	}
 };
 
 } /* namespace EBC */

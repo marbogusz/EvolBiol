@@ -38,7 +38,7 @@ protected:
 
 public:
 	ForwardPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dict,  Definitions::ModelType model, bool banding,
-			unsigned int bandPercentage, unsigned int rateCategories, double alpha);
+			unsigned int bandPercentage, unsigned int rateCategories, double alpha, Maths*);
 
 	virtual ~ForwardPairHMM();
 

@@ -28,6 +28,8 @@ public:
 
 
 	void summarize();
+
+	void setParameters(vector<double>&);
 };
 
 } /* namespace EBC */
