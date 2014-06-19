@@ -25,11 +25,12 @@ protected:
 
 public:
 
-	NucleotideSubstitutionModel(Dictionary*, Maths*i, unsigned int);
+	NucleotideSubstitutionModel(Dictionary*, Maths*i, unsigned int, unsigned int);
 
 	virtual ~NucleotideSubstitutionModel();
 
 	void calculatePt();
+
 };
 
 } /* namespace EBC */

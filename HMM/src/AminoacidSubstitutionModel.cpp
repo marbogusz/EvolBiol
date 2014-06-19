@@ -11,11 +11,8 @@ namespace EBC
 {
 
 AminoacidSubstitutionModel::AminoacidSubstitutionModel(Dictionary* dict, Maths* alg, unsigned int alpha, Definitions::aaModelDefinition modelDef) :
-	SubstitutionModelBase(dict,alg,alpha), eigenDecomposed(false)
+	SubstitutionModelBase(dict,alg,alpha, Definitions::AAParamCount), eigenDecomposed(false)
 {
-	this->paramsNumber = 1;
-	this->parameters = new double[1];
-
 	this->maxRate = modelDef.maxRate;
 	this->piFreqs = new double[matrixSize];
 

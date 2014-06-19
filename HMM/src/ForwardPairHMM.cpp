@@ -127,12 +127,12 @@ double ForwardPairHMM::runForwardAlgorithm()
 	sY = Y->getValueAt(xSize-1, ySize-1);
 	sS = maths->logSum(sM,sX,sY);
 
-	cerr << "\t" << sX << "\t" << sY << "\t"<< sM << "\t" << sS << endl;
+	//cerr << "\t" << sX << "\t" << sY << "\t"<< sM << "\t" << sS << endl;
 
 	DEBUG ("Forward results:");
 	DEBUG (" sX, sY, sM, sS " << sX << "\t" << sY << "\t" << sM << "\t" << sS);
 
-	return sS;
+	return sS* -1.0;
 }
 
 

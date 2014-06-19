@@ -82,7 +82,7 @@ protected:
 
 	vector<ForwardPairHMM*> hmms;
 
-	OptimizedModelParameters modelParams;
+	OptimizedModelParameters* modelParams;
 
 public:
 	PairwiseEstimator(Sequences* inputSeqs, Definitions::ModelType model,std::vector<double> indel_params,
@@ -94,6 +94,8 @@ public:
 	void runIteration(const column_vector& bfgsParameters);
 
 	double runIteration();
+
+	void outputResults();
 
 	//ModelParameters getMlParameters()
 	//{

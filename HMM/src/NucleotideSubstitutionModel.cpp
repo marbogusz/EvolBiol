@@ -10,8 +10,8 @@
 namespace EBC
 {
 
-NucleotideSubstitutionModel::NucleotideSubstitutionModel(Dictionary* dict, Maths* alg, unsigned int alpha) :
-	SubstitutionModelBase(dict,alg,alpha)
+NucleotideSubstitutionModel::NucleotideSubstitutionModel(Dictionary* dict, Maths* alg, unsigned int alpha, unsigned int pcnt) :
+	SubstitutionModelBase(dict,alg,alpha,pcnt)
 {
 }
 
@@ -31,5 +31,4 @@ NucleotideSubstitutionModel::~NucleotideSubstitutionModel()
 }
 
 } /* namespace EBC */
-
 

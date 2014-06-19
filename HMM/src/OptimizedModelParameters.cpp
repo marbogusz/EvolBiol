@@ -11,7 +11,7 @@ namespace EBC
 {
 
 OptimizedModelParameters::OptimizedModelParameters(SubstitutionModelBase* sm, IndelModel* im, unsigned int dCount,
-		bool ie, bool se, bool ae, Maths* m) : sm(sm), im(im), maths(m), indelParameters(im->getParamsNumber()),
+		bool se, bool ie, bool ae, Maths* m) : sm(sm), im(im), maths(m), indelParameters(im->getParamsNumber()),
 		substParameters(sm->getParamsNumber()), divergenceTimes(dCount),
 		estimateIndelParams(ie), estimateSubstParams(se), estimateAlpha(ae)
 {
@@ -19,8 +19,7 @@ OptimizedModelParameters::OptimizedModelParameters(SubstitutionModelBase* sm, In
 	substCount = substParameters.size();
 	distCount = dCount;
 	optCount = (estimateSubstParams ? substCount : 0) +
-			(estimateIndelParams ? indelCount : 0) + (distCount +
-			estimateAlpha ? 1 : 0);
+			(estimateIndelParams ? indelCount : 0) + distCount + (estimateAlpha ? 1 : 0);
 	this->divergenceBound  = 4;
 
 	if(estimateIndelParams)
@@ -81,7 +80,7 @@ void EBC::OptimizedModelParameters::toDlibVector(column_vector& vals, column_vec
 	}
 }
 
-void EBC::OptimizedModelParameters::generateInitialIndelParameters()
+void EBC::OptimizedModelParameters::generateInitialSubstitutionParameters()
 {
 	for(unsigned int i=0; i< substCount; i++)
 	{
@@ -89,11 +88,11 @@ void EBC::OptimizedModelParameters::generateInitialIndelParameters()
 	}
 }
 
-void EBC::OptimizedModelParameters::generateInitialSubstitutionParameters()
+void EBC::OptimizedModelParameters::generateInitialIndelParameters()
 {
 	for(unsigned int i=0; i< indelCount; i++)
 	{
-		indelParameters[i] = 0.2 + 0.1*maths->rndu();
+		indelParameters[i] = 0.05 + 0.1*maths->rndu();
 	}
 }
 
@@ -151,4 +150,15 @@ void EBC::OptimizedModelParameters::setUserSubstParams(
 		vector<double> allocator)
 {
 	substParameters = allocator;
+}
+
+void EBC::OptimizedModelParameters::outputParameters()
+{
+	for (auto p : substParameters)
+			std::cout << p  << '\t';
+	for (auto p : indelParameters)
+			std::cout << p  << '\t';
+	for (auto p : divergenceTimes)
+		std::cout << p  << '\t';
+	std::cout << alpha << std::endl;
 }

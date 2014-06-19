@@ -30,14 +30,18 @@ private:
 public:
 
 	FileParser(const char* filename);
+
 	string getNextSequence();
 
 	unsigned int getSequenceCount();
 
 	string getSequenceAt(unsigned int);
 
+	bool isDefinitionLine(string&);
 
-	~FileParser();
+	void trimWsChars(string&);
+
+	virtual ~FileParser();
 };
 
 } /* namespace EBC */

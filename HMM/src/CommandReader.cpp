@@ -33,7 +33,7 @@ CommandReader::CommandReader(int argc, char** argv)
 		parser.add_option("h","Display this help message.");
 		parser.add_option("b","Set banding 0/1, default is 0",1);
 		parser.add_option("bf","Set band factor, default is 5%",1);
-		parser.add_option("o","Set optimizer, 0- BFGS, 1- BOBYQA default is 1",1);
+		parser.add_option("o","Set optimizer, 0- BFGS, 1- BOBYQA default is 0",1);
 		parser.add_option("param_rev","GTR model parameters",5);
 		parser.add_option("param_hky","HKY85 model parameters",1);
 		parser.add_option("ov","Output viterbi alignment for estimated parameters");

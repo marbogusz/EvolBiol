@@ -41,7 +41,7 @@ void EvolutionaryPairHMM::setModelParameters(std::vector<double> indel_params,
 
 	if (indelParameters == indel_params.size() && substParameters == subst_params.size())
 	{
-		indelModel->setParameters(mlParameters+substParameters-1);
+		indelModel->setParameters(indel_params);
 		indelModel->setTime(evolDistance);
 		substModel->setAlpha(alpha);
 		substModel->setParameters(subst_params);

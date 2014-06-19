@@ -26,6 +26,10 @@ private:
 
 	vector<string> rawSequences;
 	vector<vector<SequenceElement> > translatedSequences;
+	vector<std::pair<unsigned int, unsigned int> > pairs;
+
+	vector<std::pair<unsigned int, unsigned int> >::iterator pairIterator;
+
 	Dictionary* dict;
 	unsigned int sequenceCount;
 	double* observedFrequencies;
@@ -54,6 +58,11 @@ public:
 	}
 
 	string getRawSequenceAt(unsigned int pos);
+
+	std::pair<unsigned int, unsigned int> getPairOfSequenceIndices(unsigned int idx)
+	{
+		return pairs[idx];
+	}
 private:
 
 	void buildDictionary(Definitions::SequenceType);

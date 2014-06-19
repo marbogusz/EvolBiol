@@ -6,6 +6,10 @@
  */
 
 #include "PairwiseEstimator.hpp"
+#include "GTRModel.hpp"
+#include "HKY85Model.hpp"
+#include "AminoacidSubstitutionModel.hpp"
+#include "NegativeBinomialGapModel.hpp"
 
 namespace EBC
 {
@@ -14,14 +18,14 @@ namespace EBC
 PairwiseEstimator::BFGS::BFGS(PairwiseEstimator* enclosing, Definitions::OptimizationType ot) : optimizationType(ot)
 {
 	parent = enclosing;
-	paramsCount = parent->modelParams.optParamCount();
+	paramsCount = parent->modelParams->optParamCount();
 	this->initParams.set_size(paramsCount);
 	this->lowerBounds.set_size(paramsCount);
 	this->upperBounds.set_size(paramsCount);
 
-	parent->modelParams.toDlibVector(initParams,lowerBounds,upperBounds);
+	parent->modelParams->toDlibVector(initParams,lowerBounds,upperBounds);
 
-	DEBUG("DLIB optimizer init with " << paramsCount << " parameters");
+	cout << "DLIB optimizer init with " << paramsCount << " parameters" << endl;
 }
 
 PairwiseEstimator::BFGS::~BFGS()
@@ -30,7 +34,7 @@ PairwiseEstimator::BFGS::~BFGS()
 
 double PairwiseEstimator::BFGS::objectiveFunction(const column_vector& bfgsParameters)
 {
-	this->parent->modelParams.fromDlibVector(bfgsParameters);
+	this->parent->modelParams->fromDlibVector(bfgsParameters);
 	return parent->runIteration();
 }
 
@@ -67,18 +71,15 @@ void PairwiseEstimator::BFGS::optimize()
 			break;
 		}
 	}
-	DEBUG("BFGS return: " << initParams );
+	this->parent->modelParams->fromDlibVector(initParams);
 }
 
 
 PairwiseEstimator::PairwiseEstimator(Sequences* inputSeqs, Definitions::ModelType model ,std::vector<double> indel_params,
 		std::vector<double> subst_params, Definitions::OptimizationType ot, bool banding, unsigned int bandPercentage,
-		unsigned int rateCategories, double alpha, bool estimateAlpha) : inputSequences(inputSeqs), gammaRateCategories(rateCategories)
+		unsigned int rateCategories, double alpha, bool estimateAlpha) : inputSequences(inputSeqs), gammaRateCategories(rateCategories),
+		pairCount(inputSequences->getPairCount()), hmms(pairCount)
 {
-	this->pairCount = inputSequences->getPairCount();
-
-	this->hmms(pairCount);
-
 	maths = new Maths();
 	dict = inputSequences->getDictionary();
 
@@ -96,21 +97,22 @@ PairwiseEstimator::PairwiseEstimator(Sequences* inputSeqs, Definitions::ModelTyp
 	{
 			substModel = new AminoacidSubstitutionModel(dict, maths,gammaRateCategories,Definitions::aaLgModel);
 	}
+
 	indelModel = new NegativeBinomialGapModel();
 
 	estimateSubstitutionParams = subst_params.size() == 0;
 	estimateIndelParams = indel_params.size() == 0;
 	this->estimateAlpha = estimateAlpha;
 
-	this->modelParams(substModel, indelModel, pairCount, estimateSubstitutionParams,
+	modelParams = new OptimizedModelParameters(substModel, indelModel, pairCount, estimateSubstitutionParams,
 			estimateIndelParams, estimateAlpha, maths);
 
 	if(!estimateIndelParams)
-		modelParams.setUserIndelParams(indel_params);
+		modelParams->setUserIndelParams(indel_params);
 	if(!estimateSubstitutionParams)
-		modelParams.setUserSubstParams(subst_params);
+		modelParams->setUserSubstParams(subst_params);
 	if(!estimateAlpha)
-		modelParams.setAlpha(alpha);
+		modelParams->setAlpha(alpha);
 
 
 	bandFactor = bandPercentage;
@@ -120,8 +122,10 @@ PairwiseEstimator::PairwiseEstimator(Sequences* inputSeqs, Definitions::ModelTyp
 
 	for(unsigned int i =0; i<pairCount; i++)
 	{
-		hmm = hmms[i] = new ForwardPairHMM(inputSequences->getSequencesAt(0), inputSequences->getSequencesAt(1),
-				dict, ot , banding, bandPercentage,rateCategories, alpha, maths);
+		std::pair<unsigned int, unsigned int> idxs = inputSequences->getPairOfSequenceIndices(i);
+		std::cerr << idxs.first << '\t' << idxs.second << '\n';
+		hmm = hmms[i] = new ForwardPairHMM(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
+				dict, model, banding, bandPercentage,rateCategories, alpha, maths);
 		hmm->setModelFrequencies(inputSequences->getElementFrequencies());
 	}
 
@@ -133,6 +137,7 @@ PairwiseEstimator::~PairwiseEstimator()
 {
 	// TODO Auto-generated destructor stub
 	delete bfgs;
+	delete modelParams;
 	//delete Y;
 	//delete X;
 	//delete M;
@@ -146,13 +151,21 @@ double PairwiseEstimator::runIteration()
 	double result = 0;
 	ForwardPairHMM* hmm;
 
+	this->modelParams->outputParameters();
+
 	for(unsigned int i =0; i<pairCount; i++)
 	{
 		hmm = hmms[i];
-		hmm>setModelParameters(modelParams.getIndelParameters(),modelParams.getSubstParameters(),
-				modelParams.getDivergenceTime(i), modelParams.getAlpha());
+		hmm->setModelParameters(modelParams->getIndelParameters(),modelParams->getSubstParameters(),
+				modelParams->getDivergenceTime(i), modelParams->getAlpha());
 		result += hmm->runForwardAlgorithm();
 	}
+	return result;
+}
+
+void PairwiseEstimator::outputResults()
+{
+	this->modelParams->outputParameters();
 }
 
 } /* namespace EBC */

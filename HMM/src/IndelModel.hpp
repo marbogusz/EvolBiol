@@ -33,7 +33,7 @@ protected:
 	//bool logMode;
 
 public:
-	IndelModel();
+	IndelModel(unsigned int);
 
 	//set parameters - time + the rest of parameters
 	virtual void setParameters(double*) = 0;

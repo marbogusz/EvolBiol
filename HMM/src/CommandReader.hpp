@@ -66,7 +66,7 @@ public:
 
 	Definitions::OptimizationType getOptimizationType()
 	{
-			unsigned int opt = get_option(parser,"o",1);
+			unsigned int opt = get_option(parser,"o",0);
 			return (Definitions::OptimizationType) opt;
 	}
 

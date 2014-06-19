@@ -10,8 +10,9 @@
 namespace EBC
 {
 
-SubstitutionModelBase::SubstitutionModelBase(Dictionary* dict, Maths* alg, unsigned int rateCategories)
-	: dictionary(dict), maths(alg), rateCategories(rateCategories), parameterHiBounds(paramsNumber), parameterLoBounds(paramsNumber)
+SubstitutionModelBase::SubstitutionModelBase(Dictionary* dict, Maths* alg, unsigned int rateCategories, unsigned int parameter_count)
+	: dictionary(dict), maths(alg), rateCategories(rateCategories), paramsNumber(parameter_count),
+	  parameterHiBounds(parameter_count), parameterLoBounds(parameter_count)
 {
 	this->matrixSize = dict->getAlphabetSize();
 	this->matrixFullSize = matrixSize*matrixSize;

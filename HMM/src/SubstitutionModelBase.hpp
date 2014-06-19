@@ -88,7 +88,7 @@ protected:
 
 public:
 
-	SubstitutionModelBase(Dictionary*, Maths*i, unsigned int);
+	SubstitutionModelBase(Dictionary*, Maths*i, unsigned int, unsigned int);
 
 	virtual ~SubstitutionModelBase();
 

@@ -23,14 +23,20 @@ Sequences::Sequences(IParser* iParser,Definitions::SequenceType st) throw (HmmEx
 
 	this->sequenceCount = size;
 
+	pairs.reserve(this->getPairCount());
+
+	for(unsigned int i=0; i< size;i++)
+		for(unsigned int j=i+1; j<size;j++)
+			pairs.push_back(std::make_pair(i,j));
+
+	pairIterator = pairs.begin();
+
 	while(size > 0)
 	{
 		this->rawSequences.push_back(iParser->getNextSequence());
 		this->translatedSequences.push_back(dict->translate(*(rawSequences.end()-1),false));
 		size--;
 	}
-
-
 }
 
 /*void Sequences::getSequencePair(vector<SequenceElement> s1,
@@ -61,9 +67,6 @@ string Sequences::getRawSequenceAt(unsigned int pos)
 {
 	return this->rawSequences[pos];
 }
-
-
-
 
 double* Sequences::getElementFrequencies()
 {

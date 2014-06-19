@@ -9,19 +9,19 @@
 #include <cmath>
 #include <iostream>
 #include "Maths.hpp"
+#include "Definitions.hpp"
 
 using namespace std;
 
 namespace EBC
 {
 
-NegativeBinomialGapModel::NegativeBinomialGapModel() : IndelModel()
+NegativeBinomialGapModel::NegativeBinomialGapModel() : IndelModel(Definitions::NBIndelParamCount)
 {
 	//logMode = true;
 	this->parameterLoBounds[0] = this->parameterLoBounds[1] = 0.000001;
-	this->parameterHiBounds[0] = 0.25;  //lambda limitation due to the model!
+	this->parameterHiBounds[0] = 0.2;  //lambda limitation due to the model!
 	this->parameterHiBounds[1] = 0.999999;
-	this->paramsNumber = 2;
 }
 
 NegativeBinomialGapModel::~NegativeBinomialGapModel()

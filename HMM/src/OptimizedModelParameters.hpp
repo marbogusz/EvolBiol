@@ -65,6 +65,8 @@ public:
 
 	void setUserSubstParams(vector<double>);
 
+	void outputParameters();
+
 	double getAlpha() const
 	{
 		return alpha;

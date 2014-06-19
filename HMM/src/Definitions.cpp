@@ -4,6 +4,14 @@
 namespace EBC
 {
 
+const unsigned int Definitions::HKY85ParamCount = 1;
+
+const unsigned int Definitions::GTRParamCount = 5;
+
+const unsigned int Definitions::AAParamCount = 0;
+
+const unsigned int Definitions::NBIndelParamCount = 2;
+
 Definitions::aaModelDefinition Definitions::aaLgModel =
 			{	10.649107,
 				{0.000000, 0.425093, 0.276818, 0.395144, 2.489084, 0.969894, 1.038545, 2.066040, 0.358858, 0.149830,0.395337, 0.536518, 1.124035, 0.253701, 1.177651,4.727182, 2.139501, 0.180717, 0.218959, 2.547870,

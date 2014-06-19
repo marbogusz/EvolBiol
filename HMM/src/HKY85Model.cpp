@@ -11,21 +11,17 @@ namespace EBC
 {
 
 HKY85Model::HKY85Model(Dictionary* dict, Maths* alg, unsigned int rates)
-	: NucleotideSubstitutionModel(dict, alg, rates)
+	: NucleotideSubstitutionModel(dict, alg, rates, Definitions::HKY85ParamCount)
 {
 
-	//6 parameters - 4 frequencies + kappa + time
-	//2 parameters to estimate - k and t
-	this->paramsNumber = 1;
 	this->parameters = new double[this->paramsNumber];
 
 	this->parameterHiBounds[0] = 5;
 	this->parameterLoBounds[0] = 0.000001;
 
-
 	//TODO - set within the model
-
 }
+
 
 void HKY85Model::setParameters(vector<double>& par)
 {

@@ -11,14 +11,10 @@ namespace EBC
 {
 
 GTRModel::GTRModel(Dictionary* dict, Maths* alg, unsigned int rates)
-	: NucleotideSubstitutionModel(dict, alg, rates)
+	: NucleotideSubstitutionModel(dict, alg, rates, Definitions::GTRParamCount)
 {
-	//6 elements to estimate - a, b, c, d, e, f=1
-	//6th element is divergence time;
-	this->paramsNumber = 5;
+
 	this->parameters = new double[this->paramsNumber];
-	//TODO - set within the model
-	//this->scale = this->logMode==true ? exp(1.0) : 1.0;
 
 	for (int i=0;i<5;i++)
 	{
