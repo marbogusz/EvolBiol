@@ -38,6 +38,7 @@ protected:
 	unsigned int indelCount;
 	unsigned int substCount;
 	unsigned int distCount;
+	unsigned int seqCount;
 	unsigned int optCount;
 
 	//FIXME - static bound vectors!
@@ -51,7 +52,7 @@ protected:
 	void generateInitialDistanceParameters();
 
 public:
-	OptimizedModelParameters(SubstitutionModelBase*, IndelModel*, unsigned int, bool, bool, bool, Maths*);
+	OptimizedModelParameters(SubstitutionModelBase*, IndelModel*, unsigned int, unsigned int, bool, bool, bool, Maths*);
 
 	unsigned int optParamCount();
 
@@ -66,6 +67,8 @@ public:
 	void setUserSubstParams(vector<double>);
 
 	void outputParameters();
+
+	double getDistanceBetween(unsigned int i, unsigned int j);
 
 	double getAlpha() const
 	{
@@ -85,6 +88,11 @@ public:
 	const vector<double>& getSubstParameters() const
 	{
 		return substParameters;
+	}
+
+	vector<double>& getDivergenceTimes()
+	{
+		return divergenceTimes;
 	}
 };
 

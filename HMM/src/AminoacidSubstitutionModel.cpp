@@ -27,8 +27,6 @@ AminoacidSubstitutionModel::AminoacidSubstitutionModel(Dictionary* dict, Maths* 
 
 void AminoacidSubstitutionModel::calculatePt()
 {
-	//One parameter model
-	this->time = parameters[0];
 	if(this->eigenDecomposed == false)
 	{
 		this->setDiagonalMeans();

@@ -11,6 +11,7 @@
 #include "ForwardPairHMM.hpp"
 #include "HmmException.hpp"
 #include "PairwiseEstimator.hpp"
+#include "BioNJ.hpp"
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -60,8 +61,21 @@ int main(int argc, char ** argv) {
 					cmdReader->getSubstParams(), cmdReader->getOptimizationType(), cmdReader->getBanding(), cmdReader->getBandFactor(),
 					cmdReader->getCategories(), cmdReader->getAlpha(), cmdReader->estimateAlpha());
 
-			pe->outputResults();
 
+			//string distFile = cmdReader->getInputFileName();
+			//distFile.insert(0,"distances_");
+			//distFile.replace(distFile.end()-3,distFile.end(),"phy");
+			//stringstream ss;
+			//pe->outputResults(ss);
+
+			//ofstream of(distFile);
+			//of << ss.str();
+			//of.close();
+
+			cerr << "running bionj\n";
+
+			BioNJ nj(inputSeqs->getSequenceCount(), pe->getOptimizedTimes());
+			nj.calculate();
 
 			//double* estimatedParams = fwdHMM->getMlParameters();
 

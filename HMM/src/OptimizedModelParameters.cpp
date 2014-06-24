@@ -10,13 +10,14 @@
 namespace EBC
 {
 
-OptimizedModelParameters::OptimizedModelParameters(SubstitutionModelBase* sm, IndelModel* im, unsigned int dCount,
+OptimizedModelParameters::OptimizedModelParameters(SubstitutionModelBase* sm, IndelModel* im, unsigned int sCount, unsigned int dCount,
 		bool se, bool ie, bool ae, Maths* m) : sm(sm), im(im), maths(m), indelParameters(im->getParamsNumber()),
 		substParameters(sm->getParamsNumber()), divergenceTimes(dCount),
 		estimateIndelParams(ie), estimateSubstParams(se), estimateAlpha(ae)
 {
 	indelCount = indelParameters.size();
 	substCount = substParameters.size();
+	seqCount = sCount;
 	distCount = dCount;
 	optCount = (estimateSubstParams ? substCount : 0) +
 			(estimateIndelParams ? indelCount : 0) + distCount + (estimateAlpha ? 1 : 0);
@@ -161,4 +162,25 @@ void EBC::OptimizedModelParameters::outputParameters()
 	for (auto p : divergenceTimes)
 		std::cout << p  << '\t';
 	std::cout << alpha << std::endl;
+}
+
+double EBC::OptimizedModelParameters::getDistanceBetween(unsigned int i,
+		unsigned int j)
+{
+	unsigned int total  = seqCount;
+	unsigned int a,b;
+	a=i;
+	b=j;
+	if (i>j)
+	{
+		b=i;
+		a=j;
+	}
+	unsigned int index;
+	if (i==j) return 0;
+	else
+	{
+		index = (b - a - 1) + (a*total) - (((1+a)/2.0)*(a*1.0));
+		return divergenceTimes[index];
+	}
 }

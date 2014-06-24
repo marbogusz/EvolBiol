@@ -18,6 +18,7 @@
 #include "Dictionary.hpp"
 #include "IndelModel.hpp"
 #include "Sequences.hpp"
+#include <sstream>
 
 #include <vector>
 
@@ -95,7 +96,12 @@ public:
 
 	double runIteration();
 
-	void outputResults();
+	void outputResults(stringstream&);
+
+	vector<double>& getOptimizedTimes()
+	{
+		return this->modelParams->getDivergenceTimes();
+	}
 
 	//ModelParameters getMlParameters()
 	//{

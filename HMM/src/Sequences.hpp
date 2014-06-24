@@ -57,6 +57,11 @@ public:
 		return (ct*(ct-1))/2;
 	}
 
+	inline unsigned int getSequenceCount()
+	{
+		return translatedSequences.size();
+	}
+
 	string getRawSequenceAt(unsigned int pos);
 
 	std::pair<unsigned int, unsigned int> getPairOfSequenceIndices(unsigned int idx)

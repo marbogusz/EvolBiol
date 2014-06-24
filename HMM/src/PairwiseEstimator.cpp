@@ -25,7 +25,7 @@ PairwiseEstimator::BFGS::BFGS(PairwiseEstimator* enclosing, Definitions::Optimiz
 
 	parent->modelParams->toDlibVector(initParams,lowerBounds,upperBounds);
 
-	cout << "DLIB optimizer init with " << paramsCount << " parameters" << endl;
+	cerr << "DLIB optimizer init with " << paramsCount << " parameters" << endl;
 }
 
 PairwiseEstimator::BFGS::~BFGS()
@@ -104,7 +104,7 @@ PairwiseEstimator::PairwiseEstimator(Sequences* inputSeqs, Definitions::ModelTyp
 	estimateIndelParams = indel_params.size() == 0;
 	this->estimateAlpha = estimateAlpha;
 
-	modelParams = new OptimizedModelParameters(substModel, indelModel, pairCount, estimateSubstitutionParams,
+	modelParams = new OptimizedModelParameters(substModel, indelModel,inputSequences->getSequenceCount(), pairCount, estimateSubstitutionParams,
 			estimateIndelParams, estimateAlpha, maths);
 
 	if(!estimateIndelParams)
@@ -123,7 +123,6 @@ PairwiseEstimator::PairwiseEstimator(Sequences* inputSeqs, Definitions::ModelTyp
 	for(unsigned int i =0; i<pairCount; i++)
 	{
 		std::pair<unsigned int, unsigned int> idxs = inputSequences->getPairOfSequenceIndices(i);
-		std::cerr << idxs.first << '\t' << idxs.second << '\n';
 		hmm = hmms[i] = new ForwardPairHMM(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
 				dict, model, banding, bandPercentage,rateCategories, alpha, maths);
 		hmm->setModelFrequencies(inputSequences->getElementFrequencies());
@@ -152,7 +151,7 @@ double PairwiseEstimator::runIteration()
 	ForwardPairHMM* hmm;
 
 	this->modelParams->outputParameters();
-
+	//cerr << "iteration " << endl;
 	for(unsigned int i =0; i<pairCount; i++)
 	{
 		hmm = hmms[i];
@@ -163,9 +162,23 @@ double PairwiseEstimator::runIteration()
 	return result;
 }
 
-void PairwiseEstimator::outputResults()
+void PairwiseEstimator::outputResults(stringstream& ss)
 {
-	this->modelParams->outputParameters();
+	unsigned int count, pairCount;
+	count = this->inputSequences->getSequenceCount();
+	pairCount = this->inputSequences->getPairCount();
+
+	ss << "\t" << this->inputSequences->getSequenceCount() << endl;
+
+	for (unsigned int i = 0; i< count; i++)
+	{
+		ss << "S" << i << " ";
+		for(unsigned int j=0; j< count; j++)
+		{
+			ss << this->modelParams->getDistanceBetween(i,j) << " ";
+		}
+		ss << endl;
+	}
 }
 
 } /* namespace EBC */
