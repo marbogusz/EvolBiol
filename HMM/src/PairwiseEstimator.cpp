@@ -150,7 +150,7 @@ double PairwiseEstimator::runIteration()
 	double result = 0;
 	ForwardPairHMM* hmm;
 
-	this->modelParams->outputParameters();
+	//this->modelParams->outputParameters();
 	//cerr << "iteration " << endl;
 	for(unsigned int i =0; i<pairCount; i++)
 	{
@@ -159,6 +159,7 @@ double PairwiseEstimator::runIteration()
 				modelParams->getDivergenceTime(i), modelParams->getAlpha());
 		result += hmm->runForwardAlgorithm();
 	}
+	//cerr << result << endl;
 	return result;
 }
 

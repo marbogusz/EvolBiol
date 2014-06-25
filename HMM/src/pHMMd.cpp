@@ -77,6 +77,8 @@ int main(int argc, char ** argv) {
 			BioNJ nj(inputSeqs->getSequenceCount(), pe->getOptimizedTimes());
 			nj.calculate();
 
+			cout << cmdReader->getInputFileName() << endl;
+
 			//double* estimatedParams = fwdHMM->getMlParameters();
 
 			//string vitFile = cmdReader->getInputFileName();

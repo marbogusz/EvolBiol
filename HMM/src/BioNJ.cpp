@@ -20,6 +20,8 @@ namespace EBC
         	names[i] = (char)('A'+i);
         }
 
+        treeLength=0;
+
 
 
     }
@@ -116,7 +118,6 @@ namespace EBC
         int r;                                  /* number of subtrees          */
         int n;                                  /* number of taxa              */
         int x, y;
-
 
         n = taxas;
         output = stdout;
@@ -547,6 +548,7 @@ namespace EBC
         }
 
         length=Finish_branch_length(last[0],last[1],last[2],delta);
+        this->treeLength += length;
         fprintf(output,"(");
         Print_output(last[0],trees,output);
         fprintf(output,":");
@@ -555,6 +557,7 @@ namespace EBC
         fprintf(output,"%f,",length);
 
         length=Finish_branch_length(last[1],last[0],last[2],delta);
+        this->treeLength += length;
         Print_output(last[1],trees,output);
         fprintf(output,":");
         /*   gcvt(length,PREC, str); */
@@ -562,13 +565,16 @@ namespace EBC
         fprintf(output,"%f,",length);
 
         length=Finish_branch_length(last[2],last[1],last[0],delta);
+        this->treeLength += length;
         Print_output(last[2],trees,output);
         fprintf(output,":");
         /*   gcvt(length,PREC,str); */
         /*   fprintf(output,"%s",str); */
         fprintf(output,"%f",length);
         fprintf(output,");");
-        fprintf(output,"\n");
+        fprintf(output,"\t");
+        fprintf(output,"%f",treeLength);
+        fprintf(output,"\t");
 
         for(i=0; i < 3; i++)
         {

@@ -43,6 +43,7 @@ private:
 	unsigned int pairs;
 	vector<string> names;
 	vector<double>& times;
+	double treeLength;
 
 public:
 	BioNJ(unsigned int size, vector<double>& divergenceTimes);

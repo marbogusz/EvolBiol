@@ -21,7 +21,7 @@ OptimizedModelParameters::OptimizedModelParameters(SubstitutionModelBase* sm, In
 	distCount = dCount;
 	optCount = (estimateSubstParams ? substCount : 0) +
 			(estimateIndelParams ? indelCount : 0) + distCount + (estimateAlpha ? 1 : 0);
-	this->divergenceBound  = 4;
+	this->divergenceBound  = 3.3;
 
 	if(estimateIndelParams)
 		generateInitialIndelParameters();
