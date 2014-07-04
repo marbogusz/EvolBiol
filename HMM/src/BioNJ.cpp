@@ -162,6 +162,9 @@ namespace EBC
                 vab=Variance(*a, *b, delta);           /* minimizing (1)           */
                 la=Branch_length(*a, *b, delta, r);    /* compute branch-lengths   */
                 lb=Branch_length(*b, *a, delta, r);    /* using formula (2)        */
+
+                treeLength += la + lb;
+
                 lamda=Lamda(*a, *b, vab, delta, n, r); /* compute lambda* using (9)*/
                 for(i=1; i <= n; i++)
                 {

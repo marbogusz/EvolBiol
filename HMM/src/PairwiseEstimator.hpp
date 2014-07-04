@@ -96,7 +96,7 @@ public:
 
 	double runIteration();
 
-	void outputResults(stringstream&);
+	void outputDistanceMatrix(stringstream&);
 
 	vector<double>& getOptimizedTimes()
 	{

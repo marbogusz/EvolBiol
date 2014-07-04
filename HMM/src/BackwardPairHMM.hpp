@@ -1,19 +1,19 @@
 /*
- * ForwardPairHMM.hpp
+ * BackwardPairHMM.hpp
  *
  *  Created on: Feb 26, 2014
  *      Author: root
  */
 
-#ifndef FORWARDPAIRHMM_HPP_
-#define FORWARDPAIRHMM_HPP_
+#ifndef BACKWARDPAIRHMM_HPP_
+#define BACKWARDPAIRHMM_HPP_
 
 #include "EvolutionaryPairHMM.hpp"
 
 namespace EBC
 {
 
-class ForwardPairHMM: public EBC::EvolutionaryPairHMM
+class BackwardPairHMM: public EBC::EvolutionaryPairHMM
 {
 
 protected:
@@ -37,12 +37,12 @@ protected:
 
 
 public:
-	ForwardPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dict,  Definitions::ModelType model, bool banding,
+	BackwardPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dict,  Definitions::ModelType model, bool banding,
 			unsigned int bandPercentage, unsigned int rateCategories, Maths*);
 
-	virtual ~ForwardPairHMM();
+	virtual ~BackwardPairHMM();
 
-	double runForwardAlgorithm();
+	double runBackwardAlgorithm();
 
 	inline double* getMlParameters()
 	{
@@ -51,4 +51,4 @@ public:
 };
 
 } /* namespace EBC */
-#endif /* FORWARDPAIRHMM_HPP_ */
+#endif /* BACKWARDPAIRHMM_HPP_ */

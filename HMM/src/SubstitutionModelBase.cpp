@@ -134,7 +134,10 @@ void SubstitutionModelBase::calculateGamma()
 {
 	int useMedian = 0;
 	if(!(alpha <=0 || rateCategories == 0))
+	{
 		this->maths->DiscreteGamma(gammaFrequencies, gammaRates, alpha, alpha, rateCategories, useMedian);
+
+	}
 }
 
 void SubstitutionModelBase::setObservedFrequencies(double* observedFrequencies)

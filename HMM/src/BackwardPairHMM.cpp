@@ -1,12 +1,12 @@
 /*
- * ForwardPairHMM.cpp
+ * BackwardPairHMM.cpp
  *
  *  Created on: Feb 26, 2014
  *      Author: root
  */
 
 #include "Definitions.hpp"
-#include "ForwardPairHMM.hpp"
+#include "BackwardPairHMM.hpp"
 #include "GTRModel.hpp"
 #include "HKY85Model.hpp"
 #include "AminoacidSubstitutionModel.hpp"
@@ -16,7 +16,7 @@ namespace EBC
 {
 
 
-ForwardPairHMM::ForwardPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dict, Definitions::ModelType model,
+BackwardPairHMM::BackwardPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dict, Definitions::ModelType model,
 		bool banding, unsigned int bandPercentage, unsigned int rateCategories, Maths* mt) :
 		EvolutionaryPairHMM(s1,s2, dict, rateCategories, mt)
 {
@@ -43,7 +43,7 @@ ForwardPairHMM::ForwardPairHMM(vector<SequenceElement> s1, vector<SequenceElemen
 	initializeStates();
 }
 
-ForwardPairHMM::~ForwardPairHMM()
+BackwardPairHMM::~BackwardPairHMM()
 {
 	// TODO Auto-generated destructor stub
 	//delete bfgs;
@@ -57,7 +57,7 @@ ForwardPairHMM::~ForwardPairHMM()
     delete maths;
 }
 
-double ForwardPairHMM::runForwardAlgorithm()
+double BackwardPairHMM::runBackwardAlgorithm()
 {
 
 	calculateModels();
@@ -80,9 +80,9 @@ double ForwardPairHMM::runForwardAlgorithm()
 	X->initializeData();
 	Y->initializeData();
 
-	for (i = 0; i<xSize; i++)
+	for (i = xSize-1; i > 0; i--)
 	{
-		for (j = 0; j<ySize; j++)
+		for (j = ySize; j>0; j--)
 		{
 			if(this->withinBand(i,j,this->bandSpan) || !bandingEnabled)
 			{
@@ -127,7 +127,7 @@ double ForwardPairHMM::runForwardAlgorithm()
 
 	//cerr << "\t" << sX << "\t" << sY << "\t"<< sM << "\t" << sS << endl;
 
-	DEBUG ("Forward results:");
+	DEBUG ("Backward results:");
 	DEBUG (" sX, sY, sM, sS " << sX << "\t" << sY << "\t" << sM << "\t" << sS);
 
 	return sS* -1.0;

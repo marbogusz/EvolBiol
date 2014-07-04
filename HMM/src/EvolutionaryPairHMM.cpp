@@ -12,8 +12,8 @@ namespace EBC
 {
 
 EvolutionaryPairHMM::EvolutionaryPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dct,
-		unsigned int rateCategories, double alpha, Maths* mt) : gammaRateCategories(rateCategories),
-				maths(mt), initialAlpha(alpha)
+		unsigned int rateCategories, Maths* mt) : gammaRateCategories(rateCategories),
+				maths(mt)
 {
 	M = X = Y = NULL;
 	mlParameters = NULL;

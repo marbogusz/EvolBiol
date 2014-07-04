@@ -50,12 +50,13 @@ void PairwiseEstimator::BFGS::optimize()
 {
 	using std::placeholders::_1;
 	std::function<double(const column_vector&)> f_objective= std::bind( &PairwiseEstimator::BFGS::objectiveFunction, this, _1 );
+	double likelihood;
 
 	switch(optimizationType)
 	{
 		case Definitions::OptimizationType::BFGS:
 		{
-			dlib::find_min_box_constrained(dlib::bfgs_search_strategy(),
+			likelihood = dlib::find_min_box_constrained(dlib::bfgs_search_strategy(),
 					dlib::objective_delta_stop_strategy(1e-8),
 					f_objective,
 					derivative(f_objective),
@@ -66,12 +67,14 @@ void PairwiseEstimator::BFGS::optimize()
 		}
 		case Definitions::OptimizationType::BOBYQA:
 		{
-			dlib::find_min_bobyqa(f_objective, initParams, 10,
+			likelihood = dlib::find_min_bobyqa(f_objective, initParams, 10,
 					lowerBounds,upperBounds, 0.05, 1e-6, 10000 );
 			break;
 		}
 	}
 	this->parent->modelParams->fromDlibVector(initParams);
+	parent->modelParams->outputParameters();
+	cerr << "lnl: " << likelihood << "\t";
 }
 
 
@@ -111,8 +114,7 @@ PairwiseEstimator::PairwiseEstimator(Sequences* inputSeqs, Definitions::ModelTyp
 		modelParams->setUserIndelParams(indel_params);
 	if(!estimateSubstitutionParams)
 		modelParams->setUserSubstParams(subst_params);
-	if(!estimateAlpha)
-		modelParams->setAlpha(alpha);
+	modelParams->setAlpha(alpha);
 
 
 	bandFactor = bandPercentage;
@@ -124,7 +126,7 @@ PairwiseEstimator::PairwiseEstimator(Sequences* inputSeqs, Definitions::ModelTyp
 	{
 		std::pair<unsigned int, unsigned int> idxs = inputSequences->getPairOfSequenceIndices(i);
 		hmm = hmms[i] = new ForwardPairHMM(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
-				dict, model, banding, bandPercentage,rateCategories, alpha, maths);
+				dict, model, banding, bandPercentage,rateCategories, maths);
 		hmm->setModelFrequencies(inputSequences->getElementFrequencies());
 	}
 
@@ -163,7 +165,7 @@ double PairwiseEstimator::runIteration()
 	return result;
 }
 
-void PairwiseEstimator::outputResults(stringstream& ss)
+void PairwiseEstimator::outputDistanceMatrix(stringstream& ss)
 {
 	unsigned int count, pairCount;
 	count = this->inputSequences->getSequenceCount();

@@ -57,6 +57,8 @@ public:
 		{
 			return Definitions::ModelType::LG;
 		}
+		//default;
+		return Definitions::ModelType::GTR;
 	}
 
 	string getInputFileName()

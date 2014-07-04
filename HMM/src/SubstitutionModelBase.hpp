@@ -23,8 +23,11 @@ class SubstitutionModelBase
 
 protected:
 
-	vector<double> parameterHiBounds;
-	vector<double> parameterLoBounds;
+	Dictionary* dictionary;
+
+	Maths* maths;
+
+	unsigned int paramsNumber;
 
 	unsigned int matrixSize;
 
@@ -62,16 +65,17 @@ protected:
 	//ML parameters - model parameters + time!
 	double* parameters;
 
-	Dictionary* dictionary;
 
-	Maths* maths;
 
-	unsigned int paramsNumber;
+
 
 	double meanRate;
 
 	//current divergence time
 	double time;
+
+	vector<double> parameterHiBounds;
+	vector<double> parameterLoBounds;
 
 	//Allocate the memory;
 	void allocateMatrices();
@@ -122,8 +126,12 @@ public:
 
 	void setAlpha(double a)
 	{
-		this->alpha = a;
-		calculateGamma();
+		if (this->alpha != a)
+		{
+			this->alpha = a;
+			//cerr << "Alpha: " << a << endl;
+			calculateGamma();
+		}
 	}
 
 	double getAlpha()

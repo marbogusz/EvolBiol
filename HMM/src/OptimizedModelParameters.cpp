@@ -156,12 +156,12 @@ void EBC::OptimizedModelParameters::setUserSubstParams(
 void EBC::OptimizedModelParameters::outputParameters()
 {
 	for (auto p : substParameters)
-			std::cout << p  << '\t';
+			std::cerr << p  << '\t';
 	for (auto p : indelParameters)
-			std::cout << p  << '\t';
+			std::cerr << p  << '\t';
 	for (auto p : divergenceTimes)
-		std::cout << p  << '\t';
-	std::cout << alpha << std::endl;
+		std::cerr << p  << '\t';
+	std::cerr << alpha << std::endl;
 }
 
 double EBC::OptimizedModelParameters::getDistanceBetween(unsigned int i,

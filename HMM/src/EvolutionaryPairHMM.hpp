@@ -48,8 +48,6 @@ protected:
 	unsigned int bandSpan;
 	unsigned int gammaRateCategories;
 
-	double initialAlpha;
-
 	bool bandingEnabled;
 
 	vector<SequenceElement> seq1;
@@ -79,7 +77,7 @@ protected:
 
 public:
 
-	EvolutionaryPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dict, unsigned int rateCategories, double alpha, Maths*);
+	EvolutionaryPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dict, unsigned int rateCategories, Maths*);
 
 	virtual ~EvolutionaryPairHMM();
 
