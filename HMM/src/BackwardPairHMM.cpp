@@ -18,43 +18,12 @@ namespace EBC
 
 BackwardPairHMM::BackwardPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dict, Definitions::ModelType model,
 		bool banding, unsigned int bandPercentage, unsigned int rateCategories, Maths* mt) :
-		EvolutionaryPairHMM(s1,s2, dict, rateCategories, mt)
+		EvolutionaryPairHMM(s1,s2, dict, rateCategories, mt, model, banding, bandPercentage)
 {
-	DEBUG("Creating the model");
-	if (model == Definitions::ModelType::GTR)
-	{
-		substModel = new GTRModel(dict, maths,gammaRateCategories);
-	}
-	else if (model == Definitions::ModelType::HKY85)
-	{
-		substModel = new HKY85Model(dict, maths,gammaRateCategories);
-	}
-	else if (model == Definitions::ModelType::LG)
-	{
-			substModel = new AminoacidSubstitutionModel(dict, maths,gammaRateCategories,Definitions::aaLgModel);
-	}
-
-	bandFactor = bandPercentage;
-	bandingEnabled = banding;
-
-	//initialize parameter arrays
-	//TODO - set parameters depending on the values provided
-	getBandWidth();
-	initializeStates();
 }
 
 BackwardPairHMM::~BackwardPairHMM()
 {
-	// TODO Auto-generated destructor stub
-	//delete bfgs;
-	//delete Y;
-	//delete X;
-	//delete M;
-	//delete[] optParameters;
-	delete[] mlParameters;
-	//delete substModel;
-	//delete indelModel;
-    delete maths;
 }
 
 double BackwardPairHMM::runBackwardAlgorithm()

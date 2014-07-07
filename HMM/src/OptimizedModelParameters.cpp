@@ -11,7 +11,7 @@ namespace EBC
 {
 
 OptimizedModelParameters::OptimizedModelParameters(SubstitutionModelBase* sm, IndelModel* im, unsigned int sCount, unsigned int dCount,
-		bool se, bool ie, bool ae, Maths* m) : sm(sm), im(im), maths(m), indelParameters(im->getParamsNumber()),
+		bool se, bool ie, bool ae, Maths* m) : maths(m), sm(sm), im(im), indelParameters(im->getParamsNumber()),
 		substParameters(sm->getParamsNumber()), divergenceTimes(dCount),
 		estimateIndelParams(ie), estimateSubstParams(se), estimateAlpha(ae)
 {

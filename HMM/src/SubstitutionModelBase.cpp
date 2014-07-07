@@ -61,7 +61,7 @@ void SubstitutionModelBase::doEigenDecomposition()
 
 void SubstitutionModelBase::calculateGammaPtMatrices()
 {
-	double *tmpRoots, *tmpUroots, *tmpPmatrix;
+	double *tmpRoots, *tmpUroots;
 	unsigned int i;
 	int matrixCount = rateCategories == 0 ? 1 : rateCategories;
 

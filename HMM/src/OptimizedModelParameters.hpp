@@ -25,6 +25,11 @@ class OptimizedModelParameters
 {
 protected:
 
+	Maths* maths;
+
+	SubstitutionModelBase* sm;
+	IndelModel* im;
+
 	vector<double> indelParameters;
 	vector<double> substParameters;
 	vector<double> divergenceTimes;
@@ -42,10 +47,7 @@ protected:
 	unsigned int optCount;
 
 	//FIXME - static bound vectors!
-	SubstitutionModelBase* sm;
-	IndelModel* im;
 
-	Maths* maths;
 
 	void generateInitialIndelParameters();
 	void generateInitialSubstitutionParameters();

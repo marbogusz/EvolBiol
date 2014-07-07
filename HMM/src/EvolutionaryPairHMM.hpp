@@ -20,6 +20,9 @@
 #include "PairwiseHmmDeleteState.hpp"
 #include "PairwiseHmmMatchState.hpp"
 #include "DpMatrixLoMem.hpp"
+#include "GTRModel.hpp"
+#include "HKY85Model.hpp"
+#include "AminoacidSubstitutionModel.hpp"
 
 namespace EBC
 {
@@ -61,6 +64,21 @@ protected:
 	//Delete state
 	PairwiseHmmStateBase* Y;
 
+	inline void getBandWidth()
+	{
+		this->bandSpan = ySize/(bandFactor);
+		DEBUG("Band span " << bandSpan);
+	}
+
+	inline bool withinBand(unsigned int line, int position, unsigned int width)
+	{
+		int low = line - width;
+		int high = line + width;
+		bool result = ((position >= low) && (position <= high));
+		return result;
+	}
+
+
 	//the following assumes a fix HMM structure
 	virtual void setTransitionProbabilities();
 
@@ -77,7 +95,8 @@ protected:
 
 public:
 
-	EvolutionaryPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dict, unsigned int rateCategories, Maths*);
+	EvolutionaryPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dict, unsigned int rateCategories, Maths*,
+			Definitions::ModelType model, bool banding, unsigned int bandPercentage);
 
 	virtual ~EvolutionaryPairHMM();
 

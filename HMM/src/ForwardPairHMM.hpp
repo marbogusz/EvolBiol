@@ -21,21 +21,6 @@ protected:
 	vector<double> userIndelParameters;
 	vector<double> userSubstParameters;
 
-	void getBandWidth()
-	{
-		this->bandSpan = ySize/(bandFactor);
-		DEBUG("Band span " << bandSpan);
-	}
-
-	inline bool withinBand(unsigned int line, int position, unsigned int width)
-	{
-		int low = line - width;
-		int high = line + width;
-		bool result = ((position >= low) && (position <= high));
-		return result;
-	}
-
-
 public:
 	ForwardPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dict,  Definitions::ModelType model, bool banding,
 			unsigned int bandPercentage, unsigned int rateCategories, Maths*);

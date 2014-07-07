@@ -27,14 +27,14 @@ protected:
 
 	Maths* maths;
 
+	//number of discrete gamma rate categories
+	unsigned int rateCategories;
+
 	unsigned int paramsNumber;
 
 	unsigned int matrixSize;
 
 	unsigned int matrixFullSize;
-
-	//number of discrete gamma rate categories
-	unsigned int rateCategories;
 
 	//gamma distribution alpha parameter
 	double alpha;

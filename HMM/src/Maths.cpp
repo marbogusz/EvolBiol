@@ -211,6 +211,7 @@ int Maths::eigenQREV (double Q[], double pi[], int n,
                U[i*n+j] = (i==j);
       }
    }
+   return 0;
 }
 
 void Maths::HouseholderRealSym(double a[], int n, double d[], double e[])

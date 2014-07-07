@@ -12,8 +12,8 @@ namespace EBC
 {
 
 EvolutionaryPairHMM::EvolutionaryPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dct,
-		unsigned int rateCategories, Maths* mt) : gammaRateCategories(rateCategories),
-				maths(mt)
+		unsigned int rateCategories, Maths* mt, Definitions::ModelType model, bool banding, unsigned int bandPercentage)
+		: maths(mt), gammaRateCategories(rateCategories)
 {
 	M = X = Y = NULL;
 	mlParameters = NULL;
@@ -29,7 +29,28 @@ EvolutionaryPairHMM::EvolutionaryPairHMM(vector<SequenceElement> s1, vector<Sequ
 	DEBUG("Creating the gap model");
 	indelModel = new NegativeBinomialGapModel();
 
-	//substitution model created by the subclass
+	DEBUG("Creating the model");
+	if (model == Definitions::ModelType::GTR)
+	{
+		substModel = new GTRModel(dict, maths,gammaRateCategories);
+	}
+	else if (model == Definitions::ModelType::HKY85)
+	{
+		substModel = new HKY85Model(dict, maths,gammaRateCategories);
+	}
+	else if (model == Definitions::ModelType::LG)
+	{
+			substModel = new AminoacidSubstitutionModel(dict, maths,gammaRateCategories,Definitions::aaLgModel);
+	}
+
+	bandFactor = bandPercentage;
+	bandingEnabled = banding;
+
+	//initialize parameter arrays
+	//TODO - set parameters depending on the values provided
+	getBandWidth();
+	initializeStates();
+
 }
 
 void EvolutionaryPairHMM::setModelParameters(std::vector<double> indel_params,
@@ -152,6 +173,15 @@ void EvolutionaryPairHMM::calculateModels()
 EvolutionaryPairHMM::~EvolutionaryPairHMM()
 {
 	// TODO Auto-generated destructor stub
+	//delete bfgs;
+	//delete Y;
+	//delete X;
+	//delete M;
+	//delete[] optParameters;
+	delete[] mlParameters;
+	//delete substModel;
+	//delete indelModel;
+    delete maths;
 }
 
 } /* namespace EBC */
