@@ -34,10 +34,12 @@ private:
 	unsigned int sequenceCount;
 	double* observedFrequencies;
 
+	bool fixedAlignment;
+
 public:
 
 	//Input from file or console
-	Sequences(IParser*, Definitions::SequenceType) throw (HmmException&);
+	Sequences(IParser*, Definitions::SequenceType, bool fixedAlignment=false) throw (HmmException&);
 
 	~Sequences();
 

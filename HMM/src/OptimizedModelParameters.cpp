@@ -11,16 +11,16 @@ namespace EBC
 {
 
 OptimizedModelParameters::OptimizedModelParameters(SubstitutionModelBase* sm, IndelModel* im, unsigned int sCount, unsigned int dCount,
-		bool se, bool ie, bool ae, Maths* m) : maths(m), sm(sm), im(im), indelParameters(im->getParamsNumber()),
+		bool se, bool ie, bool ae, bool de, Maths* m) : maths(m), sm(sm), im(im), indelParameters(im->getParamsNumber()),
 		substParameters(sm->getParamsNumber()), divergenceTimes(dCount),
-		estimateIndelParams(ie), estimateSubstParams(se), estimateAlpha(ae)
+		estimateIndelParams(ie), estimateSubstParams(se), estimateAlpha(ae), estimateDivergence(de)
 {
-	indelCount = indelParameters.size();
+	indelCount = indelParameters.size(); //-1;  //FIXME - hack!!!
 	substCount = substParameters.size();
 	seqCount = sCount;
 	distCount = dCount;
 	optCount = (estimateSubstParams ? substCount : 0) +
-			(estimateIndelParams ? indelCount : 0) + distCount + (estimateAlpha ? 1 : 0);
+			(estimateIndelParams ? indelCount : 0) + (estimateDivergence ? distCount : 0) + (estimateAlpha ? 1 : 0);
 	this->divergenceBound  = 3.3;
 
 	if(estimateIndelParams)
@@ -73,11 +73,14 @@ void EBC::OptimizedModelParameters::toDlibVector(column_vector& vals, column_vec
 		hbounds(ptr) = 99.999999;
 		ptr++;
 	}
-	for (i=0; i < distCount; i++)
+	if(estimateDivergence)
 	{
-		vals(i+ptr) = divergenceTimes[i];
-		lbounds(i+ptr) = 0.000001;
-		hbounds(i+ptr) = divergenceBound;
+		for (i=0; i < distCount; i++)
+		{
+			vals(i+ptr) = divergenceTimes[i];
+			lbounds(i+ptr) = 0.000001;
+			hbounds(i+ptr) = divergenceBound;
+		}
 	}
 }
 
@@ -94,6 +97,7 @@ void EBC::OptimizedModelParameters::generateInitialIndelParameters()
 	for(unsigned int i=0; i< indelCount; i++)
 	{
 		indelParameters[i] = 0.05 + 0.1*maths->rndu();
+		//indelParameters[i+1] = 0.5; //FIXME
 	}
 }
 
@@ -122,6 +126,7 @@ void EBC::OptimizedModelParameters::fromDlibVector(const column_vector& vals)
 		for (i=0; i < indelCount; i++)
 		{
 			indelParameters[i] = vals(i+ptr);
+			//indelParameters[i+1] = 0.5; //FIXME
 		}
 		ptr += indelCount;
 	}
@@ -130,9 +135,12 @@ void EBC::OptimizedModelParameters::fromDlibVector(const column_vector& vals)
 		alpha = vals(ptr);
 		ptr++;
 	}
-	for (i=0; i < distCount; i++)
+	if(estimateDivergence)
 	{
-		divergenceTimes[i] = vals(i+ptr);
+		for (i=0; i < distCount; i++)
+		{
+			divergenceTimes[i] = vals(i+ptr);
+		}
 	}
 }
 
@@ -145,6 +153,12 @@ void EBC::OptimizedModelParameters::setUserIndelParams(
 		vector<double> allocator)
 {
 	indelParameters = allocator;
+}
+
+void EBC::OptimizedModelParameters::setUserDivergenceParams(
+		vector<double> allocator)
+{
+	divergenceTimes = allocator;
 }
 
 void EBC::OptimizedModelParameters::setUserSubstParams(

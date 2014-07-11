@@ -98,6 +98,11 @@ public:
 		this->dpMatrix->traceback(seqA,seqB,alignment);
 	}
 
+	void tracebackRaw(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dict, vector<std::pair<unsigned int, unsigned int> >& al)
+	{
+		this->dpMatrix->tracebackRaw(s1,s2,dict,al);
+	}
+
 
 };
 

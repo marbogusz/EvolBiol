@@ -135,6 +135,55 @@ void EBC::DpMatrixFull::setSrc(unsigned int i, unsigned int j, DpMatrixBase* src
 	matrixData[i][j].src = static_cast<DpMatrixFull*>(src);
 }
 
+void EBC::DpMatrixFull::tracebackRaw(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dict, vector<std::pair<unsigned int, unsigned int> >& al)
+{
+		unsigned int i = xSize-1;
+		unsigned int j = ySize-1;
+
+		string a1 = "";
+		string a2 = "";
+
+		DpMatrixFull* currentMat = this;
+
+		while(i>0 || j >0)
+		{
+			if (currentMat->matrixData[i][j].diag)
+			{
+				al.push_back(std::make_pair(s1[i-1].getMatrixIndex(), s2[j-1].getMatrixIndex()));
+				currentMat = currentMat->matrixData[i][j].src;
+
+				a1 += dict->getSymbolAt(s1[i-1].getMatrixIndex());
+				a2 += dict->getSymbolAt(s2[j-1].getMatrixIndex());
+
+				i--;
+				j--;
+			}
+			else if (currentMat->matrixData[i][j].hor)
+			{
+				al.push_back(std::make_pair(dict->getAlphabetSize(), s2[j-1].getMatrixIndex()));
+				currentMat = currentMat->matrixData[i][j].src;
+
+				a1 += '-';
+				a2 += dict->getSymbolAt(s2[j-1].getMatrixIndex());
+				j--;
+			}
+			//vert
+			else
+			{
+				al.push_back(std::make_pair( s1[i-1].getMatrixIndex(),dict->getAlphabetSize()));
+				currentMat = currentMat->matrixData[i][j].src;
+				a1 += dict->getSymbolAt(s1[i-1].getMatrixIndex());
+				a2 += '-';
+				i--;
+			}
+
+		}
+
+		//std::cerr << a1 << endl;
+		//std::cerr << a2 << endl << endl;
+
+}
+
 void EBC::DpMatrixFull::traceback(string& seq_a, string& seq_b, std::pair<string,string>* alignment)
 {
 	unsigned int i = xSize-1;

@@ -43,6 +43,26 @@ void SubstitutionModelBase::allocateMatrices()
 		gammaRates = new double[1];
 		gammaFrequencies[0] = gammaRates[0] = 1;
 	}
+
+	this->sitePatterns = new double*[matrixSize+1];
+	for (int i =0; i<= matrixSize; i++ )
+		sitePatterns[i] = new double[matrixSize+1];
+}
+
+void SubstitutionModelBase::calculateSitePatterns()
+{
+	//includes gaps - does not discard missing data!
+	for (int i =0; i<= matrixSize; i++ )
+		for (int j =0; j<= matrixSize; j++ )
+		{
+			if (i == matrixSize)
+				sitePatterns[i][j]  = log(this->piFreqs[j]);
+			else if (j == matrixSize)
+				sitePatterns[i][j]  = log(this->piFreqs[i]);
+			else
+				sitePatterns[i][j] = log(this->getPXiYi(i,j));
+		}
+	sitePatterns[matrixSize][matrixSize] = 0;
 }
 
 void SubstitutionModelBase::destroyMatrices()
@@ -136,6 +156,8 @@ void SubstitutionModelBase::calculateGamma()
 	if(!(alpha <=0 || rateCategories == 0))
 	{
 		this->maths->DiscreteGamma(gammaFrequencies, gammaRates, alpha, alpha, rateCategories, useMedian);
+		DEBUGV(gammaRates,5);
+		DEBUGV(gammaFrequencies,5);
 
 	}
 }
@@ -157,6 +179,11 @@ double SubstitutionModelBase::getPXiYi(unsigned int xi, unsigned int yi)
 double SubstitutionModelBase::getQXi(unsigned int xi)
 {
 	return piFreqs[xi];
+}
+
+double SubstitutionModelBase::getPattern(unsigned int xi, unsigned int yi)
+{
+	return this->sitePatterns[xi][yi];
 }
 
 } /* namespace EBC */

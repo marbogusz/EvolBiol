@@ -39,6 +39,7 @@ protected:
 	bool estimateIndelParams;
 	bool estimateSubstParams;
 	bool estimateAlpha;
+	bool estimateDivergence;
 
 	unsigned int indelCount;
 	unsigned int substCount;
@@ -54,7 +55,7 @@ protected:
 	void generateInitialDistanceParameters();
 
 public:
-	OptimizedModelParameters(SubstitutionModelBase*, IndelModel*, unsigned int, unsigned int, bool, bool, bool, Maths*);
+	OptimizedModelParameters(SubstitutionModelBase*, IndelModel*, unsigned int, unsigned int, bool, bool, bool, bool, Maths*);
 
 	unsigned int optParamCount();
 
@@ -67,6 +68,8 @@ public:
 	void setUserIndelParams(vector<double>);
 
 	void setUserSubstParams(vector<double>);
+
+	void setUserDivergenceParams(vector<double>);
 
 	void outputParameters();
 

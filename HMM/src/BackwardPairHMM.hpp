@@ -38,7 +38,7 @@ protected:
 
 public:
 	BackwardPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dict,  Definitions::ModelType model, bool banding,
-			unsigned int bandPercentage, unsigned int rateCategories, Maths*);
+			unsigned int bandPercentage, unsigned int rateCategories, Maths*, Definitions::DpMatrixType);
 
 	virtual ~BackwardPairHMM();
 

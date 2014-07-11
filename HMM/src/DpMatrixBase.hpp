@@ -10,6 +10,9 @@
 
 #include <limits>
 #include <iostream>
+#include <vector>
+#include "SequenceElement.hpp"
+#include "Dictionary.hpp"
 
 using namespace std;
 
@@ -54,6 +57,8 @@ public:
 	virtual void setVerticalAt(unsigned int i, unsigned int j)=0;
 
 	virtual void traceback(string& seq_a, string& seq_b, std::pair<string,string>* alignment)=0;
+
+	virtual void tracebackRaw(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dict, vector<std::pair<unsigned int, unsigned int> >&)=0;
 };
 
 } /* namespace EBC */

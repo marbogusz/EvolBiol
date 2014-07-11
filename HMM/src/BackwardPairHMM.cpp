@@ -17,8 +17,8 @@ namespace EBC
 
 
 BackwardPairHMM::BackwardPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dict, Definitions::ModelType model,
-		bool banding, unsigned int bandPercentage, unsigned int rateCategories, Maths* mt) :
-		EvolutionaryPairHMM(s1,s2, dict, rateCategories, mt, model, banding, bandPercentage)
+		bool banding, unsigned int bandPercentage, unsigned int rateCategories, Maths* mth, Definitions::DpMatrixType mt) :
+		EvolutionaryPairHMM(s1,s2, dict, rateCategories, mth, model, banding, bandPercentage,mt)
 {
 }
 

@@ -46,6 +46,10 @@ public:
 
 	enum OptimizationType {BFGS, BOBYQA};
 
+	enum AlgorithmType {Forward, Viterbi, MLE};
+
+	enum DpMatrixType {Full, Limited};
+
 	static const unsigned int HKY85ParamCount;
 
 	static const unsigned int GTRParamCount;

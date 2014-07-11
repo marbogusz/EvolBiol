@@ -51,6 +51,8 @@ public:
 
 	void traceback(string& seqA, string& seqB, std::pair<string,string>* alignment);
 
+	void tracebackRaw(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dict, vector<std::pair<unsigned int, unsigned int> >&);
+
 	DpMatrixFull(unsigned int xSize, unsigned int ySize);
 
 	virtual ~DpMatrixFull();

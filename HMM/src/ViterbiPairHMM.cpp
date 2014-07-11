@@ -14,13 +14,31 @@ namespace EBC
 
 
 ViterbiPairHMM::ViterbiPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dict, Definitions::ModelType model,
-		bool banding, unsigned int bandPercentage, unsigned int rateCategories, Maths* mt) :
-		EvolutionaryPairHMM(s1,s2, dict, rateCategories, mt, model, banding, bandPercentage)
+		bool banding, unsigned int bandPercentage, unsigned int rateCategories, Maths* mth, Definitions::DpMatrixType mt) :
+		EvolutionaryPairHMM(s1,s2, dict, rateCategories, mth, model, banding, bandPercentage,mt)
 {
+	this->alignment.reserve(xSize);
 }
 
 ViterbiPairHMM::~ViterbiPairHMM()
 {
+}
+
+
+double ViterbiPairHMM::getViterbiSubstitutionLikelihood()
+{
+	double lnl = 0;
+	calculateModels();
+	this->substModel->calculateSitePatterns();
+	//we have the site patterns now
+	//get alignment!
+
+	for (auto it = alignment.begin(); it != alignment.end(); it ++)
+	{
+		lnl += this->substModel->getPattern(it->first, it->second);
+	}
+
+	return lnl * -1.0;
 }
 
 double ViterbiPairHMM::getMax(double m, double x, double y, unsigned int i, unsigned int j, PairwiseHmmStateBase* state)
@@ -54,7 +72,7 @@ double ViterbiPairHMM::getMax(double m, double x, double y, unsigned int i, unsi
 
 }
 
-double ViterbiPairHMM::runViterbiAlgorithm()
+double ViterbiPairHMM::runAlgorithm()
 {
 
 	calculateModels();
@@ -70,6 +88,10 @@ double ViterbiPairHMM::runViterbiAlgorithm()
 	double emissionX;
 	double emissionY;
 
+	M->initializeData();
+	X->initializeData();
+	Y->initializeData();
+
 		//while (i != xSize && j != ySize)
 
 
@@ -77,37 +99,39 @@ double ViterbiPairHMM::runViterbiAlgorithm()
 	{
 		for (j = 0; j<ySize; j++)
 		{
-
-			if(i!=0)
+			if(this->withinBand(i,j,this->bandSpan) || !bandingEnabled)
 			{
+				if(i!=0)
+				{
 
-				k = i-1;
-				emissionX = log(substModel->getQXi(seq1[i-1].getMatrixIndex()));
-				xm = M->getValueAt(k,j) + X->getTransitionProbabilityFromMatch();
-				xx = X->getValueAt(k,j) + X->getTransitionProbabilityFromInsert();
-				xy = Y->getValueAt(k,j) + X->getTransitionProbabilityFromDelete();
+					k = i-1;
+					emissionX = log(substModel->getQXi(seq1[i-1].getMatrixIndex()));
+					xm = M->getValueAt(k,j) + X->getTransitionProbabilityFromMatch();
+					xx = X->getValueAt(k,j) + X->getTransitionProbabilityFromInsert();
+					xy = Y->getValueAt(k,j) + X->getTransitionProbabilityFromDelete();
 
-				X->setValueAt(i,j,getMax(xm,xx,xy,i,j,X) + emissionX);
-			}
-			if(j!=0)
-			{
-				k = j-1;
-				emissionY = log(substModel->getQXi(seq2[j-1].getMatrixIndex()));
-				ym = M->getValueAt(i,k) + Y->getTransitionProbabilityFromMatch();
-				yx = X->getValueAt(i,k) + Y->getTransitionProbabilityFromInsert();
-				yy = Y->getValueAt(i,k) + Y->getTransitionProbabilityFromDelete();
-				Y->setValueAt(i,j,getMax(ym,yx,yy,i,j,Y) + emissionY);
+					X->setValueAt(i,j,getMax(xm,xx,xy,i,j,X) + emissionX);
+				}
+				if(j!=0)
+				{
+					k = j-1;
+					emissionY = log(substModel->getQXi(seq2[j-1].getMatrixIndex()));
+					ym = M->getValueAt(i,k) + Y->getTransitionProbabilityFromMatch();
+					yx = X->getValueAt(i,k) + Y->getTransitionProbabilityFromInsert();
+					yy = Y->getValueAt(i,k) + Y->getTransitionProbabilityFromDelete();
+					Y->setValueAt(i,j,getMax(ym,yx,yy,i,j,Y) + emissionY);
 				}
 
-			if(i!=0 && j!=0)
-			{
-				k = i-1;
-				l = j-1;
-				emissionM = log(substModel->getPXiYi(seq1[i-1].getMatrixIndex(), seq2[j-1].getMatrixIndex()));
-				mm = M->getValueAt(k,l) + M->getTransitionProbabilityFromMatch();
-				mx = X->getValueAt(k,l) + M->getTransitionProbabilityFromInsert();
-				my = Y->getValueAt(k,l) + M->getTransitionProbabilityFromDelete();
-				M->setValueAt(i,j,getMax(mm,mx,my,i,j,M) + emissionM);
+				if(i!=0 && j!=0)
+				{
+					k = i-1;
+					l = j-1;
+					emissionM = log(substModel->getPXiYi(seq1[i-1].getMatrixIndex(), seq2[j-1].getMatrixIndex()));
+					mm = M->getValueAt(k,l) + M->getTransitionProbabilityFromMatch();
+					mx = X->getValueAt(k,l) + M->getTransitionProbabilityFromInsert();
+					my = Y->getValueAt(k,l) + M->getTransitionProbabilityFromDelete();
+					M->setValueAt(i,j,getMax(mm,mx,my,i,j,M) + emissionM);
+				}
 			}
 		}
 	}
@@ -115,11 +139,25 @@ double ViterbiPairHMM::runViterbiAlgorithm()
 	my = Y->getValueAt(xSize-1,ySize-1);
 	mm = M->getValueAt(xSize-1,ySize-1);
 
-	DEBUG("Final Viterbi M  " << mm);
-	DEBUG("Final Viterbi X  " << mx );
-	DEBUG("Final Viterbi Y  " << my );
+	if(mm >=mx && mm >=my)
+	{
+		M->tracebackRaw(this->seq1,this->seq2, this->dict, this->alignment);
+	}
+	else if(mx >= my)
+	{
+		X->tracebackRaw(this->seq1,this->seq2, this->dict, this->alignment);
+	}
+	else
+	{
+		Y->tracebackRaw(this->seq1,this->seq2, this->dict, this->alignment);
+	}
 
-return std::max(mm,std::max(mx,my));
+
+	//DEBUG("Final Viterbi M  " << mm);
+	//DEBUG("Final Viterbi X  " << mx );
+	//DEBUG("Final Viterbi Y  " << my );
+
+return (std::max(mm,std::max(mx,my)))*-1.0;
 
 }
 

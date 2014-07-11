@@ -12,8 +12,8 @@ namespace EBC
 {
 
 EvolutionaryPairHMM::EvolutionaryPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dct,
-		unsigned int rateCategories, Maths* mt, Definitions::ModelType model, bool banding, unsigned int bandPercentage)
-		: maths(mt), gammaRateCategories(rateCategories)
+		unsigned int rateCategories, Maths* mths, Definitions::ModelType model, bool banding, unsigned int bandPercentage, Definitions::DpMatrixType mt)
+		: maths(mths), gammaRateCategories(rateCategories)
 {
 	M = X = Y = NULL;
 	mlParameters = NULL;
@@ -49,7 +49,7 @@ EvolutionaryPairHMM::EvolutionaryPairHMM(vector<SequenceElement> s1, vector<Sequ
 	//initialize parameter arrays
 	//TODO - set parameters depending on the values provided
 	getBandWidth();
-	initializeStates();
+	initializeStates(mt);
 
 }
 
@@ -145,7 +145,7 @@ void EvolutionaryPairHMM::summarize()
 
 }
 
-void EvolutionaryPairHMM::initializeStates()
+void EvolutionaryPairHMM::initializeStates(Definitions::DpMatrixType mt)
 {
 
 	if (M != NULL)
@@ -155,13 +155,23 @@ void EvolutionaryPairHMM::initializeStates()
 	if (Y != NULL)
 		delete Y;
 
-	//M = new PairwiseHmmMatchState(xSize,ySize);
-	//X = new PairwiseHmmInsertState(xSize,ySize);
-	//Y = new PairwiseHmmDeleteState(xSize,ySize);
-
-	M = new PairwiseHmmMatchState(new DpMatrixLoMem(xSize,ySize));
-	X = new PairwiseHmmInsertState(new DpMatrixLoMem(xSize,ySize));
-	Y = new PairwiseHmmDeleteState(new DpMatrixLoMem(xSize,ySize));
+	switch (mt)
+	{
+	case Definitions::DpMatrixType::Full :
+		M = new PairwiseHmmMatchState(xSize,ySize);
+		X = new PairwiseHmmInsertState(xSize,ySize);
+		Y = new PairwiseHmmDeleteState(xSize,ySize);
+		break;
+	case Definitions::DpMatrixType::Limited :
+		M = new PairwiseHmmMatchState(new DpMatrixLoMem(xSize,ySize));
+		X = new PairwiseHmmInsertState(new DpMatrixLoMem(xSize,ySize));
+		Y = new PairwiseHmmDeleteState(new DpMatrixLoMem(xSize,ySize));
+		break;
+	default :
+		M = new PairwiseHmmMatchState(xSize,ySize);
+		X = new PairwiseHmmInsertState(xSize,ySize);
+		Y = new PairwiseHmmDeleteState(xSize,ySize);
+	}
 }
 
 void EvolutionaryPairHMM::calculateModels()

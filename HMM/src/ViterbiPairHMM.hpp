@@ -21,15 +21,19 @@ protected:
 	vector<double> userIndelParameters;
 	vector<double> userSubstParameters;
 
+	vector<std::pair<unsigned int, unsigned int> > alignment;
+
 	double getMax(double m, double x, double y, unsigned int i, unsigned int j, PairwiseHmmStateBase* state);
 
 public:
 	ViterbiPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dict,  Definitions::ModelType model, bool banding,
-			unsigned int bandPercentage, unsigned int rateCategories, Maths*);
+			unsigned int bandPercentage, unsigned int rateCategories, Maths*, Definitions::DpMatrixType);
 
 	virtual ~ViterbiPairHMM();
 
-	double runViterbiAlgorithm();
+	double runAlgorithm();
+
+	double getViterbiSubstitutionLikelihood();
 
 };
 

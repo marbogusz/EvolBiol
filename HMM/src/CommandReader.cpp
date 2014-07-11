@@ -23,6 +23,7 @@ CommandReader::CommandReader(int argc, char** argv)
 	{
 		parser.add_option("V", "Run Viterbi algorithm using user parameters");
 		parser.add_option("F", "Run Forward algorithm");
+		parser.add_option("M", "Run Viterbi MLE");
 		parser.add_option("in","This option takes one argument which specifies the name of the file we want to analyze",1);
 		parser.add_option("rev", "REV Substitution Model");
 		parser.add_option("hky", "HKY85 Substitution Model");
@@ -66,9 +67,9 @@ CommandReader::CommandReader(int argc, char** argv)
 		parser.check_option_arg_range("initAlpha", 0.0000001, 1000.0);
 		parser.check_option_arg_range("bf", 1, 100);
 
-		if (!parser.option("V") && !parser.option("F"))
+		if (!parser.option("V") && !parser.option("F") && !parser.option("M"))
 		{
-		    cout << "Usage: HMM (-F|-V) --in input_file (rev|hky) [param_rev .... | param_hky ...] [i indel parameters] [d distance] [b] [o=0|1] [ov]\n";
+		    cout << "Usage: HMM (-F|-V| -M) --in input_file (rev|hky) [param_rev .... | param_hky ...] [i indel parameters] [d distance] [b] [o=0|1] [ov]\n";
 		    parser.print_options();
 			throw HmmException("Specify which algorithm you want to run!\n");
 		}

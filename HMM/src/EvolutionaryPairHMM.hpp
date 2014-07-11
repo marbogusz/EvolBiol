@@ -84,7 +84,7 @@ protected:
 
 	virtual void calculateModels();
 
-	virtual void initializeStates();
+	virtual void initializeStates(Definitions::DpMatrixType mt);
 
 	double* generateInitialSubstitutionParameters();
 
@@ -96,9 +96,11 @@ protected:
 public:
 
 	EvolutionaryPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dict, unsigned int rateCategories, Maths*,
-			Definitions::ModelType model, bool banding, unsigned int bandPercentage);
+			Definitions::ModelType model, bool banding, unsigned int bandPercentage, Definitions::DpMatrixType mt);
 
 	virtual ~EvolutionaryPairHMM();
+
+	virtual double runAlgorithm()=0;
 
 	void summarize();
 

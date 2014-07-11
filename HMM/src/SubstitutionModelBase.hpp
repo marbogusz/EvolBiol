@@ -65,9 +65,8 @@ protected:
 	//ML parameters - model parameters + time!
 	double* parameters;
 
-
-
-
+	//patterns for sequence elements + missing data (gaps)
+	double ** sitePatterns;
 
 	double meanRate;
 
@@ -106,7 +105,11 @@ public:
 
 	double getQXi(unsigned int xi);
 
+	double getPattern(unsigned int xi, unsigned int yi);
+
 	virtual void setParameters(vector<double>&)=0;
+
+	virtual void calculateSitePatterns();
 
 	void setTime(double t)
 	{

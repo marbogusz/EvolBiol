@@ -120,7 +120,7 @@ namespace EBC
         int x, y;
 
         n = taxas;
-        output = stdout;
+        output = stderr;
 
         /*   Allocation of memories    */
 

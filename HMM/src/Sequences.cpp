@@ -10,7 +10,8 @@
 namespace EBC
 {
 
-Sequences::Sequences(IParser* iParser,Definitions::SequenceType st) throw (HmmException&)
+Sequences::Sequences(IParser* iParser,Definitions::SequenceType st, bool fa) throw (HmmException&) :
+		fixedAlignment(fa)
 {
 	//use the file parser to get sequences and build the dictionary
 	unsigned int size = iParser->getSequenceCount();
@@ -23,14 +24,16 @@ Sequences::Sequences(IParser* iParser,Definitions::SequenceType st) throw (HmmEx
 
 	this->sequenceCount = size;
 
-	pairs.reserve(this->getPairCount());
+	if (!fixedAlignment)
+	{
+		pairs.reserve(this->getPairCount());
 
-	for(unsigned int i=0; i< size;i++)
-		for(unsigned int j=i+1; j<size;j++)
-			pairs.push_back(std::make_pair(i,j));
+		for(unsigned int i=0; i< size;i++)
+			for(unsigned int j=i+1; j<size;j++)
+				pairs.push_back(std::make_pair(i,j));
 
-	pairIterator = pairs.begin();
-
+		pairIterator = pairs.begin();
+	}
 	while(size > 0)
 	{
 		this->rawSequences.push_back(iParser->getNextSequence());

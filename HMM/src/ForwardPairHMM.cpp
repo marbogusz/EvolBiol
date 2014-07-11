@@ -13,8 +13,8 @@ namespace EBC
 
 
 ForwardPairHMM::ForwardPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dict, Definitions::ModelType model,
-		bool banding, unsigned int bandPercentage, unsigned int rateCategories, Maths* mt) :
-		EvolutionaryPairHMM(s1,s2, dict, rateCategories, mt, model, banding, bandPercentage)
+		bool banding, unsigned int bandPercentage, unsigned int rateCategories, Maths* mth, Definitions::DpMatrixType mt) :
+		EvolutionaryPairHMM(s1,s2, dict, rateCategories, mth, model, banding, bandPercentage,mt)
 {
 }
 
@@ -22,7 +22,7 @@ ForwardPairHMM::~ForwardPairHMM()
 {
 }
 
-double ForwardPairHMM::runForwardAlgorithm()
+double ForwardPairHMM::runAlgorithm()
 {
 
 	calculateModels();
@@ -92,8 +92,8 @@ double ForwardPairHMM::runForwardAlgorithm()
 
 	//cerr << "\t" << sX << "\t" << sY << "\t"<< sM << "\t" << sS << endl;
 
-	DEBUG ("Forward results:");
-	DEBUG (" sX, sY, sM, sS " << sX << "\t" << sY << "\t" << sM << "\t" << sS);
+	//DEBUG ("Forward results:");
+	//DEBUG (" sX, sY, sM, sS " << sX << "\t" << sY << "\t" << sM << "\t" << sS);
 
 	return sS* -1.0;
 }

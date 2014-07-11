@@ -68,6 +68,8 @@ public:
 
 	void traceback(string& seq_a, string& seq_b, std::pair<string,string>* alignment) {}
 
+	void tracebackRaw(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dict, vector<std::pair<unsigned int, unsigned int> >&) {}
+
 
 	DpMatrixLoMem(unsigned int xSize, unsigned int ySize);
 

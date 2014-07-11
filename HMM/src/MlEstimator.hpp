@@ -1,17 +1,17 @@
 /*
- * PairwiseEstimator.hpp
+ * MlEstimator.hpp
  *
  *  Created on: Feb 26, 2014
  *      Author: root
  */
 
-#ifndef PAIRWISEESTIMATOR_HPP_
-#define PAIRWISEESTIMATOR_HPP_
+#ifndef MLESTIMATOR_HPP_
+#define MLESTIMATOR_HPP_
 
 
 #include "OptimizedModelParameters.hpp"
 #include "Definitions.hpp"
-#include "PairwiseEstimator.hpp"
+#include "MlEstimator.hpp"
 #include "ForwardPairHMM.hpp"
 #include "ViterbiPairHMM.hpp"
 #include "SubstitutionModelBase.hpp"
@@ -30,7 +30,7 @@ using namespace std;
 namespace EBC
 {
 
-class PairwiseEstimator
+class MlEstimator
 {
 
 private:
@@ -45,12 +45,12 @@ private:
 
 		unsigned int paramsCount;
 
-		PairwiseEstimator* parent;
+		MlEstimator* parent;
 
 		Definitions::OptimizationType optimizationType;
 
 	public:
-		BFGS(PairwiseEstimator* enclosing, Definitions::OptimizationType ot);
+		BFGS(MlEstimator* enclosing, Definitions::OptimizationType ot);
 		virtual ~BFGS();
 		void optimize();
 
@@ -70,11 +70,7 @@ protected:
 	Sequences* inputSequences;
 	Maths* maths;
 
-	unsigned int bandFactor;
-	unsigned int bandSpan;
 	unsigned int gammaRateCategories;
-
-	bool bandingEnabled;
 
 	bool estimateSubstitutionParams;
 	bool estimateIndelParams;
@@ -83,22 +79,20 @@ protected:
 
 	unsigned int pairCount;
 
-	vector<EvolutionaryPairHMM*> hmms;
+	vector<ViterbiPairHMM*> hmms;
 
 	OptimizedModelParameters* modelParams;
 
 public:
-	PairwiseEstimator(Definitions::AlgorithmType at, Sequences* inputSeqs, Definitions::ModelType model,std::vector<double> indel_params,
-			std::vector<double> subst_params, Definitions::OptimizationType ot, bool banding,
-			unsigned int bandPercentage, unsigned int rateCategories, double alpha, bool estimateAlpha, double userTime);
+	MlEstimator(Sequences* inputSeqs, Definitions::ModelType model,std::vector<double> indel_params,
+			std::vector<double> subst_params,Definitions::OptimizationType ot,
+			unsigned int rateCategories, double alpha, bool estimateAlpha, double userTime);
 
-	virtual ~PairwiseEstimator();
+	virtual ~MlEstimator();
 
 	void runIteration(const column_vector& bfgsParameters);
 
 	double runIteration();
-
-	void outputDistanceMatrix(stringstream&);
 
 	vector<double>& getOptimizedTimes()
 	{

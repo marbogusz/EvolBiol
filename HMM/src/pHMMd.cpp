@@ -11,6 +11,7 @@
 #include "ForwardPairHMM.hpp"
 #include "HmmException.hpp"
 #include "PairwiseEstimator.hpp"
+#include "MlEstimator.hpp"
 #include "BioNJ.hpp"
 #include <iostream>
 #include <fstream>
@@ -36,7 +37,20 @@ int main(int argc, char ** argv) {
 		Sequences* inputSeqs = new Sequences(parser, cmdReader->getSequenceType());
 		DEBUG("Creating the HMM");
 
-		if(cmdReader->isForward())
+
+		if (cmdReader->isMLE())
+		{
+
+
+			MlEstimator* me = new MlEstimator(inputSeqs, cmdReader->getModelType() ,cmdReader->getIndelParams(),
+								cmdReader->getSubstParams(), cmdReader->getOptimizationType(),
+								cmdReader->getCategories(), cmdReader->getAlpha(), cmdReader->estimateAlpha(),cmdReader->getDistance());
+
+			cout << cmdReader->getAlpha() << '\t' << cmdReader->getDistance() << '\n';
+
+		}
+
+		else
 		{
 			/*
 			ForwardPairHMM* fwdHMM = new ForwardPairHMM(inputSeqs, cmdReader->getModelType() ,
@@ -56,10 +70,11 @@ int main(int argc, char ** argv) {
 			fwdHMM->runForwardAlgorithm();
 			*/
 
+			cout << cmdReader->getAlpha() << '\t' << cmdReader->getDistance() << '\t';
 
-			PairwiseEstimator* pe = new PairwiseEstimator(inputSeqs, cmdReader->getModelType() ,cmdReader->getIndelParams(),
+			PairwiseEstimator* pe = new PairwiseEstimator(cmdReader->getAlgorithmType(), inputSeqs, cmdReader->getModelType() ,cmdReader->getIndelParams(),
 					cmdReader->getSubstParams(), cmdReader->getOptimizationType(), cmdReader->getBanding(), cmdReader->getBandFactor(),
-					cmdReader->getCategories(), cmdReader->getAlpha(), cmdReader->estimateAlpha());
+					cmdReader->getCategories(), cmdReader->getAlpha(), cmdReader->estimateAlpha(),cmdReader->getDistance());
 
 
 			//string distFile = cmdReader->getInputFileName();
@@ -72,12 +87,14 @@ int main(int argc, char ** argv) {
 			//of << ss.str();
 			//of.close();
 
+
+
 			cerr << "running bionj\n";
 
 			BioNJ nj(inputSeqs->getSequenceCount(), pe->getOptimizedTimes());
 			nj.calculate();
 
-			cout << cmdReader->getInputFileName() << endl;
+			cerr << cmdReader->getInputFileName() << endl;
 
 			//double* estimatedParams = fwdHMM->getMlParameters();
 
@@ -114,15 +131,6 @@ int main(int argc, char ** argv) {
 			delete pe;
 		}
 
-		else if (cmdReader->isViterbi())
-		{
-
-		}
-
-		else
-		{
-			throw HmmException("specify either V or F option");
-		}
 		//ForwardPairHMM* epHMM = new ForwardPairHMM(inputSeqs);
 
 		//ViterbiPairHMM* epHMM = new ViterbiPairHMM(inputSeqs);

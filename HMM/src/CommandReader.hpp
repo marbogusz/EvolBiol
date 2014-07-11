@@ -34,6 +34,11 @@ public:
 		return parser.option("F");
 	}
 
+	inline bool isMLE()
+	{
+		return parser.option("M");
+	}
+
 	vector<double> getIndelParams();
 
 	vector<double> getSubstParams();
@@ -42,6 +47,21 @@ public:
 	{
 		return parser.option("ov");
 	}
+
+	Definitions::AlgorithmType getAlgorithmType()
+		{
+			if (parser.option("V"))
+			{
+				return Definitions::AlgorithmType::Viterbi;
+			}
+			if (parser.option("F"))
+			{
+				return Definitions::AlgorithmType::Forward;
+			}
+			//default;
+			return Definitions::AlgorithmType::MLE;
+		}
+
 
 	Definitions::ModelType getModelType()
 	{

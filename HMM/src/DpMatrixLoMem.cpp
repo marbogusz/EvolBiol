@@ -58,7 +58,12 @@ void EBC::DpMatrixLoMem::setValue(unsigned int i,unsigned int j, double value)
 	{
 		previousRow[j] = value;
 	}
-	else throw HmmException("Reduced Dp matrix index out of bounds");
+
+	else
+	{
+		string msg = "Set Value : matrix index out of bounds, x: " + std::to_string(i) + " y : " + std::to_string(j) + " current row is " + std::to_string(currentRowIndex) + "\n";
+		throw HmmException(msg);
+	}
 }
 
 double EBC::DpMatrixLoMem::valueAt(unsigned int i, unsigned int j)
@@ -75,7 +80,11 @@ double EBC::DpMatrixLoMem::valueAt(unsigned int i, unsigned int j)
 	{
 		return previousRow[j];
 	}
-	else throw HmmException("Reduced Dp matrix index out of bounds");
+	else
+	{
+		string msg = "Value At : matrix index out of bounds, x: " + std::to_string(i) + " y : " + std::to_string(j) + " current row is " + std::to_string(currentRowIndex) + "\n";
+		throw HmmException(msg);
+	}
 }
 
 void EBC::DpMatrixLoMem::setSrc(unsigned int i, unsigned int j, DpMatrixBase*){}
