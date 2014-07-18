@@ -10,10 +10,10 @@
 namespace EBC
 {
 
-Sequences::Sequences(IParser* iParser,Definitions::SequenceType st, bool fa) throw (HmmException&) :
-		fixedAlignment(fa)
+Sequences::Sequences(IParser* iParser,Definitions::SequenceType st, bool fa) throw (HmmException&)
 {
 	//use the file parser to get sequences and build the dictionary
+	fixedAlignment = fa;
 	unsigned int size = iParser->getSequenceCount();
 	if (size <= 0)
 	{
@@ -24,20 +24,18 @@ Sequences::Sequences(IParser* iParser,Definitions::SequenceType st, bool fa) thr
 
 	this->sequenceCount = size;
 
-	if (!fixedAlignment)
-	{
-		pairs.reserve(this->getPairCount());
+	pairs.reserve(this->getPairCount());
 
-		for(unsigned int i=0; i< size;i++)
-			for(unsigned int j=i+1; j<size;j++)
-				pairs.push_back(std::make_pair(i,j));
+	for(unsigned int i=0; i< size;i++)
+		for(unsigned int j=i+1; j<size;j++)
+			pairs.push_back(std::make_pair(i,j));
 
 		pairIterator = pairs.begin();
-	}
+
 	while(size > 0)
 	{
 		this->rawSequences.push_back(iParser->getNextSequence());
-		this->translatedSequences.push_back(dict->translate(*(rawSequences.end()-1),false));
+		this->translatedSequences.push_back(dict->translate(*(rawSequences.end()-1),fixedAlignment==false));
 		size--;
 	}
 }
@@ -85,8 +83,11 @@ double* Sequences::getElementFrequencies()
 	{
 		for(vector<SequenceElement>::iterator it2 = it1->begin(); it2 != it1->end(); ++it2)
 		{
-			count++;
-			observedFrequencies[it2->getMatrixIndex()]++;
+			if (!(it2->isIsGap()))
+			{
+				count++;
+				observedFrequencies[it2->getMatrixIndex()]++;
+			}
 		}
 	}
 

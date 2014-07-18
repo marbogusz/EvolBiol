@@ -9,6 +9,7 @@
 #define SEQUENCEELEMENT_H_
 
 #include <vector>
+#include <string>
 using namespace std;
 
 
@@ -20,19 +21,26 @@ class SequenceElement
 protected:
 	bool isGap;
 	short matrixIndex;
+	std::string symbol;
 	vector<short> alternativeIndexes;
 public:
-	SequenceElement(bool, short, short*);
+	SequenceElement(bool, short, short*, string smbl);
 
 	bool isIsGap() const
 	{
 		return isGap;
 	}
 
-	short getMatrixIndex() const
+	inline short getMatrixIndex() const
 	{
 		return matrixIndex;
 	}
+
+	inline string& getSymbol()
+	{
+		return symbol;
+	}
+
 };
 
 } /* namespace EBC */

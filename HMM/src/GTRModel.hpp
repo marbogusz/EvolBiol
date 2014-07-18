@@ -28,7 +28,7 @@ public:
 
 	void summarize();
 
-	void setParameters(vector<double>&);
+	void setParameters(const vector<double>&);
 };
 
 } /* namespace EBC */

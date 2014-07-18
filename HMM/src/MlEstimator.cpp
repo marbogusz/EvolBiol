@@ -57,7 +57,7 @@ void MlEstimator::BFGS::optimize()
 		case Definitions::OptimizationType::BFGS:
 		{
 			likelihood = dlib::find_min_box_constrained(dlib::bfgs_search_strategy(),
-					dlib::objective_delta_stop_strategy(1e-7),
+					dlib::objective_delta_stop_strategy(1e-9),
 					f_objective,
 					derivative(f_objective),
 					initParams,
@@ -74,6 +74,7 @@ void MlEstimator::BFGS::optimize()
 	}
 	this->parent->modelParams->fromDlibVector(initParams);
 	parent->modelParams->outputParameters();
+	parent->substs[0]->summarize();
 	cout  << likelihood << "\t";
 
 }
@@ -81,8 +82,8 @@ void MlEstimator::BFGS::optimize()
 
 MlEstimator::MlEstimator(Sequences* inputSeqs, Definitions::ModelType model ,std::vector<double> indel_params,
 		std::vector<double> subst_params,   Definitions::OptimizationType ot,
-		unsigned int rateCategories, double alpha, bool estimateAlpha, double userTime) : inputSequences(inputSeqs), gammaRateCategories(rateCategories),
-		pairCount(inputSequences->getPairCount()), hmms(pairCount)
+		unsigned int rateCategories, double alpha, bool estimateAlpha, double userTime, bool alignViterbi) : inputSequences(inputSeqs), gammaRateCategories(rateCategories),
+		pairCount(inputSequences->getPairCount()), hmms(pairCount), substs(pairCount), useViterbi(alignViterbi)
 
 {
 	maths = new Maths();
@@ -112,8 +113,11 @@ MlEstimator::MlEstimator(Sequences* inputSeqs, Definitions::ModelType model ,std
 	modelParams = new OptimizedModelParameters(substModel, indelModel,inputSequences->getSequenceCount(), pairCount, estimateSubstitutionParams,
 			estimateIndelParams, estimateAlpha, true, maths);
 
-	modelParams->setUserIndelParams(indel_params);
-	modelParams->setUserSubstParams(subst_params);
+
+	//if(indel_params.size() > 0)
+	//	modelParams->setUserIndelParams(indel_params);
+	//if(subst_params.size() > 0)
+	//	modelParams->setUserSubstParams(subst_params);
 	modelParams->setAlpha(alpha);
 
 	//FIXME - provide divergence times later
@@ -128,19 +132,49 @@ MlEstimator::MlEstimator(Sequences* inputSeqs, Definitions::ModelType model ,std
 		modelParams->setUserDivergenceParams(times);
 	}
 
-	ViterbiPairHMM* hmm;
 
-	for(unsigned int i =0; i<pairCount; i++)
+	if (useViterbi)
 	{
-		std::pair<unsigned int, unsigned int> idxs = inputSequences->getPairOfSequenceIndices(i);
-		hmm = hmms[i] = new ViterbiPairHMM(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
-				dict, model, false, 1 ,rateCategories, maths, Definitions::DpMatrixType::Full);
-		hmm->setModelFrequencies(inputSequences->getElementFrequencies());
-		hmm->setModelParameters(modelParams->getIndelParameters(),modelParams->getSubstParameters(),
+		ViterbiPairHMM* hmm;
+
+		for(unsigned int i =0; i<pairCount; i++)
+		{
+			std::pair<unsigned int, unsigned int> idxs = inputSequences->getPairOfSequenceIndices(i);
+			hmm = hmms[i] = new ViterbiPairHMM(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
+					dict, model, false, 1 ,rateCategories, maths, Definitions::DpMatrixType::Full);
+			hmm->setModelFrequencies(inputSequences->getElementFrequencies());
+			hmm->setModelParameters(modelParams->getIndelParameters(),modelParams->getSubstParameters(),
 				modelParams->getDivergenceTime(i), modelParams->getAlpha());
 
-		//FIXME - HACK!!!!!!
-		hmm->runAlgorithm();
+			//FIXME - HACK!!!!!!
+			hmm->runAlgorithm();
+		}
+
+	}
+	else
+	{
+		SubstitutionModelBase* smodel;
+		for(unsigned int i =0; i<pairCount; i++)
+		{
+
+			if (model == Definitions::ModelType::GTR)
+			{
+				smodel =  substs[i] = new GTRModel(dict, maths,gammaRateCategories);
+			}
+			else if (model == Definitions::ModelType::HKY85)
+			{
+				smodel =  substs[i] = new HKY85Model(dict, maths,gammaRateCategories);
+			}
+			else if (model == Definitions::ModelType::LG)
+			{
+				smodel =  substs[i] = new AminoacidSubstitutionModel(dict, maths,gammaRateCategories,Definitions::aaLgModel);
+			}
+			smodel->setObservedFrequencies(inputSequences->getElementFrequencies());
+			//smodel->setAlpha(modelParams->getAlpha());
+			//smodel->setParameters(modelParams->getSubstParameters());
+			//smodel->setTime(modelParams->getDivergenceTime(i));
+			//smodel->calculatePt();
+		}
 	}
 
 	bfgs = new BFGS(this,ot);
@@ -163,18 +197,49 @@ MlEstimator::~MlEstimator()
 double MlEstimator::runIteration()
 {
 	double result = 0;
-	ViterbiPairHMM* hmm;
-	//this->modelParams->outputParameters();
-
-	for(unsigned int i =0; i<pairCount; i++)
+	if (useViterbi)
 	{
-		hmm = hmms[i];
-		hmm->setModelParameters(modelParams->getIndelParameters(),modelParams->getSubstParameters(),
+		ViterbiPairHMM* hmm;
+	//
+
+		for(unsigned int i =0; i<pairCount; i++)
+		{
+			hmm = hmms[i];
+			hmm->setModelParameters(modelParams->getIndelParameters(),modelParams->getSubstParameters(),
 						modelParams->getDivergenceTime(i), modelParams->getAlpha());
-		result += hmm->getViterbiSubstitutionLikelihood();
+			result += hmm->getViterbiSubstitutionLikelihood();
+		}
 	}
+	else
+	{
+		this->modelParams->outputParameters();
+		SubstitutionModelBase* smodel;
+		for(unsigned int i =0; i<pairCount; i++)
+		{
+			smodel =  substs[i];
+			smodel->setAlpha(modelParams->getAlpha());
+			smodel->setParameters(modelParams->getSubstParameters());
+			smodel->setTime(modelParams->getDivergenceTime(i));
+			smodel->calculatePt();
+			smodel->calculateSitePatterns();
+
+			std::pair<unsigned int, unsigned int> idxs = inputSequences->getPairOfSequenceIndices(i);
+			vector<SequenceElement>  s1 = inputSequences->getSequencesAt(idxs.first);
+			vector<SequenceElement>  s2 = inputSequences->getSequencesAt(idxs.second);
+
+			if(s1.size() != s2.size())
+				throw HmmException("Sequence sizes differ for a fixed alignment!");
+
+			for (int j = 0; j < s1.size(); j++)
+			{
+				result += smodel->getPattern(s1[j].getMatrixIndex(), s2[j].getMatrixIndex());
+			}
+
+		}
+	}
+
 	//cerr << result << endl;
-	return result;
+	return result * -1.0;
 }
 
 

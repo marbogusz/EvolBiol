@@ -79,14 +79,20 @@ protected:
 
 	unsigned int pairCount;
 
+	//for viterbi calculation
 	vector<ViterbiPairHMM*> hmms;
 
+	//
+	vector<SubstitutionModelBase*> substs;
+
 	OptimizedModelParameters* modelParams;
+
+	bool useViterbi;
 
 public:
 	MlEstimator(Sequences* inputSeqs, Definitions::ModelType model,std::vector<double> indel_params,
 			std::vector<double> subst_params,Definitions::OptimizationType ot,
-			unsigned int rateCategories, double alpha, bool estimateAlpha, double userTime);
+			unsigned int rateCategories, double alpha, bool estimateAlpha, double userTime, bool useViterbi);
 
 	virtual ~MlEstimator();
 

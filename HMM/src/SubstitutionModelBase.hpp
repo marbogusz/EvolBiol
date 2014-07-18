@@ -107,7 +107,7 @@ public:
 
 	double getPattern(unsigned int xi, unsigned int yi);
 
-	virtual void setParameters(vector<double>&)=0;
+	virtual void setParameters(const vector<double>&)=0;
 
 	virtual void calculateSitePatterns();
 

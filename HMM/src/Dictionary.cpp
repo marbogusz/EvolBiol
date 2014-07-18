@@ -20,6 +20,8 @@ void Dictionary::setAlphabet(char dict[], unsigned short size)
 		this->alphabet.push_back(string(1,dict[i]));
 		this->translator.insert(std::make_pair(string(1,dict[i]),i));
 	}
+	//add gap
+	this->translator.insert(std::make_pair(string(1,'-'),size));
 	this->alphabetSize = size;
 }
 
@@ -62,8 +64,10 @@ vector<SequenceElement> Dictionary::translate(string& sequence, bool disregardIn
 	for(string::iterator it = sequence.begin(); it < sequence.end(); it++)
 	{
 		currentEl = getSymbolIndex(*it);
+		if (currentEl == alphabetSize && disregardIndels)
+			continue;
 		DEBUGN(currentEl);
-		translatedVector.push_back(SequenceElement(false, currentEl,NULL));
+		translatedVector.push_back(SequenceElement((currentEl == alphabetSize), currentEl,NULL, getSymbolAt(currentEl)));
 	}
 	DEBUGN(std::endl);
 	return translatedVector;

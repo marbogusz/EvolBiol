@@ -24,6 +24,7 @@ CommandReader::CommandReader(int argc, char** argv)
 		parser.add_option("V", "Run Viterbi algorithm using user parameters");
 		parser.add_option("F", "Run Forward algorithm");
 		parser.add_option("M", "Run Viterbi MLE");
+		parser.add_option("fa", "Fixed Alignment");
 		parser.add_option("in","This option takes one argument which specifies the name of the file we want to analyze",1);
 		parser.add_option("rev", "REV Substitution Model");
 		parser.add_option("hky", "HKY85 Substitution Model");
@@ -77,7 +78,7 @@ CommandReader::CommandReader(int argc, char** argv)
 		parser.check_option_arg_range("o", 0, 1);
 		parser.check_option_arg_range("b", 0, 1);
 		parser.check_option_arg_range("estimateAlpha", 0, 1);
-		parser.check_option_arg_range("rateCat", 0, 20);
+		parser.check_option_arg_range("rateCat", 0, 1000);
 
 		parser.check_option_arg_range("bf", 0, 100);
 		if (parser.option("h"))

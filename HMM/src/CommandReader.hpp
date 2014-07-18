@@ -39,6 +39,11 @@ public:
 		return parser.option("M");
 	}
 
+	inline bool isFixedAlignment()
+	{
+		return parser.option("fa");
+	}
+
 	vector<double> getIndelParams();
 
 	vector<double> getSubstParams();

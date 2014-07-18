@@ -156,8 +156,8 @@ void SubstitutionModelBase::calculateGamma()
 	if(!(alpha <=0 || rateCategories == 0))
 	{
 		this->maths->DiscreteGamma(gammaFrequencies, gammaRates, alpha, alpha, rateCategories, useMedian);
-		DEBUGV(gammaRates,5);
-		DEBUGV(gammaFrequencies,5);
+		//DEBUGV(gammaRates,5);
+		//DEBUGV(gammaFrequencies,5);
 
 	}
 }

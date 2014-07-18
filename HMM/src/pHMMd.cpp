@@ -34,7 +34,7 @@ int main(int argc, char ** argv) {
 		IParser* parser = cmdReader->getParser();
 		DEBUG("Creating alignment");
 
-		Sequences* inputSeqs = new Sequences(parser, cmdReader->getSequenceType());
+		Sequences* inputSeqs = new Sequences(parser, cmdReader->getSequenceType(),cmdReader->isFixedAlignment());
 		DEBUG("Creating the HMM");
 
 
@@ -43,8 +43,8 @@ int main(int argc, char ** argv) {
 
 
 			MlEstimator* me = new MlEstimator(inputSeqs, cmdReader->getModelType() ,cmdReader->getIndelParams(),
-								cmdReader->getSubstParams(), cmdReader->getOptimizationType(),
-								cmdReader->getCategories(), cmdReader->getAlpha(), cmdReader->estimateAlpha(),cmdReader->getDistance());
+								cmdReader->getSubstParams(), cmdReader->getOptimizationType(), cmdReader->getCategories(),
+								cmdReader->getAlpha(), cmdReader->estimateAlpha(),cmdReader->getDistance(), cmdReader->isFixedAlignment() == false);
 
 			cout << cmdReader->getAlpha() << '\t' << cmdReader->getDistance() << '\n';
 
