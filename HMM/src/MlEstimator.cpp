@@ -56,8 +56,10 @@ void MlEstimator::BFGS::optimize()
 	{
 		case Definitions::OptimizationType::BFGS:
 		{
+			dlib::objective_delta_stop_strategy strt(1e-7);
+			strt.be_verbose();
 			likelihood = dlib::find_min_box_constrained(dlib::bfgs_search_strategy(),
-					dlib::objective_delta_stop_strategy(1e-9),
+					strt,
 					f_objective,
 					derivative(f_objective),
 					initParams,
@@ -74,7 +76,7 @@ void MlEstimator::BFGS::optimize()
 	}
 	this->parent->modelParams->fromDlibVector(initParams);
 	parent->modelParams->outputParameters();
-	parent->substs[0]->summarize();
+	//parent->substs[0]->summarize();
 	cout  << likelihood << "\t";
 
 }
@@ -125,9 +127,35 @@ MlEstimator::MlEstimator(Sequences* inputSeqs, Definitions::ModelType model ,std
 	{
 		cerr << "User time " << userTime << endl;
 		vector<double> times(pairCount);
+		vector<double> proportions(inputSequences->getSequenceCount());
+		double multiplier = 0.1;
+		double relativeLen  = 0;
+
+		//do proportions of lengths
+		for (auto it = proportions.begin(); it < proportions.end(); it++)
+		{
+			*it = multiplier;
+			relativeLen += multiplier;
+			multiplier += 0.05;
+		}
+
+		//actual lengths = sum of pairs, divided by relative len times actual time
+
+		unsigned int counter =0;
+		unsigned int i1;
+		unsigned int i2;
+		double tmptime;
+
 		for (auto it = times.begin(); it < times.end(); it++)
 		{
-			*it = 2.0*(userTime/pairCount);
+
+			i1 = inputSequences->getPairOfSequenceIndices(counter).first;
+			i2 = inputSequences->getPairOfSequenceIndices(counter).second;
+
+			tmptime = ((proportions[i1] + proportions[i2]) / relativeLen) * userTime;
+
+			*it = tmptime;
+			counter++;
 		}
 		modelParams->setUserDivergenceParams(times);
 	}
@@ -212,7 +240,7 @@ double MlEstimator::runIteration()
 	}
 	else
 	{
-		this->modelParams->outputParameters();
+		//this->modelParams->outputParameters();
 		SubstitutionModelBase* smodel;
 		for(unsigned int i =0; i<pairCount; i++)
 		{
