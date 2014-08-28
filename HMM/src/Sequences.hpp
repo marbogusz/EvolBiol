@@ -64,7 +64,7 @@ public:
 		return translatedSequences.size();
 	}
 
-	string getRawSequenceAt(unsigned int pos);
+	string& getRawSequenceAt(unsigned int pos);
 
 	std::pair<unsigned int, unsigned int> getPairOfSequenceIndices(unsigned int idx)
 	{

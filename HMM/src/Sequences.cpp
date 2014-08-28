@@ -64,7 +64,8 @@ Dictionary* Sequences::getDictionary()
 	return dict;
 }
 
-string Sequences::getRawSequenceAt(unsigned int pos)
+//FIXME - RETURN A REFERENCE!
+string& Sequences::getRawSequenceAt(unsigned int pos)
 {
 	return this->rawSequences[pos];
 }
