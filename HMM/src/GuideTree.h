@@ -34,6 +34,7 @@ protected:
 	vector<unordered_map<string,short>*>* kmers;
 	vector<double> distances;
 
+
 public:
 	GuideTree(Sequences*);
 
