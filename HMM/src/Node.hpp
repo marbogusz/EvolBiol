@@ -7,7 +7,7 @@
  *      Tree node class
  */
 
-#include <list>
+#include <vector>
 #include <string>
 
 #ifndef NODE_HPP_
@@ -18,12 +18,9 @@ using namespace std;
 namespace EBC
 {
 
-class Node
+struct Node
 {
-private:
-	unsigned int nodeId;
-
-	Node* parent;
+public:
 
 	bool leafNode;
 
@@ -35,10 +32,33 @@ private:
 
 	double distanceToParent;
 
-	list<Node*> children;
+	friend bool operator== (Node &cP1, Node &cP2)
+	{
+		return cP1.nodeId == cP2.nodeId;
+	}
 
-public:
-	Node();
+	friend bool operator== (Node* cP1, Node* cP2)
+	{
+		return cP1->nodeId == cP2->nodeId;
+	}
+	Node* parent;
+
+	vector<Node*> children;
+
+	unsigned int nodeId;
+
+	Node(unsigned int id);
+
+	void setName(string name);
+
+	void setDistance(double distance);
+
+	void setLeaf();
+
+	void setParent(Node* pn);
+
+	void setChild(Node* cn);
+
 };
 
 } /* namespace EBC */

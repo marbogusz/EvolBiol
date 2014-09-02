@@ -9,7 +9,10 @@
 #define TRIPLETSAMPLINGTREE_HPP_
 
 #include <vector>
+#include <unordered_set>
 #include "Node.hpp"
+
+using namespace std;
 
 namespace EBC
 {
@@ -21,7 +24,10 @@ private:
 
 	vector<Node*> leafNodes;
 
+	unordered_set<Node*> usedNodes;
+
 	Node* mostRecentAncestor(Node* n1, Node* n2);
+
 	double distanceBetween(Node* n1, Node* n2);
 
 
@@ -30,6 +36,10 @@ public:
 	TripletSamplingTree();
 
 	void fromNewick(string& nString);
+
+	vector<Node*> sample();
+
+	// node operator for comparision
 };
 
 } /* namespace EBC */
