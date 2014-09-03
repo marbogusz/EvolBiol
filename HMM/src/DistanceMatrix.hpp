@@ -10,6 +10,9 @@
 
 #include <map>
 #include <string>
+#include <vector>
+
+using namespace std;
 
 namespace EBC
 {
@@ -18,12 +21,28 @@ class DistanceMatrix
 {
 private:
 
-	map<string, unsigned int> dictionary;
+	//map the length to the pair of sequences
+	multimap <double, pair<unsigned int, unsigned int> > revdistances;
 
-	double** data;
+	//pairwise distances ordered, double the size of dictionary!
+	map<pair<unsigned int, unsigned int>,double> distances;
+
+	unsigned int taxas;
+
+	void buildMap();
 
 public:
 	DistanceMatrix(int size);
+
+	void addDistance(unsigned int s1, unsigned int s2, double distance);
+
+	double getDistance(unsigned int s1, unsigned int s2);
+
+	pair<unsigned int, unsigned int>& getPairWithinDistance(double lo, double hi);
+
+	unsigned int getThirdLeafWithinDistance(double lo, double hi);
+
+
 };
 
 } /* namespace EBC */

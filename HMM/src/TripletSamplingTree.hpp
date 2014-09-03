@@ -20,9 +20,10 @@ namespace EBC
 class TripletSamplingTree
 {
 private:
+	//all nodes
 	vector<Node*> nodes;
 
-	vector<Node*> leafNodes;
+	map<unsigned int, Node*> leafNodes;
 
 	unordered_set<Node*> usedNodes;
 
@@ -30,14 +31,20 @@ private:
 
 	double distanceBetween(Node* n1, Node* n2);
 
+	DistanceMatrix& distMat;
 
+	double idealTreeSize;
 
 public:
-	TripletSamplingTree();
+	TripletSamplingTree(DistanceMatrix& dm);
 
 	void fromNewick(string& nString);
 
-	vector<Node*> sample();
+	//sample tripplets on a tree
+	vector<array<unsigned int, 3> > sampleFromTree();
+
+	//sample only based on the distance matrix
+	vector<array<unsigned int, 3> > sampleFromDM();
 
 	// node operator for comparision
 };

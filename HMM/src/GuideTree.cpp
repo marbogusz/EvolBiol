@@ -29,6 +29,10 @@ void GuideTree::constructTree()
 	unsigned int i,j;
 	string currSeq;
 	float identity;
+	string tree;
+
+	DistanceMatrix distMat(sequenceCount);
+
 	for(i = 0; i< sequenceCount; i++)
 	{
 		(*kmers)[i] = new unordered_map<string,short>();
@@ -36,16 +40,19 @@ void GuideTree::constructTree()
 		extractKmers(currSeq, (*kmers)[i]);
 	}
 	for(i = 0; i< sequenceCount; i++)
-		for(j = i; j< sequenceCount; j++)
+		for(j = i+1; j< sequenceCount; j++)
 		{
 			string s1 = inputSequences->getRawSequenceAt(i);
 			string s2 = inputSequences->getRawSequenceAt(j);
 			identity = 1.0 - commonKmerCount(i,j)/(float)(min(s1.size(),s2.size()));
-			distances.push_back(identity);
+			distMat.addDistance(i,j,identity);
 		}
 
-	BioNJ nj(sequenceCount, distances);
-	nj.calculate();
+	BioNJ nj(sequenceCount, distMat);
+	tree = nj.calculate();
+	TripletSamplingTree tst(distMat);
+	tst.fromNewick(tree);
+	auto tripplets = tst.sample();
 
 }
 

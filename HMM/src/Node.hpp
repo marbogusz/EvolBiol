@@ -26,7 +26,7 @@ public:
 
 	bool rootNode;
 
-	string* sequence;
+	unsigned int sequenceNo;
 
 	string nodeName;
 
@@ -50,6 +50,11 @@ public:
 	Node(unsigned int id);
 
 	void setName(string name);
+
+	inline void setSequenceNumber(unsigned int no)
+	{
+		this->sequenceNo = no;
+	}
 
 	void setDistance(double distance);
 

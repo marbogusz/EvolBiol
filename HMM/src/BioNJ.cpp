@@ -10,14 +10,14 @@
 namespace EBC
 {
 
-    BioNJ::BioNJ(unsigned int size, vector<double>& divergenceTimes) : names(size), times(divergenceTimes)
+    BioNJ::BioNJ(unsigned int size, DistanceMatrix& divergenceTimes) : names(size), times(divergenceTimes)
     {
         taxas = size;
         pairs = (taxas*(taxas-1))/2;
 
         for (unsigned short i = 0; i < taxas; i++)
         {
-        	names[i] = (char)('A'+i);
+        	names[i] = (char)('0'+i);
         }
 
         treeLength=0;
@@ -38,7 +38,7 @@ namespace EBC
             name=(WORD *)calloc(1,sizeof(WORD));            /* taxons name is   */
             if(name == NULL)                                /* put in trees      */
             {
-                printf("Out of memories !!");
+                printf("Out of memory !!");
                 exit(0);
             }
             else
@@ -72,13 +72,13 @@ namespace EBC
       \*;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*/
 
 
-    void BioNJ::Print_output(int i, POINTERS *trees, FILE *output)
+    void BioNJ::Print_output(int i, POINTERS *trees, stringstream& output)
     {
         WORD *parcour;
         parcour=trees[i].head;
         while(parcour != NULL)
         {
-            fprintf(output,"%s",parcour->name);
+            output << parcour->name;
             parcour=parcour->suiv;
         }
 
@@ -100,10 +100,10 @@ namespace EBC
       \*;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*/
 
 
-    void BioNJ::calculate()
+    string BioNJ::calculate()
     {
                           /* pointer to input file       */
-        FILE *output;                           /* pointer to output file      */
+        //FILE *output;                           /* pointer to output file      */
         POINTERS *trees;                        /* list of subtrees            */
         char *chain1;                           /* stringized branch-length    */
         char *chain2;                           /* idem                        */
@@ -120,7 +120,9 @@ namespace EBC
         int x, y;
 
         n = taxas;
-        output = stderr;
+        //output = stderr;
+
+        stringstream output;
 
         /*   Allocation of memories    */
 
@@ -221,6 +223,8 @@ namespace EBC
 
         free(delta);
         free(trees);
+
+        return output.str();
     }
 
     /*;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*\
@@ -523,7 +527,7 @@ namespace EBC
       ;                                                                           ;
       \*;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*/
 
-    void BioNJ::Finish(float **delta, int n, POINTERS *trees, FILE *output)
+    void BioNJ::Finish(float **delta, int n, POINTERS *trees, stringstream& output)
     {
         int l=1;
         int i=0;
@@ -552,32 +556,32 @@ namespace EBC
 
         length=Finish_branch_length(last[0],last[1],last[2],delta);
         this->treeLength += length;
-        fprintf(output,"(");
+        output << "(";
         Print_output(last[0],trees,output);
-        fprintf(output,":");
+        output << ":";
         /*   gcvt(length,PREC, str); */
         /*   fprintf(output,"%s,",str); */
-        fprintf(output,"%f,",length);
+        output << length;
 
         length=Finish_branch_length(last[1],last[0],last[2],delta);
         this->treeLength += length;
         Print_output(last[1],trees,output);
-        fprintf(output,":");
+        output <<":";
         /*   gcvt(length,PREC, str); */
         /*   fprintf(output,"%s,",str); */
-        fprintf(output,"%f,",length);
+        output << length;
 
         length=Finish_branch_length(last[2],last[1],last[0],delta);
         this->treeLength += length;
         Print_output(last[2],trees,output);
-        fprintf(output,":");
+        output << ":";
         /*   gcvt(length,PREC,str); */
         /*   fprintf(output,"%s",str); */
-        fprintf(output,"%f",length);
-        fprintf(output,");");
-        fprintf(output,"\t");
-        fprintf(output,"%f",treeLength);
-        fprintf(output,"\t");
+        output << length;
+        output << ");";
+        output <<"\t";
+        output << treeLength;
+        output << "\t";
 
         for(i=0; i < 3; i++)
         {

@@ -48,9 +48,10 @@ double TripletSamplingTree::distanceBetween(Node* n1, Node* n2)
 	return distance;
 }
 
-TripletSamplingTree::TripletSamplingTree()
+TripletSamplingTree::TripletSamplingTree(DistanceMatrix& dm) : distMat(dm)
 {
 	// TODO Auto-generated constructor stub
+	idealTreeSize = 1.0;
 
 }
 
@@ -62,7 +63,8 @@ void TripletSamplingTree::fromNewick(string& newick)
 	bool endReached = false;
 	unsigned int i = 0;
 	unsigned int ids = 0;
-	regex regDescDist("((\\w+):([0-9\\.]+)).*");
+	unsigned int sequenceNo;
+	regex regDescDist("(([0-9]+):([0-9\\.]+)).*");
 	regex regInterDist(":([0-9\\.]+).*");
 	Node *tmpNode, *tmpParent, *tmpCurrent;
 	stack<Node*> workNodes;
@@ -128,13 +130,13 @@ void TripletSamplingTree::fromNewick(string& newick)
 
 			if (regex_match(sstr, basematch, regDescDist))
 			{
-				nodeName = basematch[2].str();
+				sequenceNo = std::stoi(basematch[2].str());
 				currentDistance =  stof(basematch[3].str());
 				tmpCurrent = workNodes.top();
-				tmpCurrent->setName(nodeName);
+				tmpCurrent->setSequenceNumber(sequenceNo);
 				tmpCurrent->setDistance(currentDistance);
 				tmpCurrent->setLeaf();
-				this->leafNodes.pushBack(tmpCurrent);
+				this->leafNodes[sequenceNo] = tmpCurrent;
 				i += basematch[1].str().size();
 			}
 			else if (regex_match(sstr, basematch, regInterDist))
@@ -148,23 +150,31 @@ void TripletSamplingTree::fromNewick(string& newick)
 	}
 }
 
-vector<Node*> TripletSamplingTree::sample()
+vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromDM()
+{
+	double totalDistance = 0;
+	double remainingDistance = this->idealTreeSize;
+	auto pair = distMat.getPairWithinDistance(0.5*this->idealTreeSize, 0.8*this->idealTreeSize);
+	double distance = distMat.getDistance(pair.first, pair.second);
+
+
+}
+
+vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromTree()
 {
 	//randomly select 1 leaf
 	double treeSize = 0;
-	default_random_engine generator;
-	uniform_int_distribution<int> distribution(0,leafNodes.size());
-	distribution(generator);
-	Node* first = leafNodes[distribution(generator)];
-	//select the 2nd one from the distance matrix
-	Node* second  = first;
-	while (second == first)
-	{
-		second = leafNodes[distribution(generator)];
-	}
+
+	auto pair = distMat.getPairWithinDistance(0.5*this->idealTreeSize, 0.8*this->idealTreeSize);
+
+	Node* first = leafNodes[pair.first];
+	Node* second  = leafNodes[pair.second];
+
 	Node* ca12 =  mostRecentAncestor(first, second);
 
 	treeSize = treeSize + distanceBetween(first, ca12) + distanceBetween(second, ca12);
+
+
 
 	if (ca12->parent != NULL)
 		this->usedNodes.emplace(ca12);

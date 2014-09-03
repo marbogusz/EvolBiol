@@ -13,6 +13,8 @@
 #include <string>
 #include <ctime>
 #include <vector>
+#include "DistanceMatrix.hpp"
+
 
 #define PREC 8                             /* precision of branch-lengths  */
 #define PRC  100
@@ -42,29 +44,15 @@ private:
 	unsigned int taxas;
 	unsigned int pairs;
 	vector<string> names;
-	vector<double>& times;
+	DistanceMatrix& times;
 	double treeLength;
 
 public:
-	BioNJ(unsigned int size, vector<double>& divergenceTimes);
+	BioNJ(unsigned int size, DistanceMatrix& divergenceTimes);
 
 	double getDist(unsigned int i, unsigned int j)
 	{
-		unsigned int a,b;
-		unsigned int index;
-		a=i;
-		b=j;
-		if (i>j)
-		{
-			b=i;
-			a=j;
-		}
-		if (i==j) return 0;
-		else
-		{
-			index = (b - a - 1) + (a*taxas) - (((1+a)/2.0)*(a*1.0));
-			return times[index];
-		}
+		return times.getDistance(i,j);
 	}
 
 	void   Initialize(float **delta, int n, POINTERS *trees);
@@ -73,11 +61,11 @@ public:
 
 	void   Best_pair(float **delta, int r, int *a, int *b, int n);
 
-	void   Finish(float **delta, int n, POINTERS *trees, FILE *output);
+	void   Finish(float **delta, int n, POINTERS *trees, stringstream& output);
 
 	void   Concatenate(char chain1[LEN], int ind, POINTERS *trees, int post);
 
-	void   Print_output(int i, POINTERS *trees, FILE *output);
+	void   Print_output(int i, POINTERS *trees, stringstream& output);
 
 	float Distance(int i, int j, float **delta);
 
@@ -102,7 +90,7 @@ public:
 
 	int    Symmetrize(float **delta, int n);
 
-	void calculate();
+	string calculate();
 };
 
 } /* namespace EBC */
