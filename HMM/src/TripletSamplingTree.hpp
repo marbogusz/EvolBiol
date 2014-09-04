@@ -9,8 +9,11 @@
 #define TRIPLETSAMPLINGTREE_HPP_
 
 #include <vector>
+#include <array>
+#include <map>
 #include <unordered_set>
 #include "Node.hpp"
+#include "DistanceMatrix.hpp"
 
 using namespace std;
 

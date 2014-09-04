@@ -37,10 +37,6 @@ public:
 		return cP1.nodeId == cP2.nodeId;
 	}
 
-	friend bool operator== (Node* cP1, Node* cP2)
-	{
-		return cP1->nodeId == cP2->nodeId;
-	}
 	Node* parent;
 
 	vector<Node*> children;

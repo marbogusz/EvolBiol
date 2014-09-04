@@ -10,6 +10,7 @@
 
 #include <map>
 #include <string>
+#include <sstream>
 #include <vector>
 
 using namespace std;
@@ -40,7 +41,7 @@ public:
 
 	pair<unsigned int, unsigned int>& getPairWithinDistance(double lo, double hi);
 
-	unsigned int getThirdLeafWithinDistance(double lo, double hi);
+	unsigned int getThirdLeafWithinDistance(double targetLen, unsigned int l1, unsigned int l2);
 
 
 };

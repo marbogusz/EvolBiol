@@ -5,7 +5,8 @@
  *      Author: root
  */
 
-#include "GuideTree.h"
+#include "GuideTree.hpp"
+#include "TripletSamplingTree.hpp"
 
 namespace EBC
 {
@@ -17,6 +18,7 @@ GuideTree::GuideTree(Sequences* is) : inputSequences(is)
 	this->kmerSize = 6;
 	this->sequenceCount = inputSequences->getSequenceCount();
 	this->kmers = new vector<unordered_map<string,short>*>(sequenceCount);
+	DEBUG("Creating the guide tree");
 }
 
 GuideTree::~GuideTree()
@@ -33,6 +35,7 @@ void GuideTree::constructTree()
 
 	DistanceMatrix distMat(sequenceCount);
 
+	DEBUG("Extracting kmers");
 	for(i = 0; i< sequenceCount; i++)
 	{
 		(*kmers)[i] = new unordered_map<string,short>();
@@ -48,11 +51,15 @@ void GuideTree::constructTree()
 			distMat.addDistance(i,j,identity);
 		}
 
+	DEBUG("initialized the DM");
 	BioNJ nj(sequenceCount, distMat);
 	tree = nj.calculate();
+	DEBUG("Calculated NJ Tree " << tree);
 	TripletSamplingTree tst(distMat);
 	tst.fromNewick(tree);
-	auto tripplets = tst.sample();
+	DEBUG("Created the tree from Newick");
+	auto triplets = tst.sampleFromDM();
+	DEBUG("Obtained triplets");
 
 }
 

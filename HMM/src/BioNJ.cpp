@@ -7,6 +7,8 @@
 
 #include "BioNJ.hpp"
 
+using namespace std;
+
 namespace EBC
 {
 
@@ -17,7 +19,7 @@ namespace EBC
 
         for (unsigned short i = 0; i < taxas; i++)
         {
-        	names[i] = (char)('0'+i);
+        	names[i] = std::to_string(i);
         }
 
         treeLength=0;

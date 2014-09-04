@@ -9,21 +9,23 @@
 #include <regex>
 #include <stack>
 #include <random>
+#include <iostream>
+#include "Definitions.hpp"
 
 namespace EBC
 {
 
 Node* TripletSamplingTree::mostRecentAncestor(Node* n1, Node* n2)
 {
-	Node* tmpNode1;
-	Node* tmpNode2;
+	Node* tmpNode1 = n1;
+	Node* tmpNode2 = n2;
 
 	while(tmpNode1->parent != NULL)
 	{
 		tmpNode2 = n2;
 		while(tmpNode2->parent != NULL)
 		{
-			if (tmpNode1 == tmpNode2)
+			if (*tmpNode1 == *tmpNode2)
 				return tmpNode1;
 			tmpNode2 = tmpNode2->parent;
 		}
@@ -37,7 +39,7 @@ double TripletSamplingTree::distanceBetween(Node* n1, Node* n2)
 	double distance = 0;
 	Node* tmp = n1;
 
-	if (n1 == n2)
+	if (*n1 == *n2)
 		return 0;
 
 	while (tmp != n2)
@@ -74,6 +76,7 @@ void TripletSamplingTree::fromNewick(string& newick)
 
 	while (!endReached && i < newick.size())
 	{
+		DEBUG("size : " << workNodes.size() << " " << i);
 		if (std::isspace(newick[i]))
 		{
 			i++;
@@ -111,10 +114,13 @@ void TripletSamplingTree::fromNewick(string& newick)
 
 			tmpCurrent = workNodes.top();
 			workNodes.pop();
-			tmpParent = workNodes.top();
-			tmpParent->setChild(tmpCurrent);
-			tmpCurrent->setParent(tmpParent);
-			//TODO - copy children!!
+			if (workNodes.size() > 0)
+			{
+				tmpParent = workNodes.top();
+				tmpParent->setChild(tmpCurrent);
+				tmpCurrent->setParent(tmpParent);
+			}
+
 
 			i++;
 		}
@@ -152,16 +158,26 @@ void TripletSamplingTree::fromNewick(string& newick)
 
 vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromDM()
 {
-	double totalDistance = 0;
-	double remainingDistance = this->idealTreeSize;
+	vector<array<unsigned int, 3> > result;
+
+	unsigned int s1, s2, s3;
+	double remainingDistance = 2.0 * this->idealTreeSize;
 	auto pair = distMat.getPairWithinDistance(0.5*this->idealTreeSize, 0.8*this->idealTreeSize);
-	double distance = distMat.getDistance(pair.first, pair.second);
+	s1 = pair.first;
+	s2 = pair.second;
 
+	remainingDistance -= distMat.getDistance(s1, s2);
 
+	s3 = distMat.getThirdLeafWithinDistance(remainingDistance, s1, s2);
+
+	result.push_back({s1,s2,s3});
+	cout << "sampled values : " << s1 << '\t' << s2 << '\t' << s3 << endl;
+	return result;
 }
 
 vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromTree()
 {
+	vector<array<unsigned int, 3> > result;
 	//randomly select 1 leaf
 	double treeSize = 0;
 
@@ -190,6 +206,8 @@ vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromTree()
 	//based on the ancestor, calculate the distance to it and target the next taxon based on the distance to root + common to root
 	//invalidate the leaves laying on the common path.
 
+
+	return result;
 }
 
 } /* namespace EBC */

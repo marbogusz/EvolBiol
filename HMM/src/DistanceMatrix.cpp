@@ -6,12 +6,13 @@
  */
 
 #include "DistanceMatrix.hpp"
+#include <random>
 
 namespace EBC
 {
 
 
-EBC::DistanceMatrix::DistanceMatrix(int size) :taxas(size), revdistances((size*(size-1))/2), distances(size*(size-1))
+EBC::DistanceMatrix::DistanceMatrix(int size) :taxas(size)
 {
 
 }
@@ -35,7 +36,7 @@ void DistanceMatrix::addDistance(unsigned int s1, unsigned int s2,
 	distances[make_pair(s1,s2)] = distance;
 	distances[make_pair(s2,s1)] = distance;
 
-	revdistances[distance] = make_pair(s1,s2);
+	revdistances.insert(make_pair(distance,(make_pair(s1,s2))));
 }
 
 pair<unsigned int, unsigned int>& EBC::DistanceMatrix::getPairWithinDistance(
@@ -47,32 +48,47 @@ pair<unsigned int, unsigned int>& EBC::DistanceMatrix::getPairWithinDistance(
 	auto itlow= revdistances.lower_bound(lo);
 	auto ithi= revdistances.upper_bound(hi);
 	auto end = revdistances.end();
+	auto begin = revdistances.begin();
 
 	if (itlow != end)
 	{
 		//we're in the bracket
 		unsigned int dist = std::distance(itlow,ithi);
 		uniform_int_distribution<int> dist2(0,dist);
-		return *(itlow+dist2(generator));
+		std::advance(itlow, dist2(generator));
+		return (*itlow).second;
 
 	}
 	//return the lowest anyway ?
-	else return *(end-distribution(generator));
+	else
+	{
+		std::advance(begin, distribution(generator) );
+		return (*begin).second;
+	}
 
 }
 
-unsigned int DistanceMatrix::getThirdLeafWithinDistance(unsigned int l1, unsigned int l2, double targetLen)
+unsigned int DistanceMatrix::getThirdLeafWithinDistance(double targetLen, unsigned int l1, unsigned int l2)
 {
 	unsigned int leaves = 0;
 	double tempSum;
 	map<double, unsigned int> mappings;
-	for (leaves =0; leaves < this->taxas leaves++)
+	for (leaves =0; leaves < this->taxas; leaves++)
 	{
-		tempSum = getDistance(a,leaves) + getDistance(b,leaves);
-		mappings[tempSum]
+		tempSum = getDistance(l1,leaves) + getDistance(l2,leaves);
+		mappings[tempSum] = leaves;
 	}
-	//range itetator!
+	//range iterator over mappings!
+	//find the closest to target len
+	auto itlow= mappings.lower_bound(0.7*targetLen);
+	auto ithi= mappings.upper_bound(1.3*targetLen);
+	auto end = mappings.end();
 
+	if (itlow == end)
+		return (*(end--)).second;
+	else if (ithi == end)
+		return (*(mappings.begin())).second;
+	else return (*itlow).second;
 }
 
 } /* namespace EBC */

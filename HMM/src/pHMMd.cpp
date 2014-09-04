@@ -16,6 +16,7 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include "GuideTree.hpp"
 
 using namespace std;
 using namespace EBC;
@@ -42,11 +43,16 @@ int main(int argc, char ** argv) {
 		{
 
 
+			/*
 			MlEstimator* me = new MlEstimator(inputSeqs, cmdReader->getModelType() ,cmdReader->getIndelParams(),
 								cmdReader->getSubstParams(), cmdReader->getOptimizationType(), cmdReader->getCategories(),
 								cmdReader->getAlpha(), cmdReader->estimateAlpha(),cmdReader->getDistance(), cmdReader->isFixedAlignment() == false);
 
 			cout << cmdReader->getAlpha() << '\t' << cmdReader->getDistance() << '\n';
+			 */
+
+			GuideTree gt(inputSeqs);
+			gt.constructTree();
 
 		}
 
@@ -89,12 +95,13 @@ int main(int argc, char ** argv) {
 
 
 
-			cerr << "running bionj\n";
+			//cerr << "running bionj\n";
 
-			BioNJ nj(inputSeqs->getSequenceCount(), pe->getOptimizedTimes());
-			nj.calculate();
+			//change bionj init here!
+			//BioNJ nj(inputSeqs->getSequenceCount(), pe->getOptimizedTimes());
+			//nj.calculate();
 
-			cerr << cmdReader->getInputFileName() << endl;
+			//scerr << cmdReader->getInputFileName() << endl;
 
 			//double* estimatedParams = fwdHMM->getMlParameters();
 
