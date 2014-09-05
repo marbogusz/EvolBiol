@@ -1,0 +1,72 @@
+/*
+ * EvaluationMatrix.cpp
+ *
+ *  Created on: Feb 10, 2014
+ *      Author: root
+ */
+
+#include "heuristics/EvaluationMatrix.hpp"
+
+void EBC::EvaluationMatrix::allocateData()
+{
+	matrixData = new TraceStep*[xSize];
+	for(int i=0; i<xSize; i++)
+	{
+		matrixData[i] = new TraceStep[ySize];
+	}
+}
+
+EBC::EvaluationMatrix::EvaluationMatrix(unsigned int xS, unsigned int yS, GotohScoringMatrix* sMat) :
+		xSize(xS), ySize(yS), scoring(sMat)
+{
+	maxVal = std::numeric_limits<double>::max();
+	minVal = std::numeric_limits<double>::min();
+	allocateData();
+}
+
+void EBC::EvaluationMatrix::setValueScore(unsigned int x, unsigned int y, double value)
+{
+	//TODO - check bounds
+	matrixData[x][y].score = value;
+}
+
+double EBC::EvaluationMatrix::scoreAt(unsigned int i, unsigned int j)
+{
+	return matrixData[i][j].score;
+}
+
+void EBC::EvaluationMatrix::traceback(string& seq_a, string& seq_b, std::pair<string,string>* alignment)
+{
+	unsigned int i = xSize-1;
+	unsigned int j = ySize-1;
+
+	EvaluationMatrix* currentMat = this;
+
+	while(i>0 || j >0)
+	{
+		if (currentMat->matrixData[i][j].diag)
+		{
+			alignment->first += seq_a[i-1];
+			alignment->second += seq_b[j-1];
+			currentMat = currentMat->matrixData[i][j].src;
+			i--;
+			j--;
+		}
+		else if (currentMat->matrixData[i][j].hor)
+		{
+			alignment->second += seq_b[j-1];
+			alignment->first += '-';
+			currentMat = currentMat->matrixData[i][j].src;
+			j--;
+		}
+		//vert
+		else
+		{
+			alignment->first += seq_a[i-1];
+			alignment->second += '-';
+			currentMat = currentMat->matrixData[i][j].src;
+			i--;
+		}
+
+	}
+}
