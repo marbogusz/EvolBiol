@@ -5,18 +5,20 @@
 // Copyright   :
 //============================================================================
 
-#include "CommandReader.hpp"
-#include "Sequences.hpp"
-#include "BasicViterbi.hpp"
-#include "ForwardPairHMM.hpp"
-#include "HmmException.hpp"
-#include "PairwiseEstimator.hpp"
-#include "MlEstimator.hpp"
-#include "BioNJ.hpp"
+#include "core/CommandReader.hpp"
+#include "core/Sequences.hpp"
+#include "hmm/BasicViterbi.hpp"
+#include "hmm/ForwardPairHMM.hpp"
+#include "core/HmmException.hpp"
+#include "core/PairwiseEstimator.hpp"
+#include "core/MlEstimator.hpp"
+#include "core/BioNJ.hpp"
 #include <iostream>
 #include <fstream>
 #include <iomanip>
-#include "GuideTree.hpp"
+#include "heuristics/GuideTree.hpp"
+#include "heuristics/GotohAlgorithm.hpp"
+#include <array>
 
 using namespace std;
 using namespace EBC;
@@ -53,6 +55,11 @@ int main(int argc, char ** argv) {
 
 			GuideTree gt(inputSeqs);
 			gt.constructTree();
+			auto samples = gt.getSampledTriplets();
+			array<unsigned int, 3> arr1 = samples[0];
+
+			GotohAlgorithm* algo = new GotohAlgorithm(inputSeqs->getRawSequenceAt(arr1[0]),inputSeqs->getRawSequenceAt(arr1[1]));
+			algo->run();
 
 		}
 
