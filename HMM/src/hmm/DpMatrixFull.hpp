@@ -10,7 +10,7 @@
 
 #include <limits>
 #include <iostream>
-#include "hmm/DpMAtrixBase.hpp"
+#include "hmm/DpMatrixBase.hpp"
 
 using namespace std;
 

@@ -6,6 +6,7 @@
  */
 
 #include "core/BioNJ.hpp"
+#include <cstring>
 
 using namespace std;
 
