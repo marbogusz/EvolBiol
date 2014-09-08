@@ -80,9 +80,13 @@ std::pair<string, string> EBC::EvaluationMatrix::getAlignment(string& seq_a,
 	unsigned int i = xSize-1;
 	unsigned int j = ySize-1;
 
+	cerr << seq_a << endl;
+	cerr << seq_b << endl;
+
+
 	EvaluationMatrix* currentMat = this;
 
-	while(i>0 || j >0)
+	while(i>0 && j >0)
 	{
 		if (currentMat->matrixData[i][j].diag)
 		{
@@ -107,8 +111,11 @@ std::pair<string, string> EBC::EvaluationMatrix::getAlignment(string& seq_a,
 			currentMat = currentMat->matrixData[i][j].src;
 			i--;
 		}
+		cerr << alignment.first << endl;
+		cerr << alignment.second << endl;
 
 	}
+	cerr << "done" << endl;
 
 
 }
