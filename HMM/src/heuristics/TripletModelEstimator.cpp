@@ -9,7 +9,7 @@
 #include "models/GTRModel.hpp"
 #include "models/HKY85Model.hpp"
 #include "models/AminoacidSubstitutionModel.hpp"
-
+#include "heuristics/TripletSamplingTree.hpp"
 
 namespace EBC
 {
@@ -80,11 +80,16 @@ void TripletModelEstimator::BFGS::optimize()
 
 
 TripletModelEstimator::TripletModelEstimator(Sequences* inputSeqs, Definitions::ModelType model ,
-		Definitions::OptimizationType ot,
-		unsigned int rateCategories, double alpha, bool estimateAlpha) : inputSequences(inputSeqs), gammaRateCategories(rateCategories)
+		Definitions::OptimizationType ot, unsigned int rateCategories, double alpha, bool estimateAlpha) :
+				inputSequences(inputSeqs), gammaRateCategories(rateCategories), substs(3)
 {
 	maths = new Maths();
 	dict = inputSequences->getDictionary();
+
+	//we're running triplets, sequence count is 3!
+	unsigned int sequence_count = 3;
+
+
 
 	//Helper models
 	//FIXME - get some static definitions or sth!!
@@ -105,15 +110,15 @@ TripletModelEstimator::TripletModelEstimator(Sequences* inputSeqs, Definitions::
 	estimateSubstitutionParams = true;
 	this->estimateAlpha = estimateAlpha;
 
-	modelParams = new OptimizedModelParameters(substModel, indelModel,inputSequences->getSequenceCount(), pairCount, estimateSubstitutionParams,
-			estimateIndelParams, estimateAlpha, userTime < 0, maths);
 
-	if(!estimateIndelParams)
-		modelParams->setUserIndelParams(indel_params);
-	if(!estimateSubstitutionParams)
-		modelParams->setUserSubstParams(subst_params);
+	//TODO - maybe providing user times would be a good idea
+	modelParams = new OptimizedModelParameters(substModel, NULL,3, 3, estimateSubstitutionParams,
+			false, estimateAlpha, false, maths);
+
+	//alpha is an initial alpha!!
 	modelParams->setAlpha(alpha);
 
+	/*
 	if (userTime > 0)
 	{
 		//cerr << "User time " << userTime << endl;
@@ -124,33 +129,29 @@ TripletModelEstimator::TripletModelEstimator(Sequences* inputSeqs, Definitions::
 		}
 		modelParams->setUserDivergenceParams(times);
 	}
+	*/
 
-
-	bandFactor = bandPercentage;
-	bandingEnabled = banding;
-
-	EvolutionaryPairHMM* hmm;
-
-	for(unsigned int i =0; i<pairCount; i++)
+	SubstitutionModelBase* smodel;
+	for(unsigned int i =0; i<sequence_count; i++)
 	{
-		std::pair<unsigned int, unsigned int> idxs = inputSequences->getPairOfSequenceIndices(i);
+		if (model == Definitions::ModelType::GTR)
+		{
+			smodel =  substs[i] = new GTRModel(dict, maths,gammaRateCategories);
+		}
+		else if (model == Definitions::ModelType::HKY85)
+		{
+			smodel =  substs[i] = new HKY85Model(dict, maths,gammaRateCategories);
+		}
+		else if (model == Definitions::ModelType::LG)
+		{
+			smodel =  substs[i] = new AminoacidSubstitutionModel(dict, maths,gammaRateCategories,Definitions::aaLgModel);
+		}
+		smodel->setObservedFrequencies(inputSequences->getElementFrequencies());
 
-		if (at == Definitions::AlgorithmType::Viterbi)
-		{
-			hmm = hmms[i] = new ViterbiPairHMM(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
-				dict, model, banding, bandPercentage,rateCategories, maths, Definitions::DpMatrixType::Limited);
 		}
-		else if (at == Definitions::AlgorithmType::Forward)
-		{
-			hmm = hmms[i] = new ForwardPairHMM(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
-				dict, model, banding, bandPercentage,rateCategories, maths, Definitions::DpMatrixType::Limited);
-		}
-		else
-		{
-			throw HmmException("Wrong algorithm type - use either Forward or viterbi\n");
-		}
-		hmm->setModelFrequencies(inputSequences->getElementFrequencies());
-	}
+
+	TripletSamplingTree tst(GuideTree(inputSequences));
+	//triplets = tst.sampleFromDM();
 
 	bfgs = new BFGS(this,ot);
 	bfgs->optimize();
@@ -172,38 +173,37 @@ TripletModelEstimator::~TripletModelEstimator()
 double TripletModelEstimator::runIteration()
 {
 	double result = 0;
-	EvolutionaryPairHMM* hmm;
+	unsigned int s1, s2, s3;
+
+
+
+	//for loop here
+
+
+	substModel->setAlpha(modelParams->getAlpha());
+	substModel->setParameters(modelParams->getSubstParameters());
+	//substModel->setTime(modelParams->getDivergenceTime(i));
+	substModel->calculatePt();
+	substModel->calculateSitePatterns();
 
 	//this->modelParams->outputParameters();
 	//cerr << "iteration " << endl;
-	for(unsigned int i =0; i<pairCount; i++)
+
+/*
+	for(auto it : this->triplets )
 	{
-		hmm = hmms[i];
-		hmm->setModelParameters(modelParams->getIndelParameters(),modelParams->getSubstParameters(),
-				modelParams->getDivergenceTime(i), modelParams->getAlpha());
-		result += hmm->runAlgorithm();
+		//alignment
+		s1 = (*it)[0];
+		s2 = (*it)[1];
+		s3 = (*it)[2];
+
+
+
 	}
+
+	*/
 	//cerr << result << endl;
 	return result;
-}
-
-void TripletModelEstimator::outputDistanceMatrix(stringstream& ss)
-{
-	unsigned int count, pairCount;
-	count = this->inputSequences->getSequenceCount();
-	pairCount = this->inputSequences->getPairCount();
-
-	ss << "\t" << this->inputSequences->getSequenceCount() << endl;
-
-	for (unsigned int i = 0; i< count; i++)
-	{
-		ss << "S" << i << " ";
-		for(unsigned int j=0; j< count; j++)
-		{
-			ss << this->modelParams->getDistanceBetween(i,j) << " ";
-		}
-		ss << endl;
-	}
 }
 
 } /* namespace EBC */

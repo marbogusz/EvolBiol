@@ -11,7 +11,7 @@
 namespace EBC
 {
 
-GuideTree::GuideTree(Sequences* is) : inputSequences(is)
+GuideTree::GuideTree(Sequences* is) : inputSequences(is), distMat(inputSequences->getSequenceCount())
 {
 	// TODO Auto-generated constructor stub
 	this->dict = inputSequences->getDictionary();
@@ -19,6 +19,7 @@ GuideTree::GuideTree(Sequences* is) : inputSequences(is)
 	this->sequenceCount = inputSequences->getSequenceCount();
 	this->kmers = new vector<unordered_map<string,short>*>(sequenceCount);
 	DEBUG("Creating the guide tree");
+	this->constructTree();
 }
 
 GuideTree::~GuideTree()
@@ -31,9 +32,6 @@ void GuideTree::constructTree()
 	unsigned int i,j;
 	string currSeq;
 	float identity;
-	string tree;
-
-	DistanceMatrix distMat(sequenceCount);
 
 	DEBUG("Extracting kmers");
 	for(i = 0; i< sequenceCount; i++)
@@ -53,8 +51,9 @@ void GuideTree::constructTree()
 
 	DEBUG("initialized the DM");
 	BioNJ nj(sequenceCount, distMat);
-	tree = nj.calculate();
-	DEBUG("Calculated NJ Tree " << tree);
+	newickTree = nj.calculate();
+
+	/*
 	TripletSamplingTree tst(distMat);
 	tst.fromNewick(tree);
 	DEBUG("Created the tree from Newick");
@@ -62,7 +61,7 @@ void GuideTree::constructTree()
 	//FIXME - do it nicely - guide tree returns a newick string, sampling tree build based on gt
 	sampledTriplets = tst.sampleFromDM();
 	DEBUG("Obtained triplets");
-
+	 */
 }
 
 void GuideTree::extractKmers(string& seq, unordered_map<string, short>* umap)

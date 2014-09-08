@@ -53,13 +53,17 @@ int main(int argc, char ** argv) {
 			cout << cmdReader->getAlpha() << '\t' << cmdReader->getDistance() << '\n';
 			 */
 
-			GuideTree gt(inputSeqs);
-			gt.constructTree();
-			auto samples = gt.getSampledTriplets();
-			array<unsigned int, 3> arr1 = samples[0];
+			//GuideTree gt(inputSeqs);
+			//gt.constructTree();
+			//auto samples = gt.getSampledTriplets();
+			//array<unsigned int, 3> arr1 = samples[0];
 
-			GotohAlgorithm* algo = new GotohAlgorithm(inputSeqs->getRawSequenceAt(arr1[0]),inputSeqs->getRawSequenceAt(arr1[1]));
+			GotohAlgorithm* algo = new GotohAlgorithm(inputSeqs->getRawSequenceAt(0),inputSeqs->getRawSequenceAt(1));
 			algo->run();
+			auto al = algo->getAlignment();
+
+			DEBUG(al.first);
+			DEBUG(al.second);
 
 		}
 

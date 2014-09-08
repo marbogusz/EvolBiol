@@ -14,6 +14,7 @@
 #include <unordered_set>
 #include "heuristics/Node.hpp"
 #include "core/DistanceMatrix.hpp"
+#include "heuristics/GuideTree.hpp"
 
 using namespace std;
 
@@ -38,16 +39,16 @@ private:
 
 	double idealTreeSize;
 
-public:
-	TripletSamplingTree(DistanceMatrix& dm);
+	void fromNewick(const string& nString);
 
-	void fromNewick(string& nString);
+public:
+	TripletSamplingTree(GuideTree& gt);
 
 	//sample tripplets on a tree
-	vector<array<unsigned int, 3> > sampleFromTree();
+	vector<array<unsigned int, 3> >& sampleFromTree();
 
 	//sample only based on the distance matrix
-	vector<array<unsigned int, 3> > sampleFromDM();
+	vector<array<unsigned int, 3> >& sampleFromDM();
 
 	// node operator for comparision
 };

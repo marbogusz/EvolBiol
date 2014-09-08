@@ -52,6 +52,8 @@ public:
 
 	GotohAlgorithm(string& a, string& b);
 
+	std::pair<string,string> getAlignment();
+
 	virtual ~GotohAlgorithm();
 
 	void setSequences(string& a, string& b);

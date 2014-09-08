@@ -49,8 +49,6 @@ void GotohAlgorithm::setSequences(string& a, string& b)
 	this->seq_a = a;
 	this->seq_b = b;
 
-
-
 	seqALen = seq_a.length();
 	seqBLen = seq_b.length();
 }
@@ -71,4 +69,9 @@ void GotohAlgorithm::processMatrices()
 	}
 }
 
+}
+
+std::pair<string, string> EBC::GotohAlgorithm::getAlignment()
+{
+	return this->S->getAlignment(seq_a, seq_b);
 }

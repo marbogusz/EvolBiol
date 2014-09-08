@@ -26,6 +26,8 @@ protected:
 public:
 	SequenceElement(bool, short, short*, string smbl);
 
+	SequenceElement();
+
 	bool isIsGap() const
 	{
 		return isGap;

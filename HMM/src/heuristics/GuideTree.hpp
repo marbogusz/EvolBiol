@@ -36,6 +36,10 @@ protected:
 
 	vector<array<unsigned int, 3> > sampledTriplets;
 
+	DistanceMatrix distMat;
+
+	string newickTree;
+
 
 public:
 	GuideTree(Sequences*);
@@ -44,9 +48,14 @@ public:
 
 	void constructTree();
 
-	const vector<array<unsigned int, 3> >& getSampledTriplets() const
+	DistanceMatrix& getDistanceMatrix()
 	{
-		return sampledTriplets;
+		return distMat;
+	}
+
+	const string& getNewickTree()
+	{
+		return newickTree;
 	}
 
 private:

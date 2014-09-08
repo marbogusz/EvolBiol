@@ -70,3 +70,45 @@ void EBC::EvaluationMatrix::traceback(string& seq_a, string& seq_b, std::pair<st
 
 	}
 }
+
+std::pair<string, string> EBC::EvaluationMatrix::getAlignment(string& seq_a,
+		string& seq_b)
+{
+	auto alignment = std::make_pair(string(), string());
+	alignment.first.reserve(seq_a.size() + (int)seq_a.size() * 0.2);
+	alignment.second.reserve(seq_b.size() + (int)seq_b.size() * 0.2);
+	unsigned int i = xSize-1;
+	unsigned int j = ySize-1;
+
+	EvaluationMatrix* currentMat = this;
+
+	while(i>0 || j >0)
+	{
+		if (currentMat->matrixData[i][j].diag)
+		{
+			alignment.first += seq_a[i-1];
+			alignment.second += seq_b[j-1];
+			currentMat = currentMat->matrixData[i][j].src;
+			i--;
+			j--;
+		}
+		else if (currentMat->matrixData[i][j].hor)
+		{
+			alignment.second += seq_b[j-1];
+			alignment.first += '-';
+			currentMat = currentMat->matrixData[i][j].src;
+			j--;
+		}
+			//vert
+		else
+		{
+			alignment.first += seq_a[i-1];
+			alignment.second += '-';
+			currentMat = currentMat->matrixData[i][j].src;
+			i--;
+		}
+
+	}
+
+
+}

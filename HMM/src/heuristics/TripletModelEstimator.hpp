@@ -33,6 +33,8 @@ class TripletModelEstimator
 private:
 
 	//BFGS optimization wrapper for dlib
+
+	//FIXME - extract BFGS as an external class to avoid duplication !!
 	class BFGS
 	{
 	protected:
@@ -65,6 +67,10 @@ protected:
 	SubstitutionModelBase* substModel;
 	Sequences* inputSequences;
 	Maths* maths;
+
+	//vector<array<unsigned int, 3> >& triplets;
+
+	vector<SubstitutionModelBase*> substs;
 
 	unsigned int gammaRateCategories;
 

@@ -64,7 +64,7 @@ public:
 
 	void traceback(string& seq_a, string& seq_b, std::pair<string,string>* alignment);
 
-
+	std::pair<string,string> getAlignment(string& seq_a, string& seq_b);
 };
 
 } /* namespace EBC */

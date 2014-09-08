@@ -21,4 +21,6 @@ SequenceElement::SequenceElement(bool isGap, short index, short* alternativeInde
 	//vector<short> alternativeIndexes
 }
 
+SequenceElement::SequenceElement() : SequenceElement(false,0, NULL, ""){}
+
 } /* namespace EBC */

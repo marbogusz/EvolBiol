@@ -50,14 +50,15 @@ double TripletSamplingTree::distanceBetween(Node* n1, Node* n2)
 	return distance;
 }
 
-TripletSamplingTree::TripletSamplingTree(DistanceMatrix& dm) : distMat(dm)
+TripletSamplingTree::TripletSamplingTree(GuideTree& gt) : distMat(gt.getDistanceMatrix())
 {
 	// TODO Auto-generated constructor stub
 	idealTreeSize = 1.0;
+	this->fromNewick(gt.getNewickTree());
 
 }
 
-void TripletSamplingTree::fromNewick(string& newick)
+void TripletSamplingTree::fromNewick(const string& newick)
 {
 	//parse Newick!
 	//start with a bracket, end with a bracket and a semicolon
@@ -155,7 +156,7 @@ void TripletSamplingTree::fromNewick(string& newick)
 	}
 }
 
-vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromDM()
+vector<array<unsigned int, 3> >& TripletSamplingTree::sampleFromDM()
 {
 	vector<array<unsigned int, 3> > result;
 
@@ -174,7 +175,7 @@ vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromDM()
 	return result;
 }
 
-vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromTree()
+vector<array<unsigned int, 3> >& TripletSamplingTree::sampleFromTree()
 {
 	vector<array<unsigned int, 3> > result;
 	//randomly select 1 leaf
