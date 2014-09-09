@@ -6,6 +6,8 @@
  */
 
 #include <heuristics/TripletAligner.hpp>
+#include <vector>
+#include <array>
 
 namespace EBC
 {
@@ -35,9 +37,9 @@ array<vector<SequenceElement>, 3> TripletAligner::align()
 	string& p1al = firstPair.second;
 	string& p2al = secondPair.second;
 
-	DEBUG(seq1);
-	DEBUG(seq2);
-	DEBUG(seq3);
+	DEBUG("Triplet aligner sequence 1 " << seq1);
+	DEBUG("Triplet aligner sequence 2 " << seq2);
+	DEBUG("Triplet aligner sequence 3 " << seq3);
 
 	unsigned int alSize = std::max(anch1.size(), anch2.size());
 	alSize *= 0.2;
@@ -87,10 +89,10 @@ array<vector<SequenceElement>, 3> TripletAligner::align()
 	triAlignment[1] = inputSeqs->getDictionary()->translate(tr2, false);
 	triAlignment[2] = inputSeqs->getDictionary()->translate(tr3, false);
 
-	DEBUG("Triplet aligner");
+	DEBUG("Triplet alignment : ");
 	DEBUG(tr1);
 	DEBUG(tr2);
-	DEBUG(tr3);
+	DEBUG(tr3 << endl);
 
 	return triAlignment;
 

@@ -19,6 +19,7 @@
 #include "heuristics/GuideTree.hpp"
 #include "heuristics/GotohAlgorithm.hpp"
 #include "heuristics/TripletAligner.hpp"
+#include "heuristics/TripletModelEstimator.hpp"
 #include <array>
 
 using namespace std;
@@ -66,9 +67,14 @@ int main(int argc, char ** argv) {
 			//DEBUG(al.first);
 			//DEBUG(al.second);
 
-			TripletAligner tal(inputSeqs, {0,1,2});
-			tal.align();
+			//TripletAligner tal(inputSeqs, {0,1,2});
+			//tal.align();
 
+			TripletModelEstimator* tme = new TripletModelEstimator(inputSeqs, cmdReader->getModelType(),
+					cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
+					cmdReader->estimateAlpha());
+
+			//tme->getModelParameters();
 
 		}
 

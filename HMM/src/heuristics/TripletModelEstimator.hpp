@@ -18,8 +18,11 @@
 #include "core/Sequences.hpp"
 #include <sstream>
 #include "core/HmmException.hpp"
+#include "heuristics/GuideTree.hpp"
+#include "heuristics/TripletSamplingTree.hpp"
 
 #include <vector>
+#include <array>
 
 using namespace std;
 
@@ -67,6 +70,11 @@ protected:
 	SubstitutionModelBase* substModel;
 	Sequences* inputSequences;
 	Maths* maths;
+
+	GuideTree gtree;
+	TripletSamplingTree tst;
+
+	vector<array<vector<SequenceElement>, 3> > tripleAlignments;
 
 	//vector<array<unsigned int, 3> >& triplets;
 

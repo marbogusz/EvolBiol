@@ -9,9 +9,11 @@
 #define TRIPLETALIGNER_HPP_
 
 #include "core/Sequences.hpp"
+#include "core/DistanceMatrix.hpp"
 #include "heuristics/GotohAlgorithm.hpp"
 #include "core/SequenceElement.hpp"
 #include <array>
+#include <vector>
 
 using namespace std;
 

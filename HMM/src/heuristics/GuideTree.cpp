@@ -49,7 +49,7 @@ void GuideTree::constructTree()
 			distMat.addDistance(i,j,identity);
 		}
 
-	DEBUG("initialized the DM");
+	DEBUG("initialized the distance matrix");
 	BioNJ nj(sequenceCount, distMat);
 	newickTree = nj.calculate();
 
@@ -67,6 +67,9 @@ void GuideTree::constructTree()
 void GuideTree::extractKmers(string& seq, unordered_map<string, short>* umap)
 {
 	string kmer;
+
+	DEBUG("Guide tree : Extracting k-mers");
+
 	for(unsigned int i = 0; i< seq.size() - kmerSize; i++)
 	{
 		kmer = seq.substr(i, kmerSize);

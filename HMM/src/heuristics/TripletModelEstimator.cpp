@@ -10,6 +10,7 @@
 #include "models/HKY85Model.hpp"
 #include "models/AminoacidSubstitutionModel.hpp"
 #include "heuristics/TripletSamplingTree.hpp"
+#include "heuristics/TripletAligner.hpp"
 
 namespace EBC
 {
@@ -81,11 +82,11 @@ void TripletModelEstimator::BFGS::optimize()
 
 TripletModelEstimator::TripletModelEstimator(Sequences* inputSeqs, Definitions::ModelType model ,
 		Definitions::OptimizationType ot, unsigned int rateCategories, double alpha, bool estimateAlpha) :
-				inputSequences(inputSeqs), gammaRateCategories(rateCategories), substs(3)
+				inputSequences(inputSeqs), gammaRateCategories(rateCategories), substs(3),
+				gtree(inputSeqs), tst(gtree)
 {
 	maths = new Maths();
 	dict = inputSequences->getDictionary();
-
 	//we're running triplets, sequence count is 3!
 	unsigned int sequence_count = 3;
 
@@ -118,6 +119,8 @@ TripletModelEstimator::TripletModelEstimator(Sequences* inputSeqs, Definitions::
 	//alpha is an initial alpha!!
 	modelParams->setAlpha(alpha);
 
+
+	//theoretically one can set the times from DM
 	/*
 	if (userTime > 0)
 	{
@@ -150,8 +153,17 @@ TripletModelEstimator::TripletModelEstimator(Sequences* inputSeqs, Definitions::
 
 		}
 
-	TripletSamplingTree tst(GuideTree(inputSequences));
-	triplets = tst.sampleFromDM();
+	vector<array<unsigned int, 3> > tripletIdxs = tst.sampleFromDM();
+	//iterate over triplets and align
+
+	for (auto idx : tripletIdxs)
+	{
+		TripletAligner tal(inputSequences, idx, gtree.getDistanceMatrix());
+		tripleAlignments.push_back(tal.align());
+	}
+
+	//TripletSamplingTree tst(GuideTree(inputSequences));
+	//triplets = tst.sampleFromDM();
 
 	bfgs = new BFGS(this,ot);
 	bfgs->optimize();
@@ -162,11 +174,6 @@ TripletModelEstimator::~TripletModelEstimator()
 	// TODO Auto-generated destructor stub
 	delete bfgs;
 	delete modelParams;
-	//delete Y;
-	//delete X;
-	//delete M;
-	//delete substModel;
-	//delete indelModel;
     delete maths;
 
 
@@ -175,16 +182,12 @@ TripletModelEstimator::~TripletModelEstimator()
 double TripletModelEstimator::runIteration()
 {
 	double result = 0;
-	unsigned int s1, s2, s3;
 
-
-
-	//for loop here
 
 	for (unsigned int i = 0; i< substs.size(); i++){
 		substs[i]->setAlpha(modelParams->getAlpha());
 		substs[i]->setParameters(modelParams->getSubstParameters());
-		//substModel->setTime(modelParams->getDivergenceTime(i));
+		substs[i]->setTime(modelParams->getDivergenceTime(i));
 		substs[i]->calculatePt();
 		substs[i]->calculateSitePatterns();
 	}
@@ -192,19 +195,25 @@ double TripletModelEstimator::runIteration()
 	//get triplet alignments
 
 
-/*
-	for(auto it : this->triplets )
+
+	for(auto it : this->tripleAlignments )
 	{
-		//alignment
-		s1 = (*it)[0];
-		s2 = (*it)[1];
-		s3 = (*it)[2];
+		vector<SequenceElement>& s0 = it[0];
+		vector<SequenceElement>& s1 = it[1];
+		vector<SequenceElement>& s2 = it[2];
 
-
+		//3 sequences
+		for(int rt = 0; rt < dict->getAlphabetSize(); rt++)
+		{
+			for(int pos = 0; pos < s0.size(); pos++ )
+			{
+				//TODO
+			}
+		}
 
 	}
 
-	*/
+
 	//cerr << result << endl;
 	return result;
 }

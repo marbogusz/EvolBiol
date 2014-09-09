@@ -171,7 +171,7 @@ vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromDM()
 	s3 = distMat.getThirdLeafWithinDistance(remainingDistance, s1, s2);
 
 	result.push_back({s1,s2,s3});
-	cout << "sampled values : " << s1 << '\t' << s2 << '\t' << s3 << endl;
+	DEBUG("Triplet tree DM sampled values : " << s1 << '\t' << s2 << '\t' << s3);
 	return result;
 }
 
