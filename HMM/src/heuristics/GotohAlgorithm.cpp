@@ -17,31 +17,22 @@ GotohAlgorithm::~GotohAlgorithm()
 	// TODO Auto-generated destructor stub
 }
 
-GotohAlgorithm::GotohAlgorithm(string& a, string& b) :
-		seq_a(a), seq_b(b)
+GotohAlgorithm::GotohAlgorithm(string& a, string& b)
 {
-	cout << "Gotoh initializing ..." << endl;
-	seqALen = seq_a.length();
-	seqBLen = seq_b.length();
-
-	cout << a << endl;
-	cout << b << endl;
-
-	xSize = seqALen + 1;
-	ySize = seqBLen + 1;
+	H = NULL;
+	V = NULL;
+	S = NULL;
 
 	srand((unsigned)time(0));
 
-	scores = new GotohScoringMatrix(0.5, -1.0, -0.2);
-	scores->setStringPair(seq_a, seq_b);
+	setSequences(a,b);
+}
 
-	H = new GotohHMatrix(xSize, ySize, scores);
-	V = new GotohVMatrix(xSize, ySize, scores);
-	S = new GotohSMatrix(xSize, ySize, scores);
-
-	H->setSMatrix(S);
-	V->setSMatrix(S);
-	//S gets the matrices set automatically
+void GotohAlgorithm::setDistance(double distance)
+{
+	if (scores != NULL)
+		delete scores;
+	else scores = new GotohScoringMatrix(distance);
 }
 
 void GotohAlgorithm::setSequences(string& a, string& b)
@@ -51,11 +42,37 @@ void GotohAlgorithm::setSequences(string& a, string& b)
 
 	seqALen = seq_a.length();
 	seqBLen = seq_b.length();
+
+	xSize = seqALen + 1;
+	ySize = seqBLen + 1;
+
+	//reset matrices!
+
+	scores->setStringPair(seq_a, seq_b);
+
+	if(H != NULL)
+		delete H;
+	if(V != NULL)
+			delete V;
+	if(S != NULL)
+			delete S;
+
+
+	H = new GotohHMatrix(xSize, ySize, scores);
+	V = new GotohVMatrix(xSize, ySize, scores);
+	S = new GotohSMatrix(xSize, ySize, scores);
+
+	H->setSMatrix(S);
+	V->setSMatrix(S);
 }
 
 void GotohAlgorithm::run()
 {
 	processMatrices();
+
+	DEBUG("S score" << S->scoreAt(xSize-1, ySize-1));
+	DEBUG("V score" << V->scoreAt(xSize-1, ySize-1));
+	DEBUG("H score" << H->scoreAt(xSize-1, ySize-1));
 }
 
 void GotohAlgorithm::processMatrices()

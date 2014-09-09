@@ -36,8 +36,8 @@ void ScoringMatrix::scoresFromDistanceJC(double distance)
 		double p0 = 1+3*exP;
 		double p1 = 1-exP;
 		double pI = 1-exI;
-		p0 = log(p0);
-		p1 = log(p1);
+		p0 = log(4*p0);
+		p1 = log(4*p1);
 		pI = log(pI);
 
 		for(int i=0; i<4;i++)

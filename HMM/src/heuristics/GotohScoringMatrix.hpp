@@ -30,6 +30,8 @@ protected:
 public:
 	GotohScoringMatrix(double disance, double gapOpening, double gapExtension);
 
+	GotohScoringMatrix(double disance);
+
 	double getScoreByIndex(unsigned int i, unsigned int j)
 	{
 		return this->getScore(seq1[i], seq2[j]);

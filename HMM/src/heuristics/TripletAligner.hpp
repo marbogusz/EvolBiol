@@ -18,25 +18,26 @@ using namespace std;
 namespace EBC
 {
 
+struct TripletAlignment
+{
+public:
+	string seq1;
+	string seq2;
+	string seq3;
+};
+
 class TripletAligner
 {
 private:
 
-	array<SequenceElement, 3> tripletAlignment;
-
 	Sequences* inputSeqs;
+	DistanceMatrix& distMat;
 	unsigned int s1, s2,s3;
 
-	void align();
-
-
 public:
-	TripletAligner(Sequences* inputSeq, array<unsigned int, 3>& triplet);
+	TripletAligner(Sequences* inputSeq, array<unsigned int, 3> triplet, DistanceMatrix& dm);
 
-	const array<SequenceElement, 3>& getTripletAlignment() const
-	{
-		return tripletAlignment;
-	}
+	array<vector<SequenceElement>, 3> align();
 };
 
 } /* namespace EBC */

@@ -18,6 +18,7 @@
 #include <iomanip>
 #include "heuristics/GuideTree.hpp"
 #include "heuristics/GotohAlgorithm.hpp"
+#include "heuristics/TripletAligner.hpp"
 #include <array>
 
 using namespace std;
@@ -58,12 +59,16 @@ int main(int argc, char ** argv) {
 			//auto samples = gt.getSampledTriplets();
 			//array<unsigned int, 3> arr1 = samples[0];
 
-			GotohAlgorithm* algo = new GotohAlgorithm(inputSeqs->getRawSequenceAt(0),inputSeqs->getRawSequenceAt(1));
-			algo->run();
-			auto al = algo->getAlignment();
+			//GotohAlgorithm* algo = new GotohAlgorithm(inputSeqs->getRawSequenceAt(0),inputSeqs->getRawSequenceAt(1));
+			//algo->run();
+			//std::pair<string, string> al = algo->getAlignment();
 
-			DEBUG(al.first);
-			DEBUG(al.second);
+			//DEBUG(al.first);
+			//DEBUG(al.second);
+
+			TripletAligner tal(inputSeqs, {0,1,2});
+			tal.align();
+
 
 		}
 

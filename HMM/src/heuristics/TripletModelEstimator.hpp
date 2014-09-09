@@ -72,6 +72,9 @@ protected:
 
 	vector<SubstitutionModelBase*> substs;
 
+	//would be better to work on alignment elements!
+	vector<array<string, 3> > alignments;
+
 	unsigned int gammaRateCategories;
 
 	bool estimateSubstitutionParams;

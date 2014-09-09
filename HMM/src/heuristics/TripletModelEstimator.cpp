@@ -151,7 +151,7 @@ TripletModelEstimator::TripletModelEstimator(Sequences* inputSeqs, Definitions::
 		}
 
 	TripletSamplingTree tst(GuideTree(inputSequences));
-	//triplets = tst.sampleFromDM();
+	triplets = tst.sampleFromDM();
 
 	bfgs = new BFGS(this,ot);
 	bfgs->optimize();
@@ -168,6 +168,8 @@ TripletModelEstimator::~TripletModelEstimator()
 	//delete substModel;
 	//delete indelModel;
     delete maths;
+
+
 }
 
 double TripletModelEstimator::runIteration()
@@ -179,15 +181,16 @@ double TripletModelEstimator::runIteration()
 
 	//for loop here
 
+	for (unsigned int i = 0; i< substs.size(); i++){
+		substs[i]->setAlpha(modelParams->getAlpha());
+		substs[i]->setParameters(modelParams->getSubstParameters());
+		//substModel->setTime(modelParams->getDivergenceTime(i));
+		substs[i]->calculatePt();
+		substs[i]->calculateSitePatterns();
+	}
 
-	substModel->setAlpha(modelParams->getAlpha());
-	substModel->setParameters(modelParams->getSubstParameters());
-	//substModel->setTime(modelParams->getDivergenceTime(i));
-	substModel->calculatePt();
-	substModel->calculateSitePatterns();
+	//get triplet alignments
 
-	//this->modelParams->outputParameters();
-	//cerr << "iteration " << endl;
 
 /*
 	for(auto it : this->triplets )

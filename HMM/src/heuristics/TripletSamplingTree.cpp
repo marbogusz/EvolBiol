@@ -156,7 +156,7 @@ void TripletSamplingTree::fromNewick(const string& newick)
 	}
 }
 
-vector<array<unsigned int, 3> >& TripletSamplingTree::sampleFromDM()
+vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromDM()
 {
 	vector<array<unsigned int, 3> > result;
 
@@ -175,7 +175,7 @@ vector<array<unsigned int, 3> >& TripletSamplingTree::sampleFromDM()
 	return result;
 }
 
-vector<array<unsigned int, 3> >& TripletSamplingTree::sampleFromTree()
+vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromTree()
 {
 	vector<array<unsigned int, 3> > result;
 	//randomly select 1 leaf

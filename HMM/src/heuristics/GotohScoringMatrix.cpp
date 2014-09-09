@@ -16,4 +16,12 @@ GotohScoringMatrix::GotohScoringMatrix(double distance, double gO, double gE) :
 	// TODO Auto-generated constructor stub
 }
 
+GotohScoringMatrix::GotohScoringMatrix(double distance) : ScoringMatrix(distance)
+{
+	this->gapOpening = this->gapPenalty;
+
+	//FIXME - magic number, set the gap opening to sth reasonable;
+	this->gapExtension = gapOpening * 0.3;
+}
+
 } /* namespace EBC */

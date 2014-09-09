@@ -58,6 +58,8 @@ public:
 
 	void setSequences(string& a, string& b);
 
+	void setDistance(double dist);
+
 	void run();
 };
 

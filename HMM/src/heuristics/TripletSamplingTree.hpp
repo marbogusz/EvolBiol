@@ -45,10 +45,10 @@ public:
 	TripletSamplingTree(GuideTree& gt);
 
 	//sample tripplets on a tree
-	vector<array<unsigned int, 3> >& sampleFromTree();
+	vector<array<unsigned int, 3> > sampleFromTree();
 
 	//sample only based on the distance matrix
-	vector<array<unsigned int, 3> >& sampleFromDM();
+	vector<array<unsigned int, 3> > sampleFromDM();
 
 	// node operator for comparision
 };

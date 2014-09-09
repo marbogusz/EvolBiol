@@ -6,6 +6,7 @@
  */
 
 #include "heuristics/EvaluationMatrix.hpp"
+#include <algorithm>
 
 void EBC::EvaluationMatrix::allocateData()
 {
@@ -19,8 +20,8 @@ void EBC::EvaluationMatrix::allocateData()
 EBC::EvaluationMatrix::EvaluationMatrix(unsigned int xS, unsigned int yS, GotohScoringMatrix* sMat) :
 		xSize(xS), ySize(yS), scoring(sMat)
 {
-	maxVal = std::numeric_limits<double>::max();
-	minVal = std::numeric_limits<double>::min();
+	maxVal = std::max(xSize,ySize) * scoring->getScoreByIndex(0,0);
+	minVal = std::max(xSize,ySize) * std::min(scoring->getScoreByIndex(0,1), scoring->getGapOpening());
 	allocateData();
 }
 
@@ -42,7 +43,7 @@ void EBC::EvaluationMatrix::traceback(string& seq_a, string& seq_b, std::pair<st
 
 	EvaluationMatrix* currentMat = this;
 
-	while(i>0 || j >0)
+	while(i>0 && j >0)
 	{
 		if (currentMat->matrixData[i][j].diag)
 		{
@@ -74,14 +75,11 @@ void EBC::EvaluationMatrix::traceback(string& seq_a, string& seq_b, std::pair<st
 std::pair<string, string> EBC::EvaluationMatrix::getAlignment(string& seq_a,
 		string& seq_b)
 {
-	auto alignment = std::make_pair(string(), string());
-	alignment.first.reserve(seq_a.size() + (int)seq_a.size() * 0.2);
-	alignment.second.reserve(seq_b.size() + (int)seq_b.size() * 0.2);
+	string tmp1, tmp2;
+	tmp1.reserve(seq_a.size() + (int)seq_a.size() * 0.2);
+	tmp2.reserve(seq_b.size() + (int)seq_b.size() * 0.2);
 	unsigned int i = xSize-1;
 	unsigned int j = ySize-1;
-
-	cerr << seq_a << endl;
-	cerr << seq_b << endl;
 
 
 	EvaluationMatrix* currentMat = this;
@@ -90,32 +88,34 @@ std::pair<string, string> EBC::EvaluationMatrix::getAlignment(string& seq_a,
 	{
 		if (currentMat->matrixData[i][j].diag)
 		{
-			alignment.first += seq_a[i-1];
-			alignment.second += seq_b[j-1];
+			tmp1 += seq_a[i-1];
+			tmp2 += seq_b[j-1];
 			currentMat = currentMat->matrixData[i][j].src;
 			i--;
 			j--;
 		}
 		else if (currentMat->matrixData[i][j].hor)
 		{
-			alignment.second += seq_b[j-1];
-			alignment.first += '-';
+			tmp2 += seq_b[j-1];
+			tmp1 += '-';
 			currentMat = currentMat->matrixData[i][j].src;
 			j--;
 		}
 			//vert
 		else
 		{
-			alignment.first += seq_a[i-1];
-			alignment.second += '-';
+			tmp1 += seq_a[i-1];
+			tmp2 += '-';
 			currentMat = currentMat->matrixData[i][j].src;
 			i--;
 		}
-		cerr << alignment.first << endl;
-		cerr << alignment.second << endl;
 
 	}
-	cerr << "done" << endl;
 
+	std::reverse(tmp1.begin(), tmp1.end());
+	std::reverse(tmp2.begin(), tmp2.end());
+	std::pair<string, string> alignment = std::make_pair(tmp1,tmp2);
+
+	return alignment;
 
 }
