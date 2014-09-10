@@ -22,6 +22,10 @@ struct Node
 {
 public:
 
+	unsigned int nodeId;
+
+	Node* parent;
+
 	bool leafNode;
 
 	bool rootNode;
@@ -37,11 +41,7 @@ public:
 		return cP1.nodeId == cP2.nodeId;
 	}
 
-	Node* parent;
-
 	vector<Node*> children;
-
-	unsigned int nodeId;
 
 	Node(unsigned int id);
 

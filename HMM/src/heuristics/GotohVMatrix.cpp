@@ -13,9 +13,17 @@ namespace EBC
 
 	void GotohVMatrix::initializeData()
 	{
+		for (unsigned int i = 0; i< this->xSize; i++)
+		{
+			this->matrixData[i][0].vert = true;
+			this->matrixData[i][0].src = this;
+		}
+
 		for (int j = 0; j< this->ySize; j++)
 		{
 			this->matrixData[0][j].score = minVal;
+			this->matrixData[0][j].hor = true;
+			this->matrixData[0][j].src = this;
 		}
 	}
 
@@ -41,7 +49,7 @@ namespace EBC
 
 			if(mScore >= vScore)
 			{
-				trace->diag = true;
+				trace->vert = true;
 				trace->score = mScore;
 				trace->src = sMatrix;
 				return mScore;

@@ -44,15 +44,15 @@ private:
 	unsigned int taxas;
 	unsigned int pairs;
 	vector<string> names;
-	DistanceMatrix& times;
+	DistanceMatrix* times;
 	double treeLength;
 
 public:
-	BioNJ(unsigned int size, DistanceMatrix& divergenceTimes);
+	BioNJ(unsigned int size, DistanceMatrix* divergenceTimes);
 
 	double getDist(unsigned int i, unsigned int j)
 	{
-		return times.getDistance(i,j);
+		return times->getDistance(i,j);
 	}
 
 	void   Initialize(float **delta, int n, POINTERS *trees);

@@ -115,7 +115,7 @@ double* Sequences::getElementFrequencies()
 	//observedFrequencies[2] = 0.25;
 	//observedFrequencies[3] = 0.25;
 
-	DEBUGV(observedFrequencies, dict->getAlphabetSize());
+	//DEBUGV(observedFrequencies, dict->getAlphabetSize());
 
 	return observedFrequencies;
 

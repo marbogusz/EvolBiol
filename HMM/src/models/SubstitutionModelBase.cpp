@@ -45,8 +45,12 @@ void SubstitutionModelBase::allocateMatrices()
 	}
 
 	this->sitePatterns = new double*[matrixSize+1];
+	this->siteProbabilities = new double*[matrixSize+1];
 	for (int i =0; i<= matrixSize; i++ )
+	{
 		sitePatterns[i] = new double[matrixSize+1];
+		siteProbabilities[i] = new double[matrixSize+1];;
+	}
 }
 
 void SubstitutionModelBase::calculateSitePatterns()
@@ -56,13 +60,24 @@ void SubstitutionModelBase::calculateSitePatterns()
 		for (int j =0; j<= matrixSize; j++ )
 		{
 			if (i == matrixSize)
+			{
+				siteProbabilities[i][j] = this->piFreqs[j];
 				sitePatterns[i][j]  = log(this->piFreqs[j]);
+			}
 			else if (j == matrixSize)
+			{
+				siteProbabilities[i][j] = this->piFreqs[i];
 				sitePatterns[i][j]  = log(this->piFreqs[i]);
+			}
 			else
+			{
+				siteProbabilities[i][j] = this->getPXiYi(i,j);
 				sitePatterns[i][j] = log(this->getPXiYi(i,j));
-		}
+
+			}
+	}
 	sitePatterns[matrixSize][matrixSize] = 0;
+	siteProbabilities[matrixSize][matrixSize] = 0;
 }
 
 void SubstitutionModelBase::destroyMatrices()
@@ -148,6 +163,15 @@ SubstitutionModelBase::~SubstitutionModelBase()
 	if (this->gammaRates !=NULL )
 		delete[] gammaRates;
 
+	//site patterns
+	for (int i =0; i<= matrixSize; i++ )
+	{
+			delete[] sitePatterns[i];
+			delete[] siteProbabilities[i];
+	}
+	delete[] sitePatterns;
+	delete[] siteProbabilities;
+
 }
 
 void SubstitutionModelBase::calculateGamma()
@@ -181,9 +205,14 @@ double SubstitutionModelBase::getQXi(unsigned int xi)
 	return piFreqs[xi];
 }
 
-double SubstitutionModelBase::getPattern(unsigned int xi, unsigned int yi)
+double SubstitutionModelBase::getSitePattern(unsigned int xi, unsigned int yi)
 {
 	return this->sitePatterns[xi][yi];
+}
+
+double SubstitutionModelBase::getSiteProbability(unsigned int xi, unsigned int yi)
+{
+	return this->siteProbabilities[xi][yi];
 }
 
 } /* namespace EBC */

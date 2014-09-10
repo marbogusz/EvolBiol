@@ -53,6 +53,8 @@ double TripletSamplingTree::distanceBetween(Node* n1, Node* n2)
 TripletSamplingTree::TripletSamplingTree(GuideTree& gt) : distMat(gt.getDistanceMatrix())
 {
 	// TODO Auto-generated constructor stub
+	DEBUG("Creating TripletSamplingTree");
+
 	idealTreeSize = 1.0;
 	this->fromNewick(gt.getNewickTree());
 
@@ -162,16 +164,16 @@ vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromDM()
 
 	unsigned int s1, s2, s3;
 	double remainingDistance = 2.0 * this->idealTreeSize;
-	auto pair = distMat.getPairWithinDistance(0.5*this->idealTreeSize, 0.8*this->idealTreeSize);
+	auto pair = distMat->getPairWithinDistance(0.5*this->idealTreeSize, 0.8*this->idealTreeSize);
 	s1 = pair.first;
 	s2 = pair.second;
 
-	remainingDistance -= distMat.getDistance(s1, s2);
+	remainingDistance -= distMat->getDistance(s1, s2);
 
-	s3 = distMat.getThirdLeafWithinDistance(remainingDistance, s1, s2);
+	s3 = distMat->getThirdLeafWithinDistance(remainingDistance, s1, s2);
 
 	result.push_back({s1,s2,s3});
-	DEBUG("Triplet tree DM sampled values : " << s1 << '\t' << s2 << '\t' << s3);
+	DEBUG("Triplet tree DM sampled values : " << s1 << ", " << s2 << ", " << s3);
 	return result;
 }
 
@@ -181,7 +183,7 @@ vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromTree()
 	//randomly select 1 leaf
 	double treeSize = 0;
 
-	auto pair = distMat.getPairWithinDistance(0.5*this->idealTreeSize, 0.8*this->idealTreeSize);
+	auto pair = distMat->getPairWithinDistance(0.5*this->idealTreeSize, 0.8*this->idealTreeSize);
 
 	Node* first = leafNodes[pair.first];
 	Node* second  = leafNodes[pair.second];

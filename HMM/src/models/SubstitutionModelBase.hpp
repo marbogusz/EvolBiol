@@ -68,6 +68,9 @@ protected:
 	//patterns for sequence elements + missing data (gaps)
 	double ** sitePatterns;
 
+	//like site patterns but not logarithmic!
+	double ** siteProbabilities;
+
 	double meanRate;
 
 	//current divergence time
@@ -105,7 +108,9 @@ public:
 
 	double getQXi(unsigned int xi);
 
-	double getPattern(unsigned int xi, unsigned int yi);
+	double getSitePattern(unsigned int xi, unsigned int yi);
+
+	double getSiteProbability(unsigned int xi, unsigned int yi);
 
 	virtual void setParameters(const vector<double>&)=0;
 

@@ -18,11 +18,15 @@ namespace EBC
 		for (int i = 1; i< this->xSize; i++)
 		{
 			this->matrixData[i][0].score = scoring->getGapOpening() + i * scoring->getGapExtension();
+			this->matrixData[i][0].vert =true;
+			this->matrixData[i][0].src = this;
 		}
 
 		for (int j = 1; j< this->ySize; j++)
 		{
 			this->matrixData[0][j].score = scoring->getGapOpening() + j * scoring->getGapExtension();
+			this->matrixData[0][j].hor = true;
+			this->matrixData[0][j].src = this;
 		}
 	}
 
@@ -77,14 +81,14 @@ namespace EBC
 		}
 		else if (vScore >= hScore)
 		{
-			trace->vert = true;
+			trace->diag = true;
 			trace->score = vScore;
 			trace->src = vMatrix;
 			return vScore;
 		}
 		else
 		{
-			trace->hor = true;
+			trace->diag = true;
 			trace->score = hScore;
 			trace->src = hMatrix;
 			return hScore;

@@ -40,9 +40,6 @@ int main(int argc, char ** argv) {
 		DEBUG("Creating alignment");
 
 		Sequences* inputSeqs = new Sequences(parser, cmdReader->getSequenceType(),cmdReader->isFixedAlignment());
-		DEBUG("Creating the HMM");
-
-
 		if (cmdReader->isMLE())
 		{
 
@@ -69,6 +66,8 @@ int main(int argc, char ** argv) {
 
 			//TripletAligner tal(inputSeqs, {0,1,2});
 			//tal.align();
+
+			DEBUG("Creating TripletModelEstimator");
 
 			TripletModelEstimator* tme = new TripletModelEstimator(inputSeqs, cmdReader->getModelType(),
 					cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),

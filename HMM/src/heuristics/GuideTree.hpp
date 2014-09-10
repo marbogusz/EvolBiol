@@ -36,7 +36,7 @@ protected:
 
 	vector<array<unsigned int, 3> > sampledTriplets;
 
-	DistanceMatrix distMat;
+	DistanceMatrix* distMat;
 
 	string newickTree;
 
@@ -48,7 +48,7 @@ public:
 
 	void constructTree();
 
-	DistanceMatrix& getDistanceMatrix()
+	DistanceMatrix* getDistanceMatrix()
 	{
 		return distMat;
 	}

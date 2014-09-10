@@ -6,6 +6,7 @@
  */
 
 #include "core/BioNJ.hpp"
+#include "core/Definitions.hpp"
 #include <cstring>
 
 using namespace std;
@@ -13,7 +14,7 @@ using namespace std;
 namespace EBC
 {
 
-    BioNJ::BioNJ(unsigned int size, DistanceMatrix& divergenceTimes) : names(size), times(divergenceTimes)
+    BioNJ::BioNJ(unsigned int size, DistanceMatrix* divergenceTimes) : names(size), times(divergenceTimes)
     {
         taxas = size;
         pairs = (taxas*(taxas-1))/2;
@@ -125,6 +126,8 @@ namespace EBC
         n = taxas;
         //output = stderr;
 
+    	DEBUG("Calculating BioNJ tree");
+
         stringstream output;
 
         /*   Allocation of memories    */
@@ -140,14 +143,14 @@ namespace EBC
             delta[i]=(float *)calloc(n+1, sizeof(float));
             if(delta[i] == NULL)
             {
-                printf("Out of memories!!");
+                printf("Out of memory!!");
                 exit(0);
             }
         }
         trees=(POINTERS *)calloc(n+1,sizeof(POINTERS));
         if(trees == NULL)
         {
-            printf("Out of memories!!");
+            printf("Out of memory!!");
             exit(0);
         }
         /*   initialise and symmetrize the running delta matrix    */

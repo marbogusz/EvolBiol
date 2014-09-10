@@ -11,14 +11,15 @@
 namespace EBC
 {
 
-GuideTree::GuideTree(Sequences* is) : inputSequences(is), distMat(inputSequences->getSequenceCount())
+GuideTree::GuideTree(Sequences* is) : inputSequences(is)
 {
 	// TODO Auto-generated constructor stub
+	distMat = new DistanceMatrix(inputSequences->getSequenceCount());
 	this->dict = inputSequences->getDictionary();
 	this->kmerSize = 6;
 	this->sequenceCount = inputSequences->getSequenceCount();
 	this->kmers = new vector<unordered_map<string,short>*>(sequenceCount);
-	DEBUG("Creating the guide tree");
+	DEBUG("Creating guide tree");
 	this->constructTree();
 }
 
@@ -33,7 +34,7 @@ void GuideTree::constructTree()
 	string currSeq;
 	float identity;
 
-	DEBUG("Extracting kmers");
+	DEBUG("Extracting k-mers");
 	for(i = 0; i< sequenceCount; i++)
 	{
 		(*kmers)[i] = new unordered_map<string,short>();
@@ -46,10 +47,10 @@ void GuideTree::constructTree()
 			string s1 = inputSequences->getRawSequenceAt(i);
 			string s2 = inputSequences->getRawSequenceAt(j);
 			identity = 1.0 - commonKmerCount(i,j)/(float)(min(s1.size(),s2.size()));
-			distMat.addDistance(i,j,identity);
+			distMat->addDistance(i,j,identity);
 		}
 
-	DEBUG("initialized the distance matrix");
+	DEBUG("Initialized distance matrix");
 	BioNJ nj(sequenceCount, distMat);
 	newickTree = nj.calculate();
 
@@ -68,7 +69,7 @@ void GuideTree::extractKmers(string& seq, unordered_map<string, short>* umap)
 {
 	string kmer;
 
-	DEBUG("Guide tree : Extracting k-mers");
+
 
 	for(unsigned int i = 0; i< seq.size() - kmerSize; i++)
 	{

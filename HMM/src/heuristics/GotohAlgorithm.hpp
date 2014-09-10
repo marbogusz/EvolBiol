@@ -50,7 +50,7 @@ protected:
 
 public:
 
-	GotohAlgorithm(string& a, string& b);
+	GotohAlgorithm();
 
 	std::pair<string,string> getAlignment();
 

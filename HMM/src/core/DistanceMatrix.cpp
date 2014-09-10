@@ -6,6 +6,7 @@
  */
 
 #include "core/DistanceMatrix.hpp"
+#include "core/Definitions.hpp"
 #include <random>
 
 namespace EBC
@@ -22,6 +23,8 @@ double EBC::DistanceMatrix::getDistance(unsigned int i, unsigned int j)
 	double dst = 0;
 
 	dst = this->distances[make_pair(i,j)];
+
+	//DEBUG("Distance matrix getting distance");
 
 	return dst;
 }

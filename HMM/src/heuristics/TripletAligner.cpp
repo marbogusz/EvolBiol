@@ -18,28 +18,37 @@ array<vector<SequenceElement>, 3> TripletAligner::align()
 	string& seq2 = inputSeqs->getRawSequenceAt(s2);
 	string& seq3 = inputSeqs->getRawSequenceAt(s3);
 
-	GotohAlgorithm* algo = new GotohAlgorithm(seq2,seq1);
-
-	algo->setDistance(distMat.getDistance(s1,s2));
+	GotohAlgorithm* algo = new GotohAlgorithm();
+	algo->setDistance(distMat->getDistance(s1,s2));
+	algo->setSequences(seq1,seq2);
 	//scoring matrices etc....
 	algo->run();
 	auto firstPair = algo->getAlignment();
 
-	algo->setDistance(distMat.getDistance(s2,s3));
+	algo->setDistance(distMat->getDistance(s2,s3));
 	algo->setSequences(seq2,seq3);
 	algo->run();
 	auto secondPair = algo->getAlignment();
 
 	//align
-	string& anch1 = firstPair.first;
+	string& anch1 = firstPair.second;
 	string& anch2 = secondPair.first;
 
-	string& p1al = firstPair.second;
+	string& p1al = firstPair.first;
 	string& p2al = secondPair.second;
 
 	DEBUG("Triplet aligner sequence 1 " << seq1);
 	DEBUG("Triplet aligner sequence 2 " << seq2);
 	DEBUG("Triplet aligner sequence 3 " << seq3);
+
+
+	DEBUG("1-2 alignment :");
+	DEBUG(p1al);
+	DEBUG(anch1 << endl);
+
+	DEBUG("2-3 alignment :");
+	DEBUG(anch2);
+	DEBUG(p2al << endl);
 
 	unsigned int alSize = std::max(anch1.size(), anch2.size());
 	alSize *= 0.2;
@@ -98,8 +107,10 @@ array<vector<SequenceElement>, 3> TripletAligner::align()
 
 }
 
-TripletAligner::TripletAligner(Sequences* iSeq, array<unsigned int, 3> triplet, DistanceMatrix& dm) : inputSeqs(iSeq), distMat(dm)
+TripletAligner::TripletAligner(Sequences* iSeq, array<unsigned int, 3> triplet, DistanceMatrix* dm) : inputSeqs(iSeq), distMat(dm)
 {
+	DEBUG("Starting TripletAligner");
+
 	s1 = triplet[0];
 	s2 = triplet[1];
 	s3 = triplet[2];

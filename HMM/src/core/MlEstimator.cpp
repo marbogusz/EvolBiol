@@ -260,7 +260,7 @@ double MlEstimator::runIteration()
 
 			for (int j = 0; j < s1.size(); j++)
 			{
-				result += smodel->getPattern(s1[j].getMatrixIndex(), s2[j].getMatrixIndex());
+				result += smodel->getSitePattern(s1[j].getMatrixIndex(), s2[j].getMatrixIndex());
 			}
 
 		}

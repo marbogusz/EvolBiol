@@ -36,6 +36,7 @@ TripletModelEstimator::BFGS::~BFGS()
 double TripletModelEstimator::BFGS::objectiveFunction(const column_vector& bfgsParameters)
 {
 	this->parent->modelParams->fromDlibVector(bfgsParameters);
+	parent->modelParams->outputParameters();
 	return parent->runIteration();
 }
 
@@ -88,9 +89,6 @@ TripletModelEstimator::TripletModelEstimator(Sequences* inputSeqs, Definitions::
 	maths = new Maths();
 	dict = inputSequences->getDictionary();
 	//we're running triplets, sequence count is 3!
-	unsigned int sequence_count = 3;
-
-
 
 	//Helper models
 	//FIXME - get some static definitions or sth!!
@@ -135,7 +133,10 @@ TripletModelEstimator::TripletModelEstimator(Sequences* inputSeqs, Definitions::
 	*/
 
 	SubstitutionModelBase* smodel;
-	for(unsigned int i =0; i<sequence_count; i++)
+
+	DEBUG("Creating branch-specific substitution models");
+
+	for(unsigned int i =0; i<substs.size(); i++)
 	{
 		if (model == Definitions::ModelType::GTR)
 		{
@@ -153,8 +154,8 @@ TripletModelEstimator::TripletModelEstimator(Sequences* inputSeqs, Definitions::
 
 		}
 
+	DEBUG("About to sample some triplets");
 	vector<array<unsigned int, 3> > tripletIdxs = tst.sampleFromDM();
-	//iterate over triplets and align
 
 	for (auto idx : tripletIdxs)
 	{
@@ -175,14 +176,16 @@ TripletModelEstimator::~TripletModelEstimator()
 	delete bfgs;
 	delete modelParams;
     delete maths;
-
-
 }
 
 double TripletModelEstimator::runIteration()
 {
 	double result = 0;
 
+
+	double partial1, partial2, partial3 = 0;
+
+	SubstitutionModelBase* smodel;
 
 	for (unsigned int i = 0; i< substs.size(); i++){
 		substs[i]->setAlpha(modelParams->getAlpha());
@@ -196,26 +199,32 @@ double TripletModelEstimator::runIteration()
 
 
 
-	for(auto it : this->tripleAlignments )
+	for(auto itTrp : this->tripleAlignments )
 	{
-		vector<SequenceElement>& s0 = it[0];
-		vector<SequenceElement>& s1 = it[1];
-		vector<SequenceElement>& s2 = it[2];
-
-		//3 sequences
-		for(int rt = 0; rt < dict->getAlphabetSize(); rt++)
+		for(int pos = 0; pos < itTrp.size(); pos++ )
 		{
-			for(int pos = 0; pos < s0.size(); pos++ )
+			//iterate over possible root combinations
+			partial2 = 0;
+			for(int rt = 0; rt < dict->getAlphabetSize(); rt++)
 			{
-				//TODO
+				//iterate over sequences
+				partial1 =1;
+				for(unsigned int seqNum=0; seqNum < substs.size(); seqNum++)
+				{
+					smodel = substs[seqNum];
+					partial1 *= smodel->getSiteProbability(rt,((itTrp[seqNum])[pos]).getMatrixIndex());
+				}
+				//multiplied probs over 3 sequences with a single root
+				partial2 += partial1;
 			}
+			partial3 += log(partial2);
+			//added probabilities with alternative root
 		}
-
+		result += partial3;
 	}
 
-
-	//cerr << result << endl;
-	return result;
+	DEBUG("lnl result:" << result);
+	return result * -1.0;
 }
 
 } /* namespace EBC */

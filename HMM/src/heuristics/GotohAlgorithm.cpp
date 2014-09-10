@@ -17,26 +17,34 @@ GotohAlgorithm::~GotohAlgorithm()
 	// TODO Auto-generated destructor stub
 }
 
-GotohAlgorithm::GotohAlgorithm(string& a, string& b)
+GotohAlgorithm::GotohAlgorithm()
 {
+	DEBUG("Building Gotoh");
+
 	H = NULL;
 	V = NULL;
 	S = NULL;
 
-	srand((unsigned)time(0));
+	scores = NULL;
 
-	setSequences(a,b);
+	//srand((unsigned)time(0));
+
+	//setSequences(a,b);
 }
 
 void GotohAlgorithm::setDistance(double distance)
 {
+	DEBUG("Gotoh scoring matrix " << distance);
+
 	if (scores != NULL)
 		delete scores;
-	else scores = new GotohScoringMatrix(distance);
+	scores = new GotohScoringMatrix(distance);
 }
 
 void GotohAlgorithm::setSequences(string& a, string& b)
 {
+	DEBUG("Gotoh set sequences");
+
 	this->seq_a = a;
 	this->seq_b = b;
 
@@ -53,9 +61,9 @@ void GotohAlgorithm::setSequences(string& a, string& b)
 	if(H != NULL)
 		delete H;
 	if(V != NULL)
-			delete V;
+		delete V;
 	if(S != NULL)
-			delete S;
+		delete S;
 
 
 	H = new GotohHMatrix(xSize, ySize, scores);
@@ -90,5 +98,17 @@ void GotohAlgorithm::processMatrices()
 
 std::pair<string, string> EBC::GotohAlgorithm::getAlignment()
 {
-	return this->S->getAlignment(seq_a, seq_b);
+	double ss,sv,sh;
+	ss = S->scoreAt(xSize-1, ySize-1);
+	sv = V->scoreAt(xSize-1, ySize-1);
+	sh = H->scoreAt(xSize-1, ySize-1);
+
+	double hiscore = max(ss,max(sv,sh));
+
+	if (hiscore == ss)
+		return this->S->getAlignment(seq_a, seq_b);
+	if (hiscore == sv)
+			return this->V->getAlignment(seq_a, seq_b);
+	if (hiscore == sh)
+			return this->H->getAlignment(seq_a, seq_b);
 }

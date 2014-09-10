@@ -35,7 +35,7 @@ double ViterbiPairHMM::getViterbiSubstitutionLikelihood()
 
 	for (auto it = alignment.begin(); it != alignment.end(); it ++)
 	{
-		lnl += this->substModel->getPattern(it->first, it->second);
+		lnl += this->substModel->getSitePattern(it->first, it->second);
 	}
 
 	return lnl * -1.0;

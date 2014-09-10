@@ -35,7 +35,7 @@ private:
 
 	double distanceBetween(Node* n1, Node* n2);
 
-	DistanceMatrix& distMat;
+	DistanceMatrix* distMat;
 
 	double idealTreeSize;
 

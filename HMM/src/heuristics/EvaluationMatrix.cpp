@@ -84,7 +84,7 @@ std::pair<string, string> EBC::EvaluationMatrix::getAlignment(string& seq_a,
 
 	EvaluationMatrix* currentMat = this;
 
-	while(i>0 && j >0)
+	while(i>0 || j >0)
 	{
 		if (currentMat->matrixData[i][j].diag)
 		{

@@ -33,11 +33,11 @@ class TripletAligner
 private:
 
 	Sequences* inputSeqs;
-	DistanceMatrix& distMat;
+	DistanceMatrix* distMat;
 	unsigned int s1, s2,s3;
 
 public:
-	TripletAligner(Sequences* inputSeq, array<unsigned int, 3> triplet, DistanceMatrix& dm);
+	TripletAligner(Sequences* inputSeq, array<unsigned int, 3> triplet, DistanceMatrix* dm);
 
 	array<vector<SequenceElement>, 3> align();
 };
