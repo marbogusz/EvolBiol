@@ -126,7 +126,7 @@ double ViterbiPairHMM::runAlgorithm()
 				{
 					k = i-1;
 					l = j-1;
-					emissionM = log(substModel->getPXiYi(seq1[i-1].getMatrixIndex(), seq2[j-1].getMatrixIndex()));
+					emissionM = log(substModel->getPiXiPXiYi(seq1[i-1].getMatrixIndex(), seq2[j-1].getMatrixIndex()));
 					mm = M->getValueAt(k,l) + M->getTransitionProbabilityFromMatch();
 					mx = X->getValueAt(k,l) + M->getTransitionProbabilityFromInsert();
 					my = Y->getValueAt(k,l) + M->getTransitionProbabilityFromDelete();

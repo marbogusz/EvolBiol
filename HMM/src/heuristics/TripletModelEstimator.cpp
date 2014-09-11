@@ -112,7 +112,7 @@ TripletModelEstimator::TripletModelEstimator(Sequences* inputSeqs, Definitions::
 
 	//TODO - maybe providing user times would be a good idea
 	modelParams = new OptimizedModelParameters(substModel, NULL,3, 3, estimateSubstitutionParams,
-			false, estimateAlpha, false, maths);
+			false, estimateAlpha, true, maths);
 
 	//alpha is an initial alpha!!
 	modelParams->setAlpha(alpha);
@@ -201,7 +201,7 @@ double TripletModelEstimator::runIteration()
 
 	for(auto itTrp : this->tripleAlignments )
 	{
-		for(int pos = 0; pos < itTrp.size(); pos++ )
+		for(int pos = 0; pos < (itTrp[0]).size(); pos++ )
 		{
 			//iterate over possible root combinations
 			partial2 = 0;
@@ -213,6 +213,7 @@ double TripletModelEstimator::runIteration()
 				{
 					smodel = substs[seqNum];
 					partial1 *= smodel->getSiteProbability(rt,((itTrp[seqNum])[pos]).getMatrixIndex());
+					//partial1 *= smodel->getPXiYi(rt, ((itTrp[seqNum])[pos]).getMatrixIndex());
 				}
 				//multiplied probs over 3 sequences with a single root
 				partial2 += partial1;

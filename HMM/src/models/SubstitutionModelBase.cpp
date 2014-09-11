@@ -71,8 +71,8 @@ void SubstitutionModelBase::calculateSitePatterns()
 			}
 			else
 			{
-				siteProbabilities[i][j] = this->getPXiYi(i,j);
-				sitePatterns[i][j] = log(this->getPXiYi(i,j));
+				siteProbabilities[i][j] = this->getPiXiPXiYi(i,j);
+				sitePatterns[i][j] = log(this->getPiXiPXiYi(i,j));
 
 			}
 	}
@@ -193,12 +193,17 @@ void SubstitutionModelBase::setObservedFrequencies(double* observedFrequencies)
 
 }
 
-double SubstitutionModelBase::getPXiYi(unsigned int xi, unsigned int yi)
+double SubstitutionModelBase::getPiXiPXiYi(unsigned int xi, unsigned int yi)
 {
 	//FIXME - RATES
 		return piFreqs[xi]*pMatrix[(xi*matrixSize)+yi];
 }
 
+double SubstitutionModelBase::getPXiYi(unsigned int xi, unsigned int yi)
+{
+	//FIXME - RATES
+		return pMatrix[(xi*matrixSize)+yi];
+}
 
 double SubstitutionModelBase::getQXi(unsigned int xi)
 {

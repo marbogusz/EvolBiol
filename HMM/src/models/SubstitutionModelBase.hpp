@@ -104,6 +104,8 @@ public:
 
 	void setObservedFrequencies(double* observedFrequencies);
 
+	double getPiXiPXiYi(unsigned int xi, unsigned int yi);
+
 	double getPXiYi(unsigned int xi, unsigned int yi);
 
 	double getQXi(unsigned int xi);
