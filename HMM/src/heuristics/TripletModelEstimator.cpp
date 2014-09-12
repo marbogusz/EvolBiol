@@ -36,7 +36,6 @@ TripletModelEstimator::BFGS::~BFGS()
 double TripletModelEstimator::BFGS::objectiveFunction(const column_vector& bfgsParameters)
 {
 	this->parent->modelParams->fromDlibVector(bfgsParameters);
-	parent->modelParams->outputParameters();
 	return parent->runIteration();
 }
 
@@ -134,6 +133,10 @@ TripletModelEstimator::TripletModelEstimator(Sequences* inputSeqs, Definitions::
 
 	SubstitutionModelBase* smodel;
 
+
+	DEBUG("About to sample some triplets");
+	vector<array<unsigned int, 3> > tripletIdxs = tst.sampleFromDM();
+
 	DEBUG("Creating branch-specific substitution models");
 
 	for(unsigned int i =0; i<substs.size(); i++)
@@ -150,12 +153,11 @@ TripletModelEstimator::TripletModelEstimator(Sequences* inputSeqs, Definitions::
 		{
 			smodel =  substs[i] = new AminoacidSubstitutionModel(dict, maths,gammaRateCategories,Definitions::aaLgModel);
 		}
-		smodel->setObservedFrequencies(inputSequences->getElementFrequencies());
+		//smodel->setObservedFrequencies(inputSequences->getElementFrequencies());
+		smodel->setObservedFrequencies(inputSequences->getElementFrequencies(tripletIdxs[0]));
 
 		}
 
-	DEBUG("About to sample some triplets");
-	vector<array<unsigned int, 3> > tripletIdxs = tst.sampleFromDM();
 
 	for (auto idx : tripletIdxs)
 	{
@@ -184,8 +186,11 @@ double TripletModelEstimator::runIteration()
 
 
 	double partial1, partial2, partial3 = 0;
+	double tmp;
 
 	SubstitutionModelBase* smodel;
+
+	modelParams->outputParameters();
 
 	for (unsigned int i = 0; i< substs.size(); i++){
 		substs[i]->setAlpha(modelParams->getAlpha());
@@ -197,11 +202,10 @@ double TripletModelEstimator::runIteration()
 
 	//get triplet alignments
 
-
-
 	for(auto itTrp : this->tripleAlignments )
 	{
 		for(int pos = 0; pos < (itTrp[0]).size(); pos++ )
+		//for(int pos = 0; pos < 2; pos++ )
 		{
 			//iterate over possible root combinations
 			partial2 = 0;
@@ -212,19 +216,49 @@ double TripletModelEstimator::runIteration()
 				for(unsigned int seqNum=0; seqNum < substs.size(); seqNum++)
 				{
 					smodel = substs[seqNum];
-					partial1 *= smodel->getSiteProbability(rt,((itTrp[seqNum])[pos]).getMatrixIndex());
-					//partial1 *= smodel->getPXiYi(rt, ((itTrp[seqNum])[pos]).getMatrixIndex());
+					//partial1 *= smodel->getSiteProbability(rt,((itTrp[seqNum])[pos]).getMatrixIndex());
+					tmp = smodel->getPXiYi(rt, ((itTrp[seqNum])[pos]).getMatrixIndex());
+					if (isnan(tmp))
+					{
+						cerr << "partial1" << partial1 << " " << partial2 << " " << partial3 << endl;
+						smodel->summarize();
+						exit(0);
+					}
+					partial1 *= smodel->getPXiYi(rt, ((itTrp[seqNum])[pos]).getMatrixIndex());
+					if (isnan(partial1))
+					{
+						cerr << "partial1after" << partial1 << " " << partial2 << " " << partial3 << endl;
+						smodel->summarize();
+						exit(0);
+					}
 				}
 				//multiplied probs over 3 sequences with a single root
-				partial2 += partial1;
+				partial2 += (partial1* substs[0]->getQXi(rt));
+				if (isnan(partial2))
+				{
+					cerr << "partial2" << partial1 << " " << partial2 << " " << partial3 << endl;
+					smodel->summarize();
+					exit(0);
+				}
 			}
 			partial3 += log(partial2);
+			if (isnan(partial3))
+			{
+				cerr << "partial3" << partial1 << " " << partial2 << " " << partial3 << endl;
+				smodel->summarize();
+				exit(0);
+			}
 			//added probabilities with alternative root
 		}
 		result += partial3;
 	}
 
 	DEBUG("lnl result:" << result);
+	if (isnan(result))
+	{
+		smodel->summarize();
+		exit(0);
+	}
 	return result * -1.0;
 }
 

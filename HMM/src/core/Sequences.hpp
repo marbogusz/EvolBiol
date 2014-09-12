@@ -15,6 +15,7 @@
 #include "core/HmmException.hpp"
 #include "core/SequenceElement.hpp"
 #include "core/Definitions.hpp"
+#include <array>
 
 namespace EBC
 {
@@ -49,6 +50,8 @@ public:
 	//Get then in a dictionary order eg. T C A G, check the definitions in constants
 	//FIXME - change to A T C G
 	double* getElementFrequencies();
+
+	double* getElementFrequencies(array<unsigned int, 3> triplet);
 
 	//void getSequencePair(vector<SequenceElement> s1, vector<SequenceElement> s2 );
 	vector<SequenceElement> getSequencesAt(int pos);

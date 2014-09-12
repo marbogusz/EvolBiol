@@ -28,8 +28,8 @@ using namespace EBC;
 int main(int argc, char ** argv) {
 
 	//Set output Precision to 6
-	cout << fixed << setprecision(6);
-	cerr << fixed << setprecision(6);
+	cout << fixed << setprecision(8);
+	cerr << fixed << setprecision(8);
 
 	try
 	{

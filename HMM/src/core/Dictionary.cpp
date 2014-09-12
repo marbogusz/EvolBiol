@@ -58,6 +58,7 @@ vector<SequenceElement> Dictionary::translate(string& sequence, bool disregardIn
 {
 	//FIXME - deal with indels!
 	vector<SequenceElement> translatedVector;
+	translatedVector.reserve((sequence.size()));
 	short currentEl;
 
 	DEBUG("Transled: ");
@@ -67,6 +68,7 @@ vector<SequenceElement> Dictionary::translate(string& sequence, bool disregardIn
 		if (currentEl == alphabetSize && disregardIndels)
 			continue;
 		DEBUGN(currentEl);
+		//translatedVector.push_back(SequenceElement((currentEl == alphabetSize), currentEl,NULL, getSymbolAt(currentEl)));
 		translatedVector.push_back(SequenceElement((currentEl == alphabetSize), currentEl,NULL, getSymbolAt(currentEl)));
 	}
 	DEBUGN(std::endl);
