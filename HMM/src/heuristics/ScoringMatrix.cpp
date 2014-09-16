@@ -32,23 +32,26 @@ void ScoringMatrix::scoresFromDistanceJC(double distance)
 	//Change so it works with aminoacids
 
 	double exP = exp(4*distance/-3.0);
-		double exI = exp(distance/-3.0);
-		double p0 = 1+3*exP;
-		double p1 = 1-exP;
-		double pI = 1-exI;
-		p0 = log(4*p0);
-		p1 = log(4*p1);
-		pI = log(pI);
+	double exI = exp(distance/-3.0);
+	double p0 = 1+3*exP;
+	double p1 = 1-exP;
+	double pI = 1-exI;
+	p0 = log(p0);
+	p1 = log(p1);
+	pI = log(pI);
 
-		for(int i=0; i<4;i++)
-			for(int j=0;j<4; j++)
-			{
-				if (i==j)
-					scores[i][j] = p0;
-				else
-					scores[i][j] = p1;
-			}
-		gapPenalty = pI;
+	for(int i=0; i<4;i++)
+		for(int j=0;j<4; j++)
+		{
+			if (i==j)
+				scores[i][j] = p0;
+			else
+				scores[i][j] = p1;
+		}
+	gapPenalty = pI;
+
+	DEBUG("Scoring matrix match and mismatch scores : " << p0 << ", " << p1);
+
 }
 
 double ScoringMatrix::getScore(char& a, char& b)

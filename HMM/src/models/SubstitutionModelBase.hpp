@@ -92,6 +92,8 @@ protected:
 
 	void calculateGammaPtMatrices();
 
+	void summarizePatterns();
+
 public:
 
 	SubstitutionModelBase(Dictionary*, Maths*i, unsigned int, unsigned int);

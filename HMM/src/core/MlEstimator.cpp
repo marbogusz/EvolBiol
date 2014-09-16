@@ -112,6 +112,44 @@ MlEstimator::MlEstimator(Sequences* inputSeqs, Definitions::ModelType model ,std
 	estimateIndelParams = false;
 	this->estimateAlpha = estimateAlpha;
 
+	//hack here!
+
+	useViterbi = false;
+
+	modelParams = new OptimizedModelParameters(substModel, NULL,2, 1, false,
+				false, false, true, maths);
+	vector<double> userTimes = {1.30288};
+	vector<double> userParameters = {1.34838,  0.27850,  0.22691,  0.57785,  0.38311};
+
+	modelParams->setUserDivergenceParams(userTimes);
+	modelParams->setUserSubstParams(userParameters);
+	modelParams->setAlpha(0.7);
+
+	SubstitutionModelBase* smodel;
+			for(unsigned int i =0; i<1; i++)
+			{
+
+				if (model == Definitions::ModelType::GTR)
+				{
+					smodel =  substs[i] = new GTRModel(dict, maths,gammaRateCategories);
+				}
+				else if (model == Definitions::ModelType::HKY85)
+				{
+					smodel =  substs[i] = new HKY85Model(dict, maths,gammaRateCategories);
+				}
+				else if (model == Definitions::ModelType::LG)
+				{
+					smodel =  substs[i] = new AminoacidSubstitutionModel(dict, maths,gammaRateCategories,Definitions::aaLgModel);
+				}
+				smodel->setObservedFrequencies(inputSequences->getElementFrequencies());
+				//smodel->setAlpha(modelParams->getAlpha());
+				//smodel->setParameters(modelParams->getSubstParameters());
+				//smodel->setTime(modelParams->getDivergenceTime(i));
+				//smodel->calculatePt();
+			}
+
+
+/*
 	modelParams = new OptimizedModelParameters(substModel, indelModel,inputSequences->getSequenceCount(), pairCount, estimateSubstitutionParams,
 			estimateIndelParams, estimateAlpha, true, maths);
 
@@ -204,7 +242,7 @@ MlEstimator::MlEstimator(Sequences* inputSeqs, Definitions::ModelType model ,std
 			//smodel->calculatePt();
 		}
 	}
-
+*/
 	bfgs = new BFGS(this,ot);
 	bfgs->optimize();
 }
@@ -263,10 +301,17 @@ double MlEstimator::runIteration()
 				result += smodel->getSitePattern(s1[j].getMatrixIndex(), s2[j].getMatrixIndex());
 			}
 
+			smodel->summarize();
+
 		}
 	}
 
-	//cerr << result << endl;
+	cerr << result << endl;
+	//hack
+	//FIXME
+	exit(0);
+
+
 	return result * -1.0;
 }
 

@@ -29,6 +29,7 @@ namespace EBC
 
 		static const char nucleotides[4];
 		static const char aminoacids[20];
+		static const char gapChar;
 
 		virtual short getSymbolIndex(string &symbol);
 		virtual short getSymbolIndex(char symbol);

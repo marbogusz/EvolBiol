@@ -95,6 +95,8 @@ double* Sequences::getElementFrequencies()
 	for (i=0; i<dict->getAlphabetSize(); i++)
 		this->observedFrequencies[i]/=count;
 
+
+	DEBUGV(observedFrequencies,4);
 	return observedFrequencies;
 }
 

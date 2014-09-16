@@ -44,34 +44,21 @@ int main(int argc, char ** argv) {
 		{
 
 
-			/*
+
 			MlEstimator* me = new MlEstimator(inputSeqs, cmdReader->getModelType() ,cmdReader->getIndelParams(),
 								cmdReader->getSubstParams(), cmdReader->getOptimizationType(), cmdReader->getCategories(),
 								cmdReader->getAlpha(), cmdReader->estimateAlpha(),cmdReader->getDistance(), cmdReader->isFixedAlignment() == false);
 
-			cout << cmdReader->getAlpha() << '\t' << cmdReader->getDistance() << '\n';
-			 */
 
-			//GuideTree gt(inputSeqs);
-			//gt.constructTree();
-			//auto samples = gt.getSampledTriplets();
-			//array<unsigned int, 3> arr1 = samples[0];
 
-			//GotohAlgorithm* algo = new GotohAlgorithm(inputSeqs->getRawSequenceAt(0),inputSeqs->getRawSequenceAt(1));
-			//algo->run();
-			//std::pair<string, string> al = algo->getAlignment();
 
-			//DEBUG(al.first);
-			//DEBUG(al.second);
 
-			//TripletAligner tal(inputSeqs, {0,1,2});
-			//tal.align();
+			//DEBUG("Creating TripletModelEstimator");
 
-			DEBUG("Creating TripletModelEstimator");
+			//TripletModelEstimator* tme = new TripletModelEstimator(inputSeqs, cmdReader->getModelType(),
+			//		cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
+			//		cmdReader->estimateAlpha());
 
-			TripletModelEstimator* tme = new TripletModelEstimator(inputSeqs, cmdReader->getModelType(),
-					cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
-					cmdReader->estimateAlpha());
 
 			//tme->getModelParameters();
 

@@ -105,31 +105,40 @@ TripletModelEstimator::TripletModelEstimator(Sequences* inputSeqs, Definitions::
 	}
 
 
+	DEBUG("Gamma rates " << gammaRateCategories);
+
 	estimateSubstitutionParams = true;
 	this->estimateAlpha = estimateAlpha;
 
 
 	//TODO - maybe providing user times would be a good idea
-	modelParams = new OptimizedModelParameters(substModel, NULL,3, 3, estimateSubstitutionParams,
-			false, estimateAlpha, true, maths);
+	//modelParams = new OptimizedModelParameters(substModel, NULL,3, 3, estimateSubstitutionParams,
+	//		false, estimateAlpha, true, maths);
+
+
+	//hack!
+
+	modelParams = new OptimizedModelParameters(substModel, NULL,3, 3, false,
+				false, false, false, maths);
+
+
+	//alpha
+	vector<double> userTimes = {0.76904, 0.12799, 0.40248};
+	vector<double> userParameters = {1.60233,  0.38555,  0.45816,  0.51288,  0.48568};
+
+	//noalpha
+	//vector<double> userTimes = {0.51844, 0.14299, 0.29331};
+	//vector<double> userParameters = {1.44141,  0.45891,  0.53792,  0.57142,  0.55240};
+
+	modelParams->setUserDivergenceParams(userTimes);
+	modelParams->setUserSubstParams(userParameters);
+	modelParams->setAlpha(1.43271);
+
+
+	//hack ends
 
 	//alpha is an initial alpha!!
-	modelParams->setAlpha(alpha);
-
-
-	//theoretically one can set the times from DM
-	/*
-	if (userTime > 0)
-	{
-		//cerr << "User time " << userTime << endl;
-		vector<double> times(pairCount);
-		for (auto it = times.begin(); it < times.end(); it++)
-		{
-			*it = 2.0*(userTime/pairCount);
-		}
-		modelParams->setUserDivergenceParams(times);
-	}
-	*/
+	//modelParams->setAlpha(alpha);
 
 	SubstitutionModelBase* smodel;
 
@@ -186,21 +195,23 @@ double TripletModelEstimator::runIteration()
 
 
 	double partial1, partial2, partial3 = 0;
-	double tmp;
+	double tmp, tmp2;
 
 	SubstitutionModelBase* smodel;
+	SequenceElement* seTmp;
 
 	modelParams->outputParameters();
 
 	for (unsigned int i = 0; i< substs.size(); i++){
+		DEBUG("Model no, Alpha: " << i << " " << modelParams->getAlpha());
 		substs[i]->setAlpha(modelParams->getAlpha());
 		substs[i]->setParameters(modelParams->getSubstParameters());
+		DEBUG("Model no, time: " << i << " " << modelParams->getDivergenceTime(i));
 		substs[i]->setTime(modelParams->getDivergenceTime(i));
 		substs[i]->calculatePt();
 		substs[i]->calculateSitePatterns();
 	}
 
-	//get triplet alignments
 
 	for(auto itTrp : this->tripleAlignments )
 	{
@@ -212,39 +223,43 @@ double TripletModelEstimator::runIteration()
 			for(int rt = 0; rt < dict->getAlphabetSize(); rt++)
 			{
 				//iterate over sequences
-				partial1 =1;
+				partial1 =1.0;
 				for(unsigned int seqNum=0; seqNum < substs.size(); seqNum++)
 				{
 					smodel = substs[seqNum];
-					//partial1 *= smodel->getSiteProbability(rt,((itTrp[seqNum])[pos]).getMatrixIndex());
-					tmp = smodel->getPXiYi(rt, ((itTrp[seqNum])[pos]).getMatrixIndex());
-					if (isnan(tmp))
+					seTmp = &((itTrp[seqNum])[pos]);
+					tmp = seTmp->isIsGap() ? 1.0 : smodel->getPXiYi(rt,seTmp->getMatrixIndex());
+					if (std::isnan(tmp) || tmp < 0)
 					{
-						cerr << "partial1" << partial1 << " " << partial2 << " " << partial3 << endl;
-						smodel->summarize();
+						cerr << "temp: " << tmp << ", " << rt << ", " << ((itTrp[seqNum])[pos]).getMatrixIndex() << endl;
+						cerr << "pos, ancestral, seqNum " << pos << ", " << rt << ", " << seqNum << endl;
+						substs[seqNum]->summarize();
 						exit(0);
 					}
-					partial1 *= smodel->getPXiYi(rt, ((itTrp[seqNum])[pos]).getMatrixIndex());
-					if (isnan(partial1))
+					partial1 *= tmp;
+					if (std::isnan(partial1) || partial1 < 0)
 					{
-						cerr << "partial1after" << partial1 << " " << partial2 << " " << partial3 << endl;
+						cerr << "partial1after: " << partial1 << " " << partial2 << " " << partial3 << endl;
+						cerr << "pos, ancestral, seqNum " << pos << ", " << rt << ", " << seqNum << endl;
 						smodel->summarize();
 						exit(0);
 					}
 				}
 				//multiplied probs over 3 sequences with a single root
+
 				partial2 += (partial1* substs[0]->getQXi(rt));
-				if (isnan(partial2))
+				if (std::isnan(partial2) || partial2 < 0)
 				{
-					cerr << "partial2" << partial1 << " " << partial2 << " " << partial3 << endl;
+					cerr << "partial2: " << partial1 << " " << partial2 << " " << partial3 << endl;
 					smodel->summarize();
 					exit(0);
 				}
 			}
 			partial3 += log(partial2);
-			if (isnan(partial3))
+			DEBUG("pattern " << pos << " : " << log(partial2));
+			if (std::isnan(partial3))
 			{
-				cerr << "partial3" << partial1 << " " << partial2 << " " << partial3 << endl;
+				cerr << "partial3: " << partial1 << " " << partial2 << " " << partial3 << endl;
 				smodel->summarize();
 				exit(0);
 			}
@@ -254,12 +269,39 @@ double TripletModelEstimator::runIteration()
 	}
 
 	DEBUG("lnl result:" << result);
-	if (isnan(result))
+	if (std::isnan(result))
 	{
 		smodel->summarize();
 		exit(0);
 	}
+	substs[0]->summarize();
+	substs[1]->summarize();
+	substs[2]->summarize();
+
+	double ttp = (substs[0]->getQXi(0) * substs[1]->getPXiYi(0,0) * substs[2]->getPXiYi(0,0)) +
+			(substs[0]->getQXi(1) * substs[1]->getPXiYi(1,0) * substs[2]->getPXiYi(1,0)) +
+			(substs[0]->getQXi(2) * substs[1]->getPXiYi(2,0) * substs[2]->getPXiYi(2,0)) +
+			(substs[0]->getQXi(3) * substs[1]->getPXiYi(3,0) * substs[2]->getPXiYi(3,0));
+
+	DEBUG("-TT pattern " << log(ttp));
+
+	ttp = (substs[0]->getQXi(0) * substs[0]->getPXiYi(0,0) * substs[1]->getPXiYi(0,0)) +
+				(substs[0]->getQXi(1) * substs[0]->getPXiYi(1,0) * substs[1]->getPXiYi(1,0)) +
+				(substs[0]->getQXi(2) * substs[0]->getPXiYi(2,0) * substs[1]->getPXiYi(2,0)) +
+				(substs[0]->getQXi(3) * substs[0]->getPXiYi(3,0) * substs[1]->getPXiYi(3,0));
+
+	DEBUG("TT- pattern " << log(ttp));
+
+	ttp = (substs[0]->getQXi(0) * substs[0]->getPXiYi(0,0) * substs[2]->getPXiYi(0,0)) +
+					(substs[0]->getQXi(1) * substs[0]->getPXiYi(1,0) * substs[2]->getPXiYi(1,0)) +
+					(substs[0]->getQXi(2) * substs[0]->getPXiYi(2,0) * substs[2]->getPXiYi(2,0)) +
+					(substs[0]->getQXi(3) * substs[0]->getPXiYi(3,0) * substs[2]->getPXiYi(3,0));
+
+	DEBUG("T-T pattern " << log(ttp));
+
+	exit(0);
 	return result * -1.0;
+
 }
 
 } /* namespace EBC */

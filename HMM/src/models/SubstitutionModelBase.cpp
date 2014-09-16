@@ -80,6 +80,64 @@ void SubstitutionModelBase::calculateSitePatterns()
 	siteProbabilities[matrixSize][matrixSize] = 0;
 }
 
+void SubstitutionModelBase::summarizePatterns()
+{
+	if(this->rateCategories != 0)
+	{
+		cout << "Rate categories: " << endl;
+		for(int r=0; r< rateCategories; r++)
+		{
+			cout << gammaRates[r] << "\t\t";
+		}
+		cout << endl;
+	}
+
+	cout << "Rate Matrix: " << endl;
+
+		for (int i =0; i< matrixSize; i++ )
+		{
+				for (int j =0; j<  matrixSize; j++ )
+				{
+					cout << qMatrix[(i*matrixSize)+j] << "\t\t";
+				}
+				cout << endl;
+		}
+		cout << endl;
+
+
+	cout << "Site patterns " << endl;
+	for (int i =0; i<= matrixSize; i++ )
+	{
+			for (int j =0; j<= matrixSize; j++ )
+			{
+				cout << sitePatterns[i][j] << "\t\t";
+			}
+			cout << endl;
+	}
+
+	cout << endl <<"Site probabilities " << endl;
+	for (int i =0; i<= matrixSize; i++ )
+	{
+			for (int j =0; j<= matrixSize; j++ )
+			{
+				cout << siteProbabilities[i][j] << "\t\t";
+			}
+			cout << endl;
+	}
+	cout << endl << "P(t) matrix" << endl;
+	for (int i =0; i< matrixSize; i++ )
+	{
+			for (int j =0; j<  matrixSize; j++ )
+			{
+				cout << pMatrix[(i*matrixSize)+j] << "\t\t";
+			}
+			cout << endl;
+	}
+	cout << endl;
+
+
+}
+
 void SubstitutionModelBase::destroyMatrices()
 {
 	//TODO delete all

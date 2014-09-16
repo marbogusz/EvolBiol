@@ -22,6 +22,8 @@ GotohScoringMatrix::GotohScoringMatrix(double distance) : ScoringMatrix(distance
 
 	//FIXME - magic number, set the gap opening to sth reasonable;
 	this->gapExtension = gapOpening * 0.3;
+
+	DEBUG("Scoring matrix gap opening and extension scores : " << gapOpening << ", " << gapExtension);
 }
 
 } /* namespace EBC */
