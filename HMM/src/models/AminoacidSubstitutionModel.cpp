@@ -33,7 +33,7 @@ void AminoacidSubstitutionModel::calculatePt()
 		this->doEigenDecomposition();
 		eigenDecomposed=true;
 	}
-	calculateGammaPtMatrices();
+	//calculateGammaPtMatrices();
 }
 
 AminoacidSubstitutionModel::~AminoacidSubstitutionModel()

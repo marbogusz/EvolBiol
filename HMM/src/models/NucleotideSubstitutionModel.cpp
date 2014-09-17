@@ -23,7 +23,7 @@ void NucleotideSubstitutionModel::calculatePt()
 	this->doEigenDecomposition();
 	//qMatrix, roots, u and v matrices
 
-	calculateGammaPtMatrices();
+	//calculateGammaPtMatrices();
 }
 
 NucleotideSubstitutionModel::~NucleotideSubstitutionModel()

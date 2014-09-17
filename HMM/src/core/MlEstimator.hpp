@@ -21,8 +21,11 @@
 #include "core/Sequences.hpp"
 #include <sstream>
 #include "core/HmmException.hpp"
+#include "core/PMatrix.hpp"
 
 #include <vector>
+#include <map>
+#include <array>
 
 using namespace std;
 
@@ -83,9 +86,13 @@ protected:
 	vector<ViterbiPairHMM*> hmms;
 
 	//
-	vector<SubstitutionModelBase*> substs;
+	//vector<SubstitutionModelBase*> substs;
+
+	vector<PMatrix*> ptMatrices;
 
 	OptimizedModelParameters* modelParams;
+
+	vector<map<array<unsigned int, 2>, unsigned int> > patterns;
 
 	bool useViterbi;
 

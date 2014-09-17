@@ -145,7 +145,7 @@ void BasicViterbi::calculateModels()
 	//substModel->setParametersInMatrix();
 	//substModel->setDiagMeans();
 	//substModel->doEigenDecomposition();
-	substModel->calculatePt();
+	substModel->calculateModel();
 }
 
 double BasicViterbi::getMax(double m, double x, double y, unsigned int i, unsigned int j, PairwiseHmmStateBase* state)

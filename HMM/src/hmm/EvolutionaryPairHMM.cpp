@@ -176,7 +176,7 @@ void EvolutionaryPairHMM::initializeStates(Definitions::DpMatrixType mt)
 
 void EvolutionaryPairHMM::calculateModels()
 {
-	substModel->calculatePt();
+	substModel->calculateModel();
 	indelModel->calculate();
 }
 

@@ -122,7 +122,7 @@ public:
 
 	double getCategories()
 	{
-		return get_option(parser,"rateCat",0);
+		return get_option(parser,"rateCat",1);
 	}
 
 	bool estimateAlpha()

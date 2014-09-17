@@ -208,7 +208,7 @@ double TripletModelEstimator::runIteration()
 		substs[i]->setParameters(modelParams->getSubstParameters());
 		DEBUG("Model no, time: " << i << " " << modelParams->getDivergenceTime(i));
 		substs[i]->setTime(modelParams->getDivergenceTime(i));
-		substs[i]->calculatePt();
+		substs[i]->calculateModel();
 		substs[i]->calculateSitePatterns();
 	}
 

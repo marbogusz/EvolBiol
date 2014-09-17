@@ -85,7 +85,7 @@ void MlEstimator::BFGS::optimize()
 MlEstimator::MlEstimator(Sequences* inputSeqs, Definitions::ModelType model ,std::vector<double> indel_params,
 		std::vector<double> subst_params,   Definitions::OptimizationType ot,
 		unsigned int rateCategories, double alpha, bool estimateAlpha, double userTime, bool alignViterbi) : inputSequences(inputSeqs), gammaRateCategories(rateCategories),
-		pairCount(inputSequences->getPairCount()), hmms(pairCount), substs(pairCount), useViterbi(alignViterbi)
+		pairCount(inputSequences->getPairCount()), hmms(pairCount), ptMatrices(pairCount, nullptr), useViterbi(alignViterbi), patterns(pairCount)
 
 {
 	maths = new Maths();
@@ -125,6 +125,22 @@ MlEstimator::MlEstimator(Sequences* inputSeqs, Definitions::ModelType model ,std
 	modelParams->setUserSubstParams(userParameters);
 	modelParams->setAlpha(0.7);
 
+
+	substModel->setObservedFrequencies(inputSequences->getElementFrequencies());
+
+	for(unsigned int i =0; i<pairCount; i++)
+	{
+		ptMatrices[i] = new PMatrix(substModel);
+		std::pair<unsigned int, unsigned int> idxs = inputSequences->getPairOfSequenceIndices(i);
+		vector<SequenceElement>  s1 = inputSequences->getSequencesAt(idxs.first);
+		vector<SequenceElement>  s2 = inputSequences->getSequencesAt(idxs.second);
+		for(int j = 0; j< s1.size(); j++)
+		{
+			patterns[i][{s1[j].getMatrixIndex(),s2[j].getMatrixIndex()}]++;
+		}
+	}
+
+	/*
 	SubstitutionModelBase* smodel;
 			for(unsigned int i =0; i<1; i++)
 			{
@@ -149,7 +165,7 @@ MlEstimator::MlEstimator(Sequences* inputSeqs, Definitions::ModelType model ,std
 			}
 
 
-/*
+
 	modelParams = new OptimizedModelParameters(substModel, indelModel,inputSequences->getSequenceCount(), pairCount, estimateSubstitutionParams,
 			estimateIndelParams, estimateAlpha, true, maths);
 
@@ -243,6 +259,9 @@ MlEstimator::MlEstimator(Sequences* inputSeqs, Definitions::ModelType model ,std
 		}
 	}
 */
+
+	//do sitePatterns
+
 	bfgs = new BFGS(this,ot);
 	bfgs->optimize();
 }
@@ -279,31 +298,26 @@ double MlEstimator::runIteration()
 	else
 	{
 		//this->modelParams->outputParameters();
-		SubstitutionModelBase* smodel;
+		substModel->setAlpha(modelParams->getAlpha());
+		substModel->setAlpha(modelParams->getAlpha());
+		substModel->setParameters(modelParams->getSubstParameters());
+		substModel->calculateModel();
+
 		for(unsigned int i =0; i<pairCount; i++)
 		{
-			smodel =  substs[i];
-			smodel->setAlpha(modelParams->getAlpha());
-			smodel->setParameters(modelParams->getSubstParameters());
-			smodel->setTime(modelParams->getDivergenceTime(i));
-			smodel->calculatePt();
-			smodel->calculateSitePatterns();
+			//this calculates the matrix(matrices for a gamma model)
+			ptMatrices[i]->setTime(modelParams->getDivergenceTime(i));
 
-			std::pair<unsigned int, unsigned int> idxs = inputSequences->getPairOfSequenceIndices(i);
-			vector<SequenceElement>  s1 = inputSequences->getSequencesAt(idxs.first);
-			vector<SequenceElement>  s2 = inputSequences->getSequencesAt(idxs.second);
-
-			if(s1.size() != s2.size())
-				throw HmmException("Sequence sizes differ for a fixed alignment!");
-
-			for (int j = 0; j < s1.size(); j++)
+			//go through the map of patterns!
+			for(auto it : patterns[i])
 			{
-				result += smodel->getSitePattern(s1[j].getMatrixIndex(), s2[j].getMatrixIndex());
+				result += ptMatrices[i]->getPairSitePattern(it.first) * it.second;
 			}
 
-			smodel->summarize();
+			ptMatrices[i]->summarize();
 
 		}
+		substModel->summarize();
 	}
 
 	cerr << result << endl;

@@ -39,10 +39,6 @@ protected:
 	//gamma distribution alpha parameter
 	double alpha;
 
-	double* gammaFrequencies;
-
-	double* gammaRates;
-
 	//equilibrium frequencies
 	double* piFreqs;
 
@@ -54,7 +50,7 @@ protected:
 	double* uMatrix;
 
 	//FIXME - remove and treat separately!
-	double* pMatrix;
+	//double* pMatrix;
 
 	//square roots matrix for eigen decomposition
 	double* squareRoots;
@@ -66,10 +62,10 @@ protected:
 	double* parameters;
 
 	//patterns for sequence elements + missing data (gaps)
-	double ** sitePatterns;
+	//double ** sitePatterns;
 
 	//like site patterns but not logarithmic!
-	double ** siteProbabilities;
+	//double ** siteProbabilities;
 
 	double meanRate;
 
@@ -90,11 +86,15 @@ protected:
 
 	void calculateGamma();
 
-	void calculateGammaPtMatrices();
+	//void calculateGammaPtMatrices();
 
-	void summarizePatterns();
+	//void summarizePatterns();
 
 public:
+
+	double* gammaFrequencies;
+
+	double* gammaRates;
 
 	SubstitutionModelBase(Dictionary*, Maths*i, unsigned int, unsigned int);
 
@@ -102,29 +102,42 @@ public:
 
 	virtual void summarize()=0;
 
-	virtual void calculatePt()=0;
+	virtual void calculateModel()=0;
+
+	double* calculatePt(unsigned int rateCategory = 0);
 
 	void setObservedFrequencies(double* observedFrequencies);
 
-	double getPiXiPXiYi(unsigned int xi, unsigned int yi);
+	//double getPiXiPXiYi(unsigned int xi, unsigned int yi);
 
-	double getPXiYi(unsigned int xi, unsigned int yi);
+	//double getPXiYi(unsigned int xi, unsigned int yi);
 
-	double getQXi(unsigned int xi);
+	double getEquilibriumFrequencies(unsigned int xi);
 
-	double getSitePattern(unsigned int xi, unsigned int yi);
+	//double getSitePattern(unsigned int xi, unsigned int yi);
 
-	double getSiteProbability(unsigned int xi, unsigned int yi);
+	//double getSiteProbability(unsigned int xi, unsigned int yi);
 
 	virtual void setParameters(const vector<double>&)=0;
 
-	virtual void calculateSitePatterns();
+	void summarizeRates();
+
+	//virtual void calculateSitePatterns();
+
+	/*
 
 	void setTime(double t)
 	{
 		this->time = t;
 	}
+
+	*/
 //getters and setters
+
+	inline unsigned int getRateCategories()
+	{
+		return this->rateCategories;
+	}
 
 	inline double getHiBound(unsigned int pos)
 	{
@@ -170,6 +183,10 @@ public:
 		return parameters;
 	}
 
+	unsigned int getMatrixSize() const
+	{
+		return matrixSize;
+	}
 };
 
 } /* namespace EBC */

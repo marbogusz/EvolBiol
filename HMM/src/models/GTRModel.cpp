@@ -64,7 +64,7 @@ void GTRModel::summarize()
 	cout << "Eigenvalues" << endl;
 	cout << roots[0] << ' ' << roots[1] << ' ' << roots[2] << ' ' << roots[3] << endl << endl;
 
-	summarizePatterns();
+	summarizeRates();
 }
 
 } /* namespace EBC */
