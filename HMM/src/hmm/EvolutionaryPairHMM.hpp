@@ -23,6 +23,7 @@
 #include "models/GTRModel.hpp"
 #include "models/HKY85Model.hpp"
 #include "models/AminoacidSubstitutionModel.hpp"
+#include "core/PMatrixDouble.hpp"
 
 namespace EBC
 {
@@ -35,6 +36,7 @@ protected:
 
 	Dictionary* dict;
 	SubstitutionModelBase* substModel;
+	PMatrixDouble* ptmatrix;
 	IndelModel* indelModel;
 	Sequences* inputSequences;
 	Maths* maths;

@@ -29,13 +29,13 @@ double ViterbiPairHMM::getViterbiSubstitutionLikelihood()
 {
 	double lnl = 0;
 	calculateModels();
-	this->substModel->calculateSitePatterns();
 	//we have the site patterns now
 	//get alignment!
 
 	for (auto it = alignment.begin(); it != alignment.end(); it ++)
 	{
-		lnl += this->substModel->getSitePattern(it->first, it->second);
+		//FIXME -- implement site patterns
+		lnl += this->ptmatrix->getPairSitePattern(it->first, it->second);
 	}
 
 	return lnl * -1.0;
@@ -105,7 +105,7 @@ double ViterbiPairHMM::runAlgorithm()
 				{
 
 					k = i-1;
-					emissionX = log(substModel->getQXi(seq1[i-1].getMatrixIndex()));
+					emissionX = log(ptmatrix->getEquilibriumFreq(seq1[i-1].getMatrixIndex()));
 					xm = M->getValueAt(k,j) + X->getTransitionProbabilityFromMatch();
 					xx = X->getValueAt(k,j) + X->getTransitionProbabilityFromInsert();
 					xy = Y->getValueAt(k,j) + X->getTransitionProbabilityFromDelete();
@@ -115,7 +115,7 @@ double ViterbiPairHMM::runAlgorithm()
 				if(j!=0)
 				{
 					k = j-1;
-					emissionY = log(substModel->getQXi(seq2[j-1].getMatrixIndex()));
+					emissionY = log(ptmatrix->getEquilibriumFreq(seq2[j-1].getMatrixIndex()));
 					ym = M->getValueAt(i,k) + Y->getTransitionProbabilityFromMatch();
 					yx = X->getValueAt(i,k) + Y->getTransitionProbabilityFromInsert();
 					yy = Y->getValueAt(i,k) + Y->getTransitionProbabilityFromDelete();
@@ -126,7 +126,7 @@ double ViterbiPairHMM::runAlgorithm()
 				{
 					k = i-1;
 					l = j-1;
-					emissionM = log(substModel->getPiXiPXiYi(seq1[i-1].getMatrixIndex(), seq2[j-1].getMatrixIndex()));
+					emissionM = log(ptmatrix->getPairTransition(seq1[i-1].getMatrixIndex(), seq2[j-1].getMatrixIndex()));
 					mm = M->getValueAt(k,l) + M->getTransitionProbabilityFromMatch();
 					mx = X->getValueAt(k,l) + M->getTransitionProbabilityFromInsert();
 					my = Y->getValueAt(k,l) + M->getTransitionProbabilityFromDelete();

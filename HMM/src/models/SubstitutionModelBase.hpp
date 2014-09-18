@@ -69,9 +69,6 @@ protected:
 
 	double meanRate;
 
-	//current divergence time
-	double time;
-
 	vector<double> parameterHiBounds;
 	vector<double> parameterLoBounds;
 
@@ -104,7 +101,7 @@ public:
 
 	virtual void calculateModel()=0;
 
-	double* calculatePt(unsigned int rateCategory = 0);
+	double* calculatePt(double time, unsigned int rateCategory = 0);
 
 	void setObservedFrequencies(double* observedFrequencies);
 

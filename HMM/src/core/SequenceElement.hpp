@@ -33,7 +33,7 @@ public:
 		return isGap;
 	}
 
-	inline short getMatrixIndex() const
+	inline short getMatrixIndex()
 	{
 		return matrixIndex;
 	}

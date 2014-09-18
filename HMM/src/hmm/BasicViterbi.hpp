@@ -15,6 +15,7 @@
 #include "core/Sequences.hpp"
 #include "hmm/PairwiseHmmStateBase.hpp"
 #include "core/SequenceElement.hpp"
+#include "core/PMatrixDouble.hpp"
 
 namespace EBC
 {
@@ -27,6 +28,7 @@ protected:
 
 	Dictionary* dict;
 	SubstitutionModelBase* substModel;
+	PMatrixDouble* ptmatrix;
 	IndelModel* indelModel;
 	Sequences* inputSequences;
 	Maths* maths;

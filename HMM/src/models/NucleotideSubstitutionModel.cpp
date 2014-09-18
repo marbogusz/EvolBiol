@@ -16,7 +16,7 @@ NucleotideSubstitutionModel::NucleotideSubstitutionModel(Dictionary* dict, Maths
 }
 
 
-void NucleotideSubstitutionModel::calculatePt()
+void NucleotideSubstitutionModel::calculateModel()
 {
 	this->buildSmatrix();
 	this->setDiagonalMeans();

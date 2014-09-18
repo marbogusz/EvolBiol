@@ -79,10 +79,10 @@ void SubstitutionModelBase::doEigenDecomposition()
 	this->maths->eigenQREV(qMatrix, piFreqs, matrixSize, roots, uMatrix, vMatrix, squareRoots);
 }
 
-double* SubstitutionModelBase::calculatePt(unsigned int rateCategory)
+double* SubstitutionModelBase::calculatePt(double t, unsigned int rateCategory)
 {
 	double *tmpRoots, *tmpUroots, *matrix;
-	tmpRoots = maths->expLambdaT(roots, time*gammaRates[rateCategory], matrixSize);
+	tmpRoots = maths->expLambdaT(roots, t*gammaRates[rateCategory], matrixSize);
 	tmpUroots = maths->matrixByDiagonalMultiply(uMatrix, tmpRoots, matrixSize);
 	matrix = this->maths->matrixMultiply(tmpUroots, vMatrix, matrixSize);
 	delete[] tmpRoots;
@@ -158,13 +158,20 @@ double SubstitutionModelBase::getEquilibriumFrequencies(unsigned int xi)
 
 void SubstitutionModelBase::summarizeRates()
 {
-	if(this->rateCategories != 0)
+	if(this->rateCategories != 1)
 	{
 		cout << "Rate categories: " << endl;
 		for(int r=0; r< rateCategories; r++)
 		{
 			cout << gammaRates[r] << "\t\t";
 		}
+		cout << endl;
+		cout << "Rate frequencies : " << endl;
+		for(int f=0; f< rateCategories; f++)
+		{
+			cout << this->gammaFrequencies[f] << "\t\t";
+		}
+		cout << endl << "Alpha : " << alpha;
 		cout << endl;
 	}
 

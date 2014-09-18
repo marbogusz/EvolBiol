@@ -51,8 +51,8 @@ void HKY85Model::buildSmatrix() {
 void HKY85Model::summarize()
 {
 	cout << endl << "HKY85 model summary:" << endl;
-	cout << "kappa\ttime" << endl;
-	cout << *k << "\t" << time << endl;
+	cout << "kappa" << endl;
+	cout << *k  << endl;
 }
 
 } /* namespace EBC */

@@ -25,7 +25,7 @@ AminoacidSubstitutionModel::AminoacidSubstitutionModel(Dictionary* dict, Maths* 
 }
 
 
-void AminoacidSubstitutionModel::calculatePt()
+void AminoacidSubstitutionModel::calculateModel()
 {
 	if(this->eigenDecomposed == false)
 	{
@@ -42,7 +42,7 @@ AminoacidSubstitutionModel::~AminoacidSubstitutionModel()
 
 void AminoacidSubstitutionModel::summarize()
 {
-	std::cout << "AA Substitution model summary " << std::endl << "Divergence time: " << this->time << std::endl;
+	summarizeRates();
 }
 
 } /* namespace EBC */

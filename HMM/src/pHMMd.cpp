@@ -45,9 +45,9 @@ int main(int argc, char ** argv) {
 
 
 
-			MlEstimator* me = new MlEstimator(inputSeqs, cmdReader->getModelType() ,cmdReader->getIndelParams(),
-								cmdReader->getSubstParams(), cmdReader->getOptimizationType(), cmdReader->getCategories(),
-								cmdReader->getAlpha(), cmdReader->estimateAlpha(),cmdReader->getDistance(), cmdReader->isFixedAlignment() == false);
+			//MlEstimator* me = new MlEstimator(inputSeqs, cmdReader->getModelType() ,cmdReader->getIndelParams(),
+			//					cmdReader->getSubstParams(), cmdReader->getOptimizationType(), cmdReader->getCategories(),
+			//					cmdReader->getAlpha(), cmdReader->estimateAlpha(),cmdReader->getDistance(), cmdReader->isFixedAlignment() == false);
 
 
 
@@ -55,9 +55,9 @@ int main(int argc, char ** argv) {
 
 			//DEBUG("Creating TripletModelEstimator");
 
-			//TripletModelEstimator* tme = new TripletModelEstimator(inputSeqs, cmdReader->getModelType(),
-			//		cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
-			//		cmdReader->estimateAlpha());
+			TripletModelEstimator* tme = new TripletModelEstimator(inputSeqs, cmdReader->getModelType(),
+					cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
+					cmdReader->estimateAlpha());
 
 
 			//tme->getModelParameters();

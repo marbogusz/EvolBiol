@@ -43,6 +43,8 @@ EvolutionaryPairHMM::EvolutionaryPairHMM(vector<SequenceElement> s1, vector<Sequ
 			substModel = new AminoacidSubstitutionModel(dict, maths,gammaRateCategories,Definitions::aaLgModel);
 	}
 
+	ptmatrix = new PMatrixDouble(substModel);
+
 	bandFactor = bandPercentage;
 	bandingEnabled = banding;
 
@@ -66,7 +68,7 @@ void EvolutionaryPairHMM::setModelParameters(std::vector<double> indel_params,
 		indelModel->setTime(evolDistance);
 		substModel->setAlpha(alpha);
 		substModel->setParameters(subst_params);
-		substModel->setTime(evolDistance);
+		ptmatrix->setTime(evolDistance);
 	}
 	else
 	{
@@ -177,12 +179,15 @@ void EvolutionaryPairHMM::initializeStates(Definitions::DpMatrixType mt)
 void EvolutionaryPairHMM::calculateModels()
 {
 	substModel->calculateModel();
+	ptmatrix->calculate();
 	indelModel->calculate();
 }
 
 EvolutionaryPairHMM::~EvolutionaryPairHMM()
 {
 	// TODO Auto-generated destructor stub
+
+	//FIXME - organize memory management
 	//delete bfgs;
 	//delete Y;
 	//delete X;

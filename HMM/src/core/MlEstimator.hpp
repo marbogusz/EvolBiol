@@ -21,7 +21,7 @@
 #include "core/Sequences.hpp"
 #include <sstream>
 #include "core/HmmException.hpp"
-#include "core/PMatrix.hpp"
+#include "core/PMatrixDouble.hpp"
 
 #include <vector>
 #include <map>
@@ -88,11 +88,11 @@ protected:
 	//
 	//vector<SubstitutionModelBase*> substs;
 
-	vector<PMatrix*> ptMatrices;
+	vector<PMatrixDouble*> ptMatrices;
 
 	OptimizedModelParameters* modelParams;
 
-	vector<map<array<unsigned int, 2>, unsigned int> > patterns;
+	vector<map<array<short, 2>, unsigned int> > patterns;
 
 	bool useViterbi;
 

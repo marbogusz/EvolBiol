@@ -29,7 +29,7 @@ public:
 
 	virtual ~NucleotideSubstitutionModel();
 
-	void calculatePt();
+	void calculateModel();
 
 };
 

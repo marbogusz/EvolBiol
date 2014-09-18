@@ -17,6 +17,8 @@
 #include "hmm/PairwiseHmmInsertState.hpp"
 #include "hmm/PairwiseHmmDeleteState.hpp"
 #include "core/Definitions.hpp"
+
+
 #include <sstream>
 
 namespace EBC
@@ -49,6 +51,8 @@ BasicViterbi::BasicViterbi(Sequences* inputSeqs, Definitions::ModelType model,st
     }
 
     substModel->setAlpha(alpha);
+
+    ptmatrix = new PMatrixDouble(substModel);
 
     DEBUG("Creating the gap model");
 	indelModel = new NegativeBinomialGapModel();
@@ -146,6 +150,9 @@ void BasicViterbi::calculateModels()
 	//substModel->setDiagMeans();
 	//substModel->doEigenDecomposition();
 	substModel->calculateModel();
+
+	//FIXME -  this file is old and needs to be deleted. Use viterbi based on the EvolutionaryPairHMM
+
 }
 
 double BasicViterbi::getMax(double m, double x, double y, unsigned int i, unsigned int j, PairwiseHmmStateBase* state)
@@ -255,7 +262,7 @@ void BasicViterbi::runViterbiAlgorithm()
 			{
 
 				k = i-1;
-				emissionX = log(substModel->getQXi(seq1[i-1].getMatrixIndex()));
+				emissionX = log(ptmatrix->getEquilibriumFreq(seq1[i-1].getMatrixIndex()));
 				xm = M->getValueAt(k,j) + X->getTransitionProbabilityFromMatch();
 				xx = X->getValueAt(k,j) + X->getTransitionProbabilityFromInsert();
 				xy = Y->getValueAt(k,j) + X->getTransitionProbabilityFromDelete();
@@ -265,7 +272,7 @@ void BasicViterbi::runViterbiAlgorithm()
 			if(j!=0)
 			{
 				k = j-1;
-				emissionY = log(substModel->getQXi(seq2[j-1].getMatrixIndex()));
+				emissionY = log(ptmatrix->getEquilibriumFreq(seq2[j-1].getMatrixIndex()));
 				ym = M->getValueAt(i,k) + Y->getTransitionProbabilityFromMatch();
 				yx = X->getValueAt(i,k) + Y->getTransitionProbabilityFromInsert();
 				yy = Y->getValueAt(i,k) + Y->getTransitionProbabilityFromDelete();
@@ -276,7 +283,7 @@ void BasicViterbi::runViterbiAlgorithm()
 			{
 				k = i-1;
 				l = j-1;
-				emissionM = log(substModel->getPiXiPXiYi(seq1[i-1].getMatrixIndex(), seq2[j-1].getMatrixIndex()));
+				emissionM = log(ptmatrix->getPairTransition(seq1[i-1].getMatrixIndex(), seq2[j-1].getMatrixIndex()));
 				mm = M->getValueAt(k,l) + M->getTransitionProbabilityFromMatch();
 				mx = X->getValueAt(k,l) + M->getTransitionProbabilityFromInsert();
 				my = Y->getValueAt(k,l) + M->getTransitionProbabilityFromDelete();

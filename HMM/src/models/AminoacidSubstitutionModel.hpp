@@ -31,7 +31,7 @@ public:
 
 	virtual ~AminoacidSubstitutionModel();
 
-	void calculatePt();
+	void calculateModel();
 
 	void summarize();
 

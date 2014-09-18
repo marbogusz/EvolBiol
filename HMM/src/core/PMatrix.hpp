@@ -8,7 +8,8 @@
 #ifndef PMATRIX_HPP_
 #define PMATRIX_HPP_
 
-#include "models\SubstitutionModelBase.hpp"
+#include "models/SubstitutionModelBase.hpp"
+#include "core/HmmException.hpp"
 #include <vector>
 #include <array>
 
@@ -31,27 +32,22 @@ protected:
 
 	vector<double*> ptMatrices;
 
-	double* fastPairGammaPt;
-
-	double matrixFullSize;
+	unsigned int matrixFullSize;
 
 public:
 	PMatrix(SubstitutionModelBase* m);
 	virtual ~PMatrix();
 
-void setTime(double t);
+	void setTime(double t);
 
-double getTransitionProb(unsigned int xi, unsigned int yi, unsigned int rateCat = 0);
+	virtual void calculate()=0;
 
-inline double getEquilibriumFreq(unsigned int xi);
+	inline double getEquilibriumFreq(unsigned int xi)
+	{
+		return model->getEquilibriumFrequencies(xi);
+	}
 
-double getPairSitePattern(array<unsigned int, 2>& nodes);
-
-double getPairSitePattern(unsigned int xi, unsigned int yi);
-
-double getTripleSitePattern(unsigned int root,array<unsigned int, 3>& nodes, PMatrix* pm2, PMatrix* pm3);
-
-void summarize();
+	void summarize();
 
 };
 

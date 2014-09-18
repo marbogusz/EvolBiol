@@ -20,6 +20,7 @@
 #include "core/HmmException.hpp"
 #include "heuristics/GuideTree.hpp"
 #include "heuristics/TripletSamplingTree.hpp"
+#include "core/PMatrixTriple.hpp"
 
 #include <vector>
 #include <array>
@@ -78,10 +79,14 @@ protected:
 
 	//vector<array<unsigned int, 3> >& triplets;
 
-	vector<SubstitutionModelBase*> substs;
+	//vector<SubstitutionModelBase*> substs;
+
+	vector<array<PMatrixTriple* ,3> > ptMatrices;
 
 	//would be better to work on alignment elements!
 	vector<array<string, 3> > alignments;
+
+	vector<map<array<short, 3>, unsigned int> > patterns;
 
 	unsigned int gammaRateCategories;
 

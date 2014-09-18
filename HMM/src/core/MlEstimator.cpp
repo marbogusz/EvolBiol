@@ -130,13 +130,13 @@ MlEstimator::MlEstimator(Sequences* inputSeqs, Definitions::ModelType model ,std
 
 	for(unsigned int i =0; i<pairCount; i++)
 	{
-		ptMatrices[i] = new PMatrix(substModel);
+		ptMatrices[i] = new PMatrixDouble(substModel);
 		std::pair<unsigned int, unsigned int> idxs = inputSequences->getPairOfSequenceIndices(i);
 		vector<SequenceElement>  s1 = inputSequences->getSequencesAt(idxs.first);
 		vector<SequenceElement>  s2 = inputSequences->getSequencesAt(idxs.second);
 		for(int j = 0; j< s1.size(); j++)
 		{
-			patterns[i][{s1[j].getMatrixIndex(),s2[j].getMatrixIndex()}]++;
+			patterns[i][{{s1[j].getMatrixIndex(),s2[j].getMatrixIndex()}}]++;
 		}
 	}
 
@@ -299,25 +299,26 @@ double MlEstimator::runIteration()
 	{
 		//this->modelParams->outputParameters();
 		substModel->setAlpha(modelParams->getAlpha());
-		substModel->setAlpha(modelParams->getAlpha());
 		substModel->setParameters(modelParams->getSubstParameters());
 		substModel->calculateModel();
+
+		substModel->summarize();
 
 		for(unsigned int i =0; i<pairCount; i++)
 		{
 			//this calculates the matrix(matrices for a gamma model)
 			ptMatrices[i]->setTime(modelParams->getDivergenceTime(i));
+			ptMatrices[i]->calculate();
 
 			//go through the map of patterns!
 			for(auto it : patterns[i])
 			{
-				result += ptMatrices[i]->getPairSitePattern(it.first) * it.second;
+				result += ptMatrices[i]->getPairSitePattern(it.first[0],it.first[1]) * it.second;
 			}
 
 			ptMatrices[i]->summarize();
 
 		}
-		substModel->summarize();
 	}
 
 	cerr << result << endl;
