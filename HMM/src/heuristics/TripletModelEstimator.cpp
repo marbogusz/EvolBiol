@@ -183,6 +183,8 @@ TripletModelEstimator::TripletModelEstimator(Sequences* inputSeqs, Definitions::
 	modelParams = new OptimizedModelParameters(substModel, NULL,3, 3*tripleAlignments.size(), estimateSubstitutionParams,
 			false, estimateAlpha, true, maths);
 
+	modelParams->setAlpha(alpha);
+
 	bfgs = new BFGS(this,ot);
 	bfgs->optimize();
 }
@@ -202,23 +204,19 @@ double TripletModelEstimator::runIteration()
 
 	double partial1;
 
-	SubstitutionModelBase* smodel;
-	SequenceElement* seTmp;
-
-	modelParams->outputParameters();
+	//modelParams->outputParameters();
 
 	substModel->setAlpha(modelParams->getAlpha());
 	substModel->setParameters(modelParams->getSubstParameters());
 	substModel->calculateModel();
 
 
-	substModel->summarize();
+	//substModel->summarize();
 
 	for (unsigned int i = 0; i< ptMatrices.size(); i++)
 	{
 		for(unsigned int j=0;j<3;j++)
 		{
-			DEBUG("Triplet no, node no, time: " << i << " " << j << " "<< modelParams->getDivergenceTime(3*i +j));
 			ptMatrices[i][j]->setTime(modelParams->getDivergenceTime(3*i +j));
 			ptMatrices[i][j]->calculate();
 		}
@@ -237,7 +235,7 @@ double TripletModelEstimator::runIteration()
 			//cout << "Pattern " << it.first[0] << " "  << it.first[1] << " " << it.first[2]  << "\t\t\t" << it.second << "\t\t" << log(partial1) << endl;
 		}
 	}
-	DEBUG("lnl result:" << result);
+	//DEBUG("lnl result:" << result);
 	return result * -1.0;
 
 }

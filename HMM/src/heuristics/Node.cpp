@@ -10,7 +10,7 @@
 namespace EBC
 {
 
-Node::Node(unsigned int id) : nodeId(id), parent(NULL), leafNode(false), rootNode(false)
+Node::Node(unsigned int id) : nodeId(id), parent(NULL), leafNode(false), rootNode(false), distanceToParent(0)
 {
 }
 

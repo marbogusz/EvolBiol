@@ -10,6 +10,7 @@
 #include <stack>
 #include <random>
 #include <iostream>
+#include <cmath>
 #include "core/Definitions.hpp"
 
 namespace EBC
@@ -52,8 +53,12 @@ double TripletSamplingTree::distanceBetween(Node* n1, Node* n2)
 
 TripletSamplingTree::TripletSamplingTree(GuideTree& gt) : distMat(gt.getDistanceMatrix())
 {
+	this->averageLeafbranch = 0;
+	this->leafBranchSd = 0;
 	// TODO Auto-generated constructor stub
 	DEBUG("Creating TripletSamplingTree");
+
+
 
 	idealTreeSize = 1.0;
 	this->fromNewick(gt.getNewickTree());
@@ -73,6 +78,9 @@ void TripletSamplingTree::fromNewick(const string& newick)
 	regex regInterDist(":([0-9\\.]+).*");
 	Node *tmpNode, *tmpParent, *tmpCurrent;
 	stack<Node*> workNodes;
+
+	cout << "K-mer newick tree :" << endl;
+	cout << newick << endl;
 
 	string nodeName;
 	double currentDistance;
@@ -145,6 +153,7 @@ void TripletSamplingTree::fromNewick(const string& newick)
 				tmpCurrent->setDistance(currentDistance);
 				tmpCurrent->setLeaf();
 				this->leafNodes[sequenceNo] = tmpCurrent;
+				this->averageLeafbranch += tmpCurrent->distanceToParent;
 				i += basematch[1].str().size();
 			}
 			else if (regex_match(sstr, basematch, regInterDist))
@@ -156,6 +165,14 @@ void TripletSamplingTree::fromNewick(const string& newick)
 			}
 		}
 	}
+	this->averageLeafbranch /= leafNodes.size();
+
+	for (auto node : leafNodes)
+	{
+		this->leafBranchSd += (std::pow(node.second->distanceToParent - averageLeafbranch,2));
+	}
+	this->leafBranchSd /= leafNodes.size();
+	this->leafBranchSd = std::sqrt(leafBranchSd);
 }
 
 vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromDM()
@@ -174,6 +191,7 @@ vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromDM()
 
 	result.push_back({{s1,s2,s3}});
 	DEBUG("Triplet tree DM sampled values : " << s1 << ", " << s2 << ", " << s3);
+	cout << "Triplet tree DM sampled values : " << s1 << ", " << s2 << ", " << s3 << endl;
 	return result;
 }
 
@@ -183,12 +201,18 @@ vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromTree()
 	//randomly select 1 leaf
 	double treeSize = 0;
 
+	this->idealTreeSize = 3 * this->averageLeafbranch;
+
 	auto pair = distMat->getPairWithinDistance(0.5*this->idealTreeSize, 0.8*this->idealTreeSize);
+
 
 	Node* first = leafNodes[pair.first];
 	Node* second  = leafNodes[pair.second];
 
+
 	Node* ca12 =  mostRecentAncestor(first, second);
+
+	//chose some node to minimize the distance
 
 	treeSize = treeSize + distanceBetween(first, ca12) + distanceBetween(second, ca12);
 

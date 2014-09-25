@@ -64,6 +64,8 @@ private:
 
 	unsigned int commonKmerCount(unsigned int i, unsigned int j);
 
+	double kimuraDist(double);
+
 };
 
 } /* namespace EBC */

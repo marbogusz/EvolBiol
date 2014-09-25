@@ -32,6 +32,7 @@ private:
 
 	void buildMap();
 
+
 public:
 	DistanceMatrix(int size);
 

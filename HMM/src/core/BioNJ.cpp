@@ -567,7 +567,7 @@ namespace EBC
         output << ":";
         /*   gcvt(length,PREC, str); */
         /*   fprintf(output,"%s,",str); */
-        output << length;
+        output << length << ",";
 
         length=Finish_branch_length(last[1],last[0],last[2],delta);
         this->treeLength += length;
@@ -575,7 +575,7 @@ namespace EBC
         output <<":";
         /*   gcvt(length,PREC, str); */
         /*   fprintf(output,"%s,",str); */
-        output << length;
+        output << length << ",";
 
         length=Finish_branch_length(last[2],last[1],last[0],delta);
         this->treeLength += length;

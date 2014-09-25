@@ -16,7 +16,7 @@ GuideTree::GuideTree(Sequences* is) : inputSequences(is)
 	// TODO Auto-generated constructor stub
 	distMat = new DistanceMatrix(inputSequences->getSequenceCount());
 	this->dict = inputSequences->getDictionary();
-	this->kmerSize = 6;
+	this->kmerSize = 7;
 	this->sequenceCount = inputSequences->getSequenceCount();
 	this->kmers = new vector<unordered_map<string,short>*>(sequenceCount);
 	DEBUG("Creating guide tree");
@@ -28,11 +28,34 @@ GuideTree::~GuideTree()
 
 }
 
+double GuideTree::kimuraDist(double id)
+{
+		double p = 1 - id;
+	// Typical case: use Kimura's empirical formula
+		//if (p < 0.75)
+			return -log(1 - p - (p*p)/5);
+
+	// Per ClustalW, return 10.0 for anything over 93%
+	//	if (p > 0.93)
+	//		return 10.0;
+
+	// If p >= 0.75, use table lookup
+	//	assert(p <= 1 && p >= 0.75);
+	// Thanks for Michael Hoel for pointing out a bug
+	// in the table index calculation in versions <= 3.52.
+	//	int iTableIndex = (int) ((p - 0.75)*1000 + 0.5);
+	//	if (iTableIndex < 0 || iTableIndex >= iTableEntries)
+	//		Quit("Internal error in MSADistKimura::ComputeDist");
+
+	//	return dayhoff_pams[iTableIndex] / 100.0;
+}
+
+
 void GuideTree::constructTree()
 {
 	unsigned int i,j;
 	string currSeq;
-	float identity;
+	double identity, estIdentity, kimura;
 
 	DEBUG("Extracting k-mers");
 	for(i = 0; i< sequenceCount; i++)
@@ -46,8 +69,12 @@ void GuideTree::constructTree()
 		{
 			string s1 = inputSequences->getRawSequenceAt(i);
 			string s2 = inputSequences->getRawSequenceAt(j);
-			identity = 1.0 - commonKmerCount(i,j)/(float)(min(s1.size(),s2.size()));
-			distMat->addDistance(i,j,identity);
+			identity = commonKmerCount(i,j)/((double)(min(s1.size(),s2.size())-kmerSize+1));
+			estIdentity = log(0.02 + identity)/4.12 + 0.995;
+			kimura = kimuraDist(estIdentity);
+			DEBUG("k-mer distance between seq. " << i << " and " << j << " is " << identity << " " << -log(0.02 + identity) << " " << -log(0.1 + identity)  << " "<< estIdentity << " " << kimura );
+
+			distMat->addDistance(i,j,kimura);
 		}
 
 	DEBUG("Initialized distance matrix");
@@ -88,7 +115,10 @@ unsigned int GuideTree::commonKmerCount(unsigned int i, unsigned int j)
 	{
 		commonCount += std::min((short)((*m2)[it->first]), (short)(it->second));
 	}
+	//DEBUG("Common k-mer count between seq. " << i << " and " << j << " is " << commonCount);
 	return commonCount;
+
+
 }
 
 } /* namespace EBC */

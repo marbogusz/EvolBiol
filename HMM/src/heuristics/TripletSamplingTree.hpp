@@ -39,6 +39,9 @@ private:
 
 	double idealTreeSize;
 
+	double averageLeafbranch;
+	double leafBranchSd;
+
 	void fromNewick(const string& nString);
 
 public:

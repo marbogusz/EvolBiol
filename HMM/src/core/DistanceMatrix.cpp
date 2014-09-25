@@ -78,6 +78,8 @@ unsigned int DistanceMatrix::getThirdLeafWithinDistance(double targetLen, unsign
 	map<double, unsigned int> mappings;
 	for (leaves =0; leaves < this->taxas; leaves++)
 	{
+		if(leaves == l1 || leaves ==l2)
+			continue;
 		tempSum = getDistance(l1,leaves) + getDistance(l2,leaves);
 		mappings[tempSum] = leaves;
 	}
