@@ -32,6 +32,7 @@ private:
 
 	void buildMap();
 
+	void invalidate(std::pair<unsigned int, unsigned int>&);
 
 public:
 	DistanceMatrix(int size);
@@ -40,7 +41,7 @@ public:
 
 	double getDistance(unsigned int s1, unsigned int s2);
 
-	pair<unsigned int, unsigned int>& getPairWithinDistance(double lo, double hi);
+	pair<unsigned int, unsigned int> getPairWithinDistance(double lo, double hi);
 
 	unsigned int getThirdLeafWithinDistance(double targetLen, unsigned int l1, unsigned int l2);
 

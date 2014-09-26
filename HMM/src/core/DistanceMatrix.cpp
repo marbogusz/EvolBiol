@@ -42,16 +42,26 @@ void DistanceMatrix::addDistance(unsigned int s1, unsigned int s2,
 	revdistances.insert(make_pair(distance,(make_pair(s1,s2))));
 }
 
-pair<unsigned int, unsigned int>& EBC::DistanceMatrix::getPairWithinDistance(
+void  DistanceMatrix::invalidate(std::pair<unsigned int, unsigned int>& pr)
+{
+	for(auto el = revdistances.begin(); el != revdistances.end(); el++)
+	{
+		if (el->second.first == pr.first || el->second.first == pr.second ||el->second.second == pr.first || el->second.second == pr.second)
+			revdistances.erase(el);
+	}
+}
+
+pair<unsigned int, unsigned int> EBC::DistanceMatrix::getPairWithinDistance(
 		double lo, double hi)
 {
 	default_random_engine generator;
 	uniform_int_distribution<int> distribution(0,revdistances.size()-1);
 	//iterate over keys
-	auto itlow= revdistances.lower_bound(lo);
-	auto ithi= revdistances.upper_bound(hi);
+	auto itlow = revdistances.lower_bound(lo);
+	auto ithi = revdistances.upper_bound(hi);
 	auto end = revdistances.end();
 	auto begin = revdistances.begin();
+	pair<unsigned int, unsigned int> ret;
 
 	if (itlow != end)
 	{
@@ -59,15 +69,19 @@ pair<unsigned int, unsigned int>& EBC::DistanceMatrix::getPairWithinDistance(
 		unsigned int dist = std::distance(itlow,ithi);
 		uniform_int_distribution<int> dist2(0,dist);
 		std::advance(itlow, dist2(generator));
-		return (*itlow).second;
+		ret = make_pair((*itlow).second.first,(*itlow).second.second);
+		invalidate(ret);
 
 	}
 	//return the lowest anyway ?
 	else
 	{
 		std::advance(begin, distribution(generator) );
-		return (*begin).second;
+		ret = make_pair((*begin).second.first,(*begin).second.second);
+		invalidate(ret);
 	}
+
+	return ret;
 
 }
 

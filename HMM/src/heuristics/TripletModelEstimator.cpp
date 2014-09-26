@@ -146,7 +146,7 @@ TripletModelEstimator::TripletModelEstimator(Sequences* inputSeqs, Definitions::
 
 
 	DEBUG("About to sample some triplets");
-	vector<array<unsigned int, 3> > tripletIdxs = tst.sampleFromDM();
+	vector<array<unsigned int, 3> > tripletIdxs = tst.sampleFromTree();
 
 	patterns.resize(tripletIdxs.size());
 	ptMatrices.resize(tripletIdxs.size());

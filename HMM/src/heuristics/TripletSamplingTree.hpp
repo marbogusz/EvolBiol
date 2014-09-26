@@ -29,11 +29,20 @@ private:
 
 	map<unsigned int, Node*> leafNodes;
 
+	map<unsigned int, Node*> availableNodes;
+
 	unordered_set<Node*> usedNodes;
 
 	Node* mostRecentAncestor(Node* n1, Node* n2);
 
-	double distanceBetween(Node* n1, Node* n2);
+	double distanceToParent(Node* n1, Node* par);
+
+	inline bool isWithinRange(double val, double ran)
+	{
+		if(val <= ran*1.2 || val >= ran*0.8)
+			return true;
+		return false;
+	}
 
 	DistanceMatrix* distMat;
 

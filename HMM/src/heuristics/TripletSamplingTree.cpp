@@ -21,10 +21,10 @@ Node* TripletSamplingTree::mostRecentAncestor(Node* n1, Node* n2)
 	Node* tmpNode1 = n1;
 	Node* tmpNode2 = n2;
 
-	while(tmpNode1->parent != NULL)
+	while(tmpNode1 != NULL)
 	{
 		tmpNode2 = n2;
-		while(tmpNode2->parent != NULL)
+		while(tmpNode2 != NULL)
 		{
 			if (*tmpNode1 == *tmpNode2)
 				return tmpNode1;
@@ -35,15 +35,15 @@ Node* TripletSamplingTree::mostRecentAncestor(Node* n1, Node* n2)
 	return NULL;
 }
 
-double TripletSamplingTree::distanceBetween(Node* n1, Node* n2)
+double TripletSamplingTree::distanceToParent(Node* n1, Node* par)
 {
 	double distance = 0;
 	Node* tmp = n1;
 
-	if (*n1 == *n2)
+	if (*n1 == *par)
 		return 0;
 
-	while (tmp != n2)
+	while (tmp != par)
 	{
 		distance += tmp->distanceToParent;
 		tmp = tmp->parent;
@@ -198,33 +198,53 @@ vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromDM()
 vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromTree()
 {
 	vector<array<unsigned int, 3> > result;
+	Node *firstNd, *secondNd;
+	//copy
+	availableNodes = leafNodes;
 	//randomly select 1 leaf
-	double treeSize = 0;
-
+	double treeSize;
 	this->idealTreeSize = 3 * this->averageLeafbranch;
+	bool found;
+	unsigned int s1,s2,s3;
 
-	auto pair = distMat->getPairWithinDistance(0.5*this->idealTreeSize, 0.8*this->idealTreeSize);
+	double tmpd1, tmpd2;
 
+	while(availableNodes.size() > 5)
+	{
+		auto pair = distMat->getPairWithinDistance(this->idealTreeSize-this->leafBranchSd, this->idealTreeSize+this->leafBranchSd);
+		firstNd = leafNodes[pair.first];
+		s1 = pair.first;
+		s2 = pair.second;
+		secondNd  = leafNodes[pair.second];
+		Node* tmpAncestor = mostRecentAncestor(firstNd, secondNd);
+		treeSize = distanceToParent(firstNd, tmpAncestor) + distanceToParent(secondNd, tmpAncestor);
 
-	Node* first = leafNodes[pair.first];
-	Node* second  = leafNodes[pair.second];
+		availableNodes.erase(pair.first);
+		availableNodes.erase(pair.second);
 
-
-	Node* ca12 =  mostRecentAncestor(first, second);
-
-	//chose some node to minimize the distance
-
-	treeSize = treeSize + distanceBetween(first, ca12) + distanceBetween(second, ca12);
-
-
-
-	if (ca12->parent != NULL)
-		this->usedNodes.emplace(ca12);
-
+		found = false;
+		for (auto nd : availableNodes)
+		{
+			//go through available nodes
+			tmpd1 = distanceToParent(nd.second, mostRecentAncestor(nd.second, firstNd));
+			tmpd2 = distanceToParent(nd.second, mostRecentAncestor(nd.second, firstNd));
+			if (isWithinRange(tmpd1, idealTreeSize-treeSize) || isWithinRange(tmpd2, idealTreeSize-treeSize))
+			{
+				result.push_back({{s1,s2,nd.first}});
+				DEBUG("Sampled triplet : " << s1 << "\t\t" << s2 << "\t\t" << nd.first);
+				availableNodes.erase(nd.first);
+				found = true;
+				break;
+			}
+		}
+		if (!found)
+		{
+			// grab any unused leaf node
+			result.push_back({{s1,s2,availableNodes.begin()->first}});
+			availableNodes.erase(availableNodes.begin());
+		}
+	}
 	//distance to root
-
-
-
 
 	//get another one with distance between 0.3 and 0.7
 	//what about root node - root node has no parent set - go through list and check ?????
