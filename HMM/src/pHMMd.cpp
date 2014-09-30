@@ -84,11 +84,23 @@ int main(int argc, char ** argv) {
 			fwdHMM->runForwardAlgorithm();
 			*/
 
-			cout << cmdReader->getAlpha() << '\t' << cmdReader->getDistance() << '\t';
+			TripletModelEstimator* tme = new TripletModelEstimator(inputSeqs, cmdReader->getModelType(),
+								cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
+								cmdReader->estimateAlpha());
 
+			vector<double> indelParams;
+			vector<double> substParams;
+			double alpha;
+
+			substParams = tme->getSubstitutionParameters();
+			if(cmdReader->estimateAlpha())
+				alpha = tme->getAlpha();
+
+
+			//FIXME - hardcoding substitution parameters and alpha to come from the estimator
 			PairwiseEstimator* pe = new PairwiseEstimator(cmdReader->getAlgorithmType(), inputSeqs, cmdReader->getModelType() ,cmdReader->getIndelParams(),
-					cmdReader->getSubstParams(), cmdReader->getOptimizationType(), cmdReader->getBanding(), cmdReader->getBandFactor(),
-					cmdReader->getCategories(), cmdReader->getAlpha(), cmdReader->estimateAlpha(),cmdReader->getDistance());
+					/*cmdReader->getSubstParams()*/ substParams, cmdReader->getOptimizationType(), cmdReader->getBanding(), cmdReader->getBandFactor(),
+					cmdReader->getCategories(), /*cmdReader->getAlpha()*/ alpha, /*cmdReader->estimateAlpha()*/ false,cmdReader->getDistance());
 
 
 			//string distFile = cmdReader->getInputFileName();
@@ -103,11 +115,12 @@ int main(int argc, char ** argv) {
 
 
 
-			//cerr << "running bionj\n";
+			DEBUG ("Running bionj");
 
 			//change bionj init here!
-			//BioNJ nj(inputSeqs->getSequenceCount(), pe->getOptimizedTimes());
-			//nj.calculate();
+			BioNJ nj(inputSeqs->getSequenceCount(), pe->getOptimizedTimes());
+			DEBUG("Final tree : " << nj.calculate());
+
 
 			//scerr << cmdReader->getInputFileName() << endl;
 
@@ -143,6 +156,7 @@ int main(int argc, char ** argv) {
 
 			delete fwdHMM;
 */
+			delete tme;
 			delete pe;
 		}
 

@@ -14,7 +14,8 @@ using namespace std;
 namespace EBC
 {
 
-    BioNJ::BioNJ(unsigned int size, DistanceMatrix* divergenceTimes) : names(size), times(divergenceTimes)
+	//FIXME  - get rid of that reference to timesVec!!!
+    BioNJ::BioNJ(unsigned int size, DistanceMatrix* divergenceTimes) : names(size), times(divergenceTimes), timesVec(vector<double>())
     {
         taxas = size;
         pairs = (taxas*(taxas-1))/2;
@@ -25,9 +26,20 @@ namespace EBC
         }
 
         treeLength=0;
+    }
+    
+    BioNJ::BioNJ(unsigned int size, const vector<double>& divergenceTimes) : names(size), timesVec(divergenceTimes)
+    {
+    	times = NULL;
+        taxas = size;
+        pairs = (taxas*(taxas-1))/2;
 
+		for (unsigned short i = 0; i < taxas; i++)
+        {
+        	names[i] = std::to_string(i);
+        }
 
-
+        treeLength=0;
     }
 
     void BioNJ::Initialize(float **delta, int n, POINTERS *trees)

@@ -11,13 +11,11 @@
 namespace EBC
 {
 
-EvolutionaryPairHMM::EvolutionaryPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dct,
-		unsigned int rateCategories, Maths* mths, Definitions::ModelType model, bool banding, unsigned int bandPercentage, Definitions::DpMatrixType mt)
-		: maths(mths), gammaRateCategories(rateCategories)
+EvolutionaryPairHMM::EvolutionaryPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, bool banding,
+			SubstitutionModelBase* smdl, IndelModel* imdl, unsigned int bandPercentage, Definitions::DpMatrixType mt) :
+				substModel(smdl), indelModel(imdl)
 {
 	M = X = Y = NULL;
-	mlParameters = NULL;
-	this->dict = dct;
 
 	this->seq1 = s1;
 	this->seq2 = s2;
@@ -25,60 +23,19 @@ EvolutionaryPairHMM::EvolutionaryPairHMM(vector<SequenceElement> s1, vector<Sequ
 	this->xSize = seq1.size() +1;
 	this->ySize = seq2.size() +1;
 
-	maths  = new Maths();
-	DEBUG("Creating the gap model");
-	indelModel = new NegativeBinomialGapModel();
-
-	DEBUG("Creating the model");
-	if (model == Definitions::ModelType::GTR)
-	{
-		substModel = new GTRModel(dict, maths,gammaRateCategories);
-	}
-	else if (model == Definitions::ModelType::HKY85)
-	{
-		substModel = new HKY85Model(dict, maths,gammaRateCategories);
-	}
-	else if (model == Definitions::ModelType::LG)
-	{
-			substModel = new AminoacidSubstitutionModel(dict, maths,gammaRateCategories,Definitions::aaLgModel);
-	}
-
 	ptmatrix = new PMatrixDouble(substModel);
 
 	bandFactor = bandPercentage;
 	bandingEnabled = banding;
 
-	//initialize parameter arrays
-	//TODO - set parameters depending on the values provided
 	getBandWidth();
 	initializeStates(mt);
 
 }
 
-void EvolutionaryPairHMM::setModelParameters(std::vector<double> indel_params,
-		std::vector<double> subst_params,double evolDistance, double alpha)
+void EvolutionaryPairHMM::setDivergenceTime(double time)
 {
-	this->indelParameters = indelModel->getParamsNumber();
-	this->substParameters = substModel->getParamsNumber();
-	this->totalParameters = indelParameters + substParameters +1; //plus time
-
-	if (indelParameters == indel_params.size() && substParameters == subst_params.size())
-	{
-		indelModel->setParameters(indel_params);
-		indelModel->setTime(evolDistance);
-		substModel->setAlpha(alpha);
-		substModel->setParameters(subst_params);
-		ptmatrix->setTime(evolDistance);
-	}
-	else
-	{
-		throw HmmException("setModelParameters : wrong number of parameters provided");
-	}
-}
-
-void EvolutionaryPairHMM::setModelFrequencies(double* freqs)
-{
-	substModel->setObservedFrequencies(freqs);
+	ptmatrix->setTime(time);
 }
 
 void EvolutionaryPairHMM::setTransitionProbabilities()
@@ -101,33 +58,6 @@ void EvolutionaryPairHMM::setTransitionProbabilities()
 	X->setTransitionProbabilityFromMatch(log(g));
 	Y->setTransitionProbabilityFromMatch(log(g));
 }
-
-double* EvolutionaryPairHMM::generateInitialSubstitutionParameters()
-{
-	//don't include time
-	double* params = new double[this->substParameters-1];
-	for(unsigned int i=0; i< this->substParameters-1; i++)
-	{
-		params[i] = 0.2 + 0.1*maths->rndu();
-	}
-	return params;
-}
-double* EvolutionaryPairHMM::generateInitialIndelParameters()
-{
-	//don't include time
-	double* params = new double[this->indelParameters-1];
-	for(unsigned int i=0; i< this->indelParameters-1; i++)
-	{
-		params[i] = 0.2 + 0.1*maths->rndu();
-	}
-	return params;
-}
-
-double EvolutionaryPairHMM::generateInitialDistanceParameter()
-{
-	return 0.2 + 0.1*maths->rndu();
-}
-
 
 void EvolutionaryPairHMM::summarize()
 {
@@ -178,9 +108,7 @@ void EvolutionaryPairHMM::initializeStates(Definitions::DpMatrixType mt)
 
 void EvolutionaryPairHMM::calculateModels()
 {
-	substModel->calculateModel();
 	ptmatrix->calculate();
-	indelModel->calculate();
 }
 
 EvolutionaryPairHMM::~EvolutionaryPairHMM()

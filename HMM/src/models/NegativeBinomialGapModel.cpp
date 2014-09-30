@@ -29,7 +29,7 @@ NegativeBinomialGapModel::~NegativeBinomialGapModel()
 	// TODO Auto-generated destructor stub
 }
 
-void NegativeBinomialGapModel::setParameters(vector<double>& vc)
+void NegativeBinomialGapModel::setParameters(vector<double> vc)
 {
 	this->lambda = vc[0];
 	this->gapExtensionProbability = vc[1];

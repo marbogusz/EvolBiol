@@ -197,6 +197,21 @@ TripletModelEstimator::~TripletModelEstimator()
     delete maths;
 }
 
+vector<double> TripletModelEstimator::getSubstitutionParameters()
+{
+	return this->modelParams->getSubstParameters();
+}
+
+vector<double> TripletModelEstimator::getIndelParameters()
+{
+	return this->modelParams->getIndelParameters();
+}
+
+double TripletModelEstimator::getAlpha()
+{
+	return this->modelParams->getAlpha();
+}
+
 double TripletModelEstimator::runIteration()
 {
 	double result = 0;

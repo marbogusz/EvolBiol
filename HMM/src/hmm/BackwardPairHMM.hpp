@@ -18,9 +18,6 @@ class BackwardPairHMM: public EBC::EvolutionaryPairHMM
 
 protected:
 
-	vector<double> userIndelParameters;
-	vector<double> userSubstParameters;
-
 	void getBandWidth()
 	{
 		this->bandSpan = ySize/(bandFactor);
@@ -37,17 +34,13 @@ protected:
 
 
 public:
-	BackwardPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dict,  Definitions::ModelType model, bool banding,
-			unsigned int bandPercentage, unsigned int rateCategories, Maths*, Definitions::DpMatrixType);
+	BackwardPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, bool banding,
+			SubstitutionModelBase* smdl, IndelModel* imdl, unsigned int bandPercentage, Definitions::DpMatrixType mt);
 
 	virtual ~BackwardPairHMM();
 
 	double runBackwardAlgorithm();
 
-	inline double* getMlParameters()
-	{
-		return this->mlParameters;
-	}
 };
 
 } /* namespace EBC */

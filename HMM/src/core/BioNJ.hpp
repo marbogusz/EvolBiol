@@ -45,14 +45,35 @@ private:
 	unsigned int pairs;
 	vector<string> names;
 	DistanceMatrix* times;
+	const vector<double>& timesVec;
 	double treeLength;
 
 public:
 	BioNJ(unsigned int size, DistanceMatrix* divergenceTimes);
+	
+	BioNJ(unsigned int size, const vector<double>& divergenceTimes);
 
 	double getDist(unsigned int i, unsigned int j)
 	{
-		return times->getDistance(i,j);
+		if (times != NULL)
+			return times->getDistance(i,j);
+		
+		unsigned int a,b;
+		unsigned int index;
+		a=i;
+		b=j;
+		if (i>j)
+		{
+			b=i;
+			a=j;
+		}
+		if (i==j) return 0;
+		else
+		{
+			index = (b - a - 1) + (a*taxas) - (((1+a)/2.0)*(a*1.0));
+			return timesVec[index];
+		}
+		
 	}
 
 	void   Initialize(float **delta, int n, POINTERS *trees);

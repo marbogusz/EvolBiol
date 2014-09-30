@@ -100,7 +100,7 @@ public:
 
 	void outputDistanceMatrix(stringstream&);
 
-	vector<double>& getOptimizedTimes()
+	const vector<double>& getOptimizedTimes()
 	{
 		return this->modelParams->getDivergenceTimes();
 	}

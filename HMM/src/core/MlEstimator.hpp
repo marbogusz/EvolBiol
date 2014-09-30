@@ -107,7 +107,7 @@ public:
 
 	double runIteration();
 
-	vector<double>& getOptimizedTimes()
+	const vector<double>& getOptimizedTimes()
 	{
 		return this->modelParams->getDivergenceTimes();
 	}

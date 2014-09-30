@@ -12,9 +12,9 @@ namespace EBC
 {
 
 
-ForwardPairHMM::ForwardPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dict, Definitions::ModelType model,
-		bool banding, unsigned int bandPercentage, unsigned int rateCategories, Maths* mth, Definitions::DpMatrixType mt) :
-		EvolutionaryPairHMM(s1,s2, dict, rateCategories, mth, model, banding, bandPercentage,mt)
+ForwardPairHMM::ForwardPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, bool banding,
+		SubstitutionModelBase* smdl, IndelModel* imdl, unsigned int bandPercentage, Definitions::DpMatrixType mt) :
+		EvolutionaryPairHMM(s1,s2, banding, smdl, imdl, bandPercentage, mt)
 {
 }
 

@@ -57,7 +57,7 @@ void PairwiseEstimator::BFGS::optimize()
 		case Definitions::OptimizationType::BFGS:
 		{
 			likelihood = dlib::find_min_box_constrained(dlib::bfgs_search_strategy(),
-					dlib::objective_delta_stop_strategy(1e-8),
+					dlib::objective_delta_stop_strategy(1e-8).be_verbose(),
 					f_objective,
 					derivative(f_objective),
 					initParams,
@@ -88,7 +88,6 @@ PairwiseEstimator::PairwiseEstimator(Definitions::AlgorithmType at, Sequences* i
 	dict = inputSequences->getDictionary();
 
 	//Helper models
-	//FIXME - get some static definitions or sth!!
 	if (model == Definitions::ModelType::GTR)
 	{
 		substModel = new GTRModel(dict, maths,gammaRateCategories);
@@ -108,6 +107,10 @@ PairwiseEstimator::PairwiseEstimator(Definitions::AlgorithmType at, Sequences* i
 	estimateIndelParams = indel_params.size() == 0;
 	this->estimateAlpha = estimateAlpha;
 
+	DEBUG("Pairwise model estimator starting");
+	DEBUG("Estimate substitution parameters set to : " << estimateSubstitutionParams << " Estimate indel parameters set to : " << estimateIndelParams);
+	DEBUG("Estimate alpha set to : " << estimateAlpha << " , rate categories " << gammaRateCategories << " , user time : " << userTime);
+
 	modelParams = new OptimizedModelParameters(substModel, indelModel,inputSequences->getSequenceCount(), pairCount, estimateSubstitutionParams,
 			estimateIndelParams, estimateAlpha, userTime < 0, maths);
 
@@ -116,6 +119,8 @@ PairwiseEstimator::PairwiseEstimator(Definitions::AlgorithmType at, Sequences* i
 	if(!estimateSubstitutionParams)
 		modelParams->setUserSubstParams(subst_params);
 	modelParams->setAlpha(alpha);
+
+
 
 	if (userTime > 0)
 	{
@@ -141,18 +146,32 @@ PairwiseEstimator::PairwiseEstimator(Definitions::AlgorithmType at, Sequences* i
 		if (at == Definitions::AlgorithmType::Viterbi)
 		{
 			hmm = hmms[i] = new ViterbiPairHMM(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
-				dict, model, banding, bandPercentage,rateCategories, maths, Definitions::DpMatrixType::Limited);
+				banding, substModel, indelModel, bandPercentage, Definitions::DpMatrixType::Limited);
 		}
 		else if (at == Definitions::AlgorithmType::Forward)
 		{
 			hmm = hmms[i] = new ForwardPairHMM(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
-				dict, model, banding, bandPercentage,rateCategories, maths, Definitions::DpMatrixType::Limited);
+					banding, substModel, indelModel, bandPercentage, Definitions::DpMatrixType::Limited);
 		}
 		else
 		{
 			throw HmmException("Wrong algorithm type - use either Forward or viterbi\n");
 		}
-		hmm->setModelFrequencies(inputSequences->getElementFrequencies());
+	}
+
+	substModel->setObservedFrequencies(inputSequences->getElementFrequencies());
+	if (estimateSubstitutionParams == false)
+	{
+		//set parameters and calculate the model
+		substModel->setAlpha(modelParams->getAlpha());
+		substModel->setParameters(modelParams->getSubstParameters());
+		substModel->calculateModel();
+	}
+
+	if (estimateIndelParams == false)
+	{
+			//set parameters and calculate the model
+		indelModel->setParameters(modelParams->getIndelParameters());
 	}
 
 	bfgs = new BFGS(this,ot);
@@ -179,14 +198,35 @@ double PairwiseEstimator::runIteration()
 
 	//this->modelParams->outputParameters();
 	//cerr << "iteration " << endl;
+
+	if (estimateSubstitutionParams == true)
+	{
+			//set parameters and calculate the model
+		substModel->setAlpha(modelParams->getAlpha());
+		substModel->setParameters(modelParams->getSubstParameters());
+		substModel->calculateModel();
+	}
+
+	if (estimateIndelParams == true)
+	{
+		//set parameters and calculate the model
+		indelModel->setParameters(modelParams->getIndelParameters());
+	}
+
+
+
 	for(unsigned int i =0; i<pairCount; i++)
 	{
 		hmm = hmms[i];
-		hmm->setModelParameters(modelParams->getIndelParameters(),modelParams->getSubstParameters(),
-				modelParams->getDivergenceTime(i), modelParams->getAlpha());
+		//FIXME - individual indel models!!! or gap opening extension class aggregator!
+		// the following is not thread safe for indels!!!
+		hmm->setDivergenceTime(modelParams->getDivergenceTime(i));
+		indelModel->setTime(modelParams->getDivergenceTime(i));
+		indelModel->calculate();
 		result += hmm->runAlgorithm();
+		//modelParams->outputParameters();
 	}
-	//cerr << result << endl;
+	cerr << result << endl;
 	return result;
 }
 

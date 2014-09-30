@@ -96,7 +96,7 @@ double* Sequences::getElementFrequencies()
 		this->observedFrequencies[i]/=count;
 
 
-	DEBUGV(observedFrequencies,4);
+	//DEBUGV(observedFrequencies,4);
 	return observedFrequencies;
 }
 
@@ -125,7 +125,7 @@ double* Sequences::getElementFrequencies(array<unsigned int, 3> triplet)
 		for (i=0; i<dict->getAlphabetSize(); i++)
 			this->observedFrequencies[i]/=count;
 
-		DEBUGV(observedFrequencies,4);
+		//DEBUGV(observedFrequencies,4);
 		return observedFrequencies;
 }
 

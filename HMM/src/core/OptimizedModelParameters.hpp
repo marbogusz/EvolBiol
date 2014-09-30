@@ -85,17 +85,17 @@ public:
 		return divergenceTimes[index];
 	}
 
-	const vector<double>& getIndelParameters() const
+	vector<double> getIndelParameters()
 	{
 		return indelParameters;
 	}
 
-	const vector<double>& getSubstParameters() const
+	vector<double> getSubstParameters()
 	{
 		return substParameters;
 	}
 
-	vector<double>& getDivergenceTimes()
+	vector<double> getDivergenceTimes()
 	{
 		return divergenceTimes;
 	}

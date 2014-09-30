@@ -105,6 +105,10 @@ public:
 
 	void runIteration(const column_vector& bfgsParameters);
 
+	vector<double> getSubstitutionParameters();
+	vector<double> getIndelParameters();
+	double getAlpha();
+
 	double runIteration();
 };
 

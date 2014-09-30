@@ -290,8 +290,7 @@ double MlEstimator::runIteration()
 		for(unsigned int i =0; i<pairCount; i++)
 		{
 			hmm = hmms[i];
-			hmm->setModelParameters(modelParams->getIndelParameters(),modelParams->getSubstParameters(),
-						modelParams->getDivergenceTime(i), modelParams->getAlpha());
+			hmm->setDivergenceTime(modelParams->getDivergenceTime(i));
 			result += hmm->getViterbiSubstitutionLikelihood();
 		}
 	}

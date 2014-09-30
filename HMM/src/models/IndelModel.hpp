@@ -38,7 +38,7 @@ public:
 	//set parameters - time + the rest of parameters
 	virtual void setParameters(double*) = 0;
 
-	virtual void setParameters(vector<double>&)=0;
+	virtual void setParameters(vector<double>)=0;
 
 	void setTime(double t)
 	{

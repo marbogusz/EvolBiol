@@ -69,7 +69,7 @@ protected:
 	inline void getBandWidth()
 	{
 		this->bandSpan = ySize/(bandFactor);
-		DEBUG("Band span " << bandSpan);
+		//DEBUG("Band span " << bandSpan);
 	}
 
 	inline bool withinBand(unsigned int line, int position, unsigned int width)
@@ -88,17 +88,20 @@ protected:
 
 	virtual void initializeStates(Definitions::DpMatrixType mt);
 
-	double* generateInitialSubstitutionParameters();
+	//double* generateInitialSubstitutionParameters();
 
-	double* generateInitialIndelParameters();
+	//double* generateInitialIndelParameters();
 
-	double generateInitialDistanceParameter();
+	//double generateInitialDistanceParameter();
 
 
 public:
 
-	EvolutionaryPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dict, unsigned int rateCategories, Maths*,
-			Definitions::ModelType model, bool banding, unsigned int bandPercentage, Definitions::DpMatrixType mt);
+	//EvolutionaryPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dict, unsigned int rateCategories, Maths*,
+	//		Definitions::ModelType model, bool banding, unsigned int bandPercentage, Definitions::DpMatrixType mt);
+
+	EvolutionaryPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, bool banding,
+			SubstitutionModelBase* smdl, IndelModel* imdl, unsigned int bandPercentage, Definitions::DpMatrixType mt);
 
 	virtual ~EvolutionaryPairHMM();
 
@@ -106,9 +109,11 @@ public:
 
 	void summarize();
 
-	void setModelParameters(std::vector<double> indel_params, std::vector<double> subst_params,double evolDistance, double alpha);
+	//void setModelParameters(std::vector<double> indel_params, std::vector<double> subst_params,double evolDistance, double alpha);
 
-	void setModelFrequencies(double*);
+	void setDivergenceTime(double time);
+
+	//void setModelFrequencies(double*);
 
 	unsigned int getIndelParameterCount()
 	{
