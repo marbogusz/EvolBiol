@@ -11,17 +11,21 @@
 
 #include "core/OptimizedModelParameters.hpp"
 #include "core/Definitions.hpp"
-#include "heuristics/TripletModelEstimator.hpp"
-#include "models/SubstitutionModelBase.hpp"
 #include "core/Maths.hpp"
 #include "core/Dictionary.hpp"
 #include "core/Sequences.hpp"
-#include <sstream>
 #include "core/HmmException.hpp"
+#include "core/PMatrixTriple.hpp"
+#include "core/IOptimizable.hpp"
+#include "core/Optimizer.hpp"
+
+#include "models/SubstitutionModelBase.hpp"
+
+#include "heuristics/TripletModelEstimator.hpp"
 #include "heuristics/GuideTree.hpp"
 #include "heuristics/TripletSamplingTree.hpp"
-#include "core/PMatrixTriple.hpp"
 
+#include <sstream>
 #include <vector>
 #include <array>
 
@@ -31,11 +35,11 @@ using namespace std;
 namespace EBC
 {
 
-class TripletModelEstimator
+class TripletModelEstimator : public IOptimizable
 {
 
 private:
-
+/*
 	//BFGS optimization wrapper for dlib
 
 	//FIXME - extract BFGS as an external class to avoid duplication !!
@@ -61,11 +65,13 @@ private:
 
 		const column_vector objectiveFunctionDerivative(const column_vector& m);
 	};
-
+*/
 
 protected:
 
-	BFGS* bfgs;
+	//BFGS* bfgs;
+
+	Optimizer* bfgs;
 
 	Dictionary* dict;
 	SubstitutionModelBase* substModel;

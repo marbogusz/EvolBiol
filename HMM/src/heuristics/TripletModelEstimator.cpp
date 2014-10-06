@@ -15,7 +15,7 @@
 namespace EBC
 {
 
-
+/*
 TripletModelEstimator::BFGS::BFGS(TripletModelEstimator* enclosing, Definitions::OptimizationType ot) : optimizationType(ot)
 {
 	parent = enclosing;
@@ -78,7 +78,7 @@ void TripletModelEstimator::BFGS::optimize()
 	cout  << likelihood << "\n";
 
 }
-
+*/
 
 TripletModelEstimator::TripletModelEstimator(Sequences* inputSeqs, Definitions::ModelType model ,
 		Definitions::OptimizationType ot, unsigned int rateCategories, double alpha, bool estimateAlpha) :
@@ -185,7 +185,7 @@ TripletModelEstimator::TripletModelEstimator(Sequences* inputSeqs, Definitions::
 
 	modelParams->setAlpha(alpha);
 
-	bfgs = new BFGS(this,ot);
+	bfgs = new Optimizer(modelParams, this,ot);
 	bfgs->optimize();
 }
 
