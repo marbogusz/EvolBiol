@@ -35,6 +35,9 @@ public:
 
 	constexpr static const double defaultGapPenalty = 0.5;
 
+	constexpr static const unsigned int stateCount = 3;
+	constexpr static const unsigned int heuristicsTreeSize = 3;
+
 	struct aaModelDefinition
 	{
 		double maxRate;
@@ -51,6 +54,8 @@ public:
 	enum AlgorithmType {Forward, Viterbi, MLE};
 
 	enum DpMatrixType {Full, Limited};
+
+	enum StateId {Match, Insert , Delete};
 
 	static const unsigned int HKY85ParamCount;
 

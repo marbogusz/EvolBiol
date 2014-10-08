@@ -11,74 +11,10 @@
 #include "models/AminoacidSubstitutionModel.hpp"
 #include "heuristics/TripletSamplingTree.hpp"
 #include "heuristics/TripletAligner.hpp"
+#include "heuristics/StateTransitionEstimator.hpp"
 
 namespace EBC
 {
-
-/*
-TripletModelEstimator::BFGS::BFGS(TripletModelEstimator* enclosing, Definitions::OptimizationType ot) : optimizationType(ot)
-{
-	parent = enclosing;
-	paramsCount = parent->modelParams->optParamCount();
-	this->initParams.set_size(paramsCount);
-	this->lowerBounds.set_size(paramsCount);
-	this->upperBounds.set_size(paramsCount);
-
-	parent->modelParams->toDlibVector(initParams,lowerBounds,upperBounds);
-
-	//cerr << "DLIB optimizer init with " << paramsCount << " parameters" << endl;
-}
-
-TripletModelEstimator::BFGS::~BFGS()
-{
-}
-
-double TripletModelEstimator::BFGS::objectiveFunction(const column_vector& bfgsParameters)
-{
-	this->parent->modelParams->fromDlibVector(bfgsParameters);
-	return parent->runIteration();
-}
-
-
-const column_vector TripletModelEstimator::BFGS::objectiveFunctionDerivative(const column_vector& bfgsParameters)
-{
-	column_vector results(this->paramsCount);
-	return results;
-}
-
-
-void TripletModelEstimator::BFGS::optimize()
-{
-	using std::placeholders::_1;
-	std::function<double(const column_vector&)> f_objective= std::bind( &TripletModelEstimator::BFGS::objectiveFunction, this, _1 );
-	double likelihood;
-
-	switch(optimizationType)
-	{
-		case Definitions::OptimizationType::BFGS:
-		{
-			likelihood = dlib::find_min_box_constrained(dlib::bfgs_search_strategy(),
-					dlib::objective_delta_stop_strategy(1e-8),
-					f_objective,
-					derivative(f_objective),
-					initParams,
-					lowerBounds,
-					upperBounds);
-			break;
-		}
-		case Definitions::OptimizationType::BOBYQA:
-		{
-			likelihood = dlib::find_min_bobyqa(f_objective, initParams, parent->modelParams->optParamCount()+4,
-					lowerBounds,upperBounds, 0.05, 1e-7, 20000 );
-			break;
-		}
-	}
-	this->parent->modelParams->fromDlibVector(initParams);
-	parent->modelParams->outputParameters();
-	cout  << likelihood << "\n";
-
-}
-*/
 
 TripletModelEstimator::TripletModelEstimator(Sequences* inputSeqs, Definitions::ModelType model ,
 		Definitions::OptimizationType ot, unsigned int rateCategories, double alpha, bool estimateAlpha) :
@@ -110,40 +46,6 @@ TripletModelEstimator::TripletModelEstimator(Sequences* inputSeqs, Definitions::
 
 	estimateSubstitutionParams = true;
 	this->estimateAlpha = estimateAlpha;
-
-
-	//TODO - maybe providing user times would be a good idea
-	//modelParams = new OptimizedModelParameters(substModel, NULL,3, 3, estimateSubstitutionParams,
-	//		false, estimateAlpha, true, maths);
-
-
-	//hack!
-
-	//modelParams = new OptimizedModelParameters(substModel, NULL,3, 3, false,
-	//			false, false, false, maths);
-
-
-	//alpha
-	//vector<double> userTimes = {0.76904, 0.12799, 0.40248};
-	//vector<double> userTimes = {0.76904, 0.12799, 0.40248};
-	//vector<double> userParameters = {1.60233,  0.38555,  0.45816,  0.51288,  0.48568};
-
-	//noalpha
-	//vector<double> userTimes = {0.51844, 0.14299, 0.29331};
-	//vector<double> userParameters = {1.44141,  0.45891,  0.53792,  0.57142,  0.55240};
-
-	//modelParams->setUserDivergenceParams(userTimes);
-	//modelParams->setUserSubstParams(userParameters);
-	//modelParams->setAlpha(1.43271);
-
-
-	//hack ends
-
-	//alpha is an initial alpha!!
-	//modelParams->setAlpha(alpha);
-
-	SubstitutionModelBase* smodel;
-
 
 	DEBUG("About to sample some triplets");
 	vector<array<unsigned int, 3> > tripletIdxs = tst.sampleFromTree();
@@ -187,6 +89,26 @@ TripletModelEstimator::TripletModelEstimator(Sequences* inputSeqs, Definitions::
 
 	bfgs = new Optimizer(modelParams, this,ot);
 	bfgs->optimize();
+	//we now have the triplet times + alignments
+	//optimize indels - construct a vector of alignment pairs with the distance
+
+	modelParams->outputParameters();
+
+	StateTransitionEstimator* ste = new StateTransitionEstimator(ot);
+
+	double tb1,tb2,tb3;
+
+	for(int al = 0; al < tripleAlignments.size(); al++)
+	{
+		tb1 = modelParams->getDivergenceTime(al*3);
+		tb2 = modelParams->getDivergenceTime((al*3)+1);
+		tb3 = modelParams->getDivergenceTime((al*3)+2);
+		ste->addPair(tripleAlignments[al][0],tripleAlignments[al][1],tb1+tb2);
+		ste->addPair(tripleAlignments[al][1],tripleAlignments[al][2],tb2+tb3);
+	}
+
+	ste->optimize();
+
 }
 
 TripletModelEstimator::~TripletModelEstimator()
@@ -218,8 +140,6 @@ double TripletModelEstimator::runIteration()
 
 
 	double partial1;
-
-	//modelParams->outputParameters();
 
 	substModel->setAlpha(modelParams->getAlpha());
 	substModel->setParameters(modelParams->getSubstParameters());

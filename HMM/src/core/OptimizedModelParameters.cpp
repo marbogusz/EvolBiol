@@ -12,7 +12,7 @@ namespace EBC
 
 OptimizedModelParameters::OptimizedModelParameters(SubstitutionModelBase* sm, IndelModel* im, unsigned int sCount, unsigned int dCount,
 		bool se, bool ie, bool ae, bool de, Maths* m) : maths(m), sm(sm), im(im), indelParameters(im != NULL ? im->getParamsNumber() : 0),
-		substParameters(sm->getParamsNumber()), divergenceTimes(dCount),
+		substParameters(sm != NULL ? sm->getParamsNumber() : 0), divergenceTimes(dCount),
 		estimateIndelParams(ie), estimateSubstParams(se), estimateAlpha(ae), estimateDivergence(de)
 {
 	indelCount = indelParameters.size(); //-1;  //FIXME - hack!!!
@@ -175,7 +175,8 @@ void EBC::OptimizedModelParameters::outputParameters()
 			std::cerr << p  << '\t';
 	for (auto p : divergenceTimes)
 		std::cerr << p  << '\t';
-	std::cerr << alpha << std::endl;
+	if(this->estimateAlpha)
+		std::cerr << alpha << std::endl;
 }
 
 double EBC::OptimizedModelParameters::getDistanceBetween(unsigned int i,

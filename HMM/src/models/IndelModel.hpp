@@ -35,6 +35,10 @@ protected:
 public:
 	IndelModel(unsigned int);
 
+	virtual double calculateGapOpening(double time) = 0;
+	virtual double calculateGapExtension(double time) = 0;
+
+
 	//set parameters - time + the rest of parameters
 	virtual void setParameters(double*) = 0;
 

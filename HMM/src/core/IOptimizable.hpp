@@ -14,7 +14,7 @@ namespace EBC
 class IOptimizable
 {
 public:
-	virtual ~IOptimizable();
+
 	virtual double runIteration() = 0;
 };
 

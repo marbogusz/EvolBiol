@@ -36,10 +36,16 @@ private:
 	DistanceMatrix* distMat;
 	unsigned int s1, s2,s3;
 
+	array<vector<SequenceElement>, 3> triAlignment;
+
+	void assembleFromPairs(pair<string, string>& p1,pair<string, string>& p2);
+
 public:
 	TripletAligner(Sequences* inputSeq, array<unsigned int, 3> triplet, DistanceMatrix* dm);
 
 	array<vector<SequenceElement>, 3> align();
+
+	array<vector<SequenceElement>, 3> align(pair<string, string>& p1,pair<string, string>& p2);
 };
 
 } /* namespace EBC */

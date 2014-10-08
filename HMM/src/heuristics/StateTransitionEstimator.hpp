@@ -11,6 +11,8 @@
 #include "core/IOptimizable.hpp"
 #include "core/Optimizer.hpp"
 
+#include "heuristics/StateTransitionML.hpp"
+
 namespace EBC
 {
 
@@ -20,12 +22,30 @@ protected:
 
 	Optimizer* bfgs;
 
-public:
-	StateTransitionEstimator();
+	OptimizedModelParameters* modelParams;
 
-	void runIteration();
+	vector<StateTransitionML*> stmSamples;
+
+	IndelModel* indelModel;
+
+	Maths* maths;
+
+
+public:
+	StateTransitionEstimator(Definitions::OptimizationType ot);
+
+	void addPair(vector<SequenceElement>& s1,vector<SequenceElement>& s2, double time);
+
+	double runIteration();
+
+	void optimize();
 
 	virtual ~StateTransitionEstimator();
+
+	OptimizedModelParameters* getModelParams()
+	{
+		return modelParams;
+	}
 };
 
 } /* namespace EBC */

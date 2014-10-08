@@ -29,6 +29,16 @@ NegativeBinomialGapModel::~NegativeBinomialGapModel()
 	// TODO Auto-generated destructor stub
 }
 
+double NegativeBinomialGapModel::calculateGapOpening(double time)
+{
+	return 1-exp(-1*lambda*time);
+}
+
+double NegativeBinomialGapModel::calculateGapExtension(double time)
+{
+	return this->gapExtensionProbability;
+}
+
 void NegativeBinomialGapModel::setParameters(vector<double> vc)
 {
 	this->lambda = vc[0];

@@ -19,7 +19,7 @@
 #include "heuristics/GuideTree.hpp"
 #include "heuristics/GotohAlgorithm.hpp"
 #include "heuristics/TripletAligner.hpp"
-#include "heuristics/TripletModelEstimator.hpp"
+#include "heuristics/ModelEstimator.hpp"
 #include <array>
 
 using namespace std;
@@ -55,7 +55,7 @@ int main(int argc, char ** argv) {
 
 			//DEBUG("Creating TripletModelEstimator");
 
-			TripletModelEstimator* tme = new TripletModelEstimator(inputSeqs, cmdReader->getModelType(),
+			ModelEstimator* tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),
 					cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
 					cmdReader->estimateAlpha());
 
@@ -84,7 +84,7 @@ int main(int argc, char ** argv) {
 			fwdHMM->runForwardAlgorithm();
 			*/
 
-			TripletModelEstimator* tme = new TripletModelEstimator(inputSeqs, cmdReader->getModelType(),
+			ModelEstimator* tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),
 								cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
 								cmdReader->estimateAlpha());
 

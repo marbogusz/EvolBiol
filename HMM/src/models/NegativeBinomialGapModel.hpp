@@ -23,6 +23,9 @@ public:
 
 	NegativeBinomialGapModel();
 
+	double calculateGapOpening(double time);
+	double calculateGapExtension(double time);
+
 	virtual ~NegativeBinomialGapModel();
 
 	void calculateGeometricProbability(double lambda, double t);
