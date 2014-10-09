@@ -78,11 +78,16 @@ array<vector<SequenceElement>, 3> TripletAligner::align(
 		pair<string, string>& p1, pair<string, string>& p2)
 {
 	//FIXME - implement
+	assembleFromPairs(p1,p2);
 	return this->triAlignment;
 }
 
-array<vector<SequenceElement>, 3> TripletAligner::align()
+array<vector<SequenceElement>, 3> TripletAligner::align(array<unsigned int, 3> triplet)
 {
+	s1 = triplet[0];
+	s2 = triplet[1];
+	s3 = triplet[2];
+
 	string& seq1 = inputSeqs->getRawSequenceAt(s1);
 	string& seq2 = inputSeqs->getRawSequenceAt(s2);
 	string& seq3 = inputSeqs->getRawSequenceAt(s3);
@@ -105,13 +110,11 @@ array<vector<SequenceElement>, 3> TripletAligner::align()
 
 }
 
-TripletAligner::TripletAligner(Sequences* iSeq, array<unsigned int, 3> triplet, DistanceMatrix* dm) : inputSeqs(iSeq), distMat(dm)
+TripletAligner::TripletAligner(Sequences* iSeq, DistanceMatrix* dm) : inputSeqs(iSeq), distMat(dm)
 {
 	DEBUG("Starting TripletAligner");
 
-	s1 = triplet[0];
-	s2 = triplet[1];
-	s3 = triplet[2];
+
 }
 
 } /* namespace EBC */

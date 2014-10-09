@@ -17,12 +17,13 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 {
 	DEBUG("About to sample some triplets");
 
+	tal = new TripletAligner (inputSequences, gtree.getDistanceMatrix());
+
 	vector<array<unsigned int, 3> > tripletIdxs = tst.sampleFromTree();
 
 	for (auto idx : tripletIdxs)
 	{
-		TripletAligner tal(inputSequences, idx, gtree.getDistanceMatrix());
-		tripleAlignments.push_back(tal.align());
+		tripleAlignments.push_back(tal->align(idx));
 	}
 
 	sme = new SubstitutionModelEstimator(inputSeqs, model ,ot, rateCategories, alpha, estimateAlpha, tripletIdxs.size());
@@ -47,6 +48,65 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 		ste->addPair(tripleAlignments[al][1],tripleAlignments[al][2],tb2+tb3);
 	}
 	ste->optimize();
+
+	//make another pass
+	tripleAlignments.clear();
+
+
+	indelModel =  ste->getIndelModel();
+	substModel =  sme->getSubstModel();
+
+	for (int idx = 0; idx < tripletIdxs.size(); idx++)
+	{
+		vphmm = new ViterbiPairHMM(inputSeqs->getSequencesAt(tripletIdxs[idx][0]), inputSeqs->getSequencesAt(tripletIdxs[idx][1]),false, substModel, indelModel, 0);
+		tb1 = sme->getModelParams()->getDivergenceTime(idx*3);
+		tb2 = sme->getModelParams()->getDivergenceTime((idx*3)+1);
+		tb3 = sme->getModelParams()->getDivergenceTime((idx*3)+2);
+
+		vphmm->setDivergenceTime(tb1+tb2);
+		vphmm->runAlgorithm();
+		auto p1 =  vphmm->getAlignment(inputSeqs->getRawSequenceAt(tripletIdxs[idx][0]), inputSeqs->getRawSequenceAt(tripletIdxs[idx][1]));
+		delete vphmm;
+		vphmm = new ViterbiPairHMM(inputSeqs->getSequencesAt(tripletIdxs[idx][1]), inputSeqs->getSequencesAt(tripletIdxs[idx][2]),false, substModel, indelModel, 0);
+		vphmm->setDivergenceTime(tb2+tb3);
+		vphmm->runAlgorithm();
+		auto p2 =  vphmm->getAlignment(inputSeqs->getRawSequenceAt(tripletIdxs[idx][1]), inputSeqs->getRawSequenceAt(tripletIdxs[idx][2]));
+		delete vphmm;
+		tripleAlignments.push_back(tal->align(p1,p2));
+		//tripleAlignments.push_back(tal.align());
+	}
+
+	delete sme;
+	delete ste;
+
+	DEBUG("Re-estimating model parameters");
+
+	sme = new SubstitutionModelEstimator(inputSeqs, model ,ot, rateCategories, alpha, estimateAlpha, tripletIdxs.size());
+
+	for(int al = 0; al < tripleAlignments.size(); al++)
+	{
+		sme->addTriplet(tripleAlignments[al]);
+	}
+
+	sme->optimize();
+
+	ste = new StateTransitionEstimator(ot);
+
+	for(int al = 0; al < tripleAlignments.size(); al++)
+	{
+		tb1 = sme->getModelParams()->getDivergenceTime(al*3);
+		tb2 = sme->getModelParams()->getDivergenceTime((al*3)+1);
+		tb3 = sme->getModelParams()->getDivergenceTime((al*3)+2);
+		ste->addPair(tripleAlignments[al][0],tripleAlignments[al][1],tb1+tb2);
+		ste->addPair(tripleAlignments[al][1],tripleAlignments[al][2],tb2+tb3);
+	}
+	ste->optimize();
+	//we have new alignments!
+	//re-estimate
+
+	//do Viterbi using the estimates
+
+	//construct triplets
 }
 
 ModelEstimator::~ModelEstimator()

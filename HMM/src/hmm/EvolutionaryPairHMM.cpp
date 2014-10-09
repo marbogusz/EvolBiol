@@ -125,6 +125,7 @@ EvolutionaryPairHMM::~EvolutionaryPairHMM()
 	//delete substModel;
 	//delete indelModel;
     delete maths;
+    delete ptmatrix;
 }
 
 } /* namespace EBC */

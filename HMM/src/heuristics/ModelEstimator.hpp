@@ -18,19 +18,19 @@
 #include "core/PMatrixTriple.hpp"
 
 #include "models/SubstitutionModelBase.hpp"
+#include "models/HKY85Model.hpp"
+#include "models/AminoacidSubstitutionModel.hpp"
+#include "models/GTRModel.hpp"
 
 #include "heuristics/ModelEstimator.hpp"
 #include "heuristics/GuideTree.hpp"
 #include "heuristics/TripletSamplingTree.hpp"
-
-#include "models/GTRModel.hpp"
-#include "models/HKY85Model.hpp"
-#include "models/AminoacidSubstitutionModel.hpp"
 #include "heuristics/TripletSamplingTree.hpp"
 #include "heuristics/TripletAligner.hpp"
-
 #include "heuristics/StateTransitionEstimator.hpp"
 #include "heuristics/SubstitutionModelEstimator.hpp"
+
+#include "hmm/ViterbiPairHMM.hpp"
 
 
 #include <sstream>
@@ -51,6 +51,7 @@ protected:
 	Dictionary* dict;
 
 	SubstitutionModelBase* substModel;
+	IndelModel* indelModel;
 
 	Sequences* inputSequences;
 	Maths* maths;
@@ -60,6 +61,9 @@ protected:
 
 	StateTransitionEstimator* ste;
 	SubstitutionModelEstimator* sme;
+
+	TripletAligner* tal;
+	ViterbiPairHMM* vphmm;
 
 	vector<array<vector<SequenceElement>, 3> > tripleAlignments;
 

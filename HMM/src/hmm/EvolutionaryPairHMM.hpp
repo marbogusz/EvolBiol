@@ -101,7 +101,7 @@ public:
 	//		Definitions::ModelType model, bool banding, unsigned int bandPercentage, Definitions::DpMatrixType mt);
 
 	EvolutionaryPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, bool banding,
-			SubstitutionModelBase* smdl, IndelModel* imdl, unsigned int bandPercentage, Definitions::DpMatrixType mt);
+			SubstitutionModelBase* smdl, IndelModel* imdl, unsigned int bandPercentage, Definitions::DpMatrixType);
 
 	virtual ~EvolutionaryPairHMM();
 

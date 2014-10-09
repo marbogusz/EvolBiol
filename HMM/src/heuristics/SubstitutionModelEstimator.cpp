@@ -63,6 +63,14 @@ SubstitutionModelEstimator::~SubstitutionModelEstimator()
 	// TODO Auto-generated destructor stub
 	delete bfgs;
 	delete modelParams;
+	delete substModel;
+
+	for(auto entry : ptMatrices)
+	{
+		delete entry[0];
+		delete entry[1];
+		delete entry[2];
+	}
 }
 
 void SubstitutionModelEstimator::addTriplet(array<vector<SequenceElement>, 3>& tripleAlignment)

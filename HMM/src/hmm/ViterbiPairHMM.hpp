@@ -27,11 +27,14 @@ protected:
 
 public:
 	ViterbiPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, bool banding,
-			SubstitutionModelBase* smdl, IndelModel* imdl, unsigned int bandPercentage, Definitions::DpMatrixType mt);
+			SubstitutionModelBase* smdl, IndelModel* imdl, unsigned int bandPercentage,
+			Definitions::DpMatrixType mt = Definitions::DpMatrixType::Full);
 
 	virtual ~ViterbiPairHMM();
 
 	double runAlgorithm();
+
+	pair<string, string> getAlignment(string&a, string& b);
 
 	double getViterbiSubstitutionLikelihood();
 

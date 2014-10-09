@@ -75,6 +75,11 @@ public:
 	{
 		return modelParams;
 	}
+
+	SubstitutionModelBase* getSubstModel()
+	{
+		return substModel;
+	}
 };
 
 } /* namespace EBC */

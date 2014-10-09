@@ -46,6 +46,11 @@ public:
 	{
 		return modelParams;
 	}
+
+	IndelModel* getIndelModel()
+	{
+		return indelModel;
+	}
 };
 
 } /* namespace EBC */

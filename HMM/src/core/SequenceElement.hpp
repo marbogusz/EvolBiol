@@ -18,11 +18,13 @@ namespace EBC
 
 class SequenceElement
 {
+//FIXME - this is potentially slow - rework
+
 protected:
 	bool isGap;
 	short matrixIndex;
 	std::string symbol;
-	vector<short> alternativeIndexes;
+	//vector<short> alternativeIndexes;
 public:
 	SequenceElement(bool, short, short*, string smbl);
 

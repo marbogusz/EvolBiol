@@ -151,14 +151,55 @@ double ViterbiPairHMM::runAlgorithm()
 	{
 		Y->tracebackRaw(this->seq1,this->seq2, this->dict, this->alignment);
 	}
-
-
 	//DEBUG("Final Viterbi M  " << mm);
 	//DEBUG("Final Viterbi X  " << mx );
 	//DEBUG("Final Viterbi Y  " << my );
 
 return (std::max(mm,std::max(mx,my)))*-1.0;
+}
 
+pair<string, string> ViterbiPairHMM::getAlignment(string&a, string& b)
+{
+	double mv, xv, yv;
+
+	DEBUG("Get Viterbi Results");
+
+	pair<string, string> initialAlignment;
+	initialAlignment.first.reserve(xSize > ySize ? xSize : ySize);
+	initialAlignment.second.reserve(xSize > ySize ? xSize : ySize);
+
+
+
+	mv =  M->getValueAt(xSize-1,ySize-1) ;
+	xv =  X->getValueAt(xSize-1,ySize-1) ;
+	yv =  Y->getValueAt(xSize-1,ySize-1) ;
+
+
+	if(mv >=xv && mv >=yv)
+	{
+		M->traceback(a,b, &initialAlignment);
+	}
+	else if(xv >= yv)
+	{
+		X->traceback(a,b, &initialAlignment);
+	}
+	else
+	{
+		Y->traceback(a,b, &initialAlignment);
+	}
+
+
+
+	//M->traceback(a,b, &initialAlignment);
+
+	reverse(initialAlignment.first.begin(), initialAlignment.first.end());
+	reverse(initialAlignment.second.begin(), initialAlignment.second.end());
+
+	DEBUG("Viterbi Alignment s1 : " << initialAlignment.first);
+	DEBUG("Viterbi Alignment 21 : " << initialAlignment.first);
+
+
+	return initialAlignment;
 }
 
 
