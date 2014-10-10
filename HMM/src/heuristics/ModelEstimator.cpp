@@ -60,15 +60,19 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 
 	for (int idx = 0; idx < tripletIdxs.size(); idx++)
 	{
+
+		DEBUG("First Viterbi Pair " << idx);
 		vphmm = new ViterbiPairHMM(inputSeqs->getSequencesAt(tripletIdxs[idx][0]), inputSeqs->getSequencesAt(tripletIdxs[idx][1]),false, substModel, indelModel, 0);
 		tb1 = sme->getModelParams()->getDivergenceTime(idx*3);
 		tb2 = sme->getModelParams()->getDivergenceTime((idx*3)+1);
 		tb3 = sme->getModelParams()->getDivergenceTime((idx*3)+2);
 
 		vphmm->setDivergenceTime(tb1+tb2);
+		//vphmm->summarize();
 		vphmm->runAlgorithm();
 		auto p1 =  vphmm->getAlignment(inputSeqs->getRawSequenceAt(tripletIdxs[idx][0]), inputSeqs->getRawSequenceAt(tripletIdxs[idx][1]));
 		delete vphmm;
+		DEBUG("Second Viterbi Pair " << idx);
 		vphmm = new ViterbiPairHMM(inputSeqs->getSequencesAt(tripletIdxs[idx][1]), inputSeqs->getSequencesAt(tripletIdxs[idx][2]),false, substModel, indelModel, 0);
 		vphmm->setDivergenceTime(tb2+tb3);
 		vphmm->runAlgorithm();
