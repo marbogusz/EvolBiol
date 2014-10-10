@@ -68,7 +68,8 @@ protected:
 
 	inline void getBandWidth()
 	{
-		this->bandSpan = ySize/(bandFactor);
+		if (bandingEnabled && bandFactor >0)
+			this->bandSpan = ySize/(bandFactor);
 		//DEBUG("Band span " << bandSpan);
 	}
 

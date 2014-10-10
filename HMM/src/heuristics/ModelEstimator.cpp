@@ -49,12 +49,14 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 	}
 	ste->optimize();
 
+	DEBUG("Re-estimating model parameters");
 	//make another pass
 	tripleAlignments.clear();
 
 
 	indelModel =  ste->getIndelModel();
 	substModel =  sme->getSubstModel();
+
 
 	for (int idx = 0; idx < tripletIdxs.size(); idx++)
 	{
@@ -79,7 +81,7 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 	delete sme;
 	delete ste;
 
-	DEBUG("Re-estimating model parameters");
+
 
 	sme = new SubstitutionModelEstimator(inputSeqs, model ,ot, rateCategories, alpha, estimateAlpha, tripletIdxs.size());
 
