@@ -65,17 +65,17 @@ vector<SequenceElement> Dictionary::translate(string& sequence, bool disregardIn
 	translatedVector.reserve((sequence.size()));
 	short currentEl;
 
-	DEBUG("Transled: ");
+//	DEBUG("Transled: ");
 	for(string::iterator it = sequence.begin(); it < sequence.end(); it++)
 	{
 		currentEl = getSymbolIndex(*it);
 		if (currentEl == alphabetSize && disregardIndels)
 			continue;
-		DEBUGN(currentEl);
+//		DEBUGN(currentEl);
 		//translatedVector.push_back(SequenceElement((currentEl == alphabetSize), currentEl,NULL, getSymbolAt(currentEl)));
 		translatedVector.push_back(SequenceElement((currentEl == alphabetSize), currentEl,NULL, getSymbolAt(currentEl)));
 	}
-	DEBUGN(std::endl);
+//	DEBUGN(std::endl);
 	return translatedVector;
 
 }

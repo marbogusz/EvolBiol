@@ -176,7 +176,8 @@ void EBC::OptimizedModelParameters::outputParameters()
 	for (auto p : divergenceTimes)
 		std::cerr << p  << '\t';
 	if(this->estimateAlpha)
-		std::cerr << alpha << std::endl;
+		std::cerr << alpha;
+	std::cerr << std::endl;
 }
 
 double EBC::OptimizedModelParameters::getDistanceBetween(unsigned int i,

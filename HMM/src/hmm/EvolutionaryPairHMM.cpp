@@ -113,18 +113,10 @@ void EvolutionaryPairHMM::calculateModels()
 
 EvolutionaryPairHMM::~EvolutionaryPairHMM()
 {
-	// TODO Auto-generated destructor stub
 
-	//FIXME - organize memory management
-	//delete bfgs;
-	//delete Y;
-	//delete X;
-	//delete M;
-	//delete[] optParameters;
-	delete[] mlParameters;
-	//delete substModel;
-	//delete indelModel;
-    delete maths;
+	delete Y;
+	delete X;
+	delete M;
     delete ptmatrix;
 }
 

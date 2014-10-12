@@ -94,8 +94,6 @@ double ViterbiPairHMM::runAlgorithm()
 
 		//while (i != xSize && j != ySize)
 
-	DEBUG("Run Viterbi");
-
 	DEBUG(this->seq1.size() << " " << seq2.size() << " " << xSize << " " << ySize);
 	for (i = 0; i<xSize; i++)
 	{
@@ -191,15 +189,10 @@ pair<string, string> ViterbiPairHMM::getAlignment(string&a, string& b)
 		Y->traceback(a,b, &initialAlignment);
 	}
 
-
-
 	//M->traceback(a,b, &initialAlignment);
 
 	reverse(initialAlignment.first.begin(), initialAlignment.first.end());
 	reverse(initialAlignment.second.begin(), initialAlignment.second.end());
-
-	DEBUG("Viterbi Alignment s1 : " << initialAlignment.first);
-	DEBUG("Viterbi Alignment s2 : " << initialAlignment.second);
 
 
 	return initialAlignment;
