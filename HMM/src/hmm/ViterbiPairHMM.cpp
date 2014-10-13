@@ -78,8 +78,6 @@ double ViterbiPairHMM::runAlgorithm()
 	calculateModels();
 	setTransitionProbabilities();
 
-	DEBUG("Run Viterbi");
-
 	unsigned int i,j,k,l;
 
 	double xx,xy,xm,yx,yy,ym,mx,my,mm;
@@ -94,7 +92,6 @@ double ViterbiPairHMM::runAlgorithm()
 
 		//while (i != xSize && j != ySize)
 
-	DEBUG(this->seq1.size() << " " << seq2.size() << " " << xSize << " " << ySize);
 	for (i = 0; i<xSize; i++)
 	{
 		for (j = 0; j<ySize; j++)
@@ -163,11 +160,15 @@ pair<string, string> ViterbiPairHMM::getAlignment(string&a, string& b)
 {
 	double mv, xv, yv;
 
-	DEBUG("Get Viterbi Results");
+	DEBUG("Get Viterbi Results for the following sequences");
+	DEBUGN(a << endl);
+	DEBUGN(b << endl << endl);
+
 
 	pair<string, string> initialAlignment;
 	initialAlignment.first.reserve(xSize > ySize ? xSize : ySize);
 	initialAlignment.second.reserve(xSize > ySize ? xSize : ySize);
+
 
 
 

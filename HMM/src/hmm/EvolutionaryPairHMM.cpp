@@ -28,6 +28,8 @@ EvolutionaryPairHMM::EvolutionaryPairHMM(vector<SequenceElement> s1, vector<Sequ
 	bandFactor = bandPercentage;
 	bandingEnabled = banding;
 
+	this->tpb = new TransitionProbabilities(indelModel);
+
 	getBandWidth();
 	initializeStates(mt);
 
@@ -36,14 +38,17 @@ EvolutionaryPairHMM::EvolutionaryPairHMM(vector<SequenceElement> s1, vector<Sequ
 void EvolutionaryPairHMM::setDivergenceTime(double time)
 {
 	ptmatrix->setTime(time);
+	tpb->setTime(time);
+
+
 }
 
 void EvolutionaryPairHMM::setTransitionProbabilities()
 {
 	double e,g;
 
-	e = indelModel->getGapExtensionProbability();
-	g = indelModel->getGapOpeningProbability();
+	e = tpb->getGapExtension();
+	g = tpb->getGapOpening();
 
 	M->setTransitionProbabilityFromMatch(log(1-2*g));
 	M->setTransitionProbabilityFromInsert(log((1-e)*(1-2*g)));
@@ -57,13 +62,15 @@ void EvolutionaryPairHMM::setTransitionProbabilities()
 
 	X->setTransitionProbabilityFromMatch(log(g));
 	Y->setTransitionProbabilityFromMatch(log(g));
+
+
 }
 
 void EvolutionaryPairHMM::summarize()
 {
 	double e,g;
-	e = indelModel->getGapExtensionProbability();
-	g = indelModel->getGapOpeningProbability();
+	e = tpb->getGapExtension();
+	g = tpb->getGapOpening();
 
 	cout << " Transition probabilities: " << endl;
 	cout << "M->M : " << 1-2*g << endl;
@@ -109,6 +116,7 @@ void EvolutionaryPairHMM::initializeStates(Definitions::DpMatrixType mt)
 void EvolutionaryPairHMM::calculateModels()
 {
 	ptmatrix->calculate();
+	tpb->calculate();
 }
 
 EvolutionaryPairHMM::~EvolutionaryPairHMM()

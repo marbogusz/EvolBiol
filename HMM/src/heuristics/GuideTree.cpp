@@ -72,7 +72,7 @@ void GuideTree::constructTree()
 			identity = commonKmerCount(i,j)/((double)(min(s1.size(),s2.size())-kmerSize+1));
 			estIdentity = log(0.02 + identity)/4.12 + 0.995;
 			kimura = kimuraDist(estIdentity);
-			DEBUG("k-mer distance between seq. " << i << " and " << j << " is " << identity << " " << -log(0.02 + identity) << " " << -log(0.1 + identity)  << " "<< estIdentity << " " << kimura );
+			//DEBUG("k-mer distance between seq. " << i << " and " << j << " is " << identity << " " << -log(0.02 + identity) << " " << -log(0.1 + identity)  << " "<< estIdentity << " " << kimura );
 
 			distMat->addDistance(i,j,kimura);
 		}

@@ -79,8 +79,8 @@ void TripletSamplingTree::fromNewick(const string& newick)
 	Node *tmpNode, *tmpParent, *tmpCurrent;
 	stack<Node*> workNodes;
 
-	cout << "K-mer newick tree :" << endl;
-	cout << newick << endl;
+	//cout << "K-mer newick tree :" << endl;
+	//cout << newick << endl;
 
 	string nodeName;
 	double currentDistance;
@@ -199,6 +199,7 @@ vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromTree()
 {
 	vector<array<unsigned int, 3> > result;
 	Node *firstNd, *secondNd;
+	unsigned int treeNo = 0;
 	//copy
 	availableNodes = leafNodes;
 	//randomly select 1 leaf
@@ -209,7 +210,7 @@ vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromTree()
 
 	double tmpd1, tmpd2;
 
-	while(availableNodes.size() > 5)
+	while(availableNodes.size() >=3 && treeNo < 3)
 	{
 		auto pair = distMat->getPairWithinDistance(this->idealTreeSize-this->leafBranchSd, this->idealTreeSize+this->leafBranchSd);
 		firstNd = leafNodes[pair.first];
@@ -243,6 +244,7 @@ vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromTree()
 			result.push_back({{s1,s2,availableNodes.begin()->first}});
 			availableNodes.erase(availableNodes.begin());
 		}
+		treeNo++;
 	}
 	//distance to root
 

@@ -85,20 +85,22 @@ int main(int argc, char ** argv) {
 			*/
 
 			ModelEstimator* tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),
-								cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
-								cmdReader->estimateAlpha());
+					cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
+					cmdReader->estimateAlpha());
+
 
 			vector<double> indelParams;
 			vector<double> substParams;
 			double alpha;
 
 			substParams = tme->getSubstitutionParameters();
+			indelParams = tme->getIndelParameters();
 			if(cmdReader->estimateAlpha())
 				alpha = tme->getAlpha();
 
 
 			//FIXME - hardcoding substitution parameters and alpha to come from the estimator
-			PairwiseEstimator* pe = new PairwiseEstimator(cmdReader->getAlgorithmType(), inputSeqs, cmdReader->getModelType() ,cmdReader->getIndelParams(),
+			PairwiseEstimator* pe = new PairwiseEstimator(cmdReader->getAlgorithmType(), inputSeqs, cmdReader->getModelType() ,indelParams/*cmdReader->getIndelParams()*/,
 					/*cmdReader->getSubstParams()*/ substParams, cmdReader->getOptimizationType(), cmdReader->getBanding(), cmdReader->getBandFactor(),
 					cmdReader->getCategories(), /*cmdReader->getAlpha()*/ alpha, /*cmdReader->estimateAlpha()*/ false,cmdReader->getDistance());
 
@@ -125,7 +127,6 @@ int main(int argc, char ** argv) {
 			//scerr << cmdReader->getInputFileName() << endl;
 
 			//double* estimatedParams = fwdHMM->getMlParameters();
-
 			//string vitFile = cmdReader->getInputFileName();
 
 			//for (unsigned int i = 0; i< fwdHMM->getTotalParameters(); i++)

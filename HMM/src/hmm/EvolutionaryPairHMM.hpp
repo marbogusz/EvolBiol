@@ -24,6 +24,7 @@
 #include "models/HKY85Model.hpp"
 #include "models/AminoacidSubstitutionModel.hpp"
 #include "core/PMatrixDouble.hpp"
+#include "core/TransitionProbabilities.hpp"
 
 namespace EBC
 {
@@ -39,6 +40,7 @@ protected:
 	PMatrixDouble* ptmatrix;
 	IndelModel* indelModel;
 	Sequences* inputSequences;
+	TransitionProbabilities* tpb;
 	Maths* maths;
 
 	double * mlParameters;
