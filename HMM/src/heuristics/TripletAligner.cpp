@@ -95,7 +95,7 @@ array<vector<SequenceElement>, 3> TripletAligner::align(array<unsigned int, 3> t
 	string& seq2 = inputSeqs->getRawSequenceAt(s2);
 	string& seq3 = inputSeqs->getRawSequenceAt(s3);
 
-	GotohAlgorithm* algo = new GotohAlgorithm();
+	GotohAlgorithm* algo = new GotohAlgorithm(inputSeqs->getDictionary()->getAlphabetSize(),inputSeqs->getDictionary());
 	algo->setDistance(distMat->getDistance(s1,s2));
 	algo->setSequences(seq1,seq2);
 	//scoring matrices etc....

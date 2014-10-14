@@ -28,9 +28,7 @@ protected:
 	string seq2;
 
 public:
-	GotohScoringMatrix(double disance, double gapOpening, double gapExtension);
-
-	GotohScoringMatrix(double disance);
+	GotohScoringMatrix(unsigned int matrixSize, double distance, Dictionary*);
 
 	double getScoreByIndex(unsigned int i, unsigned int j)
 	{

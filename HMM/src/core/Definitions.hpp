@@ -10,7 +10,7 @@
 
 #include <iostream>
 
-//#define DEBUG_BUILD 1
+#define DEBUG_BUILD 1
 
 #ifdef DEBUG_BUILD
 #  define DEBUG(x) do { std::cout << "DBG! " << x << std::endl; } while (0)
@@ -65,6 +65,15 @@ public:
 
 	static const unsigned int NBIndelParamCount;
 
+	static const unsigned int nucleotideCount;
+
+	static const unsigned int aminoacidCount;
+
+	static const double blosum62[20][20];
+
+	static const double blosum62gapOpening;
+
+	static const double blosum62gapExtension;
 
 	static aaModelDefinition aaLgModel;
 	/*constexpr static const double LGaaModelPis[] = {0.079066,  0.055941,  0.041977,  0.053052,0.012937, 0.040767,  0.071586,  0.057337, 0.022355,

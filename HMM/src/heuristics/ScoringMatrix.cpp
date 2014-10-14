@@ -18,11 +18,31 @@ ScoringMatrix::ScoringMatrix()
 	gapPenalty = Definitions::defaultGapPenalty;
 }
 
-
-
-ScoringMatrix::ScoringMatrix(double distance)
+ScoringMatrix::~ScoringMatrix()
 {
-	scoresFromDistanceJC(distance);
+	for(int i=0; i< matrixSize; i++)
+			delete[] scores[i];
+	delete scores;
+}
+
+ScoringMatrix::ScoringMatrix(unsigned int matrixSize, double distance, Dictionary* dict) : matrixSize(matrixSize), dict(dict)
+{
+	scores = new double*[matrixSize];
+	for(int i=0; i< matrixSize; i++)
+		scores[i] = new double[matrixSize];
+
+	if(matrixSize == Definitions::nucleotideCount)
+		scoresFromDistanceJC(distance);
+	else if (matrixSize == Definitions::aminoacidCount)
+	{
+		scoresFromBLOSUM();
+	}
+}
+
+void ScoringMatrix::scoresFromBLOSUM()
+{
+	for(int i=0; i< matrixSize; i++)
+		std::copy(Definitions::blosum62[i], Definitions::blosum62[i]+matrixSize,scores[i]);
 }
 
 void ScoringMatrix::scoresFromDistanceJC(double distance)
@@ -56,51 +76,18 @@ void ScoringMatrix::scoresFromDistanceJC(double distance)
 
 double ScoringMatrix::getScore(char& a, char& b)
 {
-	int i,j;
-	switch(a)
-	{
-		case 'A':
-		case 'a':  	i = 0;
-					break;
-		case 'C':
-		case 'c':  	i = 1;
-					break;
-		case 'G':
-		case 'g':  	i = 2;
-					break;
-		case 'T':
-		case 't':  	i = 3;
-					break;
-		default :  	return gapPenalty;
-	}
-	switch(b)
-	{
-		case 'A':
-		case 'a':  j = 0;  break;
-
-		case 'C':
-		case 'c':  j = 1;  break;
-
-		case 'G':
-		case 'g':  j = 2;  break;
-
-		case 'T':
-		case 't':  j = 3;  break;
-
-		default :  return gapPenalty;
-	}
-
-	return scores[i][j];
+	return scores[dict->getSymbolIndex(a)][dict->getSymbolIndex(b)];
 
 }
 
 double ScoringMatrix::getAlignmentScore(pair<string, string>* alignment)
 {
+	//FIXME - remove completely
 	double score = 0;
-	for (int i = 0; i < alignment->first.size(); i++)
-	{
-		score += getScore(alignment->first[i], alignment->second[i]);
-	}
+	//for (int i = 0; i < alignment->first.size(); i++)
+	//{
+	//	score += getScore(alignment->first[i], alignment->second[i]);
+	//}
 	return score;
 }
 

@@ -17,7 +17,7 @@ GotohAlgorithm::~GotohAlgorithm()
 	// TODO Auto-generated destructor stub
 }
 
-GotohAlgorithm::GotohAlgorithm()
+GotohAlgorithm::GotohAlgorithm(unsigned int size, Dictionary* d) : scoringSize(size), dict(d)
 {
 	DEBUG("Building Gotoh");
 
@@ -38,7 +38,7 @@ void GotohAlgorithm::setDistance(double distance)
 
 	if (scores != NULL)
 		delete scores;
-	scores = new GotohScoringMatrix(distance);
+	scores = new GotohScoringMatrix(scoringSize, distance, dict);
 }
 
 void GotohAlgorithm::setSequences(string& a, string& b)

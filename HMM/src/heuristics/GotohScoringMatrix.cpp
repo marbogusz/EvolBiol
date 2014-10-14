@@ -10,20 +10,22 @@
 namespace EBC
 {
 
-GotohScoringMatrix::GotohScoringMatrix(double distance, double gO, double gE) :
-		ScoringMatrix(distance), gapOpening(gO), gapExtension(gE)
+GotohScoringMatrix::GotohScoringMatrix(unsigned int size, double distance, Dictionary* dict) : ScoringMatrix(size, distance, dict)
 {
-	// TODO Auto-generated constructor stub
-}
 
-GotohScoringMatrix::GotohScoringMatrix(double distance) : ScoringMatrix(distance)
-{
-	this->gapOpening = this->gapPenalty;
 
-	//FIXME - magic number, set the gap opening to sth reasonable;
-	this->gapExtension = gapOpening * 0.3;
+	if(matrixSize == Definitions::nucleotideCount)
+	{
+		this->gapOpening = this->gapPenalty;
+		this->gapExtension = gapOpening * 0.3;
+	}
+	else if (matrixSize == Definitions::aminoacidCount)
+	{
+		this->gapOpening = Definitions::blosum62gapOpening;
+		this->gapExtension = Definitions::blosum62gapExtension;
+	}
 
-	DEBUG("Scoring matrix gap opening and extension scores : " << gapOpening << ", " << gapExtension);
+	DEBUG("Scoring matrix gap opening and extension scores : " << gapOpening << ", " << gapExtension << " for matrix size " << matrixSize);
 }
 
 } /* namespace EBC */

@@ -54,6 +54,7 @@ short Dictionary::getSymbolIndex(string& symbol)
 
 short Dictionary::getSymbolIndex(char symbol)
 {
+	//FIXME - this is slow!!!!
 	string tmpSearchstring(1,symbol);
 	return translator[tmpSearchstring];
 }

@@ -174,7 +174,7 @@ namespace EBC
             Initialize(delta, n, trees);
             ok=Symmetrize(delta, n);
             if(!ok)
-                printf("\n The matrix  is not symmetric.\n ");
+                printf("BioNJ : The matrix  is not symmetric.\n ");
             while (r > 3)                             /* until r=3                 */
             {
                 Compute_sums_Sx(delta, n);             /* compute the sum Sx       */

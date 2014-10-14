@@ -13,6 +13,7 @@
 //TODO - legacy from a previous project - clean up by having 1 matrix class for Gotoh
 #include <string>
 #include "core/Definitions.hpp"
+#include "core/Dictionary.hpp"
 
 using namespace std;
 
@@ -24,15 +25,22 @@ class ScoringMatrix
 protected:
 
 	double gapPenalty;
-	double scores[4][4];
+	double** scores;
 
+	Dictionary* dict;
+
+	unsigned int matrixSize;
+
+	void scoresFromBLOSUM();
 
 	void scoresFromDistanceJC(double distance);
 
 public:
 	ScoringMatrix();
 
-	ScoringMatrix(double distance);
+	~ScoringMatrix();
+
+	ScoringMatrix(unsigned int size, double distance,Dictionary * dict);
 
 	double getScore(char& a, char& b);
 

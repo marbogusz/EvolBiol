@@ -34,12 +34,15 @@ protected:
 	string seq_a;
 	string seq_b;
 
+	Dictionary* dict;
+
 	GotohScoringMatrix* scores;
 
 	GotohHMatrix* H;
 	GotohVMatrix* V;
 	GotohSMatrix* S;
 
+	unsigned int scoringSize;
 
 	unsigned int seqALen, seqBLen;
 	unsigned int xSize, ySize;
@@ -50,7 +53,7 @@ protected:
 
 public:
 
-	GotohAlgorithm();
+	GotohAlgorithm(unsigned int, Dictionary*);
 
 	std::pair<string,string> getAlignment();
 
