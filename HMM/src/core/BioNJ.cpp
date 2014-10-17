@@ -579,7 +579,10 @@ namespace EBC
         output << ":";
         /*   gcvt(length,PREC, str); */
         /*   fprintf(output,"%s,",str); */
-        output << length << ",";
+        if(length < 0)
+        	output << 0.5 << ",";
+        else
+        	output << length << ",";
 
         length=Finish_branch_length(last[1],last[0],last[2],delta);
         this->treeLength += length;
@@ -587,7 +590,12 @@ namespace EBC
         output <<":";
         /*   gcvt(length,PREC, str); */
         /*   fprintf(output,"%s,",str); */
-        output << length << ",";
+        if(length < 0)
+        	output << 0.5 << ",";
+        else
+        	output << length << ",";
+
+        //FIXME - hacks on a negative length!!!
 
         length=Finish_branch_length(last[2],last[1],last[0],delta);
         this->treeLength += length;
@@ -595,7 +603,10 @@ namespace EBC
         output << ":";
         /*   gcvt(length,PREC,str); */
         /*   fprintf(output,"%s",str); */
-        output << length;
+        if(length < 0)
+        	output << 0.5;
+        else
+        	output << length;
         output << ");";
         output <<"\t";
         output << treeLength;

@@ -16,6 +16,7 @@ GuideTree::GuideTree(Sequences* is) : inputSequences(is)
 	// TODO Auto-generated constructor stub
 	distMat = new DistanceMatrix(inputSequences->getSequenceCount());
 	this->dict = inputSequences->getDictionary();
+	//FIXME - change to 4 or use 4 and 7 with no correction for distance
 	this->kmerSize = 7;
 	this->sequenceCount = inputSequences->getSequenceCount();
 	this->kmers = new vector<unordered_map<string,short>*>(sequenceCount);
@@ -50,7 +51,6 @@ double GuideTree::kimuraDist(double id)
 	//	return dayhoff_pams[iTableIndex] / 100.0;
 }
 
-
 void GuideTree::constructTree()
 {
 	unsigned int i,j;
@@ -69,11 +69,19 @@ void GuideTree::constructTree()
 		{
 			string s1 = inputSequences->getRawSequenceAt(i);
 			string s2 = inputSequences->getRawSequenceAt(j);
-			identity = commonKmerCount(i,j)/((double)(min(s1.size(),s2.size())-kmerSize+1));
-			estIdentity = log(0.02 + identity)/4.12 + 0.995;
-			kimura = kimuraDist(estIdentity);
+			identity = 1.0 - commonKmerCount(i,j)/((double)(min(s1.size(),s2.size())));
+			//estIdentity = log(0.02 + identity)/4.12 + 0.995;
+			//kimura = kimuraDist(estIdentity);
 
-			DEBUG("k-mer distance between seq. " << i << " and " << j << " is " << identity << " " << -log(0.02 + identity) << " " << -log(0.1 + identity)  << " "<< estIdentity << " " << kimura );
+			//DEBUG("k-mer distance between seq. " << i << " and " << j << " is " << identity << " " << -log(0.02 + identity) << " " << -log(0.1 + identity)  << " "<< estIdentity << " " << kimura );
+
+			if(dict->getAlphabetSize() == Definitions::nucleotideCount)
+				estIdentity = identity;
+				//estIdentity = nucFunction(identity);
+			else if(dict->getAlphabetSize() == Definitions::aminoacidCount)
+				estIdentity = aaFunction(identity);
+
+			DEBUG("k-mer distance between seq. " << i << " and " << j << " is " << identity << " " << estIdentity );
 
 			distMat->addDistance(i,j,estIdentity);
 		}

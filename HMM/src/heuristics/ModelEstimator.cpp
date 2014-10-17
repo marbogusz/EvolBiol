@@ -42,9 +42,12 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 
 	for(int al = 0; al < tripleAlignments.size(); al++)
 	{
+
 		tb1 = sme->getModelParams()->getDivergenceTime(al*3);
 		tb2 = sme->getModelParams()->getDivergenceTime((al*3)+1);
 		tb3 = sme->getModelParams()->getDivergenceTime((al*3)+2);
+
+		DEBUG(tb1 << " " << tb2 << " " << tb3);
 		ste->addPair(tripleAlignments[al][0],tripleAlignments[al][1],tb1+tb2);
 		ste->addPair(tripleAlignments[al][1],tripleAlignments[al][2],tb2+tb3);
 	}

@@ -52,7 +52,7 @@ void ScoringMatrix::scoresFromDistanceJC(double distance)
 	//Change so it works with aminoacids
 
 	double exP = exp(4*distance/-3.0);
-	double exI = exp(distance/-3.0);
+	double exI = exp(distance * -1.0 * Definitions::initialLambda);
 	double p0 = 1+3*exP;
 	double p1 = 1-exP;
 	double pI = 1-exI;
@@ -71,6 +71,7 @@ void ScoringMatrix::scoresFromDistanceJC(double distance)
 	gapPenalty = pI;
 
 	DEBUG("Scoring matrix match and mismatch scores : " << p0 << ", " << p1);
+	DEBUG("Scoring matrix gap penalty : " << pI);
 
 }
 

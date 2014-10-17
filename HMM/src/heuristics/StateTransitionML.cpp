@@ -124,6 +124,16 @@ double StateTransitionML::getLnL()
 				//go through site patterns
 				lnl += counts[i][j] * log(pis[i]*md[i][j]);
 			}
+	if (std::isnan(lnl))
+	{
+		DEBUG("NAN extension " << e);
+		DEBUG("NAN opening " << g);
+		DEBUG("EXITING WITHOUT DOING CALCLULATIONS - this means rejection of this analysis");
+		//FIXME - remove this!!!!!
+		//FIXME - fix this estimation, don't exit like this - only for test purposes
+		exit(0);
+	}
+
 	return lnl;
 	//return likelihood
 }

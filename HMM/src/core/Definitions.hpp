@@ -37,6 +37,10 @@ public:
 
 	constexpr static const unsigned int stateCount = 3;
 	constexpr static const unsigned int heuristicsTreeSize = 3;
+	constexpr static const double divergenceBound = 3.5;
+
+	constexpr static const double initialLambda = 0.02;
+	constexpr static const double initialEpsilon = 0.5;
 
 	struct aaModelDefinition
 	{

@@ -21,7 +21,8 @@ OptimizedModelParameters::OptimizedModelParameters(SubstitutionModelBase* sm, In
 	distCount = dCount;
 	optCount = (estimateSubstParams ? substCount : 0) +
 			(estimateIndelParams ? indelCount : 0) + (estimateDivergence ? distCount : 0) + (estimateAlpha ? 1 : 0);
-	this->divergenceBound  = 3.3;
+
+	this->divergenceBound  = Definitions::divergenceBound;
 
 	if(estimateIndelParams)
 		generateInitialIndelParameters();
@@ -177,8 +178,22 @@ void EBC::OptimizedModelParameters::outputParameters()
 		std::cerr << p  << '\t';
 	if(this->estimateAlpha)
 		std::cerr << alpha;
-	std::cerr << std::endl;
+	//std::cerr << std::endl;
 }
+
+void EBC::OptimizedModelParameters::outputToConsole()
+{
+	for (auto p : substParameters)
+			std::cout << p  << '\t';
+	for (auto p : indelParameters)
+			std::cout << p  << '\t';
+	for (auto p : divergenceTimes)
+		std::cout << p  << '\t';
+	if(this->estimateAlpha)
+		std::cout << alpha;
+	std::cout << std::endl;
+}
+
 
 double EBC::OptimizedModelParameters::getDistanceBetween(unsigned int i,
 		unsigned int j)

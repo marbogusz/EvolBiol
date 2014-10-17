@@ -66,6 +66,23 @@ private:
 
 	double kimuraDist(double);
 
+	inline double aaFunction(double kp)
+	{
+		//fitted to a function. Limit to 2 otherwise one might get weird results for distance matrix (negaive branch after NJ)
+		double res = ((-0.0559362*kp)/(kp-0.9992776)) + ((-0.23315*kp)/(kp-1.3291755));
+		if (std::isnan(res))
+					res = 1.1;
+		return min(res,1.1);
+	}
+
+	inline double nucFunction(double kP)
+	{
+		//double res = kP/pow(0.94015-3.14164*kP,0.3600898);
+		//if (std::isnan(res))
+		//	res = 1.1;
+		//return min(res,1.1);
+		return kP;
+	}
 };
 
 } /* namespace EBC */

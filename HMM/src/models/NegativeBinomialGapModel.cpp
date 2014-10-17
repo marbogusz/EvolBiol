@@ -20,8 +20,8 @@ NegativeBinomialGapModel::NegativeBinomialGapModel() : IndelModel(Definitions::N
 {
 	//logMode = true;
 	this->parameterLoBounds[0] = this->parameterLoBounds[1] = 0.000001;
-	this->parameterHiBounds[0] = 0.2;  //lambda limitation due to the model!
-	this->parameterHiBounds[1] = 0.999999;
+	this->parameterHiBounds[0] = 0.15;  //lambda limitation due to the model!
+	this->parameterHiBounds[1] = 0.9;
 }
 
 NegativeBinomialGapModel::~NegativeBinomialGapModel()

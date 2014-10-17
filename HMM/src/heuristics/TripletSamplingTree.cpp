@@ -79,7 +79,7 @@ void TripletSamplingTree::fromNewick(const string& newick)
 	Node *tmpNode, *tmpParent, *tmpCurrent;
 	stack<Node*> workNodes;
 
-	//cout << "K-mer newick tree :" << endl;
+	DEBUG("K-mer newick tree : " << newick);
 	//cout << newick << endl;
 
 	string nodeName;
@@ -173,6 +173,7 @@ void TripletSamplingTree::fromNewick(const string& newick)
 	}
 	this->leafBranchSd /= leafNodes.size();
 	this->leafBranchSd = std::sqrt(leafBranchSd);
+	DEBUG("Newick tree parsed");
 }
 
 vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromDM()

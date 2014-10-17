@@ -17,7 +17,7 @@ GotohScoringMatrix::GotohScoringMatrix(unsigned int size, double distance, Dicti
 	if(matrixSize == Definitions::nucleotideCount)
 	{
 		this->gapOpening = this->gapPenalty;
-		this->gapExtension = gapOpening * 0.3;
+		this->gapExtension = gapOpening * 0.2;
 	}
 	else if (matrixSize == Definitions::aminoacidCount)
 	{

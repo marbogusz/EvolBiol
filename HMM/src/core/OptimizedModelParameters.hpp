@@ -73,6 +73,8 @@ public:
 
 	void outputParameters();
 
+	void outputToConsole();
+
 	double getDistanceBetween(unsigned int i, unsigned int j);
 
 	double getAlpha() const
