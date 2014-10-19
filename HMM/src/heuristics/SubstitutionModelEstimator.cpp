@@ -89,7 +89,7 @@ void SubstitutionModelEstimator::addTriplet(array<vector<SequenceElement>, 3>& t
 void SubstitutionModelEstimator::optimize()
 {
 	bfgs->optimize();
-	modelParams->outputToConsole();
+	//modelParams->outputToConsole();
 }
 
 double SubstitutionModelEstimator::runIteration()

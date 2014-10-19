@@ -57,7 +57,7 @@ void PairwiseEstimator::BFGS::optimize()
 		case Definitions::OptimizationType::BFGS:
 		{
 			likelihood = dlib::find_min_box_constrained(dlib::bfgs_search_strategy(),
-					dlib::objective_delta_stop_strategy(1e-8).be_verbose(),
+					dlib::objective_delta_stop_strategy(1e-8),
 					f_objective,
 					derivative(f_objective),
 					initParams,
@@ -73,8 +73,8 @@ void PairwiseEstimator::BFGS::optimize()
 		}
 	}
 	this->parent->modelParams->fromDlibVector(initParams);
-	parent->modelParams->outputParameters();
-	cout  << likelihood << "\n";
+	//parent->modelParams->outputParameters();
+	//cout  << likelihood << "\n";
 
 }
 
@@ -109,7 +109,7 @@ PairwiseEstimator::PairwiseEstimator(Definitions::AlgorithmType at, Sequences* i
 
 	DEBUG("Pairwise model estimator starting");
 	DEBUG("Estimate substitution parameters set to : " << estimateSubstitutionParams << " Estimate indel parameters set to : " << estimateIndelParams);
-	DEBUG("Estimate alpha set to : " << estimateAlpha << " , rate categories " << gammaRateCategories << " , user time : " << userTime);
+	DEBUG("Estimate alpha set to : " << estimateAlpha << " , rate categories " << gammaRateCategories << " , alpha : " << alpha);
 
 	modelParams = new OptimizedModelParameters(substModel, indelModel,inputSequences->getSequenceCount(), pairCount, estimateSubstitutionParams,
 			estimateIndelParams, estimateAlpha, userTime < 0, maths);

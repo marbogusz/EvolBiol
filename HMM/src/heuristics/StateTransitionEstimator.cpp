@@ -51,7 +51,7 @@ void StateTransitionEstimator::addPair(vector<SequenceElement>& s1,
 void StateTransitionEstimator::optimize()
 {
 	bfgs->optimize();
-	modelParams->outputParameters();
+	//modelParams->outputParameters();
 }
 
 StateTransitionEstimator::~StateTransitionEstimator()

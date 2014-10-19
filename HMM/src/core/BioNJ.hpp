@@ -45,13 +45,13 @@ private:
 	unsigned int pairs;
 	vector<string> names;
 	DistanceMatrix* times;
-	const vector<double>& timesVec;
+	vector<double> timesVec;
 	double treeLength;
 
 public:
 	BioNJ(unsigned int size, DistanceMatrix* divergenceTimes);
 	
-	BioNJ(unsigned int size, const vector<double>& divergenceTimes);
+	BioNJ(unsigned int size, vector<double> divergenceTimes);
 
 	double getDist(unsigned int i, unsigned int j)
 	{

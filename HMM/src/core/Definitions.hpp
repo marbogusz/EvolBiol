@@ -10,10 +10,10 @@
 
 #include <iostream>
 
-#define DEBUG_BUILD 1
+//#define DEBUG_BUILD 1
 
 #ifdef DEBUG_BUILD
-#  define DEBUG(x) do { std::cout << "DBG! " << x << std::endl; } while (0)
+#  define DEBUG(x) do { std::cout<< "DBG! " << x << std::endl; } while (0)
 #  define DEBUGN(x) do { std::cout << x ; } while (0)
 #  define DEBUGV(x,n) do { for (int i=0;i<n;i++) std::cout << x[i] << "\t"; std::cout << std::endl;} while (0)
 #  define DEBUGM(x,h,w) do { for (int i=0;i<h;i++){std::cout << endl; for(int j=0;j<w;j++) std::cout << x[i][j] << "\t";} std::cout <<std::endl;} while (0)

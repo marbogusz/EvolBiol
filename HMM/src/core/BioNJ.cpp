@@ -28,11 +28,18 @@ namespace EBC
         treeLength=0;
     }
     
-    BioNJ::BioNJ(unsigned int size, const vector<double>& divergenceTimes) : names(size), timesVec(divergenceTimes)
+    BioNJ::BioNJ(unsigned int size, vector<double> divergenceTimes) : names(size), timesVec(divergenceTimes)
     {
     	times = NULL;
         taxas = size;
         pairs = (taxas*(taxas-1))/2;
+
+        unsigned int ctr =1;
+        for (auto dt : timesVec)
+        {
+        	DEBUG("BioNj time " << ctr << " " << dt );
+        	ctr++;
+        }
 
 		for (unsigned short i = 0; i < taxas; i++)
         {

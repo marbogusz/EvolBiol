@@ -121,7 +121,8 @@ int main(int argc, char ** argv) {
 
 			//change bionj init here!
 			BioNJ nj(inputSeqs->getSequenceCount(), pe->getOptimizedTimes());
-			DEBUG("Final tree : " << nj.calculate());
+			//DEBUG("Final tree : " << nj.calculate());
+			cout << nj.calculate() << endl;
 
 
 			//scerr << cmdReader->getInputFileName() << endl;

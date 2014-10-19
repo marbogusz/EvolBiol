@@ -16,8 +16,10 @@ GuideTree::GuideTree(Sequences* is) : inputSequences(is)
 	// TODO Auto-generated constructor stub
 	distMat = new DistanceMatrix(inputSequences->getSequenceCount());
 	this->dict = inputSequences->getDictionary();
-	//FIXME - change to 4 or use 4 and 7 with no correction for distance
-	this->kmerSize = 7;
+	if(dict->getAlphabetSize() == Definitions::nucleotideCount)
+		this->kmerSize = 7;
+	else
+		this->kmerSize = 4;
 	this->sequenceCount = inputSequences->getSequenceCount();
 	this->kmers = new vector<unordered_map<string,short>*>(sequenceCount);
 	DEBUG("Creating guide tree");
@@ -57,6 +59,8 @@ void GuideTree::constructTree()
 	string currSeq;
 	double identity, estIdentity, kimura;
 
+
+
 	DEBUG("Extracting k-mers");
 	for(i = 0; i< sequenceCount; i++)
 	{
@@ -75,11 +79,11 @@ void GuideTree::constructTree()
 
 			//DEBUG("k-mer distance between seq. " << i << " and " << j << " is " << identity << " " << -log(0.02 + identity) << " " << -log(0.1 + identity)  << " "<< estIdentity << " " << kimura );
 
-			if(dict->getAlphabetSize() == Definitions::nucleotideCount)
+			//if(dict->getAlphabetSize() == Definitions::nucleotideCount)
 				estIdentity = identity;
 				//estIdentity = nucFunction(identity);
-			else if(dict->getAlphabetSize() == Definitions::aminoacidCount)
-				estIdentity = aaFunction(identity);
+			//else if(dict->getAlphabetSize() == Definitions::aminoacidCount)
+			//	estIdentity = aaFunction(identity);
 
 			DEBUG("k-mer distance between seq. " << i << " and " << j << " is " << identity << " " << estIdentity );
 
