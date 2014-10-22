@@ -226,7 +226,7 @@ double PairwiseEstimator::runIteration()
 		result += hmm->runAlgorithm();
 		//modelParams->outputParameters();
 	}
-	cerr << result << endl;
+	//cerr << result << endl;
 	return result;
 }
 

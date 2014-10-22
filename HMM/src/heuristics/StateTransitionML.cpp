@@ -129,6 +129,7 @@ double StateTransitionML::getLnL()
 		DEBUG("NAN extension " << e);
 		DEBUG("NAN opening " << g);
 		DEBUG("EXITING WITHOUT DOING CALCLULATIONS - this means rejection of this analysis");
+		cerr << "ERROR EXITING WITHOUT DOING CALCLULATIONS due to wrong extension/opening probabilities : " << e << " " << g << endl;
 		//FIXME - remove this!!!!!
 		//FIXME - fix this estimation, don't exit like this - only for test purposes
 		exit(0);

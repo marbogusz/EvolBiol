@@ -61,7 +61,7 @@ void EBC::DpMatrixLoMem::setValue(unsigned int i,unsigned int j, double value)
 
 	else
 	{
-		string msg = "Set Value : matrix index out of bounds, x: " + std::to_string(i) + " y : " + std::to_string(j) + " current row is " + std::to_string(currentRowIndex) + "\n";
+		string msg = "ERROR setValue() index out of bounds, x: " + std::to_string(i) + " y : " + std::to_string(j) + " current row is " + std::to_string(currentRowIndex) + "\n";
 		throw HmmException(msg);
 	}
 }
