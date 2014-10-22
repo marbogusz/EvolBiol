@@ -90,6 +90,7 @@ void SubstitutionModelEstimator::optimize()
 {
 	bfgs->optimize();
 	//modelParams->outputToConsole();
+	cerr << modelParams->getAlpha() << endl;
 }
 
 double SubstitutionModelEstimator::runIteration()

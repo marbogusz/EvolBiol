@@ -95,6 +95,14 @@ array<vector<SequenceElement>, 3> TripletAligner::align(array<unsigned int, 3> t
 	string& seq2 = inputSeqs->getRawSequenceAt(s2);
 	string& seq3 = inputSeqs->getRawSequenceAt(s3);
 
+	if (this->trueAlignment)
+	{
+		triAlignment[0] = inputSeqs->getSequencesAt(s1);
+		triAlignment[1] = inputSeqs->getSequencesAt(s2);
+		triAlignment[2] = inputSeqs->getSequencesAt(s3);
+		return this->triAlignment;
+	}
+
 	GotohAlgorithm* algo = new GotohAlgorithm(inputSeqs->getDictionary()->getAlphabetSize(),inputSeqs->getDictionary());
 	algo->setDistance(distMat->getDistance(s1,s2));
 	algo->setSequences(seq1,seq2);
@@ -113,7 +121,7 @@ array<vector<SequenceElement>, 3> TripletAligner::align(array<unsigned int, 3> t
 
 }
 
-TripletAligner::TripletAligner(Sequences* iSeq, DistanceMatrix* dm) : inputSeqs(iSeq), distMat(dm)
+TripletAligner::TripletAligner(Sequences* iSeq, DistanceMatrix* dm, bool ta) : inputSeqs(iSeq), distMat(dm), trueAlignment(ta)
 {
 	DEBUG("Starting TripletAligner");
 

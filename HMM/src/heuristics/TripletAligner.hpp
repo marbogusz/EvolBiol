@@ -35,6 +35,8 @@ private:
 	Sequences* inputSeqs;
 	DistanceMatrix* distMat;
 
+	bool trueAlignment;
+
 	unsigned int s1, s2,s3;
 
 	array<vector<SequenceElement>, 3> triAlignment;
@@ -42,7 +44,7 @@ private:
 	void assembleFromPairs(pair<string, string>& p1,pair<string, string>& p2);
 
 public:
-	TripletAligner(Sequences* inputSeq, DistanceMatrix* dm);
+	TripletAligner(Sequences* inputSeq, DistanceMatrix* dm, bool trueAl);
 
 	array<vector<SequenceElement>, 3> align(array<unsigned int, 3> triplet);
 

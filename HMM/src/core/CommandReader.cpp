@@ -26,6 +26,7 @@ CommandReader::CommandReader(int argc, char** argv)
 		parser.add_option("M", "Run Viterbi MLE");
 		parser.add_option("fa", "Fixed Alignment");
 		parser.add_option("in","This option takes one argument which specifies the name of the file we want to analyze",1);
+		parser.add_option("ta","This option takes one argument which specifies the name of the file with true alignment",1);
 		parser.add_option("rev", "REV Substitution Model");
 		parser.add_option("hky", "HKY85 Substitution Model");
 		parser.add_option("lg", "Le & Gasquel AA Substitution Model");
@@ -45,7 +46,7 @@ CommandReader::CommandReader(int argc, char** argv)
 
 		parser.parse(argc,argv);
 
-		const char* one_time_opts[] = {"V", "F", "in", "i","d" ,"h","b","o", "ov"};
+		const char* one_time_opts[] = {"V", "F", "in", "ta", "i","d" ,"h","b","o", "ov"};
 		parser.check_one_time_options(one_time_opts);
 
 		parser.check_incompatible_options("V", "F");
@@ -146,6 +147,16 @@ IParser* CommandReader::getParser() throw (HmmException&)
 	if (parser.option("in"))
 	{
 		return new FileParser((string(parser.option("in").argument())).c_str());
+	}
+	else
+		throw HmmException("input file not specified");
+}
+
+IParser* CommandReader::getParserTrueAlignment() throw (HmmException&)
+{
+	if (parser.option("ta"))
+	{
+		return new FileParser((string(parser.option("ta").argument())).c_str());
 	}
 	else
 		throw HmmException("input file not specified");

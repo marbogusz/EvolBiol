@@ -10,14 +10,15 @@
 namespace EBC
 {
 
-ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType model ,
+ModelEstimator::ModelEstimator(Sequences* inputSeqs, Sequences* trueSeqs, Definitions::ModelType model ,
 		Definitions::OptimizationType ot, unsigned int rateCategories, double alpha, bool estimateAlpha) :
-				inputSequences(inputSeqs), gammaRateCategories(rateCategories),
+				inputSequences(inputSeqs), trueSequences(trueSeqs), gammaRateCategories(rateCategories),
 				gtree(inputSeqs), tst(gtree)
 {
 	DEBUG("About to sample some triplets");
 
-	tal = new TripletAligner (inputSequences, gtree.getDistanceMatrix());
+	tal = new TripletAligner (trueSequences, gtree.getDistanceMatrix(), true);
+
 
 	vector<array<unsigned int, 3> > tripletIdxs = tst.sampleFromTree();
 
@@ -61,6 +62,9 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 	indelModel =  ste->getIndelModel();
 	substModel =  sme->getSubstModel();
 
+	indelModel->summarize();
+	cout << "\t";
+
 
 	for (int idx = 0; idx < tripletIdxs.size(); idx++)
 	{
@@ -85,6 +89,7 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 		tripleAlignments.push_back(tal->align(p1,p2));
 		//tripleAlignments.push_back(tal.align());
 	}
+
 
 	delete sme;
 	delete ste;
@@ -111,6 +116,10 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 		ste->addPair(tripleAlignments[al][1],tripleAlignments[al][2],tb2+tb3);
 	}
 	ste->optimize();
+
+	indelModel =  ste->getIndelModel();
+	indelModel->summarize();
+	cout << endl;
 	//we have new alignments!
 	//re-estimate
 

@@ -40,51 +40,21 @@ int main(int argc, char ** argv) {
 		DEBUG("Creating alignment");
 
 		Sequences* inputSeqs = new Sequences(parser, cmdReader->getSequenceType(),cmdReader->isFixedAlignment());
+		Sequences* inputSeqsTrue = new Sequences(cmdReader->getParserTrueAlignment(), cmdReader->getSequenceType(),true);
+
 		if (cmdReader->isMLE())
 		{
 
-
-
-			//MlEstimator* me = new MlEstimator(inputSeqs, cmdReader->getModelType() ,cmdReader->getIndelParams(),
-			//					cmdReader->getSubstParams(), cmdReader->getOptimizationType(), cmdReader->getCategories(),
-			//					cmdReader->getAlpha(), cmdReader->estimateAlpha(),cmdReader->getDistance(), cmdReader->isFixedAlignment() == false);
-
-
-
-
-
-			//DEBUG("Creating TripletModelEstimator");
-
-			ModelEstimator* tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),
+			ModelEstimator* tme = new ModelEstimator(inputSeqs, inputSeqsTrue, cmdReader->getModelType(),
 					cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
 					cmdReader->estimateAlpha());
-
-
-			//tme->getModelParameters();
 
 		}
 
 		else
 		{
-			/*
-			ForwardPairHMM* fwdHMM = new ForwardPairHMM(inputSeqs, cmdReader->getModelType() ,
-					cmdReader->getIndelParams(),cmdReader->getSubstParams(), cmdReader->getOptimizationType(),
-					cmdReader->getBanding(), cmdReader->getBandFactor(), cmdReader->getDistance(),
-					cmdReader->getCategories(), cmdReader->getAlpha(), cmdReader->estimateAlpha());
 
-
-
-			ForwardPairHMM* fwdHMM = new ForwardPairHMM(inputSeqs->getSequencesAt(0), inputSeqs->getSequencesAt(1),
-					inputSeqs->getDictionary(), cmdReader->getModelType() , cmdReader->getBanding(), cmdReader->getBandFactor(),
-					cmdReader->getCategories(), cmdReader->getAlpha(), new Maths());
-
-
-			fwdHMM->setModelFrequencies(inputSeqs->getElementFrequencies());
-			fwdHMM->setModelParameters(cmdReader->getIndelParams(),cmdReader->getSubstParams(), cmdReader->getDistance(),0);
-			fwdHMM->runForwardAlgorithm();
-			*/
-
-			ModelEstimator* tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),
+			ModelEstimator* tme = new ModelEstimator(inputSeqs, inputSeqsTrue, cmdReader->getModelType(),
 					cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
 					cmdReader->estimateAlpha());
 
@@ -105,17 +75,6 @@ int main(int argc, char ** argv) {
 					cmdReader->getCategories(), /*cmdReader->getAlpha()*/ alpha, /*cmdReader->estimateAlpha()*/ false,cmdReader->getDistance());
 
 
-			//string distFile = cmdReader->getInputFileName();
-			//distFile.insert(0,"distances_");
-			//distFile.replace(distFile.end()-3,distFile.end(),"phy");
-			//stringstream ss;
-			//pe->outputResults(ss);
-
-			//ofstream of(distFile);
-			//of << ss.str();
-			//of.close();
-
-
 
 			DEBUG ("Running bionj");
 
@@ -125,39 +84,7 @@ int main(int argc, char ** argv) {
 			cout << nj.calculate() << endl;
 
 
-			//scerr << cmdReader->getInputFileName() << endl;
 
-			//double* estimatedParams = fwdHMM->getMlParameters();
-			//string vitFile = cmdReader->getInputFileName();
-
-			//for (unsigned int i = 0; i< fwdHMM->getTotalParameters(); i++)
-			//{
-			//	cout << estimatedParams[i] << "\t";
-			//}
-			//cout <<  vitFile << endl;
-/*
-			if(cmdReader->isOutputViterbiAlignment())
-			{
-
-				string vitFile = cmdReader->getInputFileName();
-				vitFile.insert(0,"viterbi_");
-				vitFile.replace(vitFile.end()-3,vitFile.end(),"fas");
-				vector<double> a,b;
-				stringstream ss;
-				BasicViterbi* bv = new BasicViterbi(inputSeqs, cmdReader->getModelType(),a,0,b, cmdReader->getCategories(), cmdReader->getAlpha(), estimatedParams);
-				bv->runViterbiAlgorithm();
-				bv->getResults(ss);
-
-				ofstream of(vitFile);
-				of << ss.str();
-				of.close();
-
-				delete bv;
-
-			}
-
-			delete fwdHMM;
-*/
 			delete tme;
 			delete pe;
 		}

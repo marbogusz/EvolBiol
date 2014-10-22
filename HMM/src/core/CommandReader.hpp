@@ -24,6 +24,8 @@ public:
 	CommandReader(int argc, char** argv);
 	IParser* getParser() throw (HmmException&);
 
+	IParser* getParserTrueAlignment() throw (HmmException&);
+
 	inline bool isViterbi()
 	{
 		return parser.option("V");

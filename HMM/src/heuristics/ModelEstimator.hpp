@@ -54,6 +54,8 @@ protected:
 	IndelModel* indelModel;
 
 	Sequences* inputSequences;
+	Sequences* trueSequences;
+
 	Maths* maths;
 
 	GuideTree gtree;
@@ -74,7 +76,7 @@ protected:
 	bool estimateAlpha;
 
 public:
-	ModelEstimator(Sequences* inputSeqs, Definitions::ModelType model,
+	ModelEstimator(Sequences* inputSeqs, Sequences* trueSeqs, Definitions::ModelType model,
 			Definitions::OptimizationType ot,
 			unsigned int rateCategories, double alpha, bool estimateAlpha);
 
