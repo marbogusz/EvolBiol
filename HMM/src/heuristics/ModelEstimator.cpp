@@ -111,6 +111,12 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 		ste->addPair(tripleAlignments[al][1],tripleAlignments[al][2],tb2+tb3);
 	}
 	ste->optimize();
+
+	indelModel =  ste->getIndelModel();
+	substModel =  sme->getSubstModel();
+
+	indelModel->summarize();
+	substModel->summarize();
 	//we have new alignments!
 	//re-estimate
 

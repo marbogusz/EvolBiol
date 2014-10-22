@@ -72,8 +72,8 @@ void NegativeBinomialGapModel::setParameters(double* params)
 void NegativeBinomialGapModel::summarize()
 {
 	cout << endl << " Affine geometric gap model parameters : " << endl;
-	cout << "lambda\t\ttime\text. prob\topen. prob" << endl;
-	cout << lambda <<"\t" << time << "\t" <<  gapExtensionProbability << "\t" << gapOpeningProbability << endl;
+	cout << "lambda\text. prob" << endl;
+	cout << lambda << "\t" <<  gapExtensionProbability << endl;
 }
 
 } /* namespace EBC */
