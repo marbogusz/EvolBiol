@@ -11,7 +11,8 @@ namespace EBC
 {
 
 ModelEstimator::ModelEstimator(Sequences* inputSeqs, Sequences* trueSeqs, Definitions::ModelType model ,
-		Definitions::OptimizationType ot, unsigned int rateCategories, double alpha, bool estimateAlpha) :
+		Definitions::OptimizationType ot, unsigned int rateCategories, double alpha, bool estimateAlpha,
+		std::vector<double> indel_params,std::vector<double> subst_params, double userTime) :
 				inputSequences(inputSeqs), trueSequences(trueSeqs), gammaRateCategories(rateCategories),
 				gtree(inputSeqs), tst(gtree)
 {
@@ -55,25 +56,31 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Sequences* trueSeqs, Defini
 	ste->optimize();
 
 	DEBUG("Re-estimating model parameters");
-	//make another pass
+
+
+
 	tripleAlignments.clear();
 
 
 	indelModel =  ste->getIndelModel();
 	substModel =  sme->getSubstModel();
 
+
 	indelModel->summarize();
 	cout << "\t";
 
+	//fixed model!!!
+	substModel->setParameters(subst_params);
+	indelModel->setParameters(indel_params);
 
 	for (int idx = 0; idx < tripletIdxs.size(); idx++)
 	{
 
 //		DEBUG("First Viterbi Pair " << idx);
 		vphmm = new ViterbiPairHMM(inputSeqs->getSequencesAt(tripletIdxs[idx][0]), inputSeqs->getSequencesAt(tripletIdxs[idx][1]),false, substModel, indelModel, 0);
-		tb1 = sme->getModelParams()->getDivergenceTime(idx*3);
-		tb2 = sme->getModelParams()->getDivergenceTime((idx*3)+1);
-		tb3 = sme->getModelParams()->getDivergenceTime((idx*3)+2);
+		tb1 = userTime/3.0; //sme->getModelParams()->getDivergenceTime(idx*3);
+		tb2 = userTime/3.0; //sme->getModelParams()->getDivergenceTime((idx*3)+1);
+		tb3 = userTime/3.0; //sme->getModelParams()->getDivergenceTime((idx*3)+2);
 
 		vphmm->setDivergenceTime(tb1+tb2);
 		//vphmm->summarize();
@@ -94,6 +101,8 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Sequences* trueSeqs, Defini
 	delete sme;
 	delete ste;
 
+
+	//make another pass
 
 
 	sme = new SubstitutionModelEstimator(inputSeqs, model ,ot, rateCategories, alpha, estimateAlpha, tripletIdxs.size());

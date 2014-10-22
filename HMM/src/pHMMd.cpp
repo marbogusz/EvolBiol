@@ -47,7 +47,7 @@ int main(int argc, char ** argv) {
 
 			ModelEstimator* tme = new ModelEstimator(inputSeqs, inputSeqsTrue, cmdReader->getModelType(),
 					cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
-					cmdReader->estimateAlpha());
+					cmdReader->estimateAlpha(),cmdReader->getIndelParams(),cmdReader->getSubstParams(),cmdReader->getDistance());
 
 		}
 
@@ -56,7 +56,7 @@ int main(int argc, char ** argv) {
 
 			ModelEstimator* tme = new ModelEstimator(inputSeqs, inputSeqsTrue, cmdReader->getModelType(),
 					cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
-					cmdReader->estimateAlpha());
+					cmdReader->estimateAlpha(),cmdReader->getIndelParams(),cmdReader->getSubstParams(),cmdReader->getDistance());
 
 
 			vector<double> indelParams;

@@ -78,7 +78,8 @@ protected:
 public:
 	ModelEstimator(Sequences* inputSeqs, Sequences* trueSeqs, Definitions::ModelType model,
 			Definitions::OptimizationType ot,
-			unsigned int rateCategories, double alpha, bool estimateAlpha);
+			unsigned int rateCategories, double alpha, bool estimateAlpha,std::vector<double> indel_params,
+			std::vector<double> subst_params, double userTime);
 
 	virtual ~ModelEstimator();
 
