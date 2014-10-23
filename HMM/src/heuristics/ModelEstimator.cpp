@@ -18,10 +18,13 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Sequences* trueSeqs, Defini
 {
 	DEBUG("About to sample some triplets");
 
+	maths = new Maths();
+	dict = inputSequences->getDictionary();
+
 	tal = new TripletAligner (trueSequences, gtree.getDistanceMatrix(), true);
 
 
-	vector<array<unsigned int, 3> > tripletIdxs = tst.sampleFromTree();
+	tripletIdxs = tst.sampleFromTree();
 
 	for (auto idx : tripletIdxs)
 	{
@@ -57,11 +60,6 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Sequences* trueSeqs, Defini
 
 	DEBUG("Re-estimating model parameters");
 
-
-
-	tripleAlignments.clear();
-
-
 	indelModel =  ste->getIndelModel();
 	substModel =  sme->getSubstModel();
 
@@ -69,8 +67,17 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Sequences* trueSeqs, Defini
 	indelModel->summarize();
 	cout << "\t";
 
+	tripleAlignments.clear();
+
+
+	this->estimateTripleAlignment(model);
+
+
+	/*
 	//fixed model!!!
 	substModel->setParameters(subst_params);
+	substModel->setAlpha(alpha);
+	substModel->calculateModel();
 	indelModel->setParameters(indel_params);
 
 	for (int idx = 0; idx < tripletIdxs.size(); idx++)
@@ -97,7 +104,7 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Sequences* trueSeqs, Defini
 		//tripleAlignments.push_back(tal.align());
 	}
 
-
+*/
 	delete sme;
 	delete ste;
 
@@ -136,6 +143,81 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Sequences* trueSeqs, Defini
 
 	//construct triplets
 }
+
+void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
+{
+	DEBUG("EstimateTripleAligment");
+	if (model == Definitions::ModelType::GTR || model == Definitions::ModelType::HKY85)
+	{
+			//FIXME - make model idiotproof by checking if parameters are set;
+			DEBUG("Setting HKY85");
+			this->substModel = new HKY85Model(dict, maths,gammaRateCategories);
+	}
+	else if (model == Definitions::ModelType::LG)
+	{
+			substModel = new AminoacidSubstitutionModel(dict, maths,gammaRateCategories,Definitions::aaLgModel);
+	}
+
+	DEBUG("Setting Frequencies");
+	substModel->setObservedFrequencies(inputSequences->getElementFrequencies());
+	substModel->setParameters({2.5});
+	substModel->setAlpha(0.75);
+	substModel->calculateModel();
+	DEBUG("Calculated models");
+
+	pair<string, string> p1;
+	pair<string, string> p2;
+	double lnlp1, lnlp2;
+	double tb1, tb2, tmp;
+
+
+	//FIXME - hardcodes
+	indelModel->setParameters({0.05, 0.5});
+
+
+		for (int idx = 0; idx < tripletIdxs.size(); idx++)
+		{
+			lnlp1 = std::numeric_limits<double>::max();
+			lnlp2 = std::numeric_limits<double>::max();
+			for (auto time : {0.25,0.5,0.75,1.0})
+			{
+				DEBUG("First Viterbi Pair " << idx << " time " << time);
+
+				vphmm = new ViterbiPairHMM(inputSequences->getSequencesAt(tripletIdxs[idx][0]), inputSequences->getSequencesAt(tripletIdxs[idx][1]),false, substModel, indelModel, 0);
+				tb1 = time; //sme->getModelParams()->getDivergenceTime(idx*3);
+				tb2 = time; //sme->getModelParams()->getDivergenceTime((idx*3)+1);
+				vphmm->setDivergenceTime(tb1);
+				//vphmm->summarize();
+				vphmm->runAlgorithm();
+				tmp = vphmm->getViterbiSubstitutionLikelihood();
+				DEBUG("lnlp1 " << tmp << "\t\t" << lnlp1);
+				if(tmp < lnlp1)
+				{
+					lnlp1=tmp;
+					DEBUG("Setting pair 1 with time " << time);
+					p1 =  vphmm->getAlignment(inputSequences->getRawSequenceAt(tripletIdxs[idx][0]), inputSequences->getRawSequenceAt(tripletIdxs[idx][1]));
+				}
+				delete vphmm;
+				DEBUG("Second Viterbi Pair " << idx << " time " << time);
+	//			DEBUG("Second Viterbi Pair " << idx);
+				vphmm = new ViterbiPairHMM(inputSequences->getSequencesAt(tripletIdxs[idx][1]), inputSequences->getSequencesAt(tripletIdxs[idx][2]),false, substModel, indelModel, 0);
+				vphmm->setDivergenceTime(tb2);
+				vphmm->runAlgorithm();
+				tmp = vphmm->getViterbiSubstitutionLikelihood();
+				DEBUG("lnlp2 " << tmp << "\t\t"<< lnlp2);
+				if(tmp < lnlp2)
+				{
+					lnlp2=tmp;
+					DEBUG("Setting pair 2 with time " << time);
+					p2 =  vphmm->getAlignment(inputSequences->getRawSequenceAt(tripletIdxs[idx][1]), inputSequences->getRawSequenceAt(tripletIdxs[idx][2]));
+				}
+				delete vphmm;
+				//tripleAlignments.push_back(tal.align());
+			}
+			tripleAlignments.push_back(tal->align(p1,p2));
+		}
+}
+
 
 ModelEstimator::~ModelEstimator()
 {

@@ -71,9 +71,13 @@ protected:
 
 	vector<array<string, 3> > alignments;
 
+	vector<array<unsigned int, 3> > tripletIdxs;
+
 	unsigned int gammaRateCategories;
 
 	bool estimateAlpha;
+
+	void estimateTripleAlignment(Definitions::ModelType model);
 
 public:
 	ModelEstimator(Sequences* inputSeqs, Sequences* trueSeqs, Definitions::ModelType model,

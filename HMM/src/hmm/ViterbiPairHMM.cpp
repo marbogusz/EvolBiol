@@ -27,7 +27,9 @@ ViterbiPairHMM::~ViterbiPairHMM()
 
 double ViterbiPairHMM::getViterbiSubstitutionLikelihood()
 {
+	/*
 	double lnl = 0;
+
 	calculateModels();
 	//we have the site patterns now
 	//get alignment!
@@ -38,7 +40,8 @@ double ViterbiPairHMM::getViterbiSubstitutionLikelihood()
 		lnl += this->ptmatrix->getPairSitePattern(it->first, it->second);
 	}
 
-	return lnl * -1.0;
+	 */
+	return -1.0 * max(max(X->getValueAt(xSize-1,ySize-1), Y->getValueAt(xSize-1,ySize-1)),M->getValueAt(xSize-1,ySize-1));
 }
 
 double ViterbiPairHMM::getMax(double m, double x, double y, unsigned int i, unsigned int j, PairwiseHmmStateBase* state)
@@ -149,9 +152,9 @@ double ViterbiPairHMM::runAlgorithm()
 		Y->tracebackRaw(this->seq1,this->seq2, this->dict, this->alignment);
 	}
 */
-	DEBUG("Final Viterbi M  " << mm);
-	DEBUG("Final Viterbi X  " << mx );
-	DEBUG("Final Viterbi Y  " << my );
+	//DEBUG("Final Viterbi M  " << mm);
+	//DEBUG("Final Viterbi X  " << mx );
+	//DEBUG("Final Viterbi Y  " << my );
 
 return (std::max(mm,std::max(mx,my)))*-1.0;
 }
@@ -160,9 +163,9 @@ pair<string, string> ViterbiPairHMM::getAlignment(string&a, string& b)
 {
 	double mv, xv, yv;
 
-	DEBUG("Get Viterbi Results for the following sequences");
-	DEBUGN(a << endl);
-	DEBUGN(b << endl << endl);
+	//DEBUG("Get Viterbi Results for the following sequences");
+	//DEBUGN(a << endl);
+	//DEBUGN(b << endl << endl);
 
 
 	pair<string, string> initialAlignment;
