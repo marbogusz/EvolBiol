@@ -100,7 +100,7 @@ int main(int argc, char ** argv) {
 
 
 			//FIXME - hardcoding substitution parameters and alpha to come from the estimator
-			PairwiseEstimator* pe = new PairwiseEstimator(cmdReader->getAlgorithmType(), inputSeqs, cmdReader->getModelType() ,indelParams/*cmdReader->getIndelParams()*/,
+			PairwiseEstimator* pe = new PairwiseEstimator(cmdReader->getAlgorithmType(), inputSeqs, cmdReader->getModelType() ,cmdReader->getIndelParams(),
 					/*cmdReader->getSubstParams()*/ substParams, cmdReader->getOptimizationType(), cmdReader->getBanding(), cmdReader->getBandFactor(),
 					cmdReader->getCategories(), /*cmdReader->getAlpha()*/ alpha, /*cmdReader->estimateAlpha()*/ false,cmdReader->getDistance());
 
