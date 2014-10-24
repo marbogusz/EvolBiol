@@ -32,7 +32,7 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Sequences* trueSeqs, Defini
 	}
 
 	//FIXME - check for aminoacids if applicable!!!!
-	sme = new SubstitutionModelEstimator(inputSeqs, model ,ot, rateCategories, alpha, estimateAlpha, tripletIdxs.size());
+	sme = new SubstitutionModelEstimator(inputSeqs, model ,ot, rateCategories, alpha, false, tripletIdxs.size());
 
 	for(int al = 0; al < tripleAlignments.size(); al++)
 	{
