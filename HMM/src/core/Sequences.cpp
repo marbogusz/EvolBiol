@@ -49,7 +49,7 @@ Sequences::Sequences(IParser* iParser,Definitions::SequenceType st, bool fa) thr
 	s2 = translatedSequences[1];
 }*/
 
-vector<SequenceElement> Sequences::getSequencesAt(int pos) {
+vector<SequenceElement>& Sequences::getSequencesAt(int pos) {
 		return translatedSequences[pos];
 }
 

@@ -15,7 +15,7 @@ namespace EBC
 
 class ForwardPairHMM: public EBC::EvolutionaryPairHMM
 {
-
+friend class BackwardPairHMM;
 protected:
 
 	vector<double> userIndelParameters;

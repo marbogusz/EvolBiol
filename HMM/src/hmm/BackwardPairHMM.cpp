@@ -10,6 +10,7 @@
 #include "models/GTRModel.hpp"
 #include "models/HKY85Model.hpp"
 #include "models/AminoacidSubstitutionModel.hpp"
+#include "hmm/DpMatrixFull.hpp"
 
 
 namespace EBC
@@ -26,7 +27,61 @@ BackwardPairHMM::~BackwardPairHMM()
 {
 }
 
-double BackwardPairHMM::runBackwardAlgorithm()
+void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
+{
+	int i,j;
+	double xval, yval, mval;
+	double fwdX, fwdY, fwdM;
+
+	DEBUG("Backward Match");
+	dynamic_cast<DpMatrixFull*>(M->getDpMatrix())->outputValues(0);
+
+	DEBUG("Backward Insert");
+	dynamic_cast<DpMatrixFull*>(X->getDpMatrix())->outputValues(0);
+
+	DEBUG("Backward Delete");
+	dynamic_cast<DpMatrixFull*>(Y->getDpMatrix())->outputValues(0);
+
+	DEBUG("Forward Match");
+	dynamic_cast<DpMatrixFull*>(fwd->M->getDpMatrix())->outputValues(0);
+
+	DEBUG("Forward Insert");
+	dynamic_cast<DpMatrixFull*>(fwd->X->getDpMatrix())->outputValues(0);
+
+	DEBUG("Forward Delete");
+	dynamic_cast<DpMatrixFull*>(fwd->Y->getDpMatrix())->outputValues(0);
+
+
+	fwdX = fwd->X->getValueAt(xSize,ySize);
+	fwdY = fwd->Y->getValueAt(xSize,ySize);
+	fwdM = fwd->M->getValueAt(xSize,ySize);
+
+	for (i = 1; i<xSize; i++)
+	{
+		for (j = 1; j<ySize; j++)
+		{
+			xval = X->getValueAt(i,j) + fwd->X->getValueAt(i,j) - fwdX;
+			yval = Y->getValueAt(i,j) + fwd->Y->getValueAt(i,j) - fwdY;
+			mval = M->getValueAt(i,j) + fwd->M->getValueAt(i,j) - fwdM;
+
+			X->setValueAt(i,j,xval);
+			Y->setValueAt(i,j,xval);
+			M->setValueAt(i,j,xval);
+		}
+	}
+
+	DEBUG("Posterior Match");
+	dynamic_cast<DpMatrixFull*>(M->getDpMatrix())->outputValues(0);
+
+	DEBUG("Posterior Insert");
+	dynamic_cast<DpMatrixFull*>(X->getDpMatrix())->outputValues(0);
+
+	DEBUG("Posterior Delete");
+	dynamic_cast<DpMatrixFull*>(Y->getDpMatrix())->outputValues(0);
+
+}
+
+double BackwardPairHMM::runAlgorithm()
 {
 
 	calculateModels();
@@ -49,16 +104,18 @@ double BackwardPairHMM::runBackwardAlgorithm()
 	X->initializeData();
 	Y->initializeData();
 
-	for (i = xSize-1; i > 0; i--)
+	unsigned int maxXsize = xSize-1;
+	unsigned int maxYsize = ySize-1;
+
+	//Reverse sequences = effectively forward algorithm
+	for (i = 0; i < xSize; i++)
 	{
-		for (j = ySize; j>0; j--)
+		for (j = 0; j < xSize; j++)
 		{
-			if(this->withinBand(i,j,this->bandSpan) || !bandingEnabled)
-			{
 				if(i!=0)
 				{
 					k = i-1;
-					emissionX = log(ptmatrix->getEquilibriumFreq(seq1[i-1].getMatrixIndex()));
+					emissionX = log(ptmatrix->getEquilibriumFreq(seq1[maxXsize - i].getMatrixIndex()));
 					xm = M->getValueAt(k,j) + X->getTransitionProbabilityFromMatch();
 					xx = X->getValueAt(k,j) + X->getTransitionProbabilityFromInsert();
 					xy = Y->getValueAt(k,j) + X->getTransitionProbabilityFromDelete();
@@ -85,13 +142,12 @@ double BackwardPairHMM::runBackwardAlgorithm()
 					my = Y->getValueAt(k,l) + M->getTransitionProbabilityFromDelete();
 					M->setValueAt(i,j, emissionM + maths->logSum(mm,mx,my));
 				}
-			}
 		}
 	}
 
-	sM = M->getValueAt(xSize-1, ySize-1);
-	sX = X->getValueAt(xSize-1, ySize-1);
-	sY = Y->getValueAt(xSize-1, ySize-1);
+	sM = M->getValueAt(0, 0);
+	sX = X->getValueAt(0, 0);
+	sY = Y->getValueAt(0, 0);
 	sS = maths->logSum(sM,sX,sY);
 
 	//cerr << "\t" << sX << "\t" << sY << "\t"<< sM << "\t" << sS << endl;

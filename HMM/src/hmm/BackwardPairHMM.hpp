@@ -9,6 +9,7 @@
 #define BACKWARDPAIRHMM_HPP_
 
 #include "hmm/EvolutionaryPairHMM.hpp"
+#include "hmm/ForwardPairHMM.hpp"
 
 namespace EBC
 {
@@ -39,7 +40,9 @@ public:
 
 	virtual ~BackwardPairHMM();
 
-	double runBackwardAlgorithm();
+	double runAlgorithm();
+
+	void calculatePosteriors(ForwardPairHMM* fwd);
 
 };
 

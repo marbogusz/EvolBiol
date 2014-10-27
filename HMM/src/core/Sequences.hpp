@@ -54,7 +54,7 @@ public:
 	double* getElementFrequencies(array<unsigned int, 3> triplet);
 
 	//void getSequencePair(vector<SequenceElement> s1, vector<SequenceElement> s2 );
-	vector<SequenceElement> getSequencesAt(int pos);
+	vector<SequenceElement>& getSequencesAt(int pos);
 
 	unsigned int getPairCount()
 	{

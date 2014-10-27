@@ -56,7 +56,7 @@ protected:
 	Sequences* inputSequences;
 	Maths* maths;
 
-	GuideTree gtree;
+	GuideTree* gtree;
 	TripletSamplingTree tst;
 
 	StateTransitionEstimator* ste;
@@ -84,6 +84,10 @@ public:
 	vector<double> getIndelParameters();
 	double getAlpha();
 
+	GuideTree* getGuideTree()
+	{
+		return gtree;
+	}
 };
 
 } /* namespace EBC */

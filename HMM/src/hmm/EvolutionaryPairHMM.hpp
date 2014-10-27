@@ -37,7 +37,9 @@ protected:
 
 	Dictionary* dict;
 	SubstitutionModelBase* substModel;
+
 	PMatrixDouble* ptmatrix;
+
 	IndelModel* indelModel;
 	Sequences* inputSequences;
 	TransitionProbabilities* tpb;

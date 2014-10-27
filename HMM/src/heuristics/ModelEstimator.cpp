@@ -13,11 +13,11 @@ namespace EBC
 ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType model ,
 		Definitions::OptimizationType ot, unsigned int rateCategories, double alpha, bool estimateAlpha) :
 				inputSequences(inputSeqs), gammaRateCategories(rateCategories),
-				gtree(inputSeqs), tst(gtree)
+				gtree(new GuideTree(inputSeqs)), tst(*gtree)
 {
 	DEBUG("About to sample some triplets");
 
-	tal = new TripletAligner (inputSequences, gtree.getDistanceMatrix());
+	tal = new TripletAligner (inputSequences, gtree->getDistanceMatrix());
 
 	vector<array<unsigned int, 3> > tripletIdxs = tst.sampleFromTree();
 
@@ -130,6 +130,7 @@ ModelEstimator::~ModelEstimator()
     delete maths;
     delete sme;
     delete ste;
+    delete gtree;
 }
 
 vector<double> ModelEstimator::getSubstitutionParameters()

@@ -11,6 +11,7 @@
 #include "hmm/ForwardPairHMM.hpp"
 #include "core/HmmException.hpp"
 #include "core/PairwiseEstimator.hpp"
+#include "core/BandingEstimator.hpp"
 #include "core/MlEstimator.hpp"
 #include "core/BioNJ.hpp"
 #include <iostream>
@@ -100,66 +101,16 @@ int main(int argc, char ** argv) {
 
 
 			//FIXME - hardcoding substitution parameters and alpha to come from the estimator
-			PairwiseEstimator* pe = new PairwiseEstimator(cmdReader->getAlgorithmType(), inputSeqs, cmdReader->getModelType() ,cmdReader->getIndelParams(),
-					/*cmdReader->getSubstParams()*/ substParams, cmdReader->getOptimizationType(), cmdReader->getBanding(), cmdReader->getBandFactor(),
-					cmdReader->getCategories(), /*cmdReader->getAlpha()*/ alpha, /*cmdReader->estimateAlpha()*/ false,cmdReader->getDistance());
+			BandingEstimator* be = new BandingEstimator(cmdReader->getAlgorithmType(), inputSeqs, cmdReader->getModelType() ,indelParams,
+					substParams, cmdReader->getOptimizationType(), cmdReader->getCategories(),alpha, tme->getGuideTree());
 
-
-			//string distFile = cmdReader->getInputFileName();
-			//distFile.insert(0,"distances_");
-			//distFile.replace(distFile.end()-3,distFile.end(),"phy");
-			//stringstream ss;
-			//pe->outputResults(ss);
-
-			//ofstream of(distFile);
-			//of << ss.str();
-			//of.close();
-
-
-
-			DEBUG ("Running bionj");
+			//DEBUG ("Running bionj");
 
 			//change bionj init here!
-			BioNJ nj(inputSeqs->getSequenceCount(), pe->getOptimizedTimes());
+			//BioNJ nj(inputSeqs->getSequenceCount(), be->getOptimizedTimes());
 			//DEBUG("Final tree : " << nj.calculate());
-			cout << nj.calculate() << endl;
+			//cout << nj.calculate() << endl;
 
-
-			//scerr << cmdReader->getInputFileName() << endl;
-
-			//double* estimatedParams = fwdHMM->getMlParameters();
-			//string vitFile = cmdReader->getInputFileName();
-
-			//for (unsigned int i = 0; i< fwdHMM->getTotalParameters(); i++)
-			//{
-			//	cout << estimatedParams[i] << "\t";
-			//}
-			//cout <<  vitFile << endl;
-/*
-			if(cmdReader->isOutputViterbiAlignment())
-			{
-
-				string vitFile = cmdReader->getInputFileName();
-				vitFile.insert(0,"viterbi_");
-				vitFile.replace(vitFile.end()-3,vitFile.end(),"fas");
-				vector<double> a,b;
-				stringstream ss;
-				BasicViterbi* bv = new BasicViterbi(inputSeqs, cmdReader->getModelType(),a,0,b, cmdReader->getCategories(), cmdReader->getAlpha(), estimatedParams);
-				bv->runViterbiAlgorithm();
-				bv->getResults(ss);
-
-				ofstream of(vitFile);
-				of << ss.str();
-				of.close();
-
-				delete bv;
-
-			}
-
-			delete fwdHMM;
-*/
-			delete tme;
-			delete pe;
 		}
 
 		//ForwardPairHMM* epHMM = new ForwardPairHMM(inputSeqs);
