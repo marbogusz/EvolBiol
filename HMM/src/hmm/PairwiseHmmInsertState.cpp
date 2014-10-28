@@ -13,19 +13,28 @@ namespace EBC
 
 PairwiseHmmInsertState::PairwiseHmmInsertState(unsigned int x, unsigned int y)
 {
+	this->rows =x;
+	this->cols =y;
     this->dpMatrix = new DpMatrixFull(x,y);
-	initializeData();
+	//initializeData();
 }
 
 PairwiseHmmInsertState::PairwiseHmmInsertState(DpMatrixBase *matrix)
 {
 	this->dpMatrix = matrix;
-	initializeData();
+	//initializeData();
 }
 
-void PairwiseHmmInsertState::initializeData()
+void PairwiseHmmInsertState::initializeData(bool backwards)
 {
-	dpMatrix->setWholeRow(0,-100000);
+	if(!backwards)
+		dpMatrix->setWholeRow(0,-100000);
+	else
+	{
+		dpMatrix->setWholeCol(this->cols-1,-100000);
+		dpMatrix->setWholeRow(this->rows-1,-100000);
+		dpMatrix->setValue(rows-1,cols-1,0);
+	}
 }
 
 void PairwiseHmmInsertState::setDirection(unsigned int i, unsigned int j)

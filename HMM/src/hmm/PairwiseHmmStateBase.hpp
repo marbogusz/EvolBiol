@@ -27,13 +27,16 @@ protected:
 	double transFromInsert;
 	double transFromDelete;
 
+	unsigned int rows;
+	unsigned int cols;
+
 	DpMatrixBase* dpMatrix;
 
 
 
 public:
 
-	virtual void initializeData()=0;
+	virtual void initializeData(bool backwards=false)=0;
 
 	inline double getValueAt(unsigned int row, unsigned int column)
 	{

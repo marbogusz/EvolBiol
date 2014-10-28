@@ -18,7 +18,7 @@ class PairwiseHmmInsertState: public EBC::PairwiseHmmStateBase
 
 public:
 
-	void initializeData();
+	void initializeData(bool backwards=false);
 
 	PairwiseHmmInsertState(unsigned int x, unsigned int y);
 
