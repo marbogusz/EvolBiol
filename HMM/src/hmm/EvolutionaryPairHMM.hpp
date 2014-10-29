@@ -134,6 +134,21 @@ public:
 	{
 		return totalParameters;
 	}
+
+	PairwiseHmmStateBase* getM()
+	{
+		return M;
+	}
+
+	PairwiseHmmStateBase* getX()
+	{
+		return X;
+	}
+
+	PairwiseHmmStateBase* getY()
+	{
+		return Y;
+	}
 };
 
 } /* namespace EBC */

@@ -33,29 +33,27 @@ void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 	double xval, yval, mval;
 	double fwdX, fwdY, fwdM;
 
-	DEBUG("Backward Match");
-	dynamic_cast<DpMatrixFull*>(M->getDpMatrix())->outputValues(0);
 
+/*
 	DEBUG("Backward Insert");
 	dynamic_cast<DpMatrixFull*>(X->getDpMatrix())->outputValues(0);
-
-	DEBUG("Backward Delete");
-	dynamic_cast<DpMatrixFull*>(Y->getDpMatrix())->outputValues(0);
-
-	DEBUG("Forward Match");
-	dynamic_cast<DpMatrixFull*>(fwd->M->getDpMatrix())->outputValues(0);
-
 	DEBUG("Forward Insert");
 	dynamic_cast<DpMatrixFull*>(fwd->X->getDpMatrix())->outputValues(0);
-
+	DEBUG("Backward Delete");
+	dynamic_cast<DpMatrixFull*>(Y->getDpMatrix())->outputValues(0);
 	DEBUG("Forward Delete");
 	dynamic_cast<DpMatrixFull*>(fwd->Y->getDpMatrix())->outputValues(0);
-
+*/
 
 	fwdX = fwd->X->getValueAt(xSize-1,ySize-1);
 	fwdY = fwd->Y->getValueAt(xSize-1,ySize-1);
 	fwdM = fwd->M->getValueAt(xSize-1,ySize-1);
-
+/*
+	DEBUG("Backward Match");
+	dynamic_cast<DpMatrixFull*>(M->getDpMatrix())->outputValues(0);
+	DEBUG("Forward Match");
+	dynamic_cast<DpMatrixFull*>(fwd->M->getDpMatrix())->outputValues(0);
+*/
 	for (i = 0; i<xSize-1; i++)
 	{
 		for (j = 0; j<ySize-1; j++)
@@ -103,7 +101,117 @@ double BackwardPairHMM::runAlgorithm()
 	X->initializeData(true);
 	Y->initializeData(true);
 
-	//FIXME - 2 potential errors last corner set to 0 or i,j >=0 conditions
+	/*
+	for (i = xSize-2; i >= 0; i--)
+		{
+			for (j = ySize-2; j >= 0; j--)
+			{
+
+				emissionX = log(ptmatrix->getEquilibriumFreq(seq1[i].getMatrixIndex()));
+				emissionY = log(ptmatrix->getEquilibriumFreq(seq2[j].getMatrixIndex()));
+				emissionM = log(ptmatrix->getPairTransition(seq1[i].getMatrixIndex(), seq2[j].getMatrixIndex()));
+
+				bxp = X->getValueAt(i+1,j);
+				byp = Y->getValueAt(i,j+1);
+				bmp = M->getValueAt(i+1,j+1);
+
+				bx = maths->logSum(M->getTransitionProbabilityFromInsert() + emissionM + bmp,
+						X->getTransitionProbabilityFromInsert() + emissionX + bxp,
+						Y->getTransitionProbabilityFromInsert() + emissionY + byp);
+
+				//TODO bx and by should be identical - same for forward.
+				//FIXME - speedup by using only 1 indel calculation - see above
+				by = maths->logSum(M->getTransitionProbabilityFromDelete() + emissionM + bmp,
+									X->getTransitionProbabilityFromDelete() + emissionX + bxp,
+									Y->getTransitionProbabilityFromDelete() + emissionY + byp);
+
+				bm = maths->logSum(M->getTransitionProbabilityFromMatch() + emissionM + bmp,
+												X->getTransitionProbabilityFromMatch() + emissionX + bxp,
+												Y->getTransitionProbabilityFromMatch() + emissionY + byp);
+
+				X->setValueAt(i, j, bx);
+				Y->setValueAt(i, j, by);
+				M->setValueAt(i, j, bm);
+			}
+		}
+
+	*/
+		for (j = ySize-1, i=xSize-1; j >= 0; j--)
+		{
+			emissionX = (i==xSize-1) ? -100000 : log(ptmatrix->getEquilibriumFreq(seq1[i].getMatrixIndex()));
+			emissionY = (j==ySize-1) ? -100000 : log(ptmatrix->getEquilibriumFreq(seq2[j].getMatrixIndex()));
+			emissionM = (i==xSize-1 ||j==ySize-1) ? -100000 : log(ptmatrix->getPairTransition(seq1[i].getMatrixIndex(), seq2[j].getMatrixIndex()));
+
+			bxp = (i==xSize-1) ? -100000 : X->getValueAt(i+1,j);
+			byp = (j==ySize-1) ? -100000 : Y->getValueAt(i,j+1);
+			bmp = (i==xSize-1 ||j==ySize-1) ? -100000 : M->getValueAt(i+1,j+1);
+
+			bx = maths->logSum(M->getTransitionProbabilityFromInsert() + emissionM + bmp,
+			X->getTransitionProbabilityFromInsert() + emissionX + bxp,
+			Y->getTransitionProbabilityFromInsert() + emissionY + byp);
+
+			//TODO bx and by should be identical - same for forward.
+			//FIXME - speedup by using only 1 indel calculation - see above
+			by = maths->logSum(M->getTransitionProbabilityFromDelete() + emissionM + bmp,
+			X->getTransitionProbabilityFromDelete() + emissionX + bxp,
+			Y->getTransitionProbabilityFromDelete() + emissionY + byp);
+
+			bm = maths->logSum(M->getTransitionProbabilityFromMatch() + emissionM + bmp,
+			X->getTransitionProbabilityFromMatch() + emissionX + bxp,
+														Y->getTransitionProbabilityFromMatch() + emissionY + byp);
+
+			if (i==xSize-1  && j==ySize-1)
+			{
+				X->setValueAt(i, j, 0);
+				Y->setValueAt(i, j, 0);
+				M->setValueAt(i, j, 0);
+			}
+			else
+			{
+				X->setValueAt(i, j, bx);
+				Y->setValueAt(i, j, by);
+				M->setValueAt(i, j, bm);
+			}
+		}
+		for (i = xSize-1, j=ySize-1; i >= 0; i--)
+		{
+			emissionX = (i==xSize-1) ? -100000 : log(ptmatrix->getEquilibriumFreq(seq1[i].getMatrixIndex()));
+			emissionY = (j==ySize-1) ? -100000 : log(ptmatrix->getEquilibriumFreq(seq2[j].getMatrixIndex()));
+			emissionM = (i==xSize-1 ||j==ySize-1) ? -100000 : log(ptmatrix->getPairTransition(seq1[i].getMatrixIndex(), seq2[j].getMatrixIndex()));
+
+			bxp = (i==xSize-1) ? -100000 : X->getValueAt(i+1,j);
+			byp = (j==ySize-1) ? -100000 : Y->getValueAt(i,j+1);
+			bmp = (i==xSize-1 ||j==ySize-1) ? -100000 : M->getValueAt(i+1,j+1);
+
+			bx = maths->logSum(M->getTransitionProbabilityFromInsert() + emissionM + bmp,
+			X->getTransitionProbabilityFromInsert() + emissionX + bxp,
+			Y->getTransitionProbabilityFromInsert() + emissionY + byp);
+
+			//TODO bx and by should be identical - same for forward.
+			//FIXME - speedup by using only 1 indel calculation - see above
+			by = maths->logSum(M->getTransitionProbabilityFromDelete() + emissionM + bmp,
+			X->getTransitionProbabilityFromDelete() + emissionX + bxp,
+			Y->getTransitionProbabilityFromDelete() + emissionY + byp);
+
+			bm = maths->logSum(M->getTransitionProbabilityFromMatch() + emissionM + bmp,
+			X->getTransitionProbabilityFromMatch() + emissionX + bxp,
+														Y->getTransitionProbabilityFromMatch() + emissionY + byp);
+
+			if (i==xSize-1  && j==ySize-1)
+			{
+				X->setValueAt(i, j, 0);
+				Y->setValueAt(i, j, 0);
+				M->setValueAt(i, j, 0);
+			}
+			else
+			{
+				X->setValueAt(i, j, bx);
+				Y->setValueAt(i, j, by);
+				M->setValueAt(i, j, bm);
+			}
+		}
+
+
 	for (i = xSize-2; i >= 0; i--)
 	{
 		for (j = ySize-2; j >= 0; j--)
@@ -131,9 +239,10 @@ double BackwardPairHMM::runAlgorithm()
 											X->getTransitionProbabilityFromMatch() + emissionX + bxp,
 											Y->getTransitionProbabilityFromMatch() + emissionY + byp);
 
-			X->setValueAt(i, j, bx);
-			Y->setValueAt(i, j, by);
-			M->setValueAt(i, j, bm);
+				X->setValueAt(i, j, bx);
+				Y->setValueAt(i, j, by);
+				M->setValueAt(i, j, bm);
+
 		}
 	}
 

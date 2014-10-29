@@ -106,7 +106,15 @@ public:
 		this->dpMatrix->tracebackRaw(s1,s2,dict,al);
 	}
 
+	unsigned int getCols() const
+	{
+		return cols;
+	}
 
+	unsigned int getRows() const
+	{
+		return rows;
+	}
 };
 
 } /* namespace EBC */
