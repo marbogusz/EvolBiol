@@ -207,7 +207,7 @@ vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromTree()
 	double treeSize;
 	this->idealTreeSize = 3 * this->averageLeafbranch;
 	bool found;
-	unsigned int s1,s2,s3;
+	unsigned int s1,s2;
 
 	double tmpd1, tmpd2;
 

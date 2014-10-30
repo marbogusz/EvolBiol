@@ -9,7 +9,6 @@
 #define HEURISTICS_BAND_HPP_
 
 #include <vector>
-#include "hmm/EvolutionaryPairHMM.hpp"
 
 using namespace std;
 
@@ -23,16 +22,6 @@ protected:
 	vector<pair<unsigned int, unsigned int>> matchBand;
 	vector<pair<unsigned int, unsigned int>> insertBand;
 	vector<pair<unsigned int, unsigned int>> deleteBand;
-
-	double posteriorLikelihoodLimit;
-	double posteriorLikelihoodDelta;
-
-	//Match state
-	PairwiseHmmStateBase* M;
-	//Insert state
-	PairwiseHmmStateBase* X;
-	//Delete state
-	PairwiseHmmStateBase* Y;
 
 
 public:
@@ -64,8 +53,6 @@ public:
 	{
 		return deleteBand[pos];
 	}
-
-	void processPosteriorProbabilities(EvolutionaryPairHMM* hmm);
 };
 
 } /* namespace EBC */

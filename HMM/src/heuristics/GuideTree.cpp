@@ -57,7 +57,7 @@ void GuideTree::constructTree()
 {
 	unsigned int i,j;
 	string currSeq;
-	double identity, estIdentity, kimura;
+	double identity, estIdentity;
 
 
 

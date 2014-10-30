@@ -13,9 +13,9 @@ namespace EBC
 {
 
 
-ViterbiPairHMM::ViterbiPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, bool banding,
-		SubstitutionModelBase* smdl, IndelModel* imdl, unsigned int bandPercentage, Definitions::DpMatrixType mt) :
-		EvolutionaryPairHMM(s1,s2, banding, smdl, imdl, bandPercentage,mt)
+ViterbiPairHMM::ViterbiPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, SubstitutionModelBase* smdl,
+		IndelModel* imdl,Definitions::DpMatrixType mt, Band* bandObj) :
+		EvolutionaryPairHMM(s1,s2, smdl, imdl,mt, bandObj)
 {
 	this->alignment.reserve(xSize);
 }
@@ -96,39 +96,36 @@ double ViterbiPairHMM::runAlgorithm()
 	{
 		for (j = 0; j<ySize; j++)
 		{
-			if(this->withinBand(i,j,this->bandSpan) || !bandingEnabled)
+			if(i!=0)
 			{
-				if(i!=0)
-				{
 
-					k = i-1;
-					emissionX = log(ptmatrix->getEquilibriumFreq(seq1[i-1].getMatrixIndex()));
-					xm = M->getValueAt(k,j) + X->getTransitionProbabilityFromMatch();
-					xx = X->getValueAt(k,j) + X->getTransitionProbabilityFromInsert();
-					xy = Y->getValueAt(k,j) + X->getTransitionProbabilityFromDelete();
+				k = i-1;
+				emissionX = log(ptmatrix->getEquilibriumFreq(seq1[i-1].getMatrixIndex()));
+				xm = M->getValueAt(k,j) + X->getTransitionProbabilityFromMatch();
+				xx = X->getValueAt(k,j) + X->getTransitionProbabilityFromInsert();
+				xy = Y->getValueAt(k,j) + X->getTransitionProbabilityFromDelete();
 
-					X->setValueAt(i,j,getMax(xm,xx,xy,i,j,X) + emissionX);
-				}
-				if(j!=0)
-				{
-					k = j-1;
-					emissionY = log(ptmatrix->getEquilibriumFreq(seq2[j-1].getMatrixIndex()));
-					ym = M->getValueAt(i,k) + Y->getTransitionProbabilityFromMatch();
-					yx = X->getValueAt(i,k) + Y->getTransitionProbabilityFromInsert();
-					yy = Y->getValueAt(i,k) + Y->getTransitionProbabilityFromDelete();
-					Y->setValueAt(i,j,getMax(ym,yx,yy,i,j,Y) + emissionY);
-				}
+				X->setValueAt(i,j,getMax(xm,xx,xy,i,j,X) + emissionX);
+			}
+			if(j!=0)
+			{
+				k = j-1;
+				emissionY = log(ptmatrix->getEquilibriumFreq(seq2[j-1].getMatrixIndex()));
+				ym = M->getValueAt(i,k) + Y->getTransitionProbabilityFromMatch();
+				yx = X->getValueAt(i,k) + Y->getTransitionProbabilityFromInsert();
+				yy = Y->getValueAt(i,k) + Y->getTransitionProbabilityFromDelete();
+				Y->setValueAt(i,j,getMax(ym,yx,yy,i,j,Y) + emissionY);
+			}
 
-				if(i!=0 && j!=0)
-				{
-					k = i-1;
-					l = j-1;
-					emissionM = log(ptmatrix->getPairTransition(seq1[i-1].getMatrixIndex(), seq2[j-1].getMatrixIndex()));
-					mm = M->getValueAt(k,l) + M->getTransitionProbabilityFromMatch();
-					mx = X->getValueAt(k,l) + M->getTransitionProbabilityFromInsert();
-					my = Y->getValueAt(k,l) + M->getTransitionProbabilityFromDelete();
-					M->setValueAt(i,j,getMax(mm,mx,my,i,j,M) + emissionM);
-				}
+			if(i!=0 && j!=0)
+			{
+				k = i-1;
+				l = j-1;
+				emissionM = log(ptmatrix->getPairTransition(seq1[i-1].getMatrixIndex(), seq2[j-1].getMatrixIndex()));
+				mm = M->getValueAt(k,l) + M->getTransitionProbabilityFromMatch();
+				mx = X->getValueAt(k,l) + M->getTransitionProbabilityFromInsert();
+				my = Y->getValueAt(k,l) + M->getTransitionProbabilityFromDelete();
+				M->setValueAt(i,j,getMax(mm,mx,my,i,j,M) + emissionM);
 			}
 		}
 	}

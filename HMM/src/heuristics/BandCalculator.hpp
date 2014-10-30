@@ -11,9 +11,10 @@
 #include "models/GTRModel.hpp"
 #include "models/HKY85Model.hpp"
 #include "models/AminoacidSubstitutionModel.hpp"
+#include "models/SubstitutionModelBase.hpp"
+
 #include "core/PMatrixDouble.hpp"
 #include "core/TransitionProbabilities.hpp"
-#include "models/SubstitutionModelBase.hpp"
 #include "core/Maths.hpp"
 #include "core/Dictionary.hpp"
 #include "core/Definitions.hpp"
@@ -51,13 +52,18 @@ protected:
 
 	Band* band;
 
+	double posteriorLikelihoodLimit;
+	double posteriorLikelihoodDelta;
+
+	void processPosteriorProbabilities(BackwardPairHMM* hmm, Band* band);
+
 public:
 	BandCalculator(vector<SequenceElement>& s1, vector<SequenceElement>& s2, SubstitutionModelBase* sm, IndelModel* im, double divergenceTime);
 	virtual ~BandCalculator();
 
 	inline Band* getBand()
 	{
-		return band;
+		return this->band;
 	}
 };
 

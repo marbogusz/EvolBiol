@@ -29,13 +29,9 @@ class DpMatrixFull : public DpMatrixBase
 		double score;
 		DpMatrixFull* src;
 
-
 		TraceStep() : vert(false), hor(false),
-			diag(false), score(0), src(NULL) {}
+			diag(false), score(Definitions::minMatrixLikelihood), src(NULL) {}
 	};
-
-
-
 
 protected:
 

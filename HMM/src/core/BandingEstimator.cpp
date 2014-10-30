@@ -16,8 +16,10 @@ namespace EBC
 
 BandingEstimator::BandingEstimator(Definitions::AlgorithmType at, Sequences* inputSeqs, Definitions::ModelType model ,std::vector<double> indel_params,
 		std::vector<double> subst_params, Definitions::OptimizationType ot, unsigned int rateCategories, double alpha, GuideTree* gt) :
-				inputSequences(inputSeqs), gammaRateCategories(rateCategories), pairCount(inputSequences->getPairCount()), hmms(pairCount)
+				inputSequences(inputSeqs), gammaRateCategories(rateCategories), pairCount(inputSequences->getPairCount()), hmms(pairCount), bands(pairCount)
 {
+	//Banding estimator means banding enabled!
+
 	maths = new Maths();
 	dict = inputSequences->getDictionary();
 
@@ -39,7 +41,8 @@ BandingEstimator::BandingEstimator(Definitions::AlgorithmType at, Sequences* inp
 
 	estimateSubstitutionParams = subst_params.size() != substModel->getParamsNumber();
 	estimateIndelParams = indel_params.size() == 0;
-	this->estimateAlpha = estimateAlpha;
+	//Do not estimate alpha here. Alpha needs to be estimated beforehand
+	this->estimateAlpha = false;
 
 	DEBUG("Pairwise banding model estimator starting");
 	DEBUG("Estimate substitution parameters set to : " << estimateSubstitutionParams << " Estimate indel parameters set to : " << estimateIndelParams);
@@ -53,8 +56,6 @@ BandingEstimator::BandingEstimator(Definitions::AlgorithmType at, Sequences* inp
 	if(!estimateSubstitutionParams)
 		modelParams->setUserSubstParams(subst_params);
 	modelParams->setAlpha(alpha);
-
-	EvolutionaryPairHMM* hmm;
 
 	substModel->setObservedFrequencies(inputSequences->getElementFrequencies());
 	if (estimateSubstitutionParams == false)
@@ -74,14 +75,34 @@ BandingEstimator::BandingEstimator(Definitions::AlgorithmType at, Sequences* inp
 	//let's assume that we have all the parameters estimated
 	//need to get times!
 
+	EvolutionaryPairHMM* hmm;
+
 	for(unsigned int i =0; i<pairCount; i++)
 		{
 			std::pair<unsigned int, unsigned int> idxs = inputSequences->getPairOfSequenceIndices(i);
 			DEBUG("Running band calculator for sequence " << idxs.first << " and " << idxs.second);
 			BandCalculator* bc = new BandCalculator(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
 					substModel, indelModel, gt->getDistanceMatrix()->getDistance(idxs.first,idxs.second));
+			bands[i] = bc->getBand();
+			if (at == Definitions::AlgorithmType::Viterbi)
+			{
+				hmm = hmms[i] = new ViterbiPairHMM(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
+					substModel, indelModel, Definitions::DpMatrixType::Full, bands[i]);
+			}
+			else if (at == Definitions::AlgorithmType::Forward)
+			{
+				hmm = hmms[i] = new ForwardPairHMM(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
+						substModel, indelModel, Definitions::DpMatrixType::Full, bands[i]);
+			}
+			else
+			{
+				throw HmmException("Wrong algorithm type - use either Forward or viterbi\n");
+			}
 			delete bc;
 		}
+
+	bfgs = new Optimizer(modelParams, this, ot);
+	bfgs->optimize();
 
 /*
 	for(unsigned int i =0; i<pairCount; i++)
@@ -115,6 +136,8 @@ BandingEstimator::~BandingEstimator()
 	delete bfgs;
 	delete modelParams;
     delete maths;
+    for (auto bnd : bands)
+    	delete bnd;
 }
 
 double BandingEstimator::runIteration()
@@ -122,13 +145,13 @@ double BandingEstimator::runIteration()
 	double result = 0;
 	EvolutionaryPairHMM* hmm;
 
-	//this->modelParams->outputParameters();
-	//cerr << "iteration " << endl;
-
 	if (estimateSubstitutionParams == true)
 	{
 			//set parameters and calculate the model
-		substModel->setAlpha(modelParams->getAlpha());
+		if(this->estimateAlpha)
+		{
+			substModel->setAlpha(modelParams->getAlpha());
+		}
 		substModel->setParameters(modelParams->getSubstParameters());
 		substModel->calculateModel();
 	}
@@ -139,16 +162,14 @@ double BandingEstimator::runIteration()
 		indelModel->setParameters(modelParams->getIndelParameters());
 	}
 
-
-
 	for(unsigned int i =0; i<pairCount; i++)
 	{
 		hmm = hmms[i];
 		//FIXME - individual indel models!!! or gap opening extension class aggregator!
 		// the following is not thread safe for indels!!!
 		hmm->setDivergenceTime(modelParams->getDivergenceTime(i));
-		indelModel->setTime(modelParams->getDivergenceTime(i));
-		indelModel->calculate();
+		//indelModel->setTime(modelParams->getDivergenceTime(i));
+		//indelModel->calculate();
 		result += hmm->runAlgorithm();
 		//modelParams->outputParameters();
 	}

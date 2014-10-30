@@ -7,7 +7,6 @@
 
 #include "core/CommandReader.hpp"
 #include "core/Sequences.hpp"
-#include "hmm/BasicViterbi.hpp"
 #include "hmm/ForwardPairHMM.hpp"
 #include "core/HmmException.hpp"
 #include "core/PairwiseEstimator.hpp"
@@ -28,7 +27,8 @@ using namespace EBC;
 
 int main(int argc, char ** argv) {
 
-	//Set output Precision to 6
+	//Set output Precision to 2
+	//FIXME - should normally be set to >= 6
 	cout << fixed << setprecision(2);
 	cerr << fixed << setprecision(2);
 
@@ -43,17 +43,9 @@ int main(int argc, char ** argv) {
 		Sequences* inputSeqs = new Sequences(parser, cmdReader->getSequenceType(),cmdReader->isFixedAlignment());
 		if (cmdReader->isMLE())
 		{
-
-
-
 			//MlEstimator* me = new MlEstimator(inputSeqs, cmdReader->getModelType() ,cmdReader->getIndelParams(),
 			//					cmdReader->getSubstParams(), cmdReader->getOptimizationType(), cmdReader->getCategories(),
 			//					cmdReader->getAlpha(), cmdReader->estimateAlpha(),cmdReader->getDistance(), cmdReader->isFixedAlignment() == false);
-
-
-
-
-
 			//DEBUG("Creating TripletModelEstimator");
 
 			ModelEstimator* tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),

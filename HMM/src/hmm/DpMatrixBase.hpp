@@ -11,8 +11,10 @@
 #include <limits>
 #include <iostream>
 #include <vector>
+
 #include "core/SequenceElement.hpp"
 #include "core/Dictionary.hpp"
+#include "core/Definitions.hpp"
 
 using namespace std;
 
@@ -39,7 +41,7 @@ public:
 	{
 		this->xSize = xSize;
 		this->ySize = ySize;
-		this->minVal = -100000;
+		this->minVal = Definitions::minMatrixLikelihood;
 	}
 
 	virtual ~DpMatrixBase() {}

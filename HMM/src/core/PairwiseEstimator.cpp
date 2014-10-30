@@ -146,12 +146,12 @@ PairwiseEstimator::PairwiseEstimator(Definitions::AlgorithmType at, Sequences* i
 		if (at == Definitions::AlgorithmType::Viterbi)
 		{
 			hmm = hmms[i] = new ViterbiPairHMM(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
-				banding, substModel, indelModel, bandPercentage, Definitions::DpMatrixType::Limited);
+				substModel, indelModel);
 		}
 		else if (at == Definitions::AlgorithmType::Forward)
 		{
 			hmm = hmms[i] = new ForwardPairHMM(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
-					banding, substModel, indelModel, bandPercentage, Definitions::DpMatrixType::Limited);
+					substModel, indelModel, Definitions::DpMatrixType::Full);
 		}
 		else
 		{

@@ -17,7 +17,7 @@ GotohAlgorithm::~GotohAlgorithm()
 	// TODO Auto-generated destructor stub
 }
 
-GotohAlgorithm::GotohAlgorithm(unsigned int size, Dictionary* d) : scoringSize(size), dict(d)
+GotohAlgorithm::GotohAlgorithm(unsigned int size, Dictionary* d) : dict(d), scoringSize(size)
 {
 	DEBUG("Building Gotoh");
 
@@ -107,8 +107,8 @@ std::pair<string, string> EBC::GotohAlgorithm::getAlignment()
 
 	if (hiscore == ss)
 		return this->S->getAlignment(seq_a, seq_b);
-	if (hiscore == sv)
+	else if (hiscore == sv)
 			return this->V->getAlignment(seq_a, seq_b);
-	if (hiscore == sh)
+	else
 			return this->H->getAlignment(seq_a, seq_b);
 }

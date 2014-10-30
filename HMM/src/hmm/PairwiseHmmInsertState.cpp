@@ -27,6 +27,7 @@ PairwiseHmmInsertState::PairwiseHmmInsertState(DpMatrixBase *matrix)
 
 void PairwiseHmmInsertState::initializeData(bool backwards)
 {
+	/*
 	if(!backwards)
 		dpMatrix->setWholeRow(0,-100000);
 	else
@@ -35,6 +36,7 @@ void PairwiseHmmInsertState::initializeData(bool backwards)
 		dpMatrix->setWholeRow(this->rows-1,-100000);
 		dpMatrix->setValue(rows-1,cols-1,0);
 	}
+	*/
 }
 
 void PairwiseHmmInsertState::setDirection(unsigned int i, unsigned int j)

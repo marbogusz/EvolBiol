@@ -11,9 +11,9 @@
 namespace EBC
 {
 
-EvolutionaryPairHMM::EvolutionaryPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, bool banding,
-			SubstitutionModelBase* smdl, IndelModel* imdl, unsigned int bandPercentage, Definitions::DpMatrixType mt) :
-				substModel(smdl), indelModel(imdl)
+EvolutionaryPairHMM::EvolutionaryPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2,
+			SubstitutionModelBase* smdl, IndelModel* imdl,
+			Definitions::DpMatrixType mt, Band* bandObj) : substModel(smdl), indelModel(imdl), band(bandObj)
 {
 	M = X = Y = NULL;
 
@@ -25,14 +25,9 @@ EvolutionaryPairHMM::EvolutionaryPairHMM(vector<SequenceElement> s1, vector<Sequ
 
 	ptmatrix = new PMatrixDouble(substModel);
 
-	bandFactor = bandPercentage;
-	bandingEnabled = banding;
-
 	this->tpb = new TransitionProbabilities(indelModel);
 
-	getBandWidth();
 	initializeStates(mt);
-
 }
 
 void EvolutionaryPairHMM::setDivergenceTime(double time)
@@ -122,6 +117,7 @@ void EvolutionaryPairHMM::calculateModels()
 EvolutionaryPairHMM::~EvolutionaryPairHMM()
 {
 
+	DEBUG("Evolutionary pair HMM destructor");
 	delete Y;
 	delete X;
 	delete M;

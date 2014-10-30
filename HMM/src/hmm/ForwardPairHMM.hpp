@@ -22,8 +22,9 @@ protected:
 	vector<double> userSubstParameters;
 
 public:
-	ForwardPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, bool banding,
-			SubstitutionModelBase* smdl, IndelModel* imdl, unsigned int bandPercentage, Definitions::DpMatrixType mt);
+	ForwardPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2,
+			SubstitutionModelBase* smdl, IndelModel* imdl,
+			Definitions::DpMatrixType mt, Band* bandObj = nullptr);
 
 	virtual ~ForwardPairHMM();
 

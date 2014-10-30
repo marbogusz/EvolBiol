@@ -9,6 +9,8 @@
 #define BANDINGESTIMATOR_HPP_
 
 
+
+#include "core/IOptimizable.hpp"
 #include "core/OptimizedModelParameters.hpp"
 #include "core/Definitions.hpp"
 #include "core/BandingEstimator.hpp"
@@ -17,13 +19,16 @@
 #include "core/Sequences.hpp"
 #include "core/HmmException.hpp"
 #include "core/Optimizer.hpp"
-#include "hmm/ForwardPairHMM.hpp"
-#include "hmm/ViterbiPairHMM.hpp"
+
 #include "models/SubstitutionModelBase.hpp"
 #include "models/IndelModel.hpp"
-#include "core/IOptimizable.hpp"
+
 #include "heuristics/GuideTree.hpp"
 #include "heuristics/BandCalculator.hpp"
+#include "heuristics/Band.hpp"
+
+#include "hmm/ForwardPairHMM.hpp"
+#include "hmm/ViterbiPairHMM.hpp"
 
 #include <vector>
 #include <sstream>
@@ -63,6 +68,8 @@ protected:
 	unsigned int pairCount;
 
 	vector<EvolutionaryPairHMM*> hmms;
+	//delete bands in the destructor
+	vector<Band*> bands;
 
 	OptimizedModelParameters* modelParams;
 

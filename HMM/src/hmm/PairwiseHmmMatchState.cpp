@@ -33,16 +33,17 @@ void PairwiseHmmMatchState::initializeData(bool backwards)
 {
 	if (!backwards)
 	{
-		dpMatrix->setWholeCol(0,-100000);
-		dpMatrix->setWholeRow(0,-100000);
+		//dpMatrix->setWholeCol(0,-100000);
+		//dpMatrix->setWholeRow(0,-100000);
 		dpMatrix->setValue(0,0,0);
 	}
-	else
+	/*else
 	{
 		dpMatrix->setWholeCol(this->cols-1,-100000);
 		dpMatrix->setWholeRow(this->rows-1,-100000);
 		dpMatrix->setValue(rows-1,cols-1,0);
 	}
+	*/
 }
 
 void PairwiseHmmMatchState::setDirection(unsigned int i, unsigned int j)

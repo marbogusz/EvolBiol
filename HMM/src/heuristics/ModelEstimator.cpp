@@ -66,7 +66,7 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 	{
 
 //		DEBUG("First Viterbi Pair " << idx);
-		vphmm = new ViterbiPairHMM(inputSeqs->getSequencesAt(tripletIdxs[idx][0]), inputSeqs->getSequencesAt(tripletIdxs[idx][1]),false, substModel, indelModel, 0);
+		vphmm = new ViterbiPairHMM(inputSeqs->getSequencesAt(tripletIdxs[idx][0]), inputSeqs->getSequencesAt(tripletIdxs[idx][1]), substModel, indelModel);
 		tb1 = sme->getModelParams()->getDivergenceTime(idx*3);
 		tb2 = sme->getModelParams()->getDivergenceTime((idx*3)+1);
 		tb3 = sme->getModelParams()->getDivergenceTime((idx*3)+2);
@@ -77,7 +77,7 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 		auto p1 =  vphmm->getAlignment(inputSeqs->getRawSequenceAt(tripletIdxs[idx][0]), inputSeqs->getRawSequenceAt(tripletIdxs[idx][1]));
 		delete vphmm;
 //		DEBUG("Second Viterbi Pair " << idx);
-		vphmm = new ViterbiPairHMM(inputSeqs->getSequencesAt(tripletIdxs[idx][1]), inputSeqs->getSequencesAt(tripletIdxs[idx][2]),false, substModel, indelModel, 0);
+		vphmm = new ViterbiPairHMM(inputSeqs->getSequencesAt(tripletIdxs[idx][1]), inputSeqs->getSequencesAt(tripletIdxs[idx][2]), substModel, indelModel);
 		vphmm->setDivergenceTime(tb2+tb3);
 		vphmm->runAlgorithm();
 		auto p2 =  vphmm->getAlignment(inputSeqs->getRawSequenceAt(tripletIdxs[idx][1]), inputSeqs->getRawSequenceAt(tripletIdxs[idx][2]));

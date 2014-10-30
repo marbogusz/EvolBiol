@@ -35,8 +35,8 @@ protected:
 
 
 public:
-	BackwardPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, bool banding,
-			SubstitutionModelBase* smdl, IndelModel* imdl, unsigned int bandPercentage, Definitions::DpMatrixType mt);
+	BackwardPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, SubstitutionModelBase* smdl, IndelModel* imdl,
+			Definitions::DpMatrixType mt, Band* bandObj = nullptr);
 
 	virtual ~BackwardPairHMM();
 

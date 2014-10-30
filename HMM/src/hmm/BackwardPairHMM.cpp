@@ -17,9 +17,9 @@ namespace EBC
 {
 
 
-BackwardPairHMM::BackwardPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, bool banding,
-		SubstitutionModelBase* smdl, IndelModel* imdl, unsigned int bandPercentage, Definitions::DpMatrixType mt) :
-		EvolutionaryPairHMM(s1,s2, banding, smdl, imdl, bandPercentage,mt)
+BackwardPairHMM::BackwardPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, SubstitutionModelBase* smdl,
+		IndelModel* imdl,  Definitions::DpMatrixType mt ,Band* bandObj) :
+		EvolutionaryPairHMM(s1,s2, smdl, imdl, mt, bandObj)
 {
 }
 
@@ -71,11 +71,11 @@ void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 	DEBUG("Posterior Match");
 	dynamic_cast<DpMatrixFull*>(M->getDpMatrix())->outputValues(0);
 
-	DEBUG("Posterior Insert");
-	dynamic_cast<DpMatrixFull*>(X->getDpMatrix())->outputValues(0);
+//	DEBUG("Posterior Insert");
+//	dynamic_cast<DpMatrixFull*>(X->getDpMatrix())->outputValues(0);
 
-	DEBUG("Posterior Delete");
-	dynamic_cast<DpMatrixFull*>(Y->getDpMatrix())->outputValues(0);
+//	DEBUG("Posterior Delete");
+//	dynamic_cast<DpMatrixFull*>(Y->getDpMatrix())->outputValues(0);
 
 }
 

@@ -99,14 +99,10 @@ public:
 
 	bool getBanding()
 	{
-		unsigned int opt = get_option(parser,"b",0);
-		return (opt == 1);
-	}
-
-	unsigned int getBandFactor()
-	{
-		unsigned int opt = get_option(parser,"bf",5);
-		return opt;
+		if (parser.option("b"))
+			return true;
+		else
+			return false;
 	}
 
 	double getDistance()
@@ -127,7 +123,7 @@ public:
 
 	bool estimateAlpha()
 	{
-		int res = get_option(parser,"estimateAlpha",0);
+		int res = get_option(parser,"estimateAlpha",1);
 		return res == 1;
 	}
 	Definitions::SequenceType getSequenceType()
@@ -135,7 +131,7 @@ public:
 		if (parser.option("rev") || parser.option("hky"))
 			return Definitions::SequenceType::Nucleotide;
 		else return Definitions::SequenceType::Aminoacid;
-		//FIXME codons
+		//FIXME codons???
 	}
 };
 
