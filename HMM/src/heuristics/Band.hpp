@@ -19,37 +19,37 @@ class Band
 {
 protected:
 
-	vector<pair<unsigned int, unsigned int>> matchBand;
-	vector<pair<unsigned int, unsigned int>> insertBand;
-	vector<pair<unsigned int, unsigned int>> deleteBand;
+	vector<pair<int, int>> matchBand;
+	vector<pair<int, int>> insertBand;
+	vector<pair<int, int>> deleteBand;
 
 
 public:
 	Band(unsigned int size);
 	virtual ~Band();
 
-	inline void setMatchRangeAt(unsigned int pos, unsigned int start, unsigned int end)
+	inline void setMatchRangeAt(unsigned int pos, int start, int end)
 	{
 		matchBand[pos] = std::make_pair(start,end);
 	}
-	inline void setInsertRangeAt(unsigned int pos, unsigned int start, unsigned int end)
+	inline void setInsertRangeAt(unsigned int pos, int start, int end)
 	{
 		insertBand[pos] = std::make_pair(start,end);
 	}
-	inline void setDeleteRangeAt(unsigned int pos, unsigned int start, unsigned int end)
+	inline void setDeleteRangeAt(unsigned int pos, int start, int end)
 	{
 		deleteBand[pos] = std::make_pair(start,end);
 	}
 
-	inline std::pair<unsigned int, unsigned int> getMatchRangeAt(unsigned int pos)
+	inline std::pair<int, int> getMatchRangeAt(unsigned int pos)
 	{
 		return matchBand[pos];
 	}
-	inline std::pair<unsigned int, unsigned int> getInsertRangeAt(unsigned int pos)
+	inline std::pair<int, int> getInsertRangeAt(unsigned int pos)
 	{
 		return insertBand[pos];
 	}
-	inline std::pair<unsigned int, unsigned int> getDeleteRangeAt(unsigned int pos)
+	inline std::pair<int, int> getDeleteRangeAt(unsigned int pos)
 	{
 		return deleteBand[pos];
 	}

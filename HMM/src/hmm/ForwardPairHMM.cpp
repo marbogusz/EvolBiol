@@ -107,7 +107,7 @@ double ForwardPairHMM::runAlgorithm()
 		int loI, hiI, loD, hiD, loM, hiM;
 		auto bracket = band->getInsertRangeAt(0);
 		loI = bracket.first;
-		if (loI != 0)
+		if (loI > 0)
 		{
 			hiI = bracket.second;
 			for(i=loI,j=0; i<= hiI; i++)
@@ -130,7 +130,7 @@ double ForwardPairHMM::runAlgorithm()
 			loM = bracketM.first;
 			loD = bracketD.first;
 
-			if (loI != 0)
+			if (loI > 0)
 			{
 				hiI = bracketI.second;
 				for(i = loI; i <= hiI; i++)
@@ -143,7 +143,7 @@ double ForwardPairHMM::runAlgorithm()
 					X->setValueAt(i,j, emissionX + maths->logSum(xm,xx,xy));
 				}
 			}
-			if (loD != 0)
+			if (loD != -1)
 			{
 				hiD = bracketD.second;
 				for(i = loD; i <= hiD; i++)
@@ -156,7 +156,7 @@ double ForwardPairHMM::runAlgorithm()
 					Y->setValueAt(i,j, emissionY + maths->logSum(ym,yx,yy));
 				}
 			}
-			if (loM != 0)
+			if (loM > 0)
 			{
 				hiM = bracketD.second;
 				for(i = loM; i <= hiM; i++)

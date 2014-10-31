@@ -85,7 +85,7 @@ void BandCalculator::processPosteriorProbabilities(BackwardPairHMM* hmm, Band* b
 	double minY;
 	double minM;
 
-	unsigned int xHi, xLo, yHi, yLo, mHi,mLo, rowCount;
+	int xHi, xLo, yHi, yLo, mHi,mLo, rowCount;
 
 	unsigned int tmpRow;
 
@@ -98,7 +98,7 @@ void BandCalculator::processPosteriorProbabilities(BackwardPairHMM* hmm, Band* b
 		minX = -200000;
 		minY = -200000;
 		minM = -200000;
-		xHi=mHi=yHi=xLo=mLo=yLo=0;
+		xHi=mHi=yHi=xLo=mLo=yLo=-1;
 		//scan the column for the smallest lnl
 		for(tmpRow = 0; tmpRow < rowCount; tmpRow ++)
 		{
@@ -123,7 +123,7 @@ void BandCalculator::processPosteriorProbabilities(BackwardPairHMM* hmm, Band* b
 		}
 		//got the minimums, get the range
 		int tmpIdx;
-		if(xHi != 0)
+		if(xHi != -1)
 		{
 			tmpIdx = xLo = xHi;
 			while(++tmpIdx < rowCount && (X->getValueAt(tmpIdx, col) - minX) > posteriorLikelihoodDelta)
@@ -133,7 +133,7 @@ void BandCalculator::processPosteriorProbabilities(BackwardPairHMM* hmm, Band* b
 				xLo = tmpIdx;
 
 		}
-		if(yHi != 0)
+		if(yHi != -1)
 		{
 			tmpIdx = yLo = yHi;
 			while(++tmpIdx < rowCount && (Y->getValueAt(tmpIdx, col) - minY) > posteriorLikelihoodDelta)
@@ -143,7 +143,7 @@ void BandCalculator::processPosteriorProbabilities(BackwardPairHMM* hmm, Band* b
 				yLo = tmpIdx;
 
 		}
-		if(mHi != 0)
+		if(mHi != -1)
 		{
 			tmpIdx = mLo = mHi;
 			while(++tmpIdx < rowCount && (M->getValueAt(tmpIdx, col) - minM) > posteriorLikelihoodDelta)
@@ -156,7 +156,12 @@ void BandCalculator::processPosteriorProbabilities(BackwardPairHMM* hmm, Band* b
 		band->setInsertRangeAt(col, xLo,xHi);
 		band->setDeleteRangeAt(col, yLo,yHi);
 		band->setMatchRangeAt(col, mLo,mHi);
-		DEBUG("M band " << col << "\t" << mLo <<"\t" << mHi);
+		//band->setInsertRangeAt(col, 1,rowCount-1);
+		//band->setDeleteRangeAt(col, 0,rowCount-1);
+		//band->setMatchRangeAt(col, 1,rowCount-1);
+		DEBUG("M/X/Y bands " << col << "\t" << band->getMatchRangeAt(col).first <<"\t" << band->getMatchRangeAt(col).second
+				<< "\t" << band->getInsertRangeAt(col).first <<"\t" << band->getInsertRangeAt(col).second
+				<< "\t" << band->getDeleteRangeAt(col).first <<"\t" << band->getDeleteRangeAt(col).second);
 	}
 }
 
