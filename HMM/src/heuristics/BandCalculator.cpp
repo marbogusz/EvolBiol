@@ -11,7 +11,7 @@ namespace EBC
 {
 
 BandCalculator::BandCalculator(vector<SequenceElement>& s1, vector<SequenceElement>& s2, SubstitutionModelBase* sm, IndelModel* im, double divergenceTime) :
-		fwd(3), seq1(s1), seq2(s2), substModel(sm), indelModel(im), time(divergenceTime)
+		fwd(3,nullptr), seq1(s1), seq2(s2), substModel(sm), indelModel(im), time(divergenceTime)
 {
 	// TODO Auto-generated constructor stub
 	//FIXME magic numbers
@@ -60,11 +60,13 @@ BandCalculator::BandCalculator(vector<SequenceElement>& s1, vector<SequenceEleme
 
 BandCalculator::~BandCalculator()
 {
+	delete bwd;
+
 	for(int i=0; i< fwd.size(); i++)
 	{
 		delete fwd[i];
 	}
-	delete bwd;
+
 }
 
 void BandCalculator::processPosteriorProbabilities(BackwardPairHMM* hmm, Band* band)

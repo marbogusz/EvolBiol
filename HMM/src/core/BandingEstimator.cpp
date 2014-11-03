@@ -10,6 +10,7 @@
 #include "models/HKY85Model.hpp"
 #include "models/AminoacidSubstitutionModel.hpp"
 #include "models/NegativeBinomialGapModel.hpp"
+#include "hmm/DpMatrixFull.hpp"
 
 namespace EBC
 {
@@ -75,7 +76,10 @@ BandingEstimator::BandingEstimator(Definitions::AlgorithmType at, Sequences* inp
 	//let's assume that we have all the parameters estimated
 	//need to get times!
 
-	EvolutionaryPairHMM* hmm;
+	EvolutionaryPairHMM *hmm;
+//non banden probs
+//	vector<EvolutionaryPairHMM*> hmmsNB(pairCount);
+
 
 	for(unsigned int i =0; i<pairCount; i++)
 		{
@@ -93,6 +97,8 @@ BandingEstimator::BandingEstimator(Definitions::AlgorithmType at, Sequences* inp
 			{
 				hmm = hmms[i] = new ForwardPairHMM(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
 						substModel, indelModel, Definitions::DpMatrixType::Full, bands[i]);
+				//hmmsNB[i] = new ForwardPairHMM(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
+				//						substModel, indelModel, Definitions::DpMatrixType::Full, NULL);
 			}
 			else
 			{
@@ -100,9 +106,31 @@ BandingEstimator::BandingEstimator(Definitions::AlgorithmType at, Sequences* inp
 			}
 			delete bc;
 		}
+/*
+	hmms[0]->setDivergenceTime(0.5);
+	hmmsNB[0]->setDivergenceTime(0.5);
+
+	hmms[0]->runAlgorithm();
+	hmmsNB[0]->runAlgorithm();
+
+	DEBUG("Match Banded");
+	dynamic_cast<DpMatrixFull*>(hmms[0]->M->getDpMatrix())->outputValues(0);
+	DEBUG("Match UNbanded");
+	dynamic_cast<DpMatrixFull*>(hmmsNB[0]->M->getDpMatrix())->outputValues(0);
+
+	DEBUG("Insert Banded");
+	dynamic_cast<DpMatrixFull*>(hmms[0]->X->getDpMatrix())->outputValues(0);
+	DEBUG("Insert UNbanded");
+	dynamic_cast<DpMatrixFull*>(hmmsNB[0]->X->getDpMatrix())->outputValues(0);
+	DEBUG("Delete Banded");
+	dynamic_cast<DpMatrixFull*>(hmms[0]->Y->getDpMatrix())->outputValues(0);
+	DEBUG("Delete UNbanded");
+	dynamic_cast<DpMatrixFull*>(hmmsNB[0]->Y->getDpMatrix())->outputValues(0);
+*/
 
 	bfgs = new Optimizer(modelParams, this, ot);
 	bfgs->optimize();
+	this->modelParams->outputParameters();
 
 /*
 	for(unsigned int i =0; i<pairCount; i++)
@@ -173,7 +201,7 @@ double BandingEstimator::runIteration()
 		result += hmm->runAlgorithm();
 		//modelParams->outputParameters();
 	}
-	cerr << " lnl " << result << endl;
+	//cerr << " lnl " << result << endl;
 	return result;
 }
 

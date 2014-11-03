@@ -70,12 +70,7 @@ protected:
 	vector<SequenceElement> seq2;
 	vector<SequenceElement>::iterator itS1, itS2;
 
-	//Match state
-	PairwiseHmmStateBase* M;
-	//Insert state
-	PairwiseHmmStateBase* X;
-	//Delete state
-	PairwiseHmmStateBase* Y;
+
 
 	//the following assumes a fix HMM structure
 	virtual void setTransitionProbabilities();
@@ -86,6 +81,13 @@ protected:
 
 
 public:
+
+	//Match state
+	PairwiseHmmStateBase* M;
+	//Insert state
+	PairwiseHmmStateBase* X;
+	//Delete state
+	PairwiseHmmStateBase* Y;
 
 	EvolutionaryPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, SubstitutionModelBase* smdl,
 			IndelModel* imdl, Definitions::DpMatrixType, Band* bandObj);

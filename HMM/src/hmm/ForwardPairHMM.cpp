@@ -130,19 +130,6 @@ double ForwardPairHMM::runAlgorithm()
 			loM = bracketM.first;
 			loD = bracketD.first;
 
-			if (loI > 0)
-			{
-				hiI = bracketI.second;
-				for(i = loI; i <= hiI; i++)
-				{
-					k = i-1;
-					emissionX = log(ptmatrix->getEquilibriumFreq(seq1[i-1].getMatrixIndex()));
-					xm = M->getValueAt(k,j) + X->getTransitionProbabilityFromMatch();
-					xx = X->getValueAt(k,j) + X->getTransitionProbabilityFromInsert();
-					xy = Y->getValueAt(k,j) + X->getTransitionProbabilityFromDelete();
-					X->setValueAt(i,j, emissionX + maths->logSum(xm,xx,xy));
-				}
-			}
 			if (loD != -1)
 			{
 				hiD = bracketD.second;
@@ -158,7 +145,7 @@ double ForwardPairHMM::runAlgorithm()
 			}
 			if (loM > 0)
 			{
-				hiM = bracketD.second;
+				hiM = bracketM.second;
 				for(i = loM; i <= hiM; i++)
 				{
 					k = i-1;
@@ -168,6 +155,20 @@ double ForwardPairHMM::runAlgorithm()
 					mx = X->getValueAt(k,l) + M->getTransitionProbabilityFromInsert();
 					my = Y->getValueAt(k,l) + M->getTransitionProbabilityFromDelete();
 					M->setValueAt(i,j, emissionM + maths->logSum(mm,mx,my));
+				}
+			}
+
+			if (loI > 0)
+			{
+				hiI = bracketI.second;
+				for(i = loI; i <= hiI; i++)
+				{
+					k = i-1;
+					emissionX = log(ptmatrix->getEquilibriumFreq(seq1[i-1].getMatrixIndex()));
+					xm = M->getValueAt(k,j) + X->getTransitionProbabilityFromMatch();
+					xx = X->getValueAt(k,j) + X->getTransitionProbabilityFromInsert();
+					xy = Y->getValueAt(k,j) + X->getTransitionProbabilityFromDelete();
+					X->setValueAt(i,j, emissionX + maths->logSum(xm,xx,xy));
 				}
 			}
 		}
