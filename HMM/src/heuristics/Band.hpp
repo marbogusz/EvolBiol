@@ -19,9 +19,9 @@ class Band
 {
 protected:
 
-	vector<pair<int, int>> matchBand;
-	vector<pair<int, int>> insertBand;
-	vector<pair<int, int>> deleteBand;
+	vector<pair<int, int> > matchBand;
+	vector<pair<int, int> > insertBand;
+	vector<pair<int, int> > deleteBand;
 
 
 public:

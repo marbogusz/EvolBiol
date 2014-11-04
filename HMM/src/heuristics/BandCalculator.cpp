@@ -53,7 +53,7 @@ BandCalculator::BandCalculator(vector<SequenceElement>& s1, vector<SequenceEleme
 	bwd->runAlgorithm();
 
 	//combine fwd and bwd metrics into one!
-	band = new Band(s2.size());
+	band = new Band(s2.size()+1);
 	bwd->calculatePosteriors(fwd[best]);
 	this->processPosteriorProbabilities(bwd, band);
 }

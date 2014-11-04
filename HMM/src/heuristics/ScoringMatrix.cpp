@@ -22,7 +22,7 @@ ScoringMatrix::~ScoringMatrix()
 {
 	for(int i=0; i< matrixSize; i++)
 			delete[] scores[i];
-	delete scores;
+	delete[] scores;
 }
 
 ScoringMatrix::ScoringMatrix(unsigned int matrixSize, double distance, Dictionary* dict) : matrixSize(matrixSize), dict(dict)
