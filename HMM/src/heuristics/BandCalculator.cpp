@@ -15,8 +15,8 @@ BandCalculator::BandCalculator(vector<SequenceElement>& s1, vector<SequenceEleme
 {
 	// TODO Auto-generated constructor stub
 	//FIXME magic numbers
-	posteriorLikelihoodLimit = -5;
-	posteriorLikelihoodDelta = -2;
+	posteriorLikelihoodLimit = -7;
+	posteriorLikelihoodDelta = -4;
 
 	this->ptMatrix =  new PMatrixDouble(substModel);
 	this->trProbs = new TransitionProbabilities(indelModel);
@@ -29,7 +29,6 @@ BandCalculator::BandCalculator(vector<SequenceElement>& s1, vector<SequenceEleme
 	for(unsigned int i = 0; i < fwd.size(); i++)
 	{
 
-		DEBUG(i << " with divergence time " << divergenceTime);
 		fwd[i] = new ForwardPairHMM(seq1,seq2, substModel,indelModel, Definitions::DpMatrixType::Full);
 		fwd[i]->setDivergenceTime(time*multipliers[i]);
 		lnl = fwd[i]->runAlgorithm();
@@ -44,7 +43,7 @@ BandCalculator::BandCalculator(vector<SequenceElement>& s1, vector<SequenceEleme
 		//bwd[i]->runAlgorithm();
 	}
 
-	DEBUG("Best " << best);
+	DEBUG("Best " << best << " time " << time*multipliers[best]);
 
 	bwd =  new BackwardPairHMM(seq1,seq2, substModel,indelModel, Definitions::DpMatrixType::Full);
 	DEBUG("BWD Set time");

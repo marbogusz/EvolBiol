@@ -57,12 +57,12 @@ void GTRModel::buildSmatrix() {
 void GTRModel::summarize()
 {
 	cout << endl << "REV model summary:" << endl;
-	cout << "a\tb\tc\td\te" << endl;
-	cout << *a << "\t" << *b << "\t"<< *c << "\t"<< *d << "\t"<< *e << endl;
+	//cout << "a\tb\tc\td\te" << endl;
+	//cout << *a << "\t" << *b << "\t"<< *c << "\t"<< *d << "\t"<< *e << endl;
 	cout << "Frequencies" << endl;
 	cout << this->piFreqs[0] << '\t' << this->piFreqs[1] << '\t' << this->piFreqs[2] << '\t' << this->piFreqs[3] << '\t' << endl;
-	cout << "Eigenvalues" << endl;
-	cout << roots[0] << ' ' << roots[1] << ' ' << roots[2] << ' ' << roots[3] << endl << endl;
+	//cout << "Eigenvalues" << endl;
+	//cout << roots[0] << ' ' << roots[1] << ' ' << roots[2] << ' ' << roots[3] << endl << endl;
 
 	summarizeRates();
 }

@@ -175,6 +175,7 @@ void SubstitutionModelBase::summarizeRates()
 		cout << endl;
 	}
 
+	/*
 	cout << "Rate Matrix: " << endl;
 
 		for (int i =0; i< matrixSize; i++ )
@@ -186,7 +187,7 @@ void SubstitutionModelBase::summarizeRates()
 				cout << endl;
 		}
 		cout << endl;
-
+*/
 }
 
 /*

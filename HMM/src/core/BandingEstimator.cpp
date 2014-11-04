@@ -171,6 +171,7 @@ BandingEstimator::~BandingEstimator()
 double BandingEstimator::runIteration()
 {
 	double result = 0;
+	double tmp;
 	EvolutionaryPairHMM* hmm;
 
 	if (estimateSubstitutionParams == true)
@@ -190,6 +191,7 @@ double BandingEstimator::runIteration()
 		indelModel->setParameters(modelParams->getIndelParameters());
 	}
 
+	DEBUGN("DBG pair likelihoods : ");
 	for(unsigned int i =0; i<pairCount; i++)
 	{
 		hmm = hmms[i];
@@ -198,9 +200,12 @@ double BandingEstimator::runIteration()
 		hmm->setDivergenceTime(modelParams->getDivergenceTime(i));
 		//indelModel->setTime(modelParams->getDivergenceTime(i));
 		//indelModel->calculate();
-		result += hmm->runAlgorithm();
+		tmp = hmm->runAlgorithm();
+		DEBUGN("\t\t" << tmp << " " << modelParams->getDivergenceTime(i));
+		result += tmp;
 		//modelParams->outputParameters();
 	}
+	DEBUGN("\n");
 	//cerr << " lnl " << result << endl;
 	return result;
 }

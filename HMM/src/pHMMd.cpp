@@ -29,8 +29,8 @@ int main(int argc, char ** argv) {
 
 	//Set output Precision to 2
 	//FIXME - should normally be set to >= 6
-	cout << fixed << setprecision(2);
-	cerr << fixed << setprecision(2);
+	cout << fixed << setprecision(4);
+	cerr << fixed << setprecision(4);
 
 	try
 	{
@@ -99,9 +99,9 @@ int main(int argc, char ** argv) {
 			//DEBUG ("Running bionj");
 
 			//change bionj init here!
-			//BioNJ nj(inputSeqs->getSequenceCount(), be->getOptimizedTimes());
+			BioNJ nj(inputSeqs->getSequenceCount(), be->getOptimizedTimes());
 			//DEBUG("Final tree : " << nj.calculate());
-			//cout << nj.calculate() << endl;
+			cout << nj.calculate() << endl;
 
 		}
 

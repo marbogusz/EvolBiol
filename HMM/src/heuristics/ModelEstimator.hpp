@@ -21,6 +21,7 @@
 #include "models/HKY85Model.hpp"
 #include "models/AminoacidSubstitutionModel.hpp"
 #include "models/GTRModel.hpp"
+#include "models/NegativeBinomialGapModel.hpp"
 
 #include "heuristics/ModelEstimator.hpp"
 #include "heuristics/GuideTree.hpp"
@@ -69,9 +70,13 @@ protected:
 
 	vector<array<string, 3> > alignments;
 
+	vector<array<unsigned int, 3> > tripletIdxs;
+
 	unsigned int gammaRateCategories;
 
 	bool estimateAlpha;
+
+	void estimateTripleAlignment(Definitions::ModelType model);
 
 public:
 	ModelEstimator(Sequences* inputSeqs, Definitions::ModelType model,

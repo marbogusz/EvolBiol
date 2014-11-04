@@ -64,6 +64,7 @@ SubstitutionModelEstimator::~SubstitutionModelEstimator()
 	delete bfgs;
 	delete modelParams;
 	delete substModel;
+	delete maths;
 
 	for(auto entry : ptMatrices)
 	{

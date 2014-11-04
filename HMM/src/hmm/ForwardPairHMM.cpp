@@ -181,8 +181,8 @@ double ForwardPairHMM::runAlgorithm()
 
 	//cerr << "\t" << sX << "\t" << sY << "\t"<< sM << "\t" << sS << endl;
 
-	DEBUG ("Forward results:");
-	DEBUG (" sX, sY, sM, sS " << sX << "\t" << sY << "\t" << sM << "\t" << sS);
+	//DEBUG ("Forward results:");
+	//DEBUG (" sX, sY, sM, sS " << sX << "\t" << sY << "\t" << sM << "\t" << sS);
 
 	return sS* -1.0;
 }
