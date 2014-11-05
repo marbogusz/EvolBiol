@@ -25,6 +25,7 @@ class PMatrixDouble : public PMatrix
 protected:
 
 	double* fastPairGammaPt;
+	double* fastLogPairGammaPt;
 
 	double ** sitePatterns;
 
@@ -44,6 +45,8 @@ public:
 	double getPairTransition(array<unsigned int, 2>& nodes);
 
 	double getPairTransition(unsigned int xi, unsigned int yi);
+
+	double getLogPairTransition(unsigned int xi, unsigned int yi);
 
 	void summarize();
 

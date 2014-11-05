@@ -100,7 +100,7 @@ double ViterbiPairHMM::runAlgorithm()
 			{
 
 				k = i-1;
-				emissionX = log(ptmatrix->getEquilibriumFreq(seq1[i-1].getMatrixIndex()));
+				emissionX = ptmatrix->getLogEquilibriumFreq(seq1[i-1].getMatrixIndex());
 				xm = M->getValueAt(k,j) + X->getTransitionProbabilityFromMatch();
 				xx = X->getValueAt(k,j) + X->getTransitionProbabilityFromInsert();
 				xy = Y->getValueAt(k,j) + X->getTransitionProbabilityFromDelete();
@@ -110,7 +110,7 @@ double ViterbiPairHMM::runAlgorithm()
 			if(j!=0)
 			{
 				k = j-1;
-				emissionY = log(ptmatrix->getEquilibriumFreq(seq2[j-1].getMatrixIndex()));
+				emissionY = ptmatrix->getLogEquilibriumFreq(seq2[j-1].getMatrixIndex());
 				ym = M->getValueAt(i,k) + Y->getTransitionProbabilityFromMatch();
 				yx = X->getValueAt(i,k) + Y->getTransitionProbabilityFromInsert();
 				yy = Y->getValueAt(i,k) + Y->getTransitionProbabilityFromDelete();
@@ -121,7 +121,7 @@ double ViterbiPairHMM::runAlgorithm()
 			{
 				k = i-1;
 				l = j-1;
-				emissionM = log(ptmatrix->getPairTransition(seq1[i-1].getMatrixIndex(), seq2[j-1].getMatrixIndex()));
+				emissionM = ptmatrix->getLogPairTransition(seq1[i-1].getMatrixIndex(), seq2[j-1].getMatrixIndex());
 				mm = M->getValueAt(k,l) + M->getTransitionProbabilityFromMatch();
 				mx = X->getValueAt(k,l) + M->getTransitionProbabilityFromInsert();
 				my = Y->getValueAt(k,l) + M->getTransitionProbabilityFromDelete();

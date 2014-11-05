@@ -122,6 +122,7 @@ void SubstitutionModelBase::setDiagonalMeans()
 SubstitutionModelBase::~SubstitutionModelBase()
 {
 	delete[] this-> roots;
+	delete[] this->piLogFreqs;
 	destroyMatrices();
 
 	//site patterns
@@ -149,12 +150,21 @@ void SubstitutionModelBase::setObservedFrequencies(double* observedFrequencies)
 {
 	//Size and order is clear
 	this->piFreqs = observedFrequencies;
-
+	this->piLogFreqs = new double[this->matrixSize];
+	for(int i = 0; i< this->matrixSize; i++)
+	{
+		piLogFreqs[i] = log(piFreqs[i]);
+	}
 }
 
 double SubstitutionModelBase::getEquilibriumFrequencies(unsigned int xi)
 {
 	return piFreqs[xi];
+}
+
+double SubstitutionModelBase::getLogEquilibriumFrequencies(unsigned int xi)
+{
+	return piLogFreqs[xi];
 }
 
 void SubstitutionModelBase::summarizeRates()

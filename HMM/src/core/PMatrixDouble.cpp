@@ -14,6 +14,7 @@ PMatrixDouble::PMatrixDouble(SubstitutionModelBase* m) : PMatrix(m)
 {
 	// TODO Auto-generated constructor stub
 	this->fastPairGammaPt = new double[matrixFullSize];
+	this->fastLogPairGammaPt = new double[matrixFullSize];
 	this->sitePatterns = new double*[matrixSize+1];
 	for (int i =0; i<= matrixSize; i++ )
 	{
@@ -25,6 +26,7 @@ PMatrixDouble::PMatrixDouble(SubstitutionModelBase* m) : PMatrix(m)
 PMatrixDouble::~PMatrixDouble()
 {
 	delete [] fastPairGammaPt;
+	delete [] fastLogPairGammaPt;
 
 	for (int i =0; i<= matrixSize; i++ )
 	{
@@ -71,6 +73,7 @@ void PMatrixDouble::calculate()
 			for (int j=0; j< matrixFullSize; j++)
 			{
 				fastPairGammaPt[j] += ptMatrices[i][j] * model->gammaFrequencies[i];
+				fastLogPairGammaPt[j] = log(fastPairGammaPt[j]);
 			}
 
 		}
@@ -90,6 +93,11 @@ double PMatrixDouble::getPairTransition(array<unsigned int, 2>& nodes)
 double PMatrixDouble::getPairTransition(unsigned int xi, unsigned int yi)
 {
 	return model->getEquilibriumFrequencies(xi) * fastPairGammaPt[xi*matrixSize+yi];
+}
+
+double PMatrixDouble::getLogPairTransition(unsigned int xi, unsigned int yi)
+{
+	return model->getLogEquilibriumFrequencies(xi) + fastLogPairGammaPt[xi*matrixSize+yi];
 }
 
 void PMatrixDouble::summarize()

@@ -47,6 +47,11 @@ public:
 		return model->getEquilibriumFrequencies(xi);
 	}
 
+	inline double getLogEquilibriumFreq(unsigned int xi)
+	{
+		return model->getLogEquilibriumFrequencies(xi);
+	}
+
 	void summarize();
 
 };
