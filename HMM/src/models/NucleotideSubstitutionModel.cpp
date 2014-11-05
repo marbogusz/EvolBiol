@@ -28,6 +28,8 @@ void NucleotideSubstitutionModel::calculateModel()
 
 NucleotideSubstitutionModel::~NucleotideSubstitutionModel()
 {
+	if (this->parameters)
+		delete[] this->parameters;
 }
 
 } /* namespace EBC */

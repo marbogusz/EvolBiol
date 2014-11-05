@@ -54,6 +54,7 @@ int main(int argc, char ** argv) {
 
 
 			//tme->getModelParameters();
+			delete tme;
 
 		}
 
@@ -103,7 +104,16 @@ int main(int argc, char ** argv) {
 			//DEBUG("Final tree : " << nj.calculate());
 			cout << nj.calculate() << endl;
 
+
+			delete be;
+			delete tme;
+
 		}
+
+
+		delete inputSeqs;
+		delete parser;
+		delete cmdReader;
 
 		//ForwardPairHMM* epHMM = new ForwardPairHMM(inputSeqs);
 

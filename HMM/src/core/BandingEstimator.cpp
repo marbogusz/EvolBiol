@@ -161,11 +161,15 @@ BandingEstimator::BandingEstimator(Definitions::AlgorithmType at, Sequences* inp
 BandingEstimator::~BandingEstimator()
 {
 	// TODO Auto-generated destructor stub
+	for(auto hmm : hmms)
+		delete hmm;
 	delete bfgs;
 	delete modelParams;
     delete maths;
     for (auto bnd : bands)
     	delete bnd;
+    delete indelModel;
+    delete substModel;
 }
 
 double BandingEstimator::runIteration()

@@ -28,7 +28,7 @@ GuideTree::GuideTree(Sequences* is) : inputSequences(is)
 
 GuideTree::~GuideTree()
 {
-
+	delete kmers;
 }
 
 double GuideTree::kimuraDist(double id)

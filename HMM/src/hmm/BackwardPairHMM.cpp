@@ -33,24 +33,8 @@ void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 	double xval, yval, mval;
 	double fwdM;
 
-
-/*
-	DEBUG("Backward Insert");
-	dynamic_cast<DpMatrixFull*>(X->getDpMatrix())->outputValues(0);
-	DEBUG("Forward Insert");
-	dynamic_cast<DpMatrixFull*>(fwd->X->getDpMatrix())->outputValues(0);
-	DEBUG("Backward Delete");
-	dynamic_cast<DpMatrixFull*>(Y->getDpMatrix())->outputValues(0);
-	DEBUG("Forward Delete");
-	dynamic_cast<DpMatrixFull*>(fwd->Y->getDpMatrix())->outputValues(0);
-*/
 	fwdM = fwd->M->getValueAt(xSize-1,ySize-1);
-/*
-	DEBUG("Backward Match");
-	dynamic_cast<DpMatrixFull*>(M->getDpMatrix())->outputValues(0);
-	DEBUG("Forward Match");
-	dynamic_cast<DpMatrixFull*>(fwd->M->getDpMatrix())->outputValues(0);
-*/
+
 	for (i = 0; i<xSize-1; i++)
 	{
 		for (j = 0; j<ySize-1; j++)

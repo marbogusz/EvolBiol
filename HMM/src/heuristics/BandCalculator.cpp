@@ -66,6 +66,9 @@ BandCalculator::~BandCalculator()
 		delete fwd[i];
 	}
 
+	delete trProbs;
+	delete ptMatrix;
+
 }
 
 void BandCalculator::processPosteriorProbabilities(BackwardPairHMM* hmm, Band* band)

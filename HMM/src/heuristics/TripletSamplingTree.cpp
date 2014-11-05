@@ -16,6 +16,26 @@
 namespace EBC
 {
 
+TripletSamplingTree::TripletSamplingTree(GuideTree& gt) : distMat(gt.getDistanceMatrix())
+{
+	this->averageLeafbranch = 0;
+	this->leafBranchSd = 0;
+	// TODO Auto-generated constructor stub
+	DEBUG("Creating TripletSamplingTree");
+
+
+
+	idealTreeSize = 1.0;
+	this->fromNewick(gt.getNewickTree());
+
+}
+
+TripletSamplingTree::~TripletSamplingTree()
+{
+	for (auto nod : nodes)
+		delete nod;
+}
+
 Node* TripletSamplingTree::mostRecentAncestor(Node* n1, Node* n2)
 {
 	Node* tmpNode1 = n1;
@@ -51,19 +71,7 @@ double TripletSamplingTree::distanceToParent(Node* n1, Node* par)
 	return distance;
 }
 
-TripletSamplingTree::TripletSamplingTree(GuideTree& gt) : distMat(gt.getDistanceMatrix())
-{
-	this->averageLeafbranch = 0;
-	this->leafBranchSd = 0;
-	// TODO Auto-generated constructor stub
-	DEBUG("Creating TripletSamplingTree");
 
-
-
-	idealTreeSize = 1.0;
-	this->fromNewick(gt.getNewickTree());
-
-}
 
 void TripletSamplingTree::fromNewick(const string& newick)
 {

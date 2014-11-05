@@ -56,7 +56,7 @@ vector<SequenceElement>& Sequences::getSequencesAt(int pos) {
 Sequences::~Sequences()
 {
 	delete dict;
-	delete observedFrequencies;
+	delete[] observedFrequencies;
 }
 
 Dictionary* Sequences::getDictionary()
@@ -70,7 +70,7 @@ string& Sequences::getRawSequenceAt(unsigned int pos)
 	return this->rawSequences[pos];
 }
 
-double* Sequences::getElementFrequencies()
+void Sequences::calculateObservedFrequencies()
 {
 	this->observedFrequencies = new double[dict->getAlphabetSize()];
 	int i;
@@ -94,39 +94,45 @@ double* Sequences::getElementFrequencies()
 
 	for (i=0; i<dict->getAlphabetSize(); i++)
 		this->observedFrequencies[i]/=count;
+}
 
-
+double* Sequences::getElementFrequencies()
+{
+	if(observedFrequencies == NULL)
+		calculateObservedFrequencies();
 	//DEBUGV(observedFrequencies,4);
 	return observedFrequencies;
 }
 
 double* Sequences::getElementFrequencies(array<unsigned int, 3> triplet)
 {
+
+	if(observedFrequencies == NULL)
 		this->observedFrequencies = new double[dict->getAlphabetSize()];
-		int i;
+	int i;
 
-		for (i=0; i<dict->getAlphabetSize(); i++)
-			this->observedFrequencies[i] = 0;
+	for (i=0; i<dict->getAlphabetSize(); i++)
+		this->observedFrequencies[i] = 0;
 
-		unsigned int count =0;
+	unsigned int count =0;
 
-		for (auto it1 : triplet)
+	for (auto it1 : triplet)
+	{
+		for(vector<SequenceElement>::iterator it2 = translatedSequences[it1].begin(); it2 != translatedSequences[it1].end(); ++it2)
 		{
-			for(vector<SequenceElement>::iterator it2 = translatedSequences[it1].begin(); it2 != translatedSequences[it1].end(); ++it2)
+			if (!(it2->isIsGap()))
 			{
-				if (!(it2->isIsGap()))
-				{
-					count++;
-					observedFrequencies[it2->getMatrixIndex()]++;
-				}
+				count++;
+				observedFrequencies[it2->getMatrixIndex()]++;
 			}
 		}
+	}
 
-		for (i=0; i<dict->getAlphabetSize(); i++)
-			this->observedFrequencies[i]/=count;
+	for (i=0; i<dict->getAlphabetSize(); i++)
+		this->observedFrequencies[i]/=count;
 
-		//DEBUGV(observedFrequencies,4);
-		return observedFrequencies;
+	//DEBUGV(observedFrequencies,4);
+	return observedFrequencies;
 }
 
 void Sequences::buildDictionary(Definitions::SequenceType st)
@@ -147,4 +153,5 @@ void Sequences::buildDictionary(Definitions::SequenceType st)
 
 
 } /* namespace EBC */
+
 

@@ -23,9 +23,7 @@ double *k;
 public:
 	HKY85Model(Dictionary* dict, Maths* alg, unsigned int);
 
-
 	void buildSmatrix();
-
 
 	void summarize();
 

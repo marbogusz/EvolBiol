@@ -210,6 +210,7 @@ ModelEstimator::~ModelEstimator()
     delete sme;
     delete ste;
     delete gtree;
+    delete tal;
 }
 
 vector<double> ModelEstimator::getSubstitutionParameters()

@@ -75,6 +75,8 @@ public:
 	}
 private:
 
+	void calculateObservedFrequencies();
+
 	void buildDictionary(Definitions::SequenceType);
 
 };

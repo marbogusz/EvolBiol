@@ -59,6 +59,11 @@ StateTransitionEstimator::~StateTransitionEstimator()
 	delete bfgs;
 	delete modelParams;
     delete maths;
+    for(auto tm : stmSamples)
+    {
+    	delete tm;
+    }
+    delete indelModel;
 }
 
 } /* namespace EBC */

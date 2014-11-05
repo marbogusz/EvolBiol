@@ -56,6 +56,8 @@ private:
 public:
 	TripletSamplingTree(GuideTree& gt);
 
+	~TripletSamplingTree();
+
 	//sample tripplets on a tree
 	vector<array<unsigned int, 3> > sampleFromTree();
 

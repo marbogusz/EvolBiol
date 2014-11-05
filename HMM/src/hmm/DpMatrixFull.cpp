@@ -26,7 +26,7 @@ EBC::DpMatrixFull::~DpMatrixFull()
 	{
 		delete[] matrixData[i];
 	}
-	delete matrixData;
+	delete[] matrixData;
 }
 
 EBC::DpMatrixFull::DpMatrixFull(unsigned int xS, unsigned int yS) : DpMatrixBase(xS,yS)

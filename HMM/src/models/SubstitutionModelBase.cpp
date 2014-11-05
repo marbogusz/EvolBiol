@@ -121,6 +121,7 @@ void SubstitutionModelBase::setDiagonalMeans()
 
 SubstitutionModelBase::~SubstitutionModelBase()
 {
+	delete[] this-> roots;
 	destroyMatrices();
 
 	//site patterns
