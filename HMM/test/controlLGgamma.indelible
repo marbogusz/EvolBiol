@@ -8,12 +8,12 @@
 
 [MODEL]    modelname  	//  Evolutionary models are defined in [MODEL] blocks.
   [submodel]     LG
-  [rates]        0 0.50 5
-  [indelmodel]   NB  0.5 1  //  Geometric indel length distribution (q=0.4, r=1)
-  [insertrate]   {rate}       //  insertion rate = 0.08 relative to substitution rate of 1
-  [deleterate]   {rate}      //  deletion rate = 0.12 relative to substitution rate of 1
+  [rates]        0 {alpha} 5
+  [indelmodel]   NB  {epsilon} 1  //  Geometric indel length distribution (q=0.4, r=1)
+  [insertrate]   {lambda}       //  insertion rate = 0.08 relative to substitution rate of 1
+  [deleterate]   {lambda}      //  deletion rate = 0.12 relative to substitution rate of 1
   
-[TREE] treename  (A:{distance},B:{distance});        //  User trees are defined here
+[TREE] treename  {newick};        //  User trees are defined here
 
 [PARTITIONS] partitionname             //  [PARTITIONS] blocks say which models go with
   [treename modelname {length}]            //  which trees and define the length of the
