@@ -8,6 +8,8 @@ import os
 import subprocess
 import shutil
 import re
+from threading import Thread
+
 
 #print(tree.as_newick_string())
 #print(tree.as_string('newick'))
@@ -45,16 +47,15 @@ class HmmDistanceGenerator:
         
         #indicates how many birth rate steps to generate
         self.steps = 15
-        self.paml_binary = 'baseml'
-        if (self.model == 'LG'):
-            self.paml_binary = 'codeml'
+        self.cores = 4;
         self.indelible_binary = 'indelible'
-        self.hmm_binary = 'HMMestF1'
+        self.hmm_binary = 'HMMestBF1'
         self.hmm_base_params = ['-F','--in']
         self.hmm_misc_params = ['-b', '1', '-o', '0', '--bf', '20']
         self.hmm_alpha_params = ['--rateCat', '5', '--initAlpha', '0.75']
         self.hmm_alpha_est_params = ['--estimateAlpha', '1']
         self.file_prefix = 'control'
+        self.hmmtreefile = '.hmm.tree'
         self.file_suffix = '.indelible'
         self.gtr_suffix = 'GTR'
         self.hky_suffix = 'HKY85'
@@ -63,12 +64,23 @@ class HmmDistanceGenerator:
         self.modelno = '7';
         self.indelible_output = 'idlbl';
         self.mafft_exec = 'mafft-linsi'
-        self.phyml_exec = 'phyml'
-        self.prank_exec = 'prank'
         self.muscle_exec = 'muscle'
+        self.prank_exec = 'prank'
+        self.raxml_bin = 'raxmlHPC'
+        self.raxml_prefix = 'RAxML_bestTree.'
+        self.raxml_GTR_params = ['-m', 'GTRGAMMA', '-p', '12345']
+        self.raxml_LG_params = ['-m', 'PROTGAMMALG', '-p', '12345']
+        self.raxml_HKY_params = ['-m', 'GTRGAMMA', '-p', '12345']
+
+        self.paml_binary = 'baseml'
+        self.raxml_params = self.raxml_GTR_params
+        if (self.model == 'LG'):
+            self.paml_binary = 'codeml'
+            self.raxml_params = self.raxml_LG_params
+
+        self.raxml_params.append('-s')
 
         self.logfile = open('debug_' + str(self.taxaNo) + '.log', 'w')
-        
         self.gamma = 'gamma'
 
         print("HMM analysis for {} steps with {} replicates.".format(self.steps,self.replicates))
@@ -106,19 +118,10 @@ class HmmDistanceGenerator:
             self.alignMuscle(i)
             #self.alignPrank(i)
 
-    def runHMMbatch(self, count,filed,full):
-        threads = []
-        for i in range(count):
-            clean_name = self.indelible_output + '_' + str(i+1) + '.fas'
-            t = Thread(target=self.callHMM, args=(self.hmm_binary, clean_name,filed,full,))
-            threads.append(t)
-            t.start()
-        for th in threads:
-            th.join()
-
     def run(self):
-        self.simulate(self.steps,self.replicates,self.model);
-        self.analyze(self.steps,self.replicates,self.model);
+        #self.simulate(self.steps,self.replicates,self.model);
+        #self.calculate(self.steps,self.replicates,self.model);
+        self.analyzeOutput(self.steps,self.replicates,self.model);
 
     def simulate(self, s,r,modelname):
     
@@ -158,32 +161,122 @@ class HmmDistanceGenerator:
             os.chdir('..');
             s -= 1
     
-    
-    def analyze(self, s,r,model):
-      #pfl = open(self.paml_binary + self.gamma + '.paml', 'r');
+    def analyzeOutput(self, s, r, model):
+        filepref = str(self.seq_len) + '_'  + str(r) + '_' + self.model_suffix
+        
+        #Robinson Foulds results
+        resultsRF = open('out_RF_' + filepref,'w')
+        #Total Tree distance results
+        resultsTD = open('out_TD_' + filepref,'w')
+        while s > 0:
+            birth_rate = 0.1 * s
+            print("Analysis step {}".format(round(birth_rate,1)))
+            current_dir = str(self.seq_len) + '_' + str(round(birth_rate,1)) + '_Indelible_' + str(r) + '_' + self.model_suffix
+            os.chdir(current_dir)
+            #create trees based on results
+            rmft = []
+            rtru = []
+            rmus = []
+            hmmt = []
+            for i in range(r):
+                #true rax
+                rtru.append(dendropy.Tree.get_from_stream(open(self.raxml_prefix + 'true'+str(i+1), 'rU'), "newick", tree_offset=0))
+                #mafft rax
+                rmft.append(dendropy.Tree.get_from_stream(open(self.raxml_prefix + 'mafft'+str(i+1), 'rU'), "newick", tree_offset=0))
+                #muscle rax
+                rmus.append(dendropy.Tree.get_from_stream(open(self.raxml_prefix + 'muscle'+str(i+1), 'rU'), "newick", tree_offset=0))
+                #hmm
+                hmmt.append(dendropy.Tree.get_from_stream(open(self.indelible_output + '_' + str(i+1) + '.fas' + self.hmmtreefile, 'rU'), "newick", tree_offset=0))
+            os.chdir('..');
+            s -= 1
+        self.logfile.close()
       #if (not onlyPaml):
-      #    outfile_all = open(self.model + '_' + 'hmm_' + str(self.seq_len) + '_' + str(round(self.indel_rate,2))+ '_' + str(r) +'all' + self.gamma,'w',1)
-      #    outfile_ltd = open(self.model + '_' + 'hmm_' + str(self.seq_len) + '_' + str(round(self.indel_rate,2))+ '_' + str(r) +'ltd' + self.gamma,'w',1)
-      #pml_template = pfl.read()
-      #pfl.close()
-      
+    
+    def calculate(self, s, r, model):
         while s > 0:
             birth_rate = 0.1 * s
             print("Calculation step {}".format(round(birth_rate,1)))
             current_dir = str(self.seq_len) + '_' + str(round(birth_rate,1)) + '_Indelible_' + str(r) + '_' + self.model_suffix
-            #shutil.copy('star.trees',current_dir) 
             os.chdir(current_dir)
-            #execute indelible
             #self.runHMMbatch(r,outfile_all,True)
-            #self.runHMMbatch(r,outfile_ltd,False)
+            self.runHMMbatch(r)
             self.alignBatch(r)
-            #self.runPaml(r,pml_template)
-            #go back
+            self.runRaxml(r)
             os.chdir('..');
             s -= 1
+        self.logfile.close()
       #if (not onlyPaml):
       #    outfile_all.close()
       #    outfile_ltd.close()
+
+    def runHMMbatch(self, count):
+        i = 0
+        while i < count:
+            threads = []
+            for j in range(self.cores):
+                if i < count:
+                    clean_name = self.indelible_output + '_' + str(i+1) + '.fas'
+                    t = Thread(target=self.callHMM, args=(self.hmm_binary, clean_name,))
+                    threads.append(t)
+                    t.start()
+                    i+=1
+            for th in threads:
+                th.join()
+
+
+    def callHMM(self, executable, filename):
+	#print ("Calling " + executable + "on " + filename) 
+        params = []
+        params.append(executable)
+        params += self.hmm_base_params
+        params.append(filename)
+        if (self.model == 'GTR'):
+            params.append('--rev')
+        if (self.model == 'HKY'):
+            params.append('--hky')
+        if (self.model == 'LG'):
+            params.append('--lg')
+        params +=self.hmm_alpha_params
+        subprocess.call(params,stdout=self.logfile, stderr=self.logfile) 
+
+    def callRaxml(self, params):
+            subprocess.call(params,stdout=self.logfile,stderr=self.logfile)
+
+      
+    def runRaxml(self, count):
+	for i in range(count):
+	    true_fc = self.indelible_output + '_TRUE_' + str(i+1) + '.fas'
+            mafft_fc = 'mafft_' + str(i+1) + '.fas'
+            muscle_fc = 'muscle_' + str(i+1) + '.fas'
+            #prank_fc = 'prank_' + str(i+1) + '.best.fas'
+
+            params_true = self.raxml_params[:]
+            params_mafft = self.raxml_params[:]
+            params_muscle = self.raxml_params[:]
+            #params_prank = self.raxml_params[:]
+
+            params_true += [true_fc,'-n', 'true'+str(i+1)]
+            params_mafft += [mafft_fc,'-n', 'mafft'+str(i+1)]
+            params_muscle += [muscle_fc,'-n', 'muscle'+str(i+1)]
+            #params_prank += [prank_fc,'-n', 'prank'+str(i+1)]
+
+            threads = []
+            t = Thread(target=self.callRaxml, args=([self.raxml_bin]+params_true,))
+            threads.append(t)
+            t.start()
+            t = Thread(target=self.callRaxml, args=([self.raxml_bin]+params_mafft,))
+            threads.append(t)
+            t.start()
+            t = Thread(target=self.callRaxml, args=([self.raxml_bin]+params_muscle,))
+            threads.append(t)
+            t.start()
+            #t = Thread(target=self.callRaxml, args=([self.raxml_bin]+params_prank,))
+            #threads.append(t)
+            #t.start()
+
+            for th in threads:
+                th.join()
+
 
 if __name__ == "__main__":
     if len(sys.argv) != 5:

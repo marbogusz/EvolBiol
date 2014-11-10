@@ -21,6 +21,8 @@ SubstitutionModelBase::SubstitutionModelBase(Dictionary* dict, Maths* alg, unsig
 	this-> roots = new double[matrixSize];
 	//no alpha provided
 	this->alpha = 0;
+	this->piFreqs = NULL;
+	this->piLogFreqs = NULL;
 	//FIXME - maybe initial alpha set to a value ?
 }
 
@@ -122,7 +124,9 @@ void SubstitutionModelBase::setDiagonalMeans()
 SubstitutionModelBase::~SubstitutionModelBase()
 {
 	delete[] this-> roots;
-	delete[] this->piLogFreqs;
+
+	if (this->piLogFreqs != NULL)
+		delete[] this->piLogFreqs;
 	destroyMatrices();
 
 	//site patterns
@@ -150,7 +154,8 @@ void SubstitutionModelBase::setObservedFrequencies(double* observedFrequencies)
 {
 	//Size and order is clear
 	this->piFreqs = observedFrequencies;
-	this->piLogFreqs = new double[this->matrixSize];
+	if(this->piLogFreqs == NULL)
+		this->piLogFreqs = new double[this->matrixSize];
 	for(int i = 0; i< this->matrixSize; i++)
 	{
 		piLogFreqs[i] = log(piFreqs[i]);
@@ -200,149 +205,6 @@ void SubstitutionModelBase::summarizeRates()
 		cout << endl;
 */
 }
-
-/*
- *
- void SubstitutionModelBase::calculateGammaPtMatrices()
-{
-	double *tmpRoots, *tmpUroots;
-	unsigned int i;
-	int matrixCount = rateCategories == 1 ? 1 : rateCategories;
-
-	std::vector<double*> pMatVector(matrixCount);
-
-	for(i = 0; i< matrixCount; i++)
-	{
-
-		tmpRoots = maths->expLambdaT(roots, time*gammaRates[i], matrixSize);
-		tmpUroots = maths->matrixByDiagonalMultiply(uMatrix, tmpRoots, matrixSize);
-		//tmpPmatrix = this->maths->matrixMultiply(tmpUroots, vMatrix, matrixSize);
-		pMatVector[i] = this->maths->matrixMultiply(tmpUroots, vMatrix, matrixSize);
-		delete[] tmpRoots;
-		delete[] tmpUroots;
-	}
-	//now we have a vector of p-mats, combine into 1 matrix since the probs are equal in this model
-	for (i=1; i<matrixCount; i++)
-	{
-		maths->matrixAppend(pMatVector[0],pMatVector[i],matrixSize);
-		delete[] pMatVector[i];
-	}
-	this->pMatrix = pMatVector[0];
-	if(rateCategories != 1)
-	{
-		this->maths->matrixScale(pMatrix,gammaFrequencies[0],matrixSize);
-	}
-}
-
-void SubstitutionModelBase::calculateSitePatterns()
-{
-	//includes gaps - does not discard missing data!
-	for (int i =0; i<= matrixSize; i++ )
-		for (int j =0; j<= matrixSize; j++ )
-		{
-			if (i == matrixSize)
-			{
-				siteProbabilities[i][j] = this->piFreqs[j];
-				sitePatterns[i][j]  = log(this->piFreqs[j]);
-			}
-			else if (j == matrixSize)
-			{
-				siteProbabilities[i][j] = this->piFreqs[i];
-				sitePatterns[i][j]  = log(this->piFreqs[i]);
-			}
-			else
-			{
-				siteProbabilities[i][j] = this->getPiXiPXiYi(i,j);
-				sitePatterns[i][j] = log(this->getPiXiPXiYi(i,j));
-
-			}
-	}
-	sitePatterns[matrixSize][matrixSize] = 0;
-	siteProbabilities[matrixSize][matrixSize] = 0;
-}
-
-void SubstitutionModelBase::summarizePatterns()
-{
-	if(this->rateCategories != 0)
-	{
-		cout << "Rate categories: " << endl;
-		for(int r=0; r< rateCategories; r++)
-		{
-			cout << gammaRates[r] << "\t\t";
-		}
-		cout << endl;
-	}
-
-	cout << "Rate Matrix: " << endl;
-
-		for (int i =0; i< matrixSize; i++ )
-		{
-				for (int j =0; j<  matrixSize; j++ )
-				{
-					cout << qMatrix[(i*matrixSize)+j] << "\t\t";
-				}
-				cout << endl;
-		}
-		cout << endl;
-
-
-	cout << "Site patterns " << endl;
-	for (int i =0; i<= matrixSize; i++ )
-	{
-			for (int j =0; j<= matrixSize; j++ )
-			{
-				cout << sitePatterns[i][j] << "\t\t";
-			}
-			cout << endl;
-	}
-
-	cout << endl <<"Site probabilities " << endl;
-	for (int i =0; i<= matrixSize; i++ )
-	{
-			for (int j =0; j<= matrixSize; j++ )
-			{
-				cout << siteProbabilities[i][j] << "\t\t";
-			}
-			cout << endl;
-	}
-	cout << endl << "P(t) matrix" << endl;
-	for (int i =0; i< matrixSize; i++ )
-	{
-			for (int j =0; j<  matrixSize; j++ )
-			{
-				cout << pMatrix[(i*matrixSize)+j] << "\t\t";
-			}
-			cout << endl;
-	}
-	cout << endl;
-
-
-}
-
-double SubstitutionModelBase::getPiXiPXiYi(unsigned int xi, unsigned int yi)
-{
-	//FIXME - RATES
-		return piFreqs[xi]*pMatrix[(xi*matrixSize)+yi];
-}
-
-double SubstitutionModelBase::getPXiYi(unsigned int xi, unsigned int yi)
-{
-	//FIXME - RATES
-		return pMatrix[(xi*matrixSize)+yi];
-}
-
-
-
-double SubstitutionModelBase::getSitePattern(unsigned int xi, unsigned int yi)
-{
-	return this->sitePatterns[xi][yi];
-}
-
-double SubstitutionModelBase::getSiteProbability(unsigned int xi, unsigned int yi)
-{
-	return this->siteProbabilities[xi][yi];
-}
-*/
 
 } /* namespace EBC */
 

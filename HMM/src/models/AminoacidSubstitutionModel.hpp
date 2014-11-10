@@ -36,6 +36,8 @@ public:
 	void summarize();
 
 	void setParameters(const vector<double>&){}
+
+	void setObservedFrequencies(double* observedFrequencies) {};
 };
 
 } /* namespace EBC */

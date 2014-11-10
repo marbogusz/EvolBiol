@@ -37,6 +37,10 @@ int main(int argc, char ** argv) {
 		CommandReader* cmdReader = new CommandReader(argc, argv);
 		DEBUG("Get parser" << endl);
 
+		ofstream treefile;
+
+		treefile.open((string(cmdReader->getInputFileName()).append(".hmm.tree")).c_str(),ios::out);
+
 		IParser* parser = cmdReader->getParser();
 		DEBUG("Creating alignment");
 
@@ -102,9 +106,10 @@ int main(int argc, char ** argv) {
 			//change bionj init here!
 			BioNJ nj(inputSeqs->getSequenceCount(), be->getOptimizedTimes());
 			//DEBUG("Final tree : " << nj.calculate());
-			cout << nj.calculate() << endl;
+			treefile << nj.calculate() << endl;
 
 
+			treefile.close();
 			delete be;
 			delete tme;
 

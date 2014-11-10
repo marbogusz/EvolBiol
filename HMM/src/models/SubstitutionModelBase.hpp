@@ -105,7 +105,7 @@ public:
 
 	double* calculatePt(double time, unsigned int rateCategory = 0);
 
-	void setObservedFrequencies(double* observedFrequencies);
+	virtual void setObservedFrequencies(double* observedFrequencies);
 
 	//double getPiXiPXiYi(unsigned int xi, unsigned int yi);
 

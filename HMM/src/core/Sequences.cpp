@@ -14,6 +14,8 @@ Sequences::Sequences(IParser* iParser,Definitions::SequenceType st, bool fa) thr
 {
 	//use the file parser to get sequences and build the dictionary
 	fixedAlignment = fa;
+	observedFrequencies = NULL;
+
 	unsigned int size = iParser->getSequenceCount();
 	if (size <= 0)
 	{
