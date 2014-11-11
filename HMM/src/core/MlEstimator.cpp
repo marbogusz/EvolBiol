@@ -75,7 +75,7 @@ void MlEstimator::BFGS::optimize()
 		}
 	}
 	this->parent->modelParams->fromDlibVector(initParams);
-	parent->modelParams->outputParameters();
+	parent->modelParams->logParameters();
 	//parent->substs[0]->summarize();
 	cout  << likelihood << "\t";
 

@@ -9,6 +9,7 @@
 #define DEFINITIONS_H_
 
 #include <iostream>
+#include "core/FileLogger.hpp"
 
 //#define DEBUG_BUILD 1
 

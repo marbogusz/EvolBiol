@@ -71,7 +71,7 @@ public:
 
 	void setUserDivergenceParams(vector<double>);
 
-	void outputParameters();
+	void logParameters();
 
 	void outputToConsole();
 

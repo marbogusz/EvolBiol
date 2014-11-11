@@ -168,17 +168,23 @@ void EBC::OptimizedModelParameters::setUserSubstParams(
 	substParameters = allocator;
 }
 
-void EBC::OptimizedModelParameters::outputParameters()
+void EBC::OptimizedModelParameters::logParameters()
 {
-	for (auto p : substParameters)
-			std::cerr << p  << '\t';
-	for (auto p : indelParameters)
-			std::cerr << p  << '\t';
-	for (auto p : divergenceTimes)
-		std::cerr << p  << '\t';
-	if(this->estimateAlpha)
-		std::cerr << alpha;
+	//for (auto p : substParameters)
+	//		std::cerr << p  << '\t';
+	//for (auto p : indelParameters)
+	//		std::cerr << p  << '\t';
+	//for (auto p : divergenceTimes)
+	//	std::cerr << p  << '\t';
+	//if(this->estimateAlpha)
+	//	std::cerr << alpha;
 	//std::cerr << std::endl;
+	FileLogger::getLogger() << substParameters;
+	FileLogger::getLogger() << indelParameters;
+	FileLogger::getLogger() << divergenceTimes;
+	if(this->estimateAlpha)
+		FileLogger::getLogger() << "Alpha: " << alpha << "\n";
+
 }
 
 void EBC::OptimizedModelParameters::outputToConsole()

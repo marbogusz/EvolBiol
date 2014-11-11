@@ -22,6 +22,8 @@
 #include "heuristics/ModelEstimator.hpp"
 #include <array>
 
+#include "core/FileLogger.hpp"
+
 using namespace std;
 using namespace EBC;
 
@@ -39,9 +41,14 @@ int main(int argc, char ** argv) {
 
 		ofstream treefile;
 
+		FileLogger::getLogger().start((string(cmdReader->getInputFileName()).append(".hmm.log")));
+
 		treefile.open((string(cmdReader->getInputFileName()).append(".hmm.tree")).c_str(),ios::out);
 
 		IParser* parser = cmdReader->getParser();
+
+		FileLogger::getLogger() << "Reading sequences" << "\n";
+
 		DEBUG("Creating alignment");
 
 		Sequences* inputSeqs = new Sequences(parser, cmdReader->getSequenceType(),cmdReader->isFixedAlignment());
@@ -64,6 +71,7 @@ int main(int argc, char ** argv) {
 
 		else
 		{
+
 			/*
 			ForwardPairHMM* fwdHMM = new ForwardPairHMM(inputSeqs, cmdReader->getModelType() ,
 					cmdReader->getIndelParams(),cmdReader->getSubstParams(), cmdReader->getOptimizationType(),
@@ -82,10 +90,10 @@ int main(int argc, char ** argv) {
 			fwdHMM->runForwardAlgorithm();
 			*/
 
+			FileLogger::getLogger() << "Creating Model Parameters heuristics" << "\n";
 			ModelEstimator* tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),
 					cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
 					cmdReader->estimateAlpha());
-
 
 			vector<double> indelParams;
 			vector<double> substParams;
@@ -138,5 +146,7 @@ int main(int argc, char ** argv) {
 	{
 		cerr << ex.what();
 	}
+
+	FileLogger::getLogger().stop();
 	return 0;
 }

@@ -21,6 +21,7 @@ BandingEstimator::BandingEstimator(Definitions::AlgorithmType at, Sequences* inp
 {
 	//Banding estimator means banding enabled!
 
+	FileLogger::getLogger() << "Starting Banding Estimator" << "\n";
 	maths = new Maths();
 	dict = inputSequences->getDictionary();
 
@@ -48,6 +49,9 @@ BandingEstimator::BandingEstimator(Definitions::AlgorithmType at, Sequences* inp
 	DEBUG("Pairwise banding model estimator starting");
 	DEBUG("Estimate substitution parameters set to : " << estimateSubstitutionParams << " Estimate indel parameters set to : " << estimateIndelParams);
 	DEBUG("Estimate alpha set to : " << estimateAlpha << " , rate categories " << gammaRateCategories << " , alpha : " << alpha);
+
+	FileLogger::getLogger() << "Estimate substitution parameters set to : " << estimateSubstitutionParams << " Estimate indel parameters set to : " << estimateIndelParams << "\n";
+	FileLogger::getLogger() << "Estimate alpha set to : " << estimateAlpha << " , rate categories " << gammaRateCategories << " , alpha : " << alpha << "\n";
 
 	modelParams = new OptimizedModelParameters(substModel, indelModel,inputSequences->getSequenceCount(), pairCount, estimateSubstitutionParams,
 			estimateIndelParams, estimateAlpha, true, maths);
@@ -85,6 +89,7 @@ BandingEstimator::BandingEstimator(Definitions::AlgorithmType at, Sequences* inp
 		{
 			std::pair<unsigned int, unsigned int> idxs = inputSequences->getPairOfSequenceIndices(i);
 			DEBUG("Running band calculator for sequence " << idxs.first << " and " << idxs.second);
+			FileLogger::getLogger() << "Running band calculator for sequence " << idxs.first << " and " << idxs.second << "\n";
 			BandCalculator* bc = new BandCalculator(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
 					substModel, indelModel, gt->getDistanceMatrix()->getDistance(idxs.first,idxs.second));
 			bands[i] = bc->getBand();
@@ -130,7 +135,7 @@ BandingEstimator::BandingEstimator(Definitions::AlgorithmType at, Sequences* inp
 
 	bfgs = new Optimizer(modelParams, this, ot);
 	bfgs->optimize();
-	this->modelParams->outputParameters();
+	this->modelParams->logParameters();
 
 /*
 	for(unsigned int i =0; i<pairCount; i++)

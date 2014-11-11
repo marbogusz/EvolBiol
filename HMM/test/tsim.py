@@ -41,6 +41,9 @@ class HmmDistanceGenerator:
         #model name 
         self.model = modelName
         
+        #different runs under various parameter draws!!!
+        self.indelible_replicates = 4;
+
         self.taxaNo = numberTaxa
         
         self.treegen = TreeGenerator()
@@ -56,6 +59,7 @@ class HmmDistanceGenerator:
         self.hmm_alpha_est_params = ['--estimateAlpha', '1']
         self.file_prefix = 'control'
         self.hmmtreefile = '.hmm.tree'
+        self.original_treefile = 'tree.sim'
         self.file_suffix = '.indelible'
         self.gtr_suffix = 'GTR'
         self.hky_suffix = 'HKY85'
@@ -89,10 +93,39 @@ class HmmDistanceGenerator:
         return random.uniform(0.1,4.0)
       
     def getLambda(self):
-        return random.gauss(0.03,0.02)
+        ret = random.gauss(0.03,0.2)
+        while ret  < 0:
+            ret = random.gauss(0.03,0.2)
+        return ret
+
+        return random.gauss(0.03,0.2)
       
     def getEpsilon(self):
         return random.uniform(0.25,0.75)
+    
+    def getNucleotideFrequencies(self):
+        f1=f2=f3=f4=-1.0
+        while f1  < 0:
+            f1 = random.gauss(0.25,0.1)
+        while f2  < 0 or f1+f2 > 1.0:
+            f2 = random.gauss(0.25,0.1)
+        while f3  < 0 or f1+f2+f3 > 1.0:
+            f3 = random.gauss(0.25,0.1)
+        f4 = 1.0 -f1 -f2 -f3;
+        return [f1,f2,f3,f4]
+    def getRevRates(self):
+        a=b=c=d=e=f=-1.0;
+        while a  < 0:
+            a = random.gauss(0.9,0.3)
+        while b  < 0:
+            b = random.gauss(0.9,0.3)
+        while c  < 0:
+            c = random.gauss(0.9,0.3)
+        while d  < 0:
+            d = random.gauss(0.9,0.3)
+        while e  < 0:
+            e = random.gauss(0.9,0.3)
+        return [a,b,c,d,e]
 
     def alignMafft(self, fid):
         curr_file  = self.indelible_output + '_' + str(fid+1) + '.fas' 
@@ -119,10 +152,10 @@ class HmmDistanceGenerator:
             #self.alignPrank(i)
 
     def run(self):
-        #self.simulate(self.steps,self.replicates,self.model);
-        #self.calculate(self.steps,self.replicates,self.model);
+        self.simulate(self.steps,self.replicates,self.model);
+        self.calculate(self.steps,self.replicates,self.model);
         self.analyzeOutput(self.steps,self.replicates,self.model);
-
+ 
     def simulate(self, s,r,modelname):
     
         ifile = open(self.file_prefix+modelname+self.gamma+self.file_suffix, 'r')
@@ -142,7 +175,12 @@ class HmmDistanceGenerator:
             
             newicktext = m1.group(1) 
         
-            templateDict = {'alpha' : round(self.getAlpha(),3), 'epsilon' : round(self.getEpsilon(),3), 'lambda' : round(self.getLambda(),3), 'newick' : newicktext, 'output' : self.indelible_output, 'length' : self.seq_len, 'replicates' : r}
+            if (modelname == 'LG'):
+                templateDict = {'alpha' : round(self.getAlpha(),3), 'epsilon' : round(self.getEpsilon(),3), 'lambda' : round(self.getLambda(),3), 'newick' : newicktext, 'output' : self.indelible_output, 'length' : self.seq_len, 'replicates' : r}
+            elif (modelname == 'GTR'):
+                rates = self.getRevRates()
+                pis = self.getNucleotideFrequencies()
+                templateDict = {'a' : rates[0], 'b' : rates[1], 'c' : rates[2],'d' : rates[3], 'e' : rates[4], 'pi1': pis[0], 'pi2': pis[1], 'pi3': pis[2], 'pi4': pis[3], 'alpha' : round(self.getAlpha(),3), 'epsilon' : round(self.getEpsilon(),3), 'lambda' : round(self.getLambda(),3), 'newick' : newicktext, 'output' : self.indelible_output, 'length' : self.seq_len, 'replicates' : r}
 
             ofile.write(ictl_template.format(**templateDict))
             ofile.close()
@@ -152,22 +190,31 @@ class HmmDistanceGenerator:
             shutil.copy('control.txt',current_dir) 
             #shutil.copy('star.trees',current_dir) 
             os.chdir(current_dir)
+            tfile = open(self.original_treefile,'w')
+            tfile.write(newicktext)
             #execute indelible
             subprocess.call('indelible',stdout=self.logfile,stderr=self.logfile)
-            #alignBatch(replicates)
-            #runHMMbatch(replicates)
-            #runPaml(replicates,pml_template)
-            #go back
             os.chdir('..');
             s -= 1
+
+    def writeRF(self,fd,bd,dist,which):
+        fd.write(str(bd)+'\t' +str(dist) + '\t' + which + '\n')
+
+    def writeTD(self, fd,bd,dist1, dist2,which):
+        fd.write(str(bd)+'\t' +str(dist1) + '\t' +str(dist2) + '\t' + which + '\n')
     
     def analyzeOutput(self, s, r, model):
         filepref = str(self.seq_len) + '_'  + str(r) + '_' + self.model_suffix
         
         #Robinson Foulds results
-        resultsRF = open('out_RF_' + filepref,'w')
+        rfname = 'out_RF_' + filepref + '.txt'
+        tdname = 'out_TD_' + filepref + '.txt'
+
+        resultsRF = open(rfname,'w')
+        resultsRF.write('BirthParam\tRFDistance\talgorithm\n');
         #Total Tree distance results
-        resultsTD = open('out_TD_' + filepref,'w')
+        resultsTD = open(tdname,'w')
+        resultsTD.write('BirthParam\tRealDistance\tInferredDistance\talgorithm\n');
         while s > 0:
             birth_rate = 0.1 * s
             print("Analysis step {}".format(round(birth_rate,1)))
@@ -178,6 +225,7 @@ class HmmDistanceGenerator:
             rtru = []
             rmus = []
             hmmt = []
+            reftree = dendropy.Tree.get_from_stream(open(self.original_treefile, 'rU'), "newick", tree_offset=0)
             for i in range(r):
                 #true rax
                 rtru.append(dendropy.Tree.get_from_stream(open(self.raxml_prefix + 'true'+str(i+1), 'rU'), "newick", tree_offset=0))
@@ -187,9 +235,29 @@ class HmmDistanceGenerator:
                 rmus.append(dendropy.Tree.get_from_stream(open(self.raxml_prefix + 'muscle'+str(i+1), 'rU'), "newick", tree_offset=0))
                 #hmm
                 hmmt.append(dendropy.Tree.get_from_stream(open(self.indelible_output + '_' + str(i+1) + '.fas' + self.hmmtreefile, 'rU'), "newick", tree_offset=0))
+                
+                self.writeRF(resultsRF, birth_rate, reftree.robinson_foulds_distance(rtru[-1]), 'true')
+                self.writeRF(resultsRF, birth_rate, reftree.robinson_foulds_distance(rmft[-1]), 'mafft')
+                self.writeRF(resultsRF, birth_rate, reftree.robinson_foulds_distance(rmus[-1]), 'muscle')
+                self.writeRF(resultsRF, birth_rate, reftree.robinson_foulds_distance(hmmt[-1]), 'hmm')
+
+                self.writeTD(resultsTD, birth_rate, reftree.length(), rtru[-1].length() , 'true')
+                self.writeTD(resultsTD, birth_rate, reftree.length(), rmft[-1].length() , 'mafft')
+                self.writeTD(resultsTD, birth_rate, reftree.length(), rmus[-1].length() , 'muscle')
+                self.writeTD(resultsTD, birth_rate, reftree.length(), hmmt[-1].length() , 'hmm')
+
             os.chdir('..');
             s -= 1
         self.logfile.close()
+
+        resultsRF.close();
+        resultsTD.close();
+
+        pngfile_r = rfname.replace('.txt','_m.png'); 
+        pngfile_d = tdname.replace('.txt','_s.png'); 
+
+        subprocess.call(['Rscript', 'graph_RFs.R',rfname, pngfile_r, pngfile_r ])
+        subprocess.call(['Rscript', 'graph_TDs.R',tdname, pngfile_d, pngfile_d ])
       #if (not onlyPaml):
     
     def calculate(self, s, r, model):

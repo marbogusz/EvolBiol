@@ -1,6 +1,5 @@
 #include "core/Definitions.hpp"
 
-
 namespace EBC
 {
 

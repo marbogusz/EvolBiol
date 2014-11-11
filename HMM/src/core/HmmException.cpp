@@ -6,6 +6,7 @@
  */
 
 #include "core/HmmException.hpp"
+#include "core/Definitions.hpp"
 
 namespace EBC {
 
@@ -23,6 +24,7 @@ HmmException::~HmmException() throw()
 
 HmmException::HmmException(string message) : msg(message)
 {
+	FileLogger::getLogger() << FileLogger::logT::L_ERR << message;
 }
 
 const char* HmmException::what() const throw ()
