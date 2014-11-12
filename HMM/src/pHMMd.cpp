@@ -37,19 +37,15 @@ int main(int argc, char ** argv) {
 	try
 	{
 		CommandReader* cmdReader = new CommandReader(argc, argv);
-		DEBUG("Get parser" << endl);
-
 		ofstream treefile;
-
-		FileLogger::getLogger().start((string(cmdReader->getInputFileName()).append(".hmm.log")));
+		FileLogger::start(cmdReader->getLoggingLevel(), (string(cmdReader->getInputFileName()).append(".hmm.log")));
 
 		treefile.open((string(cmdReader->getInputFileName()).append(".hmm.tree")).c_str(),ios::out);
 
 		IParser* parser = cmdReader->getParser();
 
-		FileLogger::getLogger() << "Reading sequences" << "\n";
-
-		DEBUG("Creating alignment");
+		FileLogger::InfoLogger() << "Reading sequences" << "\n";
+		FileLogger::DebugLogger() << "Creating alignment" << "\n";
 
 		Sequences* inputSeqs = new Sequences(parser, cmdReader->getSequenceType(),cmdReader->isFixedAlignment());
 		if (cmdReader->isMLE())
@@ -62,7 +58,6 @@ int main(int argc, char ** argv) {
 			ModelEstimator* tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),
 					cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
 					cmdReader->estimateAlpha());
-
 
 			//tme->getModelParameters();
 			delete tme;
@@ -90,7 +85,7 @@ int main(int argc, char ** argv) {
 			fwdHMM->runForwardAlgorithm();
 			*/
 
-			FileLogger::getLogger() << "Creating Model Parameters heuristics" << "\n";
+			FileLogger::InfoLogger() << "Creating Model Parameters heuristics" << "\n";
 			ModelEstimator* tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),
 					cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
 					cmdReader->estimateAlpha());
@@ -147,6 +142,6 @@ int main(int argc, char ** argv) {
 		cerr << ex.what();
 	}
 
-	FileLogger::getLogger().stop();
+	FileLogger::stop();
 	return 0;
 }

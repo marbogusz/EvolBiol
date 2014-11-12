@@ -11,15 +11,35 @@
 namespace EBC
 {
 
-FileLogger FileLogger::instance;
+std::ofstream FileLogger::logFile;
 
+FileLogger FileLogger::errL;
+FileLogger FileLogger::wrnL;
+FileLogger FileLogger::dbgL;
+FileLogger FileLogger::infL;
 
-FileLogger& FileLogger::getLogger()
+FileLogger& FileLogger::DebugLogger()
 {
-	return instance;
+	if(dbgL.active)
+		logFile << "[DEBUG]\t";
+	return dbgL;
 }
-
-
+FileLogger& FileLogger::ErrorLogger()
+{
+	if(errL.active)
+		logFile << "[ERROR]\t";
+	return errL;
+}
+FileLogger& FileLogger::InfoLogger()
+{	if(infL.active)
+		logFile << "[INFO]\t";
+	return infL;
+}
+FileLogger& FileLogger::WarningLogger()
+{	if(wrnL.active)
+		logFile << "[WARN]\t";
+	return wrnL;
+}
 
 }
 

@@ -24,7 +24,7 @@ HmmException::~HmmException() throw()
 
 HmmException::HmmException(string message) : msg(message)
 {
-	FileLogger::getLogger() << FileLogger::logT::L_ERR << message;
+	FileLogger::ErrorLogger() <<  message << '\n';
 }
 
 const char* HmmException::what() const throw ()

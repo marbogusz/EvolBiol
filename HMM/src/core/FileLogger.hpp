@@ -3,9 +3,11 @@
 
 
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <vector>
 
+using namespace std;
 
 namespace EBC
 {
@@ -14,68 +16,143 @@ namespace EBC
 class FileLogger
 {
 
-//FIXME - create a nice log with static members
+
 public:
-	enum class logT { L_ERR, L_WARN, L_INF, L_DBG };
+	enum logType { L_ERR, L_WARN, L_INF, L_DBG };
 
-	static FileLogger& getLogger();
+	static FileLogger& DebugLogger();
+	static FileLogger& ErrorLogger();
+	static FileLogger& InfoLogger();
+	static FileLogger& WarningLogger();
 
-	void start(const std::string& fname)
+	void activate()
+	{
+		this->active = true;
+	}
+	void setCerr()
+	{
+		this->stderrout = true;
+	}
+
+	static void start(logType priority, const std::string& fname)
 	{
 		//FIXME - file creation check
-		instance.logFile.open (fname.c_str());
+		switch(priority)
+		{
+		case L_DBG:
+			dbgL.activate();
+		case L_INF:
+			infL.activate();
+		case L_WARN:
+			wrnL.activate();
+		default:
+			errL.activate();
+			errL.setCerr();
+		}
+		logFile.open (fname.c_str());
 	}
-	void stop()
+	static void stop()
 	{
-	    if (instance.logFile.is_open())
+	    if (logFile.is_open())
 	    {
-	        instance.logFile.close();
+	        logFile.close();
 	    }
 	}
+/*
+	void Debug(std::string& text)
+	{
+		if (this->priority > L_INF)
+			this->logFile << "[DEBUG] " << text;
+	}
 
-	friend FileLogger &operator << (FileLogger &logger, const logT l_type) {
+	void Info(std::string& text)
+	{
+		if (this->priority > L_WARN)
+				this->logFile << "[INFO] " << text;
+	}
 
-		switch (l_type) {
-			case logT::L_ERR:
-				logger.logFile << "[ERROR]: ";
-				break;
+	void Warn(std::string& text)
+	{
+		if (this->priority > L_ERR)
+			this->logFile << "[WARN] " << text;
+	}
 
-			case logT::L_WARN:
-				logger.logFile << "[WARNING]: ";
-				break;
-			default:
-				logger.logFile << "[INFO]: ";
-				break;
-		}
-
-		return logger;
+	void Error(std::string& text)
+	{
+		this->logFile << "[ERROR] " << text;
+		std::cerr << "[ERROR] " << text;
 	}
 
 	template <typename T>
+	void Debug (const std::vector<T>& v)
+	{
+		if (this->priority < L_DBG)
+			return;
+		this->logFile << "[DEBUG] ";
+		for(unsigned int i = 0; i < v.size(); i++)
+		{
+			this->logFile << v[i] << "\t";
+		}
+		if (v.size() != 0)
+			this->logFile << std::endl;
+	}
+
+	template <typename T>
+	void Info (const std::vector<T>& v)
+	{
+		if (this->priority < L_INF)
+			return;
+		this->logFile << "[INFO] ";
+		for(unsigned int i = 0; i < v.size(); i++)
+		{
+			this->logFile << v[i] << "\t";
+		}
+		if (v.size() != 0)
+			this->logFile << std::endl;
+	}
+*/
+	template <typename T>
 	friend FileLogger &operator << (FileLogger &logger, const T& param) {
 
-		logger.logFile << param;
+		if(logger.active)
+			logFile << param;
+		if (logger.stderrout)
+			std::cerr << param;
 		return logger;
 	}
 
 	template <typename T>
 	friend FileLogger &operator << (FileLogger &logger, const std::vector<T>& v)
 	{
-		for(unsigned int i = 0; i < v.size(); i++)
+		if (v.size() != 0 && logger.active)
 		{
-			logger.logFile << v[i] << "\t";
+			for(unsigned int i = 0; i < v.size(); i++)
+			{
+				logFile << v[i] << "\t";
+				if (logger.stderrout)
+				{
+					std::cerr << v[i] << "\t";
+				}
+			}
+			logFile << std::endl;
+			if (logger.stderrout)
+				std::cerr << std::endl;
 		}
-		if (v.size() != 0)
-			logger.logFile << std::endl;
+		return logger;
 	}
+public:
+	bool stderrout;
+	bool active;
 
 private:
-    FileLogger() {}
+    FileLogger() : active(false), stderrout(false) {}
     FileLogger(const FileLogger& logger) {}
     FileLogger& operator = (const FileLogger& logger) {}
-	static FileLogger instance;
-	std::ofstream logFile;
-
+	static FileLogger errL;
+	static FileLogger wrnL;
+	static FileLogger dbgL;
+	static FileLogger infL;
+	static std::ofstream logFile;
 };
 
 }

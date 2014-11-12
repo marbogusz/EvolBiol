@@ -16,7 +16,7 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 				gtree(new GuideTree(inputSeqs)), tst(*gtree)
 {
 	DEBUG("About to sample some triplets");
-	FileLogger::getLogger() << "Sampling triplets osf sequences for gamma shape parameter estimation" << "\n";
+	FileLogger::DebugLogger() << "Sampling triplets osf sequences for gamma shape parameter estimation" << "\n";
 	
 	maths = new Maths();
 	dict = inputSequences->getDictionary();

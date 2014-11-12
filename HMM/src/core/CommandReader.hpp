@@ -97,6 +97,21 @@ public:
 			return (Definitions::OptimizationType) opt;
 	}
 
+	FileLogger::logType getLoggingLevel()
+	{
+		if (parser.option("lE"))
+			return FileLogger::L_ERR;
+		if (parser.option("lW"))
+			return FileLogger::L_WARN;
+		if (parser.option("lI"))
+			return FileLogger::L_INF;
+		if (parser.option("lD"))
+			return FileLogger::L_DBG;
+		//info by default!
+		return
+			FileLogger::L_INF;
+	}
+
 	bool getBanding()
 	{
 		if (parser.option("b"))

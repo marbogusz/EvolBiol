@@ -179,11 +179,11 @@ void EBC::OptimizedModelParameters::logParameters()
 	//if(this->estimateAlpha)
 	//	std::cerr << alpha;
 	//std::cerr << std::endl;
-	FileLogger::getLogger() << substParameters;
-	FileLogger::getLogger() << indelParameters;
-	FileLogger::getLogger() << divergenceTimes;
+	FileLogger::InfoLogger() << substParameters;
+	FileLogger::InfoLogger() << indelParameters;
+	FileLogger::InfoLogger() << divergenceTimes;
 	if(this->estimateAlpha)
-		FileLogger::getLogger() << "Alpha: " << alpha << "\n";
+		FileLogger::InfoLogger() << "Alpha: " << alpha << "\n";
 
 }
 

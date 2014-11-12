@@ -90,7 +90,7 @@ void SubstitutionModelEstimator::addTriplet(array<vector<SequenceElement>, 3>& t
 void SubstitutionModelEstimator::optimize()
 {
 	bfgs->optimize();
-	FileLogger::getLogger() << "SubstitutionModelEstimator" << "\n";
+	FileLogger::InfoLogger() << "SubstitutionModelEstimator" << "\n";
 	modelParams->logParameters();
 
 }

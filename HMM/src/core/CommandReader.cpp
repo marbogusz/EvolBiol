@@ -43,6 +43,11 @@ CommandReader::CommandReader(int argc, char** argv)
 		parser.add_option("initAlpha", "Specify initial alpha parameter, default is 0.5",1 );
 		parser.add_option("estimateAlpha", "Specify to estimate alpha 0|1, default is 1",1 );
 
+		parser.add_option("lE", "log error");
+		parser.add_option("lW", "log warning");
+		parser.add_option("lI", "log info");
+		parser.add_option("lD", "log debug");
+
 		parser.parse(argc,argv);
 
 		const char* one_time_opts[] = {"V", "F", "M", "in", "i","d" ,"h","b","o", "ov"};
