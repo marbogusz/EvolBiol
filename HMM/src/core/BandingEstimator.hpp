@@ -19,6 +19,7 @@
 #include "core/Sequences.hpp"
 #include "core/HmmException.hpp"
 #include "core/Optimizer.hpp"
+#include "core/PairHmmCalculationWrapper.hpp"
 
 #include "models/SubstitutionModelBase.hpp"
 #include "models/IndelModel.hpp"
@@ -70,6 +71,7 @@ protected:
 	vector<EvolutionaryPairHMM*> hmms;
 	//delete bands in the destructor
 	vector<Band*> bands;
+	vector<double> divergenceTimes;
 
 	OptimizedModelParameters* modelParams;
 
@@ -85,9 +87,11 @@ public:
 
 	void outputDistanceMatrix(stringstream&);
 
+	void optimizePairByPair();
+
 	vector<double> getOptimizedTimes()
 	{
-		return this->modelParams->getDivergenceTimes();
+		return this->divergenceTimes;
 	}
 
 	//ModelParameters getMlParameters()

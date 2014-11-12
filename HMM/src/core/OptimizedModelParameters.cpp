@@ -91,6 +91,8 @@ void EBC::OptimizedModelParameters::generateInitialSubstitutionParameters()
 	{
 		substParameters[i] = 0.2 + 0.1*maths->rndu();
 	}
+	FileLogger::DebugLogger() << "Initial substitution parameters:\n";
+	FileLogger::DebugLogger() << substParameters;
 }
 
 void EBC::OptimizedModelParameters::generateInitialIndelParameters()
@@ -100,6 +102,8 @@ void EBC::OptimizedModelParameters::generateInitialIndelParameters()
 		indelParameters[i] = 0.05 + 0.1*maths->rndu();
 		//indelParameters[i+1] = 0.5; //FIXME
 	}
+	FileLogger::DebugLogger() << "Initial indel parameters:\n";
+	FileLogger::DebugLogger() << indelParameters;
 }
 
 void EBC::OptimizedModelParameters::generateInitialDistanceParameters()
@@ -108,6 +112,9 @@ void EBC::OptimizedModelParameters::generateInitialDistanceParameters()
 	{
 		divergenceTimes[i] = 0.2 + 0.1*maths->rndu();
 	}
+
+	FileLogger::DebugLogger() << "Initial divergence times:\n";
+	FileLogger::DebugLogger() << divergenceTimes;
 }
 
 void EBC::OptimizedModelParameters::fromDlibVector(const column_vector& vals)

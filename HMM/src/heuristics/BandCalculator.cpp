@@ -99,9 +99,9 @@ void BandCalculator::processPosteriorProbabilities(BackwardPairHMM* hmm, Band* b
 
 	for(unsigned int col = 0; col < M->getCols(); col++)
 	{
-		minX = -200000;
-		minY = -200000;
-		minM = -200000;
+		minX = Definitions::minMatrixLikelihood *2;
+		minY = Definitions::minMatrixLikelihood *2;
+		minM = Definitions::minMatrixLikelihood *2;
 		xHi=mHi=yHi=xLo=mLo=yLo=-1;
 		//scan the column for the smallest lnl
 		for(tmpRow = 0; tmpRow < rowCount; tmpRow ++)

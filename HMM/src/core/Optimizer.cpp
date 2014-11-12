@@ -13,6 +13,8 @@ namespace EBC
 Optimizer::Optimizer(OptimizedModelParameters* mp, IOptimizable* opt, Definitions::OptimizationType ot) :
 		optimizationType(ot), omp(mp), target(opt)
 {
+
+
 	paramsCount = omp->optParamCount();
 	this->initParams.set_size(paramsCount);
 	this->lowerBounds.set_size(paramsCount);
@@ -20,7 +22,13 @@ Optimizer::Optimizer(OptimizedModelParameters* mp, IOptimizable* opt, Definition
 
 	omp->toDlibVector(initParams,lowerBounds,upperBounds);
 
+	FileLogger::DebugLogger() << "Starting optimizer with " << paramsCount << " parameter(s)" << '\n';
 	//cerr << "DLIB optimizer init with " << paramsCount << " parameters" << endl;
+}
+
+void Optimizer::setTarget(IOptimizable* opt)
+{
+	target = opt;
 }
 
 Optimizer::~Optimizer()
@@ -29,6 +37,7 @@ Optimizer::~Optimizer()
 
 double Optimizer::objectiveFunction(const column_vector& bfgsParameters)
 {
+	//FIXME - address an issue of vector copying!
 	omp->fromDlibVector(bfgsParameters);
 	return target->runIteration();
 }
@@ -41,7 +50,7 @@ const column_vector Optimizer::objectiveFunctionDerivative(const column_vector& 
 }
 
 
-void Optimizer::optimize()
+double Optimizer::optimize()
 {
 	using std::placeholders::_1;
 	std::function<double(const column_vector&)> f_objective= std::bind( &Optimizer::objectiveFunction, this, _1 );
@@ -68,6 +77,7 @@ void Optimizer::optimize()
 		}
 	}
 	omp->fromDlibVector(initParams);
+	return likelihood;
 	//omp->outputParameters();
 	//cout  << likelihood << "\n";
 

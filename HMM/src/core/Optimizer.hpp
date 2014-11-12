@@ -31,7 +31,10 @@ class Optimizer
 	public:
 		Optimizer(OptimizedModelParameters* mp, IOptimizable* opt, Definitions::OptimizationType ot);
 		virtual ~Optimizer();
-		void optimize();
+
+		double optimize();
+
+		void setTarget(IOptimizable* opt);
 
 		double objectiveFunction(const column_vector& m);
 

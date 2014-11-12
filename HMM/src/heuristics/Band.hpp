@@ -9,6 +9,7 @@
 #define HEURISTICS_BAND_HPP_
 
 #include <vector>
+#include "core/FileLogger.hpp"
 
 using namespace std;
 
@@ -53,6 +54,18 @@ public:
 	{
 		return deleteBand[pos];
 	}
+
+	inline void output()
+	{
+		for(int i =0; i< matchBand.size(); i++)
+		{
+			FileLogger::DebugLogger() << "M/X/Y bands " << i << "\t" << getMatchRangeAt(i).first <<"\t" << getMatchRangeAt(i).second
+							<< "\t" << getInsertRangeAt(i).first <<"\t" << getInsertRangeAt(i).second
+							<< "\t" << getDeleteRangeAt(i).first <<"\t" << getDeleteRangeAt(i).second << "\n";
+
+		}
+	}
+
 };
 
 } /* namespace EBC */

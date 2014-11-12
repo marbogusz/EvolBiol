@@ -8,6 +8,7 @@
 #include "hmm/DpMatrixFull.hpp"
 #include <iostream>
 #include <cmath>
+#include <sstream>
 
 using namespace std;
 
@@ -101,6 +102,10 @@ void EBC::DpMatrixFull::outputValues(unsigned int bound=0)
 	unsigned int xl = bound !=0 ? bound : xSize;
 	unsigned int yl = bound !=0 ? bound : ySize;
 
+	stringstream sstr;
+
+	sstr << endl;
+
 	for(unsigned int i=0; i < xl; i++)
 	{
 		for(unsigned int j=0; j < yl; j++)
@@ -108,10 +113,11 @@ void EBC::DpMatrixFull::outputValues(unsigned int bound=0)
 			TraceStep& ts = matrixData[i][j];
 
 
-			cout << (ts.score) << "\t";
+			sstr << (ts.score <= Definitions::minMatrixLikelihood ? ".":"X"); //<< "\t";
 		}
-		cout << endl;
+		sstr << endl;
 	}
+	FileLogger::DebugLogger() << sstr.str();
 }
 
 

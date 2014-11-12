@@ -31,8 +31,8 @@ int main(int argc, char ** argv) {
 
 	//Set output Precision to 2
 	//FIXME - should normally be set to >= 6
-	cout << fixed << setprecision(4);
-	cerr << fixed << setprecision(4);
+	cout << fixed << setprecision(1);
+	cerr << fixed << setprecision(1);
 
 	try
 	{
@@ -103,6 +103,7 @@ int main(int argc, char ** argv) {
 			//FIXME - hardcoding substitution parameters and alpha to come from the estimator
 			BandingEstimator* be = new BandingEstimator(cmdReader->getAlgorithmType(), inputSeqs, cmdReader->getModelType() ,indelParams,
 					substParams, cmdReader->getOptimizationType(), cmdReader->getCategories(),alpha, tme->getGuideTree());
+			be->optimizePairByPair();
 
 			//DEBUG ("Running bionj");
 

@@ -43,7 +43,7 @@ public:
 	constexpr static const double initialLambda = 0.02;
 	constexpr static const double initialEpsilon = 0.5;
 
-	constexpr static const double minMatrixLikelihood = -100000.0;
+	constexpr static const double minMatrixLikelihood = -1000000.0;
 
 
 
