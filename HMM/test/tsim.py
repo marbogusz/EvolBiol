@@ -52,7 +52,7 @@ class HmmDistanceGenerator:
         self.steps = 15
         self.cores = 4;
         self.indelible_binary = 'indelible'
-        self.hmm_binary = 'HMMestBF1'
+        self.hmm_binary = 'HMMestBF3'
         self.hmm_base_params = ['-F','--in']
         self.hmm_misc_params = ['-b', '1', '-o', '0', '--bf', '20']
         self.hmm_alpha_params = ['--rateCat', '5', '--initAlpha', '0.75']
@@ -151,10 +151,6 @@ class HmmDistanceGenerator:
             self.alignMuscle(i)
             #self.alignPrank(i)
 
-    def run(self):
-        self.simulate(self.steps,self.replicates,self.model);
-        self.calculate(self.steps,self.replicates,self.model);
-        self.analyzeOutput(self.steps,self.replicates,self.model);
  
     def simulate(self, s,r,modelname):
     
@@ -185,7 +181,7 @@ class HmmDistanceGenerator:
             ofile.write(ictl_template.format(**templateDict))
             ofile.close()
             #mkdir GTR + indelible + distance 
-            current_dir = str(self.seq_len) + '_' + str(round(birth_rate,1)) + '_Indelible_' + str(r) + '_' + self.model_suffix
+            current_dir = str(self.taxaNo) + '_taxa_' + self.model_suffix + '_' + str(self.seq_len) + '_' + str(round(birth_rate,1)) + '_Indelible_' + str(r) 
             os.mkdir(current_dir)
             shutil.copy('control.txt',current_dir) 
             #shutil.copy('star.trees',current_dir) 
@@ -218,7 +214,7 @@ class HmmDistanceGenerator:
         while s > 0:
             birth_rate = 0.1 * s
             print("Analysis step {}".format(round(birth_rate,1)))
-            current_dir = str(self.seq_len) + '_' + str(round(birth_rate,1)) + '_Indelible_' + str(r) + '_' + self.model_suffix
+            current_dir = str(self.taxaNo) + '_taxa_' + self.model_suffix + '_' + str(self.seq_len) + '_' + str(round(birth_rate,1)) + '_Indelible_' + str(r) 
             os.chdir(current_dir)
             #create trees based on results
             rmft = []
@@ -264,7 +260,7 @@ class HmmDistanceGenerator:
         while s > 0:
             birth_rate = 0.1 * s
             print("Calculation step {}".format(round(birth_rate,1)))
-            current_dir = str(self.seq_len) + '_' + str(round(birth_rate,1)) + '_Indelible_' + str(r) + '_' + self.model_suffix
+            current_dir = str(self.taxaNo) + '_taxa_' + self.model_suffix + '_' + str(self.seq_len) + '_' + str(round(birth_rate,1)) + '_Indelible_' + str(r) 
             os.chdir(current_dir)
             #self.runHMMbatch(r,outfile_all,True)
             self.runHMMbatch(r)
@@ -305,7 +301,7 @@ class HmmDistanceGenerator:
         if (self.model == 'LG'):
             params.append('--lg')
         params +=self.hmm_alpha_params
-        subprocess.call(params,stdout=self.logfile, stderr=self.logfile) 
+        subprocess.call(params,stdout=self.logfile) 
 
     def callRaxml(self, params):
             subprocess.call(params,stdout=self.logfile,stderr=self.logfile)
@@ -345,6 +341,10 @@ class HmmDistanceGenerator:
             for th in threads:
                 th.join()
 
+    def run(self):
+        self.simulate(self.steps,self.replicates,self.model);
+        self.calculate(self.steps,self.replicates,self.model);
+        self.analyzeOutput(self.steps,self.replicates,self.model);
 
 if __name__ == "__main__":
     if len(sys.argv) != 5:

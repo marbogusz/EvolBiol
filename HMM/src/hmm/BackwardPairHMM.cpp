@@ -49,6 +49,8 @@ void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 		}
 	}
 
+	//dynamic_cast<DpMatrixFull*>(M->getDpMatrix())->outputValues(0);
+
 }
 
 double BackwardPairHMM::runAlgorithm()

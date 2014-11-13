@@ -36,6 +36,9 @@ int main(int argc, char ** argv) {
 
 	try
 	{
+
+		//FIXME - nothing happens when the model does not get specified!
+
 		CommandReader* cmdReader = new CommandReader(argc, argv);
 		ofstream treefile;
 		FileLogger::start(cmdReader->getLoggingLevel(), (string(cmdReader->getInputFileName()).append(".hmm.log")));

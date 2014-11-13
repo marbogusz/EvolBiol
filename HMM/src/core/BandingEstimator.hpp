@@ -55,6 +55,8 @@ protected:
 	Maths* maths;
 	GuideTree* gt;
 
+	Definitions::AlgorithmType algorithm;
+
 	unsigned int bandFactor;
 	unsigned int bandSpan;
 	unsigned int gammaRateCategories;
@@ -68,9 +70,9 @@ protected:
 
 	unsigned int pairCount;
 
-	vector<EvolutionaryPairHMM*> hmms;
+	//vector<EvolutionaryPairHMM*> hmms;
 	//delete bands in the destructor
-	vector<Band*> bands;
+	//vector<Band*> bands;
 	vector<double> divergenceTimes;
 
 	OptimizedModelParameters* modelParams;

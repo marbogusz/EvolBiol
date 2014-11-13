@@ -11,6 +11,7 @@
 #include <limits>
 #include <iostream>
 #include "hmm/DpMatrixBase.hpp"
+#include <vector>
 
 using namespace std;
 
@@ -68,6 +69,8 @@ public:
 	void outputTrace(unsigned int);
 
 	void outputValues(unsigned int);
+
+	void outputValuesWithBands(const vector<pair<int, int> >& band, const vector<pair<int, int> >& oband1, const vector<pair<int, int> >& oband2, char os1, char os2);
 
 
 };

@@ -66,6 +66,17 @@ public:
 		}
 	}
 
+	const vector<pair<int, int> >& getDeleteBand() const {
+		return deleteBand;
+	}
+
+	const vector<pair<int, int> >& getInsertBand() const {
+		return insertBand;
+	}
+
+	const vector<pair<int, int> >& getMatchBand() const {
+		return matchBand;
+	}
 };
 
 } /* namespace EBC */

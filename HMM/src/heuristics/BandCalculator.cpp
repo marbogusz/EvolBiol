@@ -15,8 +15,8 @@ BandCalculator::BandCalculator(vector<SequenceElement>& s1, vector<SequenceEleme
 {
 	// TODO Auto-generated constructor stub
 	//FIXME magic numbers
-	posteriorLikelihoodLimit = -7;
-	posteriorLikelihoodDelta = -4;
+	posteriorLikelihoodLimit = -3;
+	posteriorLikelihoodDelta = -9;
 
 	this->ptMatrix =  new PMatrixDouble(substModel);
 	this->trProbs = new TransitionProbabilities(indelModel);
@@ -53,6 +53,9 @@ BandCalculator::BandCalculator(vector<SequenceElement>& s1, vector<SequenceEleme
 
 	//combine fwd and bwd metrics into one!
 	band = new Band(s2.size()+1);
+
+	FileLogger::DebugLogger() << "Posterior probabilities:\n";
+
 	bwd->calculatePosteriors(fwd[best]);
 	this->processPosteriorProbabilities(bwd, band);
 }
@@ -71,6 +74,94 @@ BandCalculator::~BandCalculator()
 
 }
 
+void BandCalculator::processPosteriorProbabilities(BackwardPairHMM* hmm, Band* band)
+{
+	//Match state
+	PairwiseHmmStateBase* M;
+	//Insert state
+	PairwiseHmmStateBase* X;
+	//Delete state
+	PairwiseHmmStateBase* Y;
+
+	M = hmm->getM();
+	X = hmm->getX();
+	Y = hmm->getY();
+
+	//FIXME - use a defined number, same with -1000000 mins!!
+	double minX;
+	double minY;
+	double minM;
+
+	//cumulative posterior likelihood
+	double cpl = posteriorLikelihoodLimit + posteriorLikelihoodDelta;
+
+	int xHi, xLo, yHi, yLo, mHi,mLo, rowCount;
+
+	unsigned int tmpRow;
+
+	double tmpX, tmpY, tmpM;
+
+	rowCount = M->getRows();
+
+	for(unsigned int col = 0; col < M->getCols(); col++)
+	{
+		xHi=mHi=yHi=xLo=mLo=yLo=-1;
+		tmpRow = 0;
+		while(tmpRow < rowCount && X->getValueAt(tmpRow, col) < cpl )
+			tmpRow++;
+		if (tmpRow != rowCount)
+		{
+			//found a value
+			xLo = tmpRow;
+			tmpRow = rowCount-1;
+			while(tmpRow >= 0 && X->getValueAt(tmpRow, col) < cpl)
+				tmpRow--;
+			if (tmpRow > 0)
+				xHi = tmpRow;
+		}
+
+		tmpRow = 0;
+		while(tmpRow < rowCount && Y->getValueAt(tmpRow, col) < cpl)
+			tmpRow++;
+		if (tmpRow != rowCount)
+		{
+			//found a value
+			yLo = tmpRow;
+			tmpRow = rowCount-1;
+			while(tmpRow >= 0 && Y->getValueAt(tmpRow, col) < cpl)
+				tmpRow--;
+			if (tmpRow > 0)
+				yHi = tmpRow;
+		}
+
+		tmpRow = 0;
+		while(tmpRow < rowCount && M->getValueAt(tmpRow, col) < cpl)
+			tmpRow++;
+		if (tmpRow != rowCount)
+		{
+			//found a value
+			mLo = tmpRow;
+			tmpRow = rowCount-1;
+			while(tmpRow >= 0 && M->getValueAt(tmpRow, col) < cpl)
+				tmpRow--;
+			if (tmpRow > 0)
+				mHi = tmpRow;
+		}
+
+
+
+		band->setInsertRangeAt(col, xLo,xHi);
+		band->setDeleteRangeAt(col, yLo,yHi);
+		band->setMatchRangeAt(col, mLo,mHi);
+
+		DEBUG("M/X/Y bands " << col << "\t" << band->getMatchRangeAt(col).first <<"\t" << band->getMatchRangeAt(col).second
+				<< "\t" << band->getInsertRangeAt(col).first <<"\t" << band->getInsertRangeAt(col).second
+				<< "\t" << band->getDeleteRangeAt(col).first <<"\t" << band->getDeleteRangeAt(col).second);
+	}
+}
+
+
+/*
 void BandCalculator::processPosteriorProbabilities(BackwardPairHMM* hmm, Band* band)
 {
 	//Match state
@@ -160,6 +251,26 @@ void BandCalculator::processPosteriorProbabilities(BackwardPairHMM* hmm, Band* b
 		band->setInsertRangeAt(col, xLo,xHi);
 		band->setDeleteRangeAt(col, yLo,yHi);
 		band->setMatchRangeAt(col, mLo,mHi);
+
+		//int min = std::min(std::min(xLo < 0 ? 1 : xLo,yLo < 0 ? 1 : yLo),mLo < 0 ? 1 : mLo);
+		int max = std::max(std::max(xHi,yHi),mHi);
+
+
+		int Xmin = std::min(std::min(xLo < 1 ? 10000 : xLo,yLo < 10000 ? 100000 : yLo),mLo < 1 ? 10000 : mLo);
+
+
+		int Ymin = std::min(std::min(xLo < 0 ? 0 : xLo,yLo < 0 ? 0 : yLo),mLo < 0 ? 0 : mLo);
+
+
+		int Mmin = std::min(std::min(xLo < 1 ? 10000 : xLo,yLo < 1 ? 10000 : yLo),mLo < 1 ? 10000 : mLo);
+
+
+
+
+		//FIXME - do some proper estimation instead doing band intersection
+		//band->setInsertRangeAt(col, Xmin, max);
+		//band->setDeleteRangeAt(col, Ymin,max);
+		//band->setMatchRangeAt(col, Mmin,max);
 		//band->setInsertRangeAt(col, 1,rowCount-1);
 		//band->setDeleteRangeAt(col, 0,rowCount-1);
 		//band->setMatchRangeAt(col, 1,rowCount-1);
@@ -168,6 +279,6 @@ void BandCalculator::processPosteriorProbabilities(BackwardPairHMM* hmm, Band* b
 				<< "\t" << band->getDeleteRangeAt(col).first <<"\t" << band->getDeleteRangeAt(col).second);
 	}
 }
-
+*/
 
 } /* namespace EBC */

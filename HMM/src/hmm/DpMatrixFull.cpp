@@ -105,6 +105,9 @@ void EBC::DpMatrixFull::outputValues(unsigned int bound=0)
 	stringstream sstr;
 
 	sstr << endl;
+	for(unsigned int k=0; k < yl; k++)
+		sstr << k << "\t";
+	sstr << endl;
 
 	for(unsigned int i=0; i < xl; i++)
 	{
@@ -113,14 +116,45 @@ void EBC::DpMatrixFull::outputValues(unsigned int bound=0)
 			TraceStep& ts = matrixData[i][j];
 
 
-			sstr << (ts.score <= Definitions::minMatrixLikelihood ? ".":"X"); //<< "\t";
+			sstr << (int)ts.score << "\t";
 		}
 		sstr << endl;
 	}
 	FileLogger::DebugLogger() << sstr.str();
 }
 
+void EBC::DpMatrixFull::outputValuesWithBands(const vector<pair<int, int> >& band, const vector<pair<int, int> >& oband1, const vector<pair<int, int> >& oband2, char os1, char os2) {
+	stringstream sstr;
 
+		sstr << endl;
+
+		for(unsigned int i=0; i < xSize; i++)
+		{
+			for(unsigned int j=0; j < ySize; j++)
+			{
+				TraceStep& ts = matrixData[i][j];
+
+				if (ts.score <= (Definitions::minMatrixLikelihood /2.0))
+				{
+					if (band[j].first <= i && band[j].second >= i)
+						sstr << "*";
+					else if ((oband1[j].first <= i && oband1[j].second >= i) && (oband2[j].first <= i && oband2[j].second >= i))
+						sstr << "+";
+					else if (oband1[j].first <= i && oband1[j].second >= i)
+						sstr << os1;
+					else if (oband2[j].first <= i && oband2[j].second >= i)
+						sstr << os2;
+					else
+						sstr << ".";
+				}
+
+				else
+					sstr << "X";
+			}
+			sstr << endl;
+		}
+		FileLogger::DebugLogger() << sstr.str();
+}
 
 void EBC::DpMatrixFull::setDiagonalAt(unsigned int i, unsigned int j)
 {
@@ -226,16 +260,5 @@ void EBC::DpMatrixFull::traceback(string& seq_a, string& seq_b, std::pair<string
 
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
 
 

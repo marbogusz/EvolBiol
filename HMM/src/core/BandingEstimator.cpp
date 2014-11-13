@@ -16,9 +16,9 @@ namespace EBC
 {
 
 BandingEstimator::BandingEstimator(Definitions::AlgorithmType at, Sequences* inputSeqs, Definitions::ModelType model ,std::vector<double> indel_params,
-		std::vector<double> subst_params, Definitions::OptimizationType ot, unsigned int rateCategories, double alpha, GuideTree* gt) :
+		std::vector<double> subst_params, Definitions::OptimizationType ot, unsigned int rateCategories, double alpha, GuideTree* g) :
 				inputSequences(inputSeqs), gammaRateCategories(rateCategories), pairCount(inputSequences->getPairCount()),
-				hmms(pairCount), bands(pairCount), divergenceTimes(pairCount)
+				/*hmms(pairCount), bands(pairCount),*/ divergenceTimes(pairCount), algorithm(at), gt(g)
 {
 	//Banding estimator means banding enabled!
 
@@ -90,8 +90,8 @@ BandingEstimator::BandingEstimator(Definitions::AlgorithmType at, Sequences* inp
 //non banden probs
 //	vector<EvolutionaryPairHMM*> hmmsNB(pairCount);
 
-
-	for(unsigned int i =0; i<pairCount; i++)
+/*
+	for(unsigned int i =0; i< pairCount; i++)
 		{
 			std::pair<unsigned int, unsigned int> idxs = inputSequences->getPairOfSequenceIndices(i);
 			DEBUG("Running band calculator for sequence " << idxs.first << " and " << idxs.second);
@@ -117,7 +117,7 @@ BandingEstimator::BandingEstimator(Definitions::AlgorithmType at, Sequences* inp
 			}
 			delete bc;
 		}
-
+*/
 	bfgs = new Optimizer(modelParams, NULL, ot);
 	//bfgs->optimize();
 	//this->modelParams->logParameters();
@@ -127,13 +127,13 @@ BandingEstimator::BandingEstimator(Definitions::AlgorithmType at, Sequences* inp
 BandingEstimator::~BandingEstimator()
 {
 	// TODO Auto-generated destructor stub
-	for(auto hmm : hmms)
-		delete hmm;
+	//for(auto hmm : hmms)
+	//	delete hmm;
 	delete bfgs;
 	delete modelParams;
     delete maths;
-    for (auto bnd : bands)
-    	delete bnd;
+    //for (auto bnd : bands)
+    //	delete bnd;
     delete indelModel;
     delete substModel;
 }
@@ -141,32 +141,51 @@ BandingEstimator::~BandingEstimator()
 void BandingEstimator::optimizePairByPair()
 {
 	EvolutionaryPairHMM* hmm;
+	Band* band;
 	PairHmmCalculationWrapper* wrapper = new PairHmmCalculationWrapper();
 	double result;
 
-	for(unsigned int i =0; i<pairCount; i++)
+	for(unsigned int i =0; i< pairCount; i++)
 	{
 		FileLogger::DebugLogger() << "Optimizing distance for pair #" << i << '\n';
-		hmm = hmms[i];
+		std::pair<unsigned int, unsigned int> idxs = inputSequences->getPairOfSequenceIndices(i);
+		FileLogger::InfoLogger() << "Running band calculator for sequence " << idxs.first << " and " << idxs.second << "\n";
+		BandCalculator* bc = new BandCalculator(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
+				substModel, indelModel, gt->getDistanceMatrix()->getDistance(idxs.first,idxs.second));
+		band = bc->getBand();
+		if (algorithm == Definitions::AlgorithmType::Viterbi)
+		{
+			hmm = new ViterbiPairHMM(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
+					substModel, indelModel, Definitions::DpMatrixType::Full, band);
+		}
+		else if (algorithm == Definitions::AlgorithmType::Forward)
+		{
+			hmm = new ForwardPairHMM(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
+					substModel, indelModel, Definitions::DpMatrixType::Full, band);
+		}
+
 		//hmm->setDivergenceTime(modelParams->getDivergenceTime(0)); //zero as there's only one pair!
 		wrapper->setTargetHMM(hmm);
 		wrapper->setModelParameters(modelParams);
 		bfgs->setTarget(wrapper);
 		result = bfgs->optimize() * -1.0;
 		FileLogger::DebugLogger() << "Resulting likelihood " << result << "\n";
-		if (result <= Definitions::minMatrixLikelihood)
+		if (result <= (Definitions::minMatrixLikelihood /2.0))
 		{
 			FileLogger::ErrorLogger() << "Optimization failed for pair #" << i << " Zero probability FWD" << '\n';
-			bands[i]->output();
-			dynamic_cast<DpMatrixFull*>(hmm->M->getDpMatrix())->outputValues(0);
-			dynamic_cast<DpMatrixFull*>(hmm->X->getDpMatrix())->outputValues(0);
-			dynamic_cast<DpMatrixFull*>(hmm->Y->getDpMatrix())->outputValues(0);
+			band->output();
+			dynamic_cast<DpMatrixFull*>(hmm->M->getDpMatrix())->outputValuesWithBands(band->getMatchBand() ,band->getInsertBand(),band->getDeleteBand(),'|', '-');
+			dynamic_cast<DpMatrixFull*>(hmm->X->getDpMatrix())->outputValuesWithBands(band->getInsertBand(),band->getMatchBand() ,band->getDeleteBand(),'\\', '-');
+			dynamic_cast<DpMatrixFull*>(hmm->Y->getDpMatrix())->outputValuesWithBands(band->getDeleteBand(),band->getMatchBand() ,band->getInsertBand(),'\\', '|');
 		}
 		this->divergenceTimes[i] = modelParams->getDivergenceTime(0);
+
+		delete band;
+		delete bc;
+		delete hmm;
 	}
 
 	FileLogger::DebugLogger() << this->divergenceTimes;
-
 }
 
 
@@ -174,7 +193,7 @@ double BandingEstimator::runIteration()
 {
 	double result = 0;
 	double tmp;
-	EvolutionaryPairHMM* hmm;
+/*	EvolutionaryPairHMM* hmm;
 
 	if (estimateSubstitutionParams == true)
 	{
@@ -209,7 +228,7 @@ double BandingEstimator::runIteration()
 		//modelParams->outputParameters();
 	}
 	DEBUGN("\n");
-	//cerr << " lnl " << result << endl;
+	//cerr << " lnl " << result << endl;*/
 	return result;
 }
 
