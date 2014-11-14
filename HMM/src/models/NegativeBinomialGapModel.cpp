@@ -26,7 +26,6 @@ NegativeBinomialGapModel::NegativeBinomialGapModel() : IndelModel(Definitions::N
 
 NegativeBinomialGapModel::~NegativeBinomialGapModel()
 {
-	// TODO Auto-generated destructor stub
 }
 
 double NegativeBinomialGapModel::calculateGapOpening(double time)
@@ -53,7 +52,7 @@ void NegativeBinomialGapModel::calculate()
 
 void NegativeBinomialGapModel::calculateGeometricProbability(double lambda, double t)
 {
-	//FIXME - this might not be making sense!
+	//FIXME - remove
 	double exponent = 1-exp(-1*lambda*t);
 	this->gapOpeningProbability = exponent;
 }

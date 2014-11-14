@@ -13,6 +13,17 @@
 
 //#define DEBUG_BUILD 1
 
+#define DUMP(x) do { FileLogger::DumpLogger() << x << "\n"; } while (0)
+#define DEBUG(x) do { FileLogger::DebugLogger() << x << "\n"; } while (0)
+#define INFO(x) do { FileLogger::InfoLogger() << x<< "\n"; } while (0)
+#define WARN(x) do { FileLogger::WarningLogger() << x << "\n"; } while (0)
+#define ERROR(x) do { FileLogger::ErrorLogger() << x << "\n"; } while (0)
+
+#  define DEBUGN(x) do {} while (0)
+#  define DEBUGV(x,n) do {} while (0)
+#  define DEBUGM(x,n) do {} while (0)
+
+/*
 #ifdef DEBUG_BUILD
 #  define DEBUG(x) do { std::cerr<< "DBG! " << x << std::endl; } while (0)
 #  define DEBUGN(x) do { std::cerr << x ; } while (0)
@@ -24,7 +35,7 @@
 #  define DEBUGV(x,n) do {} while (0)
 #  define DEBUGM(x,n) do {} while (0)
 #endif
-
+*/
 namespace EBC
 {
 

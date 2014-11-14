@@ -12,15 +12,10 @@ namespace EBC
 
 Band::Band(unsigned int size) : matchBand(size), insertBand(size), deleteBand(size)
 {
-
-
-	// TODO Auto-generated constructor stub
-
 }
 
 Band::~Band()
 {
-	// TODO Auto-generated destructor stub
 }
 
 } /* namespace EBC */

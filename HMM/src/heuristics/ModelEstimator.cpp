@@ -16,7 +16,7 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 				gtree(new GuideTree(inputSeqs)), tst(*gtree)
 {
 	DEBUG("About to sample some triplets");
-	FileLogger::DebugLogger() << "Sampling triplets osf sequences for gamma shape parameter estimation" << "\n";
+	DEBUG("Sampling triplets osf sequences for gamma shape parameter estimation");
 	
 	maths = new Maths();
 	dict = inputSequences->getDictionary();
@@ -27,7 +27,6 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 
 	this->estimateTripleAlignment(model);
 
-	//FIXME - check for aminoacids if applicable!!!!
 	sme = new SubstitutionModelEstimator(inputSeqs, model ,ot, rateCategories, alpha, estimateAlpha, tripletIdxs.size());
 
 	for(int al = 0; al < tripleAlignments.size(); al++)

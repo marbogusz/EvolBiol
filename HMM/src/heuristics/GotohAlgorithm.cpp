@@ -14,7 +14,6 @@ namespace EBC
 
 GotohAlgorithm::~GotohAlgorithm()
 {
-	// TODO Auto-generated destructor stub
 }
 
 GotohAlgorithm::GotohAlgorithm(unsigned int size, Dictionary* d) : dict(d), scoringSize(size)

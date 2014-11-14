@@ -6,12 +6,14 @@
  */
 
 #include "heuristics/Node.hpp"
+#include "core/Definitions.hpp"
 
 namespace EBC
 {
 
 Node::Node(unsigned int id) : nodeId(id), parent(NULL), leafNode(false), rootNode(false), distanceToParent(0)
 {
+	DUMP("New node with id " << id);
 }
 
 void Node::setName(string name)

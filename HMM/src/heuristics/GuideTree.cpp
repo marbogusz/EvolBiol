@@ -13,7 +13,6 @@ namespace EBC
 
 GuideTree::GuideTree(Sequences* is) : inputSequences(is)
 {
-	// TODO Auto-generated constructor stub
 	distMat = new DistanceMatrix(inputSequences->getSequenceCount());
 	this->dict = inputSequences->getDictionary();
 	if(dict->getAlphabetSize() == Definitions::nucleotideCount)
@@ -85,7 +84,7 @@ void GuideTree::constructTree()
 			//else if(dict->getAlphabetSize() == Definitions::aminoacidCount)
 			//	estIdentity = aaFunction(identity);
 
-			DEBUG("k-mer distance between seq. " << i << " and " << j << " is " << identity << " " << estIdentity );
+			DUMP("k-mer distance between seq. " << i << " and " << j << " is " << identity << " " << estIdentity );
 
 			distMat->addDistance(i,j,estIdentity);
 		}

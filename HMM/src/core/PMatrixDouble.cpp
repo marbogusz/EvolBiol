@@ -12,7 +12,6 @@ namespace EBC
 
 PMatrixDouble::PMatrixDouble(SubstitutionModelBase* m) : PMatrix(m)
 {
-	// TODO Auto-generated constructor stub
 	this->fastPairGammaPt = new double[matrixFullSize];
 	this->fastLogPairGammaPt = new double[matrixFullSize];
 	this->sitePatterns = new double*[matrixSize+1];

@@ -60,7 +60,6 @@ SubstitutionModelEstimator::SubstitutionModelEstimator(Sequences* inputSeqs, Def
 
 SubstitutionModelEstimator::~SubstitutionModelEstimator()
 {
-	// TODO Auto-generated destructor stub
 	delete bfgs;
 	delete modelParams;
 	delete substModel;

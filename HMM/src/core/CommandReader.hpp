@@ -99,6 +99,8 @@ public:
 
 	FileLogger::logType getLoggingLevel()
 	{
+		if (parser.option("lDD"))
+			return FileLogger::L_DMP;
 		if (parser.option("lE"))
 			return FileLogger::L_ERR;
 		if (parser.option("lW"))

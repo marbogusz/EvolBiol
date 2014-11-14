@@ -12,14 +12,12 @@ namespace EBC {
 
 HmmException::HmmException()
 {
-	// TODO Auto-generated constructor stub
 	// General message
 	msg = "Parse Exception";
 }
 
 HmmException::~HmmException() throw()
 {
-	// TODO Auto-generated destructor stub
 }
 
 HmmException::HmmException(string message) : msg(message)

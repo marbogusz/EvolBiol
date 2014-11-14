@@ -40,14 +40,11 @@ void GTRModel::buildSmatrix() {
 	this->e = &parameters[4];
 	this->f = &scale;
 
-	//FIXME - deal with alpha somehow
-	//this->time = parameters[5];
-
 	int s = this->matrixSize;
 	int i,j,k;
 
 
-	this->qMatrix[(s-1)*s+2] = this->qMatrix[(s-2)*s+3] =  1.0;//scale;  /* r_AG = r_GA = 1. */ //FIXME - exponent
+	this->qMatrix[(s-1)*s+2] = this->qMatrix[(s-2)*s+3] =  1.0;
 	for(i=0,k=0; i<s-1; i++) for (j=i+1; j<s; j++)
 		if(i*s+j != 2*s+3)
 			this->qMatrix[i*s+j] = this->qMatrix[j*s+i] = parameters[k++];

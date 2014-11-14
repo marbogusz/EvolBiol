@@ -47,6 +47,7 @@ CommandReader::CommandReader(int argc, char** argv)
 		parser.add_option("lW", "log warning");
 		parser.add_option("lI", "log info");
 		parser.add_option("lD", "log debug");
+		parser.add_option("lDD", "log dump");
 
 		parser.parse(argc,argv);
 

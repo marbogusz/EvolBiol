@@ -91,8 +91,6 @@ MlEstimator::MlEstimator(Sequences* inputSeqs, Definitions::ModelType model ,std
 	maths = new Maths();
 	dict = inputSequences->getDictionary();
 
-	//Helper models
-	//FIXME - get some static definitions or sth!!
 	if (model == Definitions::ModelType::GTR)
 	{
 		substModel = new GTRModel(dict, maths,gammaRateCategories);
@@ -268,7 +266,6 @@ MlEstimator::MlEstimator(Sequences* inputSeqs, Definitions::ModelType model ,std
 
 MlEstimator::~MlEstimator()
 {
-	// TODO Auto-generated destructor stub
 	delete bfgs;
 	delete modelParams;
 	//delete Y;
@@ -321,11 +318,6 @@ double MlEstimator::runIteration()
 	}
 
 	cerr << result << endl;
-	//hack
-	//FIXME
-	exit(0);
-
-
 	return result * -1.0;
 }
 

@@ -14,7 +14,6 @@ namespace EBC
 StateTransitionEstimator::StateTransitionEstimator(Definitions::OptimizationType ot)
 {
 	DEBUG("Starting State Transition Estimator");
-	// TODO Auto-generated constructor stub
 	indelModel = new NegativeBinomialGapModel();
 	maths = new Maths();
 

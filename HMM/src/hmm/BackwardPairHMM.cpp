@@ -29,6 +29,8 @@ BackwardPairHMM::~BackwardPairHMM()
 
 void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 {
+	DEBUG("Calculating posterior probabilities");
+
 	int i,j;
 	double xval, yval, mval;
 	double fwdM;
@@ -168,8 +170,8 @@ double BackwardPairHMM::runAlgorithm()
 	sY = Y->getValueAt(0, 0);
 	sS = maths->logSum(sM,sX,sY);
 
-	DEBUG ("Backward results:");
-	DEBUG (" sX, sY, sM, sS " << sX << "\t" << sY << "\t" << sM << "\t" << sS);
+	DUMP("Backward results:");
+	DUMP(" sX, sY, sM, sS " << sX << "\t" << sY << "\t" << sM << "\t" << sS);
 
 	return sS* -1.0;
 }

@@ -42,15 +42,6 @@ Sequences::Sequences(IParser* iParser,Definitions::SequenceType st, bool fa) thr
 	}
 }
 
-/*void Sequences::getSequencePair(vector<SequenceElement> s1,
-		vector<SequenceElement> s2) {
-	//FIXME - a mockup, only get the first pair
-	//vector<vector<SequenceElement> >::iterator it = translatedSequences.begin();
-	//TODO - consider friend with Algorithm
-	s1 = translatedSequences[0];
-	s2 = translatedSequences[1];
-}*/
-
 vector<SequenceElement>& Sequences::getSequencesAt(int pos) {
 		return translatedSequences[pos];
 }

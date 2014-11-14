@@ -18,8 +18,9 @@ class FileLogger
 
 
 public:
-	enum logType { L_ERR, L_WARN, L_INF, L_DBG };
+	enum logType { L_ERR, L_WARN, L_INF, L_DBG, L_DMP };
 
+	static FileLogger& DumpLogger();
 	static FileLogger& DebugLogger();
 	static FileLogger& ErrorLogger();
 	static FileLogger& InfoLogger();
@@ -39,6 +40,8 @@ public:
 		//FIXME - file creation check
 		switch(priority)
 		{
+		case L_DMP:
+			dmpL.activate();
 		case L_DBG:
 			dbgL.activate();
 		case L_INF:
@@ -115,9 +118,11 @@ public:
 	friend FileLogger &operator << (FileLogger &logger, const T& param) {
 
 		if(logger.active)
+		{
 			logFile << param;
-		if (logger.stderrout)
-			std::cerr << param;
+			if (logger.stderrout)
+				std::cerr << param;
+		}
 		return logger;
 	}
 
@@ -141,8 +146,8 @@ public:
 		return logger;
 	}
 public:
-	bool stderrout;
 	bool active;
+	bool stderrout;
 
 private:
     FileLogger() : active(false), stderrout(false) {}
@@ -151,6 +156,7 @@ private:
 	static FileLogger errL;
 	static FileLogger wrnL;
 	static FileLogger dbgL;
+	static FileLogger dmpL;
 	static FileLogger infL;
 	static std::ofstream logFile;
 };

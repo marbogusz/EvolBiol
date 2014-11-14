@@ -13,14 +13,11 @@ namespace EBC
 PMatrix::PMatrix(SubstitutionModelBase* m) : model(m),  matrixSize(m->getMatrixSize()) ,time(0),
 		rateCategories(model->getRateCategories()), ptMatrices(rateCategories, nullptr)
 {
-	// TODO Auto-generated constructor stub
 	this->matrixFullSize = matrixSize*matrixSize;
-
 }
 
 PMatrix::~PMatrix()
 {
-	// TODO Auto-generated destructor stub
 	for (int i = 0; i < ptMatrices.size(); i++)
 	{
 		delete [] ptMatrices[i];

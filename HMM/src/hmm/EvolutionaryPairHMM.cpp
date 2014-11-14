@@ -23,6 +23,8 @@ EvolutionaryPairHMM::EvolutionaryPairHMM(vector<SequenceElement> s1, vector<Sequ
 	this->xSize = seq1.size() +1;
 	this->ySize = seq2.size() +1;
 
+	DUMP("Evolutionary Pair HMM for seqence 1 with size " << xSize << " and sequence 2 with size " << ySize);
+
 	ptmatrix = new PMatrixDouble(substModel);
 
 	this->tpb = new TransitionProbabilities(indelModel);
@@ -117,7 +119,7 @@ void EvolutionaryPairHMM::calculateModels()
 EvolutionaryPairHMM::~EvolutionaryPairHMM()
 {
 
-	DEBUG("Evolutionary pair HMM destructor");
+	DUMP("Evolutionary pair HMM destructor");
 	delete Y;
 	delete X;
 	delete M;

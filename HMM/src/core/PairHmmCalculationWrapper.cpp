@@ -11,12 +11,10 @@ namespace EBC
 {
 
 PairHmmCalculationWrapper::PairHmmCalculationWrapper() {
-	// TODO Auto-generated constructor stub
-
 }
 
 PairHmmCalculationWrapper::~PairHmmCalculationWrapper() {
-	// TODO Auto-generated destructor stub
+
 }
 
 double PairHmmCalculationWrapper::runIteration() {

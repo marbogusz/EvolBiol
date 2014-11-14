@@ -8,6 +8,7 @@
 #include "core/BioNJ.hpp"
 #include "core/Definitions.hpp"
 #include <cstring>
+#include <iomanip>
 
 using namespace std;
 
@@ -148,6 +149,8 @@ namespace EBC
     	DEBUG("Calculating BioNJ tree");
 
         stringstream output;
+        //output.precision(8);
+        //output.width(10);
 
         /*   Allocation of memories    */
 
@@ -587,9 +590,12 @@ namespace EBC
         /*   gcvt(length,PREC, str); */
         /*   fprintf(output,"%s,",str); */
         if(length < 0)
-        	output << 0.5 << ",";
+        {
+        	ERROR("NEGATIVE BRANCH LENGTH IN BIONJ!!! setting branch to a positive value");
+        	output << std::fixed <<  setprecision(8) << length*-1.0 << ",";
+        }
         else
-        	output << length << ",";
+        	output<< std::fixed  << setprecision(8) << length << ",";
 
         length=Finish_branch_length(last[1],last[0],last[2],delta);
         this->treeLength += length;
@@ -598,9 +604,12 @@ namespace EBC
         /*   gcvt(length,PREC, str); */
         /*   fprintf(output,"%s,",str); */
         if(length < 0)
-        	output << 0.5 << ",";
+        {
+        	ERROR("NEGATIVE BRANCH LENGTH IN BIONJ!!! setting branch to a positive value");
+        	output << std::fixed <<  setprecision(8) << length*-1.0 << ",";
+        }
         else
-        	output << length << ",";
+        	output << std::fixed <<  setprecision(8) << length << ",";
 
         //FIXME - hacks on a negative length!!!
 
@@ -613,10 +622,10 @@ namespace EBC
         if(length < 0)
         	output << 0.5;
         else
-        	output << length;
+        	output << std::fixed << setprecision(8) << length;
         output << ");";
         output <<"\t";
-        output << treeLength;
+        output << std::fixed << setprecision(8) << treeLength;
         output << "\t";
 
         for(i=0; i < 3; i++)

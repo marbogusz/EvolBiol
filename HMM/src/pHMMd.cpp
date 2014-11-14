@@ -21,6 +21,8 @@
 #include "heuristics/TripletAligner.hpp"
 #include "heuristics/ModelEstimator.hpp"
 #include <array>
+#include <chrono>
+#include <ctime>
 
 #include "core/FileLogger.hpp"
 
@@ -31,24 +33,32 @@ int main(int argc, char ** argv) {
 
 	//Set output Precision to 2
 	//FIXME - should normally be set to >= 6
-	cout << fixed << setprecision(1);
-	cerr << fixed << setprecision(1);
+	//cout << fixed << setprecision(4);
+	//cerr << fixed << setprecision(4);
 
 	try
 	{
+		//Get some time statistics
+	    chrono::time_point<chrono::system_clock> start, end;
+	    start = chrono::system_clock::now();
 
 		//FIXME - nothing happens when the model does not get specified!
 
 		CommandReader* cmdReader = new CommandReader(argc, argv);
 		ofstream treefile;
+
 		FileLogger::start(cmdReader->getLoggingLevel(), (string(cmdReader->getInputFileName()).append(".hmm.log")));
 
 		treefile.open((string(cmdReader->getInputFileName()).append(".hmm.tree")).c_str(),ios::out);
 
 		IParser* parser = cmdReader->getParser();
 
-		FileLogger::InfoLogger() << "Reading sequences" << "\n";
-		FileLogger::DebugLogger() << "Creating alignment" << "\n";
+		//FileLogger::DebugLogger().setCerr();
+		//FileLogger::DumpLogger().setCerr();
+		//FileLogger::InfoLogger().setCerr();
+
+		INFO("Reading input sequences...");
+		DEBUG("Creating alignment object...");
 
 		Sequences* inputSeqs = new Sequences(parser, cmdReader->getSequenceType(),cmdReader->isFixedAlignment());
 		if (cmdReader->isMLE())
@@ -88,7 +98,7 @@ int main(int argc, char ** argv) {
 			fwdHMM->runForwardAlgorithm();
 			*/
 
-			FileLogger::InfoLogger() << "Creating Model Parameters heuristics" << "\n";
+			INFO("Creating Model Parameters heuristics...");
 			ModelEstimator* tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),
 					cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
 					cmdReader->estimateAlpha());
@@ -108,7 +118,7 @@ int main(int argc, char ** argv) {
 					substParams, cmdReader->getOptimizationType(), cmdReader->getCategories(),alpha, tme->getGuideTree());
 			be->optimizePairByPair();
 
-			//DEBUG ("Running bionj");
+			INFO ("Running BioNJ");
 
 			//change bionj init here!
 			BioNJ nj(inputSeqs->getSequenceCount(), be->getOptimizedTimes());
@@ -136,6 +146,15 @@ int main(int argc, char ** argv) {
 		//delete epHMM;
 		//ForwardPairHMM* fwdHMM = new ForwardPairHMM(inputSeqs,true);
 		//fwdHMM->summarize();
+
+
+		end = chrono::system_clock::now();
+	    chrono::duration<double> elapsed_seconds = end-start;
+	    std::time_t end_time = chrono::system_clock::to_time_t(end);
+
+	    std::cout << "Finished computation at " << std::ctime(&end_time)
+	              << " elapsed time: " << elapsed_seconds.count() << "s\n";
+
 	}
 	catch(HmmException& pe)
 	{

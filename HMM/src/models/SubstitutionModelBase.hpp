@@ -51,9 +51,6 @@ protected:
 
 	double* uMatrix;
 
-	//FIXME - remove and treat separately!
-	//double* pMatrix;
-
 	//square roots matrix for eigen decomposition
 	double* squareRoots;
 

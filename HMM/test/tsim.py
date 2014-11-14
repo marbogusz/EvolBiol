@@ -53,7 +53,7 @@ class HmmDistanceGenerator:
         self.cores = 4;
         self.indelible_binary = 'indelible'
         self.hmm_binary = 'HMMestBF3'
-        self.hmm_base_params = ['-F','--in']
+        self.hmm_base_params = ['--lD', '-F','--in']
         self.hmm_misc_params = ['-b', '1', '-o', '0', '--bf', '20']
         self.hmm_alpha_params = ['--rateCat', '5', '--initAlpha', '0.75']
         self.hmm_alpha_est_params = ['--estimateAlpha', '1']
@@ -130,6 +130,8 @@ class HmmDistanceGenerator:
     def alignMafft(self, fid):
         curr_file  = self.indelible_output + '_' + str(fid+1) + '.fas' 
         mafft_file = 'mafft_' + str(fid+1) + '.fas'
+        if os.path.isfile(mafft_file):
+            return
         mfd = open(mafft_file,'w')
         subprocess.call([self.mafft_exec, curr_file],stdout=mfd,stderr=self.logfile)
         mfd.close()
@@ -137,12 +139,16 @@ class HmmDistanceGenerator:
     def alignMuscle(self, fid):
         curr_file  = self.indelible_output + '_' + str(fid+1) + '.fas' 
         muscle_file = 'muscle_' + str(fid+1) + '.fas'
+        if os.path.isfile(muscle_file):
+            return
         subprocess.call([self.muscle_exec, '-in', curr_file, '-out', muscle_file],stdout=self.logfile,stderr=self.logfile)
 
 
     def alignPrank(self, fid):
         curr_file  = self.indelible_output + '_' + str(fid+1) + '.fas' 
         prank_file = 'prank_' + str(fid+1)
+        if os.path.isfile(prank_file):
+            return
         subprocess.call([self.prank_exec, '-d='+curr_file, '-o='+prank_file],stdout=self.logfile,stderr=self.logfile)
     
     def alignBatch(self, count):
@@ -160,9 +166,15 @@ class HmmDistanceGenerator:
     
     
         while s > 0:
+            s -= 1
         
-            birth_rate = 0.1 * s
+            birth_rate = 0.1 * (s+1)
         
+            current_dir = str(self.taxaNo) + '_taxa_' + self.model_suffix + '_' + str(self.seq_len) + '_' + str(round(birth_rate,1)) + '_Indelible_' + str(r) 
+            if os.path.exists(current_dir):
+                print('Simulation direcory ' + current_dir + ' exists. Skipping\n') 
+                continue
+
             tree = self.treegen.getTree(self.taxaNo,birth_rate)
             ofile = open('control.txt', 'w');
 
@@ -181,7 +193,6 @@ class HmmDistanceGenerator:
             ofile.write(ictl_template.format(**templateDict))
             ofile.close()
             #mkdir GTR + indelible + distance 
-            current_dir = str(self.taxaNo) + '_taxa_' + self.model_suffix + '_' + str(self.seq_len) + '_' + str(round(birth_rate,1)) + '_Indelible_' + str(r) 
             os.mkdir(current_dir)
             shutil.copy('control.txt',current_dir) 
             #shutil.copy('star.trees',current_dir) 
@@ -191,7 +202,6 @@ class HmmDistanceGenerator:
             #execute indelible
             subprocess.call('indelible',stdout=self.logfile,stderr=self.logfile)
             os.chdir('..');
-            s -= 1
 
     def writeRF(self,fd,bd,dist,which):
         fd.write(str(bd)+'\t' +str(dist) + '\t' + which + '\n')
@@ -280,10 +290,12 @@ class HmmDistanceGenerator:
             for j in range(self.cores):
                 if i < count:
                     clean_name = self.indelible_output + '_' + str(i+1) + '.fas'
+                    i+=1
+                    if os.path.isfile(clean_name + '.hmm.tree'):
+                        continue 
                     t = Thread(target=self.callHMM, args=(self.hmm_binary, clean_name,))
                     threads.append(t)
                     t.start()
-                    i+=1
             for th in threads:
                 th.join()
 
@@ -304,6 +316,9 @@ class HmmDistanceGenerator:
         subprocess.call(params,stdout=self.logfile) 
 
     def callRaxml(self, params):
+        if os.path.isfile(self.raxml_prefix+ params[-1]):
+            return
+
             subprocess.call(params,stdout=self.logfile,stderr=self.logfile)
 
       

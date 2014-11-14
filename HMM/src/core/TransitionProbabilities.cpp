@@ -16,7 +16,6 @@ TransitionProbabilities::TransitionProbabilities(IndelModel* im) : indelModel(im
 
 TransitionProbabilities::~TransitionProbabilities()
 {
-	// TODO Auto-generated destructor stub
 }
 
 void TransitionProbabilities::calculate()

@@ -16,8 +16,15 @@ std::ofstream FileLogger::logFile;
 FileLogger FileLogger::errL;
 FileLogger FileLogger::wrnL;
 FileLogger FileLogger::dbgL;
+FileLogger FileLogger::dmpL;
 FileLogger FileLogger::infL;
 
+FileLogger& FileLogger::DumpLogger()
+{
+	if(dmpL.active)
+		logFile << "[DUMP]\t";
+	return dmpL;
+}
 FileLogger& FileLogger::DebugLogger()
 {
 	if(dbgL.active)

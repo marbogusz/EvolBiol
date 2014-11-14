@@ -34,7 +34,6 @@ double ViterbiPairHMM::getViterbiSubstitutionLikelihood()
 
 	for (auto it = alignment.begin(); it != alignment.end(); it ++)
 	{
-		//FIXME -- implement site patterns
 		lnl += this->ptmatrix->getPairSitePattern(it->first, it->second);
 	}
 

@@ -59,7 +59,7 @@ public:
 	{
 		for(int i =0; i< matchBand.size(); i++)
 		{
-			FileLogger::DebugLogger() << "M/X/Y bands " << i << "\t" << getMatchRangeAt(i).first <<"\t" << getMatchRangeAt(i).second
+			FileLogger::DumpLogger() << "M/X/Y bands " << i << "\t" << getMatchRangeAt(i).first <<"\t" << getMatchRangeAt(i).second
 							<< "\t" << getInsertRangeAt(i).first <<"\t" << getInsertRangeAt(i).second
 							<< "\t" << getDeleteRangeAt(i).first <<"\t" << getDeleteRangeAt(i).second << "\n";
 

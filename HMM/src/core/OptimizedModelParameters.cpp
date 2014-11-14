@@ -15,7 +15,7 @@ OptimizedModelParameters::OptimizedModelParameters(SubstitutionModelBase* sm, In
 		substParameters(sm != NULL ? sm->getParamsNumber() : 0), divergenceTimes(dCount),
 		estimateIndelParams(ie), estimateSubstParams(se), estimateAlpha(ae), estimateDivergence(de)
 {
-	indelCount = indelParameters.size(); //-1;  //FIXME - hack!!!
+	indelCount = indelParameters.size();
 	substCount = substParameters.size();
 	seqCount = sCount;
 	distCount = dCount;
@@ -50,7 +50,6 @@ void EBC::OptimizedModelParameters::toDlibVector(column_vector& vals, column_vec
 			vals(i) = substParameters[i];
 			//default probs bounds
 			lbounds(i) = sm->getLoBound(i);
-			//FIXME - provide external bounds????????????
 			hbounds(i) = sm->getHiBound(i);
 		}
 		ptr += substCount;
@@ -62,7 +61,6 @@ void EBC::OptimizedModelParameters::toDlibVector(column_vector& vals, column_vec
 			vals(i+ptr) = indelParameters[i];
 			//default probs bounds
 			lbounds(i+ptr) = im->getLoBound(i);
-			//FIXME - provide external bounds????????????
 			hbounds(i+ptr) = im->getHiBound(i);
 		}
 		ptr += indelCount;
@@ -100,7 +98,6 @@ void EBC::OptimizedModelParameters::generateInitialIndelParameters()
 	for(unsigned int i=0; i< indelCount; i++)
 	{
 		indelParameters[i] = 0.05 + 0.1*maths->rndu();
-		//indelParameters[i+1] = 0.5; //FIXME
 	}
 	FileLogger::DebugLogger() << "Initial indel parameters:\n";
 	FileLogger::DebugLogger() << indelParameters;
@@ -134,7 +131,6 @@ void EBC::OptimizedModelParameters::fromDlibVector(const column_vector& vals)
 		for (i=0; i < indelCount; i++)
 		{
 			indelParameters[i] = vals(i+ptr);
-			//indelParameters[i+1] = 0.5; //FIXME
 		}
 		ptr += indelCount;
 	}

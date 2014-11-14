@@ -20,10 +20,7 @@ TripletSamplingTree::TripletSamplingTree(GuideTree& gt) : distMat(gt.getDistance
 {
 	this->averageLeafbranch = 0;
 	this->leafBranchSd = 0;
-	// TODO Auto-generated constructor stub
 	DEBUG("Creating TripletSamplingTree");
-
-
 
 	idealTreeSize = 1.0;
 	this->fromNewick(gt.getNewickTree());
@@ -101,6 +98,7 @@ void TripletSamplingTree::fromNewick(const string& newick)
 		}
 		else if(newick[i] == '(')
 		{
+			DUMP("TST (");
 			tmpNode = new Node(++ids);
 			nodes.push_back(tmpNode);
 			workNodes.push(tmpNode);
@@ -108,6 +106,7 @@ void TripletSamplingTree::fromNewick(const string& newick)
 		}
 		else if(newick[i] == ',')
 		{
+			DUMP("TST ,");
 			workNodes.pop();
 			if (workNodes.empty())
 			{
@@ -130,6 +129,7 @@ void TripletSamplingTree::fromNewick(const string& newick)
 		else if(newick[i] == ')')
 		{
 
+			DUMP("TST )");
 			tmpCurrent = workNodes.top();
 			workNodes.pop();
 			if (workNodes.size() > 0)
@@ -144,6 +144,7 @@ void TripletSamplingTree::fromNewick(const string& newick)
 		}
 		else if(newick[i] == ';')
 		{
+			DUMP("TST ;");
 			endReached = true;
 			i++;
 		}
@@ -174,6 +175,8 @@ void TripletSamplingTree::fromNewick(const string& newick)
 		}
 	}
 	this->averageLeafbranch /= leafNodes.size();
+
+	DEBUG("Newick tree parsed");
 
 	for (auto node : leafNodes)
 	{

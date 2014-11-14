@@ -180,7 +180,6 @@ PairwiseEstimator::PairwiseEstimator(Definitions::AlgorithmType at, Sequences* i
 
 PairwiseEstimator::~PairwiseEstimator()
 {
-	// TODO Auto-generated destructor stub
 	delete bfgs;
 	delete modelParams;
 	//delete Y;
@@ -218,8 +217,6 @@ double PairwiseEstimator::runIteration()
 	for(unsigned int i =0; i<pairCount; i++)
 	{
 		hmm = hmms[i];
-		//FIXME - individual indel models!!! or gap opening extension class aggregator!
-		// the following is not thread safe for indels!!!
 		hmm->setDivergenceTime(modelParams->getDivergenceTime(i));
 		indelModel->setTime(modelParams->getDivergenceTime(i));
 		indelModel->calculate();

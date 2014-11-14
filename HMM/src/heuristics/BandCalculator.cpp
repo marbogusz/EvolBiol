@@ -13,7 +13,7 @@ namespace EBC
 BandCalculator::BandCalculator(vector<SequenceElement>& s1, vector<SequenceElement>& s2, SubstitutionModelBase* sm, IndelModel* im, double divergenceTime) :
 		fwd(3,nullptr), seq1(s1), seq2(s2), substModel(sm), indelModel(im), time(divergenceTime)
 {
-	// TODO Auto-generated constructor stub
+	DEBUG("Band estimator running...");
 	//FIXME magic numbers
 	posteriorLikelihoodLimit = -3;
 	posteriorLikelihoodDelta = -9;
@@ -26,13 +26,14 @@ BandCalculator::BandCalculator(vector<SequenceElement>& s1, vector<SequenceEleme
 	double tmpRes = std::numeric_limits<double>::max();
 	double lnl;
 
+	DUMP("Trying 3 forward calculations to assess the band...");
 	for(unsigned int i = 0; i < fwd.size(); i++)
 	{
 
 		fwd[i] = new ForwardPairHMM(seq1,seq2, substModel,indelModel, Definitions::DpMatrixType::Full);
 		fwd[i]->setDivergenceTime(time*multipliers[i]);
 		lnl = fwd[i]->runAlgorithm();
-		DEBUG(i << " with divergence time " << divergenceTime << " lnl " << lnl);
+		DUMP("Calculation "<< i << " with divergence time " << time*multipliers[i] << " and lnL " << lnl);
 		if(lnl < tmpRes)
 		{
 			best = i;
@@ -43,18 +44,13 @@ BandCalculator::BandCalculator(vector<SequenceElement>& s1, vector<SequenceEleme
 		//bwd[i]->runAlgorithm();
 	}
 
-	DEBUG("Best " << best << " time " << time*multipliers[best]);
-
 	bwd =  new BackwardPairHMM(seq1,seq2, substModel,indelModel, Definitions::DpMatrixType::Full);
-	DEBUG("BWD Set time");
 	bwd->setDivergenceTime(time*multipliers[best]);
-	DEBUG("BWD Run");
+	DUMP("Backward calculation runs...");
 	bwd->runAlgorithm();
 
 	//combine fwd and bwd metrics into one!
 	band = new Band(s2.size()+1);
-
-	FileLogger::DebugLogger() << "Posterior probabilities:\n";
 
 	bwd->calculatePosteriors(fwd[best]);
 	this->processPosteriorProbabilities(bwd, band);
@@ -86,11 +82,6 @@ void BandCalculator::processPosteriorProbabilities(BackwardPairHMM* hmm, Band* b
 	M = hmm->getM();
 	X = hmm->getX();
 	Y = hmm->getY();
-
-	//FIXME - use a defined number, same with -1000000 mins!!
-	double minX;
-	double minY;
-	double minM;
 
 	//cumulative posterior likelihood
 	double cpl = posteriorLikelihoodLimit + posteriorLikelihoodDelta;
@@ -154,7 +145,7 @@ void BandCalculator::processPosteriorProbabilities(BackwardPairHMM* hmm, Band* b
 		band->setDeleteRangeAt(col, yLo,yHi);
 		band->setMatchRangeAt(col, mLo,mHi);
 
-		DEBUG("M/X/Y bands " << col << "\t" << band->getMatchRangeAt(col).first <<"\t" << band->getMatchRangeAt(col).second
+		DUMP("Match/Ins/Del bands for column " << col << "\t" << band->getMatchRangeAt(col).first <<"\t" << band->getMatchRangeAt(col).second
 				<< "\t" << band->getInsertRangeAt(col).first <<"\t" << band->getInsertRangeAt(col).second
 				<< "\t" << band->getDeleteRangeAt(col).first <<"\t" << band->getDeleteRangeAt(col).second);
 	}
@@ -264,10 +255,6 @@ void BandCalculator::processPosteriorProbabilities(BackwardPairHMM* hmm, Band* b
 
 		int Mmin = std::min(std::min(xLo < 1 ? 10000 : xLo,yLo < 1 ? 10000 : yLo),mLo < 1 ? 10000 : mLo);
 
-
-
-
-		//FIXME - do some proper estimation instead doing band intersection
 		//band->setInsertRangeAt(col, Xmin, max);
 		//band->setDeleteRangeAt(col, Ymin,max);
 		//band->setMatchRangeAt(col, Mmin,max);

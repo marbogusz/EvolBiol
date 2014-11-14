@@ -126,7 +126,6 @@ BandingEstimator::BandingEstimator(Definitions::AlgorithmType at, Sequences* inp
 
 BandingEstimator::~BandingEstimator()
 {
-	// TODO Auto-generated destructor stub
 	//for(auto hmm : hmms)
 	//	delete hmm;
 	delete bfgs;
@@ -149,27 +148,31 @@ void BandingEstimator::optimizePairByPair()
 	{
 		FileLogger::DebugLogger() << "Optimizing distance for pair #" << i << '\n';
 		std::pair<unsigned int, unsigned int> idxs = inputSequences->getPairOfSequenceIndices(i);
-		FileLogger::InfoLogger() << "Running band calculator for sequence " << idxs.first << " and " << idxs.second << "\n";
+		INFO("Running pairwise calculator for sequence id " << idxs.first << " and " << idxs.second
+				<< " ,number " << i+1 <<" out of " << pairCount << " pairs" );
 		BandCalculator* bc = new BandCalculator(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
 				substModel, indelModel, gt->getDistanceMatrix()->getDistance(idxs.first,idxs.second));
 		band = bc->getBand();
 		if (algorithm == Definitions::AlgorithmType::Viterbi)
 		{
+			DEBUG("Creating Viterbi algorithm to optimize the pairwise divergence time...");
 			hmm = new ViterbiPairHMM(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
 					substModel, indelModel, Definitions::DpMatrixType::Full, band);
 		}
 		else if (algorithm == Definitions::AlgorithmType::Forward)
 		{
+			DEBUG("Creating forward algorithm to optimize the pairwise divergence time...");
 			hmm = new ForwardPairHMM(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
 					substModel, indelModel, Definitions::DpMatrixType::Full, band);
 		}
 
 		//hmm->setDivergenceTime(modelParams->getDivergenceTime(0)); //zero as there's only one pair!
 		wrapper->setTargetHMM(hmm);
+		DUMP("Set model parameter in the hmm...");
 		wrapper->setModelParameters(modelParams);
 		bfgs->setTarget(wrapper);
 		result = bfgs->optimize() * -1.0;
-		FileLogger::DebugLogger() << "Resulting likelihood " << result << "\n";
+		DEBUG("Resulting likelihood after pairwise optimization" << result);
 		if (result <= (Definitions::minMatrixLikelihood /2.0))
 		{
 			FileLogger::ErrorLogger() << "Optimization failed for pair #" << i << " Zero probability FWD" << '\n';
@@ -185,6 +188,7 @@ void BandingEstimator::optimizePairByPair()
 		delete hmm;
 	}
 
+	DEBUG("Optimized divergence times:");
 	FileLogger::DebugLogger() << this->divergenceTimes;
 }
 
@@ -216,8 +220,6 @@ double BandingEstimator::runIteration()
 	for(unsigned int i =0; i<pairCount; i++)
 	{
 		hmm = hmms[i];
-		//FIXME - individual indel models!!! or gap opening extension class aggregator!
-		// the following is not thread safe for indels!!!
 		hmm->setDivergenceTime(modelParams->getDivergenceTime(i));
 		//indelModel->setTime(modelParams->getDivergenceTime(i));
 		//indelModel->calculate();
