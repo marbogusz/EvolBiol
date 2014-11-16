@@ -145,9 +145,9 @@ double ViterbiPairHMM::runAlgorithm()
 		Y->tracebackRaw(this->seq1,this->seq2, this->dict, this->alignment);
 	}
 */
-	DEBUG("Final Viterbi M  " << mm);
-	DEBUG("Final Viterbi X  " << mx );
-	DEBUG("Final Viterbi Y  " << my );
+	DUMP("Final Viterbi M  " << mm);
+	DUMP("Final Viterbi X  " << mx );
+	DUMP("Final Viterbi Y  " << my );
 
 return (std::max(mm,std::max(mx,my)))*-1.0;
 }
@@ -155,11 +155,6 @@ return (std::max(mm,std::max(mx,my)))*-1.0;
 pair<string, string> ViterbiPairHMM::getAlignment(string&a, string& b)
 {
 	double mv, xv, yv;
-
-	DEBUG("Get Viterbi Results for the following sequences");
-	DEBUGN(a << endl);
-	DEBUGN(b << endl << endl);
-
 
 	pair<string, string> initialAlignment;
 	initialAlignment.first.reserve(xSize > ySize ? xSize : ySize);

@@ -84,7 +84,7 @@ class HmmDistanceGenerator:
 
         self.raxml_params.append('-s')
 
-        self.logfile = open('debug_' + str(self.taxaNo) + '.log', 'w')
+        self.logfile = open('sim_' + str(self.taxaNo) + '_taxa_' + self.model_suffix + '_' + str(self.seq_len) + '_'  + str(self.replicates) +  '.log', 'w')
         self.gamma = 'gamma'
 
         print("HMM analysis for {} steps with {} replicates.".format(self.steps,self.replicates))
@@ -93,12 +93,12 @@ class HmmDistanceGenerator:
         return random.uniform(0.1,4.0)
       
     def getLambda(self):
-        ret = random.gauss(0.03,0.2)
+        ret = random.gauss(0.03,0.02)
         while ret  < 0:
-            ret = random.gauss(0.03,0.2)
+            ret = random.gauss(0.03,0.02)
         return ret
 
-        return random.gauss(0.03,0.2)
+        return random.gauss(0.03,0.02)
       
     def getEpsilon(self):
         return random.uniform(0.25,0.75)
@@ -128,7 +128,7 @@ class HmmDistanceGenerator:
         return [a,b,c,d,e]
 
     def alignMafft(self, fid):
-        curr_file  = self.indelible_output + '_' + str(fid+1) + '.fas' 
+        curr_file  = self.indelible_output + '_' + str(fid+1) + '_1.fas' 
         mafft_file = 'mafft_' + str(fid+1) + '.fas'
         if os.path.isfile(mafft_file):
             return
@@ -137,7 +137,7 @@ class HmmDistanceGenerator:
         mfd.close()
 
     def alignMuscle(self, fid):
-        curr_file  = self.indelible_output + '_' + str(fid+1) + '.fas' 
+        curr_file  = self.indelible_output + '_' + str(fid+1) +'_1.fas' 
         muscle_file = 'muscle_' + str(fid+1) + '.fas'
         if os.path.isfile(muscle_file):
             return
@@ -145,7 +145,7 @@ class HmmDistanceGenerator:
 
 
     def alignPrank(self, fid):
-        curr_file  = self.indelible_output + '_' + str(fid+1) + '.fas' 
+        curr_file  = self.indelible_output + '_' + str(fid+1) +'_1.fas' 
         prank_file = 'prank_' + str(fid+1)
         if os.path.isfile(prank_file):
             return
@@ -175,33 +175,38 @@ class HmmDistanceGenerator:
                 print('Simulation direcory ' + current_dir + ' exists. Skipping\n') 
                 continue
 
-            tree = self.treegen.getTree(self.taxaNo,birth_rate)
-            ofile = open('control.txt', 'w');
-
-            p1 = re.compile('(\(.*\)).*')
-            m1 = p1.search(tree.as_newick_string() )
-            
-            newicktext = m1.group(1) 
-        
-            if (modelname == 'LG'):
-                templateDict = {'alpha' : round(self.getAlpha(),3), 'epsilon' : round(self.getEpsilon(),3), 'lambda' : round(self.getLambda(),3), 'newick' : newicktext, 'output' : self.indelible_output, 'length' : self.seq_len, 'replicates' : r}
-            elif (modelname == 'GTR'):
-                rates = self.getRevRates()
-                pis = self.getNucleotideFrequencies()
-                templateDict = {'a' : rates[0], 'b' : rates[1], 'c' : rates[2],'d' : rates[3], 'e' : rates[4], 'pi1': pis[0], 'pi2': pis[1], 'pi3': pis[2], 'pi4': pis[3], 'alpha' : round(self.getAlpha(),3), 'epsilon' : round(self.getEpsilon(),3), 'lambda' : round(self.getLambda(),3), 'newick' : newicktext, 'output' : self.indelible_output, 'length' : self.seq_len, 'replicates' : r}
-
-            ofile.write(ictl_template.format(**templateDict))
-            ofile.close()
-            #mkdir GTR + indelible + distance 
             os.mkdir(current_dir)
-            shutil.copy('control.txt',current_dir) 
-            #shutil.copy('star.trees',current_dir) 
-            os.chdir(current_dir)
-            tfile = open(self.original_treefile,'w')
-            tfile.write(newicktext)
-            #execute indelible
-            subprocess.call('indelible',stdout=self.logfile,stderr=self.logfile)
-            os.chdir('..');
+
+            for rpl in range(r):
+
+                tree = self.treegen.getTree(self.taxaNo,birth_rate)
+                ofile = open('control.txt', 'w');
+
+                p1 = re.compile('(\(.*\)).*')
+                m1 = p1.search(tree.as_newick_string() )
+            
+                newicktext = m1.group(1) 
+                outidl =  self.indelible_output + '_' + str(rpl+1)
+        
+                if (modelname == 'LG'):
+                    templateDict = {'alpha' : round(self.getAlpha(),3), 'epsilon' : round(self.getEpsilon(),3), 'lambda' : round(self.getLambda(),3), 'newick' : newicktext, 'output' : outidl , 'length' : self.seq_len, 'replicates' : 1}
+                elif (modelname == 'GTR'):
+                    rates = self.getRevRates()
+                    pis = self.getNucleotideFrequencies()
+                    templateDict = {'a' : rates[0], 'b' : rates[1], 'c' : rates[2],'d' : rates[3], 'e' : rates[4], 'pi1': pis[0], 'pi2': pis[1], 'pi3': pis[2], 'pi4': pis[3], 'alpha' : round(self.getAlpha(),3), 'epsilon' : round(self.getEpsilon(),3), 'lambda' : round(self.getLambda(),3), 'newick' : newicktext, 'output' : outidl, 'length' : self.seq_len, 'replicates' : 1}
+
+                ofile.write(ictl_template.format(**templateDict))
+                ofile.close()
+                #mkdir GTR + indelible + distance 
+                shutil.copy('control.txt',current_dir) 
+                #shutil.copy('star.trees',current_dir) 
+                os.chdir(current_dir)
+                shutil.copy('control.txt','control_'+str(rpl+1)+'.txt') 
+                tfile = open(self.original_treefile+'_'+str(rpl+1),'w')
+                tfile.write(newicktext)
+                #execute indelible
+                subprocess.call('indelible',stdout=self.logfile,stderr=self.logfile)
+                os.chdir('..');
 
     def writeRF(self,fd,bd,dist,which):
         fd.write(str(bd)+'\t' +str(dist) + '\t' + which + '\n')
@@ -210,7 +215,7 @@ class HmmDistanceGenerator:
         fd.write(str(bd)+'\t' +str(dist1) + '\t' +str(dist2) + '\t' + which + '\n')
     
     def analyzeOutput(self, s, r, model):
-        filepref = str(self.seq_len) + '_'  + str(r) + '_' + self.model_suffix
+        filepref = str(self.taxaNo) + '_taxa_' + self.model_suffix + '_' + str(self.seq_len) + '_'  + str(r) + '_' 
         
         #Robinson Foulds results
         rfname = 'out_RF_' + filepref + '.txt'
@@ -231,8 +236,8 @@ class HmmDistanceGenerator:
             rtru = []
             rmus = []
             hmmt = []
-            reftree = dendropy.Tree.get_from_stream(open(self.original_treefile, 'rU'), "newick", tree_offset=0)
             for i in range(r):
+                reftree = dendropy.Tree.get_from_stream(open(self.original_treefile+'_'+ str(i+1), 'rU'), "newick", tree_offset=0)
                 #true rax
                 rtru.append(dendropy.Tree.get_from_stream(open(self.raxml_prefix + 'true'+str(i+1), 'rU'), "newick", tree_offset=0))
                 #mafft rax
@@ -240,7 +245,7 @@ class HmmDistanceGenerator:
                 #muscle rax
                 rmus.append(dendropy.Tree.get_from_stream(open(self.raxml_prefix + 'muscle'+str(i+1), 'rU'), "newick", tree_offset=0))
                 #hmm
-                hmmt.append(dendropy.Tree.get_from_stream(open(self.indelible_output + '_' + str(i+1) + '.fas' + self.hmmtreefile, 'rU'), "newick", tree_offset=0))
+                hmmt.append(dendropy.Tree.get_from_stream(open(self.indelible_output + '_' + str(i+1) + '_1.fas' + self.hmmtreefile, 'rU'), "newick", tree_offset=0))
                 
                 self.writeRF(resultsRF, birth_rate, reftree.robinson_foulds_distance(rtru[-1]), 'true')
                 self.writeRF(resultsRF, birth_rate, reftree.robinson_foulds_distance(rmft[-1]), 'mafft')
@@ -289,7 +294,7 @@ class HmmDistanceGenerator:
             threads = []
             for j in range(self.cores):
                 if i < count:
-                    clean_name = self.indelible_output + '_' + str(i+1) + '.fas'
+                    clean_name = self.indelible_output + '_' + str(i+1) + '_1' + '.fas'
                     i+=1
                     if os.path.isfile(clean_name + '.hmm.tree'):
                         continue 
@@ -323,7 +328,7 @@ class HmmDistanceGenerator:
       
     def runRaxml(self, count):
 	for i in range(count):
-	    true_fc = self.indelible_output + '_TRUE_' + str(i+1) + '.fas'
+	    true_fc = self.indelible_output + '_' + str(i+1) +  '_TRUE_1.fas'
             mafft_fc = 'mafft_' + str(i+1) + '.fas'
             muscle_fc = 'muscle_' + str(i+1) + '.fas'
             #prank_fc = 'prank_' + str(i+1) + '.best.fas'

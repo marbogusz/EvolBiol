@@ -172,7 +172,7 @@ void BandingEstimator::optimizePairByPair()
 		wrapper->setModelParameters(modelParams);
 		bfgs->setTarget(wrapper);
 		result = bfgs->optimize() * -1.0;
-		DEBUG("Resulting likelihood after pairwise optimization" << result);
+		DEBUG("Likelihood after pairwise optimization: " << result);
 		if (result <= (Definitions::minMatrixLikelihood /2.0))
 		{
 			FileLogger::ErrorLogger() << "Optimization failed for pair #" << i << " Zero probability FWD" << '\n';
