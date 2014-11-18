@@ -23,7 +23,8 @@ class TreeGenerator:
     def rescaleTree(self, tree, factor):
         nds = [nd for nd in tree.postorder_node_iter()]
         for i, n in enumerate(nds):
-            n.edge_length = random.gauss(n.edge_length*factor, n.edge_length*0.1*factor) 
+            n.edge_length = round(random.gauss(n.edge_length*factor, n.edge_length*0.1*factor),3) 
+            #n.edge_length = random.gauss(n.edge_length*factor, n.edge_length*0.1*factor) 
 
     def getTree(self, size, birthParam):
         tree = treesim.birth_death(birth_rate=birthParam, death_rate=0, taxon_set=dendropy.TaxonSet(self.fullTaxonSet[0:size]))
@@ -55,7 +56,7 @@ class HmmDistanceGenerator:
         self.hmm_binary = 'HMMestBF3'
         self.hmm_base_params = ['--lD', '-F','--in']
         self.hmm_misc_params = ['-b', '1', '-o', '0', '--bf', '20']
-        self.hmm_alpha_params = ['--rateCat', '5', '--initAlpha', '0.75']
+        self.hmm_alpha_params = ['--rateCat', '5', '--initAlpha']
         self.hmm_alpha_est_params = ['--estimateAlpha', '1']
         self.file_prefix = 'control'
         self.hmmtreefile = '.hmm.tree'
@@ -72,9 +73,12 @@ class HmmDistanceGenerator:
         self.prank_exec = 'prank'
         self.raxml_bin = 'raxmlHPC'
         self.raxml_prefix = 'RAxML_bestTree.'
-        self.raxml_GTR_params = ['-m', 'GTRGAMMA', '-p', '12345']
+        self.raxml_GTR_params = ['-m', 'GTRGAMMA', '-p', '12345','-#', '20']
         self.raxml_LG_params = ['-m', 'PROTGAMMALG', '-p', '12345']
         self.raxml_HKY_params = ['-m', 'GTRGAMMA', '-p', '12345']
+        self.realIndels = [[0 for x in range(self.replicates)] for x in range(self.steps)]  
+        self.realSubsts = [[0 for x in range(self.replicates)] for x in range(self.steps)] 
+        self.realAlphas = [[0 for x in range(self.replicates)] for x in range(self.steps)] 
 
         self.paml_binary = 'baseml'
         self.raxml_params = self.raxml_GTR_params
@@ -90,41 +94,41 @@ class HmmDistanceGenerator:
         print("HMM analysis for {} steps with {} replicates.".format(self.steps,self.replicates))
 
     def getAlpha(self):
-        return random.uniform(0.1,4.0)
+        return round(random.uniform(0.1,4.0),3)
       
     def getLambda(self):
-        ret = random.gauss(0.03,0.02)
+        ret = round(random.gauss(0.03,0.02),3)
         while ret  < 0:
-            ret = random.gauss(0.03,0.02)
+            ret = round(random.gauss(0.03,0.02),3)
         return ret
 
-        return random.gauss(0.03,0.02)
+        return round(random.gauss(0.03,0.02),3)
       
     def getEpsilon(self):
-        return random.uniform(0.25,0.75)
+        return round(random.uniform(0.25,0.75),3)
     
     def getNucleotideFrequencies(self):
         f1=f2=f3=f4=-1.0
         while f1  < 0:
-            f1 = random.gauss(0.25,0.1)
+            f1 = round(random.gauss(0.25,0.1),3)
         while f2  < 0 or f1+f2 > 1.0:
-            f2 = random.gauss(0.25,0.1)
+            f2 = round(random.gauss(0.25,0.1),3)
         while f3  < 0 or f1+f2+f3 > 1.0:
-            f3 = random.gauss(0.25,0.1)
-        f4 = 1.0 -f1 -f2 -f3;
+            f3 = round(random.gauss(0.25,0.1),3)
+        f4 = round(1.0 -f1 -f2 -f3,3);
         return [f1,f2,f3,f4]
     def getRevRates(self):
         a=b=c=d=e=f=-1.0;
         while a  < 0:
-            a = random.gauss(0.9,0.3)
+            a = round(random.gauss(0.9,0.3),3)
         while b  < 0:
-            b = random.gauss(0.9,0.3)
+            b = round(random.gauss(0.9,0.3),3)
         while c  < 0:
-            c = random.gauss(0.9,0.3)
+            c = round(random.gauss(0.9,0.3),3)
         while d  < 0:
-            d = random.gauss(0.9,0.3)
+            d = round(random.gauss(0.9,0.3),3)
         while e  < 0:
-            e = random.gauss(0.9,0.3)
+            e = round(random.gauss(0.9,0.3),3)
         return [a,b,c,d,e]
 
     def alignMafft(self, fid):
@@ -156,14 +160,48 @@ class HmmDistanceGenerator:
             self.alignMafft(i)
             self.alignMuscle(i)
             #self.alignPrank(i)
+    
+    def parseControl(self, filename, ind, sub):
+        ctl = open(filename,'r')
+        if ctl:
+            contents = ctl.read()
+        else:
+            print('cannot open ' + filename)
 
- 
+        #get GTR section and numbers
+        pSub = re.compile(r'\s+\[submodel\]\s+GTR\s+([0-9.]+)\s+([0-9.]+)\s+([0-9.]+)\s+([0-9.]+)\s+([0-9.]+).*')
+        #get inndels
+        pLam = re.compile(r'\s+\[insertrate\]\s+([0-9.]+).*')
+        pEps = re.compile(r'\s+\[indelmodel\]\s+NB\s+([0-9.]+).*')
+
+        #get alpha 
+        pAlp = re.compile(r'\s+\[rates\]\s+0\s+([0-9.]+).*');
+
+        if self.model == 'GTR':
+            mg = pSub.search(contents)
+            sub.append(mg.group(1))
+            sub.append(mg.group(2))
+            sub.append(mg.group(3))
+            sub.append(mg.group(4))
+            sub.append(mg.group(5))
+
+        ml = pLam.search(contents)
+        me = pEps.search(contents)
+    
+        if(ml and me):
+            ind.append(ml.group(1))
+            ind.append(me.group(1))
+        ma = pAlp.search(contents)
+        if ma:
+            alp = ma.group(1)
+        return alp
+
     def simulate(self, s,r,modelname):
     
         ifile = open(self.file_prefix+modelname+self.gamma+self.file_suffix, 'r')
         ictl_template = ifile.read()
         ifile.close()
-    
+        index = 0; 
     
         while s > 0:
             s -= 1
@@ -173,6 +211,7 @@ class HmmDistanceGenerator:
             current_dir = str(self.taxaNo) + '_taxa_' + self.model_suffix + '_' + str(self.seq_len) + '_' + str(round(birth_rate,1)) + '_Indelible_' + str(r) 
             if os.path.exists(current_dir):
                 print('Simulation direcory ' + current_dir + ' exists. Skipping\n') 
+                index +=1
                 continue
 
             os.mkdir(current_dir)
@@ -187,13 +226,21 @@ class HmmDistanceGenerator:
             
                 newicktext = m1.group(1) 
                 outidl =  self.indelible_output + '_' + str(rpl+1)
+
+                alpha = self.getAlpha()
+                epsilon = self.getEpsilon()
+                lmbda = self.getLambda()
         
                 if (modelname == 'LG'):
-                    templateDict = {'alpha' : round(self.getAlpha(),3), 'epsilon' : round(self.getEpsilon(),3), 'lambda' : round(self.getLambda(),3), 'newick' : newicktext, 'output' : outidl , 'length' : self.seq_len, 'replicates' : 1}
+                    templateDict = {'alpha' : alpha, 'epsilon' : epsilon, 'lambda' : lmbda, 'newick' : newicktext, 'output' : outidl , 'length' : self.seq_len, 'replicates' : 1}
                 elif (modelname == 'GTR'):
                     rates = self.getRevRates()
                     pis = self.getNucleotideFrequencies()
-                    templateDict = {'a' : rates[0], 'b' : rates[1], 'c' : rates[2],'d' : rates[3], 'e' : rates[4], 'pi1': pis[0], 'pi2': pis[1], 'pi3': pis[2], 'pi4': pis[3], 'alpha' : round(self.getAlpha(),3), 'epsilon' : round(self.getEpsilon(),3), 'lambda' : round(self.getLambda(),3), 'newick' : newicktext, 'output' : outidl, 'length' : self.seq_len, 'replicates' : 1}
+                    templateDict = {'a' : rates[0], 'b' : rates[1], 'c' : rates[2],'d' : rates[3], 'e' : rates[4], 'pi1': pis[0], 'pi2': pis[1], 'pi3': pis[2], 'pi4': pis[3], 'alpha' : alpha, 'epsilon' : epsilon, 'lambda' : lmbda, 'newick' : newicktext, 'output' : outidl, 'length' : self.seq_len, 'replicates' : 1}
+
+                #self.realIndels[index][rpl] = [lmbda,epsilon]
+                #self.realSubsts[index][rpl] = 
+                #self.realAlphas[index][rpl] = alpha
 
                 ofile.write(ictl_template.format(**templateDict))
                 ofile.close()
@@ -206,7 +253,8 @@ class HmmDistanceGenerator:
                 tfile.write(newicktext)
                 #execute indelible
                 subprocess.call('indelible',stdout=self.logfile,stderr=self.logfile)
-                os.chdir('..');
+                os.chdir('..')
+            index+=1
 
     def writeRF(self,fd,bd,dist,which):
         fd.write(str(bd)+'\t' +str(dist) + '\t' + which + '\n')
@@ -298,26 +346,35 @@ class HmmDistanceGenerator:
                     i+=1
                     if os.path.isfile(clean_name + '.hmm.tree'):
                         continue 
-                    t = Thread(target=self.callHMM, args=(self.hmm_binary, clean_name,))
+                    t = Thread(target=self.callHMM, args=(self.hmm_binary, clean_name,'control_'+str(i)+'.txt',))
                     threads.append(t)
                     t.start()
             for th in threads:
                 th.join()
 
 
-    def callHMM(self, executable, filename):
+    def callHMM(self, executable, filename, controlfile):
 	#print ("Calling " + executable + "on " + filename) 
+        ind = []
+        sub = []
+        alp = self.parseControl(controlfile, ind, sub)
         params = []
         params.append(executable)
         params += self.hmm_base_params
         params.append(filename)
+        params.append('-i')
+        params += ind
         if (self.model == 'GTR'):
             params.append('--rev')
+            params.append('--param_rev')
+            params += sub
         if (self.model == 'HKY'):
             params.append('--hky')
         if (self.model == 'LG'):
             params.append('--lg')
         params +=self.hmm_alpha_params
+        params.append(alp)
+
         subprocess.call(params,stdout=self.logfile) 
 
     def callRaxml(self, params):

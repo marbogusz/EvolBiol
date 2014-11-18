@@ -120,7 +120,7 @@ void EBC::DpMatrixFull::outputValues(unsigned int bound=0)
 		}
 		sstr << endl;
 	}
-	FileLogger::DebugLogger() << sstr.str();
+	DEBUG(sstr.str());
 }
 
 void EBC::DpMatrixFull::outputValuesWithBands(const vector<pair<int, int> >& band, const vector<pair<int, int> >& oband1, const vector<pair<int, int> >& oband2, char os1, char os2) {
@@ -153,7 +153,7 @@ void EBC::DpMatrixFull::outputValuesWithBands(const vector<pair<int, int> >& ban
 			}
 			sstr << endl;
 		}
-		FileLogger::DebugLogger() << sstr.str();
+		DEBUG(sstr.str());
 }
 
 void EBC::DpMatrixFull::setDiagonalAt(unsigned int i, unsigned int j)

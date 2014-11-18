@@ -117,8 +117,8 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 	indelModel =  ste->getIndelModel();
 	substModel =  sme->getSubstModel();
 
-	substModel->summarize();
-	indelModel->summarize();
+	//substModel->summarize();
+	//indelModel->summarize();
 	//substModel->summarize();
 	//we have new alignments!
 	//re-estimate

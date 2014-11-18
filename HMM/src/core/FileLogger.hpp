@@ -25,6 +25,9 @@ public:
 	static FileLogger& ErrorLogger();
 	static FileLogger& InfoLogger();
 	static FileLogger& WarningLogger();
+	//Defualt logger without anny prefixes etc. Logs essential info like
+	//estimated parameters and the tree
+	static FileLogger& Logger();
 
 	void activate()
 	{
@@ -133,15 +136,12 @@ public:
 		{
 			for(unsigned int i = 0; i < v.size(); i++)
 			{
-				logFile << v[i] << "\t";
+				logFile << v[i] << "\t\t";
 				if (logger.stderrout)
 				{
-					std::cerr << v[i] << "\t";
+					std::cerr << v[i] << "\t\t";
 				}
 			}
-			logFile << std::endl;
-			if (logger.stderrout)
-				std::cerr << std::endl;
 		}
 		return logger;
 	}

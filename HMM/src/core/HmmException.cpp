@@ -22,7 +22,7 @@ HmmException::~HmmException() throw()
 
 HmmException::HmmException(string message) : msg(message)
 {
-	FileLogger::ErrorLogger() <<  message << '\n';
+	ERROR(message);
 }
 
 const char* HmmException::what() const throw ()

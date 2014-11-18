@@ -19,32 +19,32 @@ FileLogger FileLogger::dbgL;
 FileLogger FileLogger::dmpL;
 FileLogger FileLogger::infL;
 
+
+//FIXME Separate default logger?
+FileLogger& FileLogger::Logger()
+{
+	return errL;
+}
+
 FileLogger& FileLogger::DumpLogger()
 {
-	if(dmpL.active)
-		logFile << "[DUMP]\t";
 	return dmpL;
 }
 FileLogger& FileLogger::DebugLogger()
 {
-	if(dbgL.active)
-		logFile << "[DEBUG]\t";
 	return dbgL;
 }
 FileLogger& FileLogger::ErrorLogger()
 {
-	if(errL.active)
-		logFile << "[ERROR]\t";
+
 	return errL;
 }
 FileLogger& FileLogger::InfoLogger()
-{	if(infL.active)
-		logFile << "[INFO]\t";
+{
 	return infL;
 }
 FileLogger& FileLogger::WarningLogger()
-{	if(wrnL.active)
-		logFile << "[WARN]\t";
+{
 	return wrnL;
 }
 

@@ -22,7 +22,7 @@ BandingEstimator::BandingEstimator(Definitions::AlgorithmType at, Sequences* inp
 {
 	//Banding estimator means banding enabled!
 
-	FileLogger::DebugLogger() << "Starting Banding Estimator" << "\n";
+	DEBUG("Starting Banding Estimator");
 	maths = new Maths();
 	dict = inputSequences->getDictionary();
 
@@ -146,7 +146,7 @@ void BandingEstimator::optimizePairByPair()
 
 	for(unsigned int i =0; i< pairCount; i++)
 	{
-		FileLogger::DebugLogger() << "Optimizing distance for pair #" << i << '\n';
+		DEBUG("Optimizing distance for pair #" << i);
 		std::pair<unsigned int, unsigned int> idxs = inputSequences->getPairOfSequenceIndices(i);
 		INFO("Running pairwise calculator for sequence id " << idxs.first << " and " << idxs.second
 				<< " ,number " << i+1 <<" out of " << pairCount << " pairs" );
@@ -175,7 +175,7 @@ void BandingEstimator::optimizePairByPair()
 		DEBUG("Likelihood after pairwise optimization: " << result);
 		if (result <= (Definitions::minMatrixLikelihood /2.0))
 		{
-			FileLogger::ErrorLogger() << "Optimization failed for pair #" << i << " Zero probability FWD" << '\n';
+			DEBUG("Optimization failed for pair #" << i << " Zero probability FWD");
 			band->output();
 			dynamic_cast<DpMatrixFull*>(hmm->M->getDpMatrix())->outputValuesWithBands(band->getMatchBand() ,band->getInsertBand(),band->getDeleteBand(),'|', '-');
 			dynamic_cast<DpMatrixFull*>(hmm->X->getDpMatrix())->outputValuesWithBands(band->getInsertBand(),band->getMatchBand() ,band->getDeleteBand(),'\\', '-');
@@ -189,7 +189,7 @@ void BandingEstimator::optimizePairByPair()
 	}
 
 	DEBUG("Optimized divergence times:");
-	FileLogger::DebugLogger() << this->divergenceTimes;
+	DEBUG(this->divergenceTimes);
 }
 
 

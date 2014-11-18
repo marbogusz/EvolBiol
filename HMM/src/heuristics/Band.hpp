@@ -10,6 +10,7 @@
 
 #include <vector>
 #include "core/FileLogger.hpp"
+#include "core/Definitions.hpp"
 
 using namespace std;
 
@@ -27,6 +28,7 @@ protected:
 
 public:
 	Band(unsigned int size);
+
 	virtual ~Band();
 
 	inline void setMatchRangeAt(unsigned int pos, int start, int end)
@@ -59,9 +61,9 @@ public:
 	{
 		for(int i =0; i< matchBand.size(); i++)
 		{
-			FileLogger::DumpLogger() << "M/X/Y bands " << i << "\t" << getMatchRangeAt(i).first <<"\t" << getMatchRangeAt(i).second
+			DUMP("M/X/Y bands " << i << "\t" << getMatchRangeAt(i).first <<"\t" << getMatchRangeAt(i).second
 							<< "\t" << getInsertRangeAt(i).first <<"\t" << getInsertRangeAt(i).second
-							<< "\t" << getDeleteRangeAt(i).first <<"\t" << getDeleteRangeAt(i).second << "\n";
+							<< "\t" << getDeleteRangeAt(i).first <<"\t" << getDeleteRangeAt(i).second);
 
 		}
 	}

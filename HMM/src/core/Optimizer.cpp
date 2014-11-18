@@ -22,7 +22,7 @@ Optimizer::Optimizer(OptimizedModelParameters* mp, IOptimizable* opt, Definition
 
 	omp->toDlibVector(initParams,lowerBounds,upperBounds);
 
-	FileLogger::DebugLogger() << "Starting optimizer with " << paramsCount << " parameter(s)" << '\n';
+	DEBUG("Starting optimizer with " << paramsCount << " parameter(s)");
 	//cerr << "DLIB optimizer init with " << paramsCount << " parameters" << endl;
 }
 

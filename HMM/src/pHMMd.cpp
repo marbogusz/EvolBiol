@@ -98,6 +98,7 @@ int main(int argc, char ** argv) {
 			fwdHMM->runForwardAlgorithm();
 			*/
 
+
 			INFO("Creating Model Parameters heuristics...");
 			ModelEstimator* tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),
 					cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
@@ -111,6 +112,17 @@ int main(int argc, char ** argv) {
 			indelParams = tme->getIndelParameters();
 			if(cmdReader->estimateAlpha())
 				alpha = tme->getAlpha();
+
+			FileLogger::Logger() << "True indel paramteres     : ";
+			FileLogger::Logger() << cmdReader->getIndelParams() << '\n';
+			FileLogger::Logger() << "Estimated indel paramteres: ";
+			FileLogger::Logger() << indelParams << '\n';
+			//FileLogger::Logger() << "True substitution paramteres     : ";
+			//FileLogger::Logger() << cmdReader->getSubstParams();
+			//FileLogger::Logger() << "Estimated substitution paramteres: ";
+			//FileLogger::Logger() << substParams;
+			FileLogger::Logger() << "True alpha      : " << cmdReader->getAlpha() << "\n";
+			FileLogger::Logger() << "Estimated alpha : " << alpha << "\n";
 
 
 			//FIXME - hardcoding substitution parameters and alpha to come from the estimator
@@ -152,8 +164,7 @@ int main(int argc, char ** argv) {
 	    chrono::duration<double> elapsed_seconds = end-start;
 	    std::time_t end_time = chrono::system_clock::to_time_t(end);
 
-	    std::cout << "Finished computation at " << std::ctime(&end_time)
-	              << " elapsed time: " << elapsed_seconds.count() << "s\n";
+	    INFO("Finished computation at " << std::ctime(&end_time) << " elapsed time: " << elapsed_seconds.count() << "s\n");
 
 	}
 	catch(HmmException& pe)

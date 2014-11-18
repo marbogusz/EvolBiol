@@ -50,7 +50,7 @@ void StateTransitionEstimator::addPair(vector<SequenceElement>& s1,
 void StateTransitionEstimator::optimize()
 {
 	bfgs->optimize();
-	FileLogger::InfoLogger() << "StateTransitionEstimator" << "\n";
+	INFO("StateTransitionEstimator results:");
 	modelParams->logParameters();
 	//modelParams->outputParameters();
 }

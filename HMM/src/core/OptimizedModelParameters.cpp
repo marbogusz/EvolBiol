@@ -89,8 +89,8 @@ void EBC::OptimizedModelParameters::generateInitialSubstitutionParameters()
 	{
 		substParameters[i] = 0.2 + 0.1*maths->rndu();
 	}
-	FileLogger::DebugLogger() << "Initial substitution parameters:\n";
-	FileLogger::DebugLogger() << substParameters;
+	DUMP("Model estimator initial substitution parameters:");
+	DUMP(substParameters);
 }
 
 void EBC::OptimizedModelParameters::generateInitialIndelParameters()
@@ -99,8 +99,8 @@ void EBC::OptimizedModelParameters::generateInitialIndelParameters()
 	{
 		indelParameters[i] = 0.05 + 0.1*maths->rndu();
 	}
-	FileLogger::DebugLogger() << "Initial indel parameters:\n";
-	FileLogger::DebugLogger() << indelParameters;
+	DUMP("Model estimator initial indel parameters:");
+	DUMP(indelParameters);
 }
 
 void EBC::OptimizedModelParameters::generateInitialDistanceParameters()
@@ -110,8 +110,8 @@ void EBC::OptimizedModelParameters::generateInitialDistanceParameters()
 		divergenceTimes[i] = 0.2 + 0.1*maths->rndu();
 	}
 
-	FileLogger::DebugLogger() << "Initial divergence times:\n";
-	FileLogger::DebugLogger() << divergenceTimes;
+	DUMP("Model Estimator initial divergence times:");
+	DUMP(divergenceTimes);
 }
 
 void EBC::OptimizedModelParameters::fromDlibVector(const column_vector& vals)
@@ -182,11 +182,11 @@ void EBC::OptimizedModelParameters::logParameters()
 	//if(this->estimateAlpha)
 	//	std::cerr << alpha;
 	//std::cerr << std::endl;
-	FileLogger::InfoLogger() << substParameters;
-	FileLogger::InfoLogger() << indelParameters;
-	FileLogger::InfoLogger() << divergenceTimes;
+	INFO(substParameters);
+	INFO(indelParameters);
+	INFO(divergenceTimes);
 	if(this->estimateAlpha)
-		FileLogger::InfoLogger() << "Alpha: " << alpha << "\n";
+		INFO("Alpha: " << alpha);
 
 }
 
