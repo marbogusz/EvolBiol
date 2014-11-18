@@ -133,7 +133,7 @@ int main(int argc, char ** argv) {
 			INFO ("Running BioNJ");
 
 			//change bionj init here!
-			BioNJ nj(inputSeqs->getSequenceCount(), be->getOptimizedTimes());
+			BioNJ nj(inputSeqs->getSequenceCount(), be->getOptimizedTimes(), inputSeqs);
 			//DEBUG("Final tree : " << nj.calculate());
 			treefile << nj.calculate() << endl;
 

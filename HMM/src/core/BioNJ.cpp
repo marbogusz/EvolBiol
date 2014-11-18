@@ -16,20 +16,20 @@ namespace EBC
 {
 
 	//FIXME  - get rid of that reference to timesVec!!!
-    BioNJ::BioNJ(unsigned int size, DistanceMatrix* divergenceTimes) : names(size), times(divergenceTimes), timesVec(vector<double>())
+    BioNJ::BioNJ(unsigned int size, DistanceMatrix* divergenceTimes, Sequences* seqs) : names(size), times(divergenceTimes), timesVec(vector<double>())
     {
         taxas = size;
         pairs = (taxas*(taxas-1))/2;
 
         for (unsigned short i = 0; i < taxas; i++)
         {
-        	names[i] = std::to_string(i);
+        	names[i] = seqs == NULL ? std::to_string(i) : seqs->getSequenceName(i);
         }
 
         treeLength=0;
     }
     
-    BioNJ::BioNJ(unsigned int size, vector<double> divergenceTimes) : names(size), timesVec(divergenceTimes)
+    BioNJ::BioNJ(unsigned int size, vector<double> divergenceTimes, Sequences* seqs) : names(size), timesVec(divergenceTimes)
     {
     	times = NULL;
         taxas = size;
@@ -44,7 +44,7 @@ namespace EBC
 
 		for (unsigned short i = 0; i < taxas; i++)
         {
-        	names[i] = std::to_string(i);
+        	names[i] = seqs == NULL ? std::to_string(i) : seqs->getSequenceName(i);
         }
 
         treeLength=0;

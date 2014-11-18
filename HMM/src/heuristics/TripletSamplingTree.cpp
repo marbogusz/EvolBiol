@@ -98,7 +98,7 @@ void TripletSamplingTree::fromNewick(const string& newick)
 		}
 		else if(newick[i] == '(')
 		{
-			DUMP("TST (");
+			DUMP("newick (");
 			tmpNode = new Node(++ids);
 			nodes.push_back(tmpNode);
 			workNodes.push(tmpNode);
@@ -106,7 +106,7 @@ void TripletSamplingTree::fromNewick(const string& newick)
 		}
 		else if(newick[i] == ',')
 		{
-			DUMP("TST ,");
+			DUMP("newick ,");
 			workNodes.pop();
 			if (workNodes.empty())
 			{
@@ -129,7 +129,7 @@ void TripletSamplingTree::fromNewick(const string& newick)
 		else if(newick[i] == ')')
 		{
 
-			DUMP("TST )");
+			DUMP("newick )");
 			tmpCurrent = workNodes.top();
 			workNodes.pop();
 			if (workNodes.size() > 0)
@@ -144,7 +144,7 @@ void TripletSamplingTree::fromNewick(const string& newick)
 		}
 		else if(newick[i] == ';')
 		{
-			DUMP("TST ;");
+			DUMP("newick ;");
 			endReached = true;
 			i++;
 		}

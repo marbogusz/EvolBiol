@@ -25,7 +25,12 @@ class Sequences
 {
 private:
 
+
+	//FIXME - how about just copying from the parser or better, a pointer to the sequences instantiated in parser?
 	vector<string> rawSequences;
+
+	vector<string> sequenceNames;
+
 	vector<vector<SequenceElement> > translatedSequences;
 	vector<std::pair<unsigned int, unsigned int> > pairs;
 
@@ -66,6 +71,8 @@ public:
 	{
 		return translatedSequences.size();
 	}
+
+	string& getSequenceName(unsigned int pos);
 
 	string& getRawSequenceAt(unsigned int pos);
 

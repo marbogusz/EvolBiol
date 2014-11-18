@@ -15,6 +15,8 @@ namespace EBC
 
 FileParser::FileParser(const char* filename)
 {
+	//FIXME - check the file structure to avoid errors from phylip, nexus and other non-fasta files
+
 	this->filename = filename;
 	//this->infile.exceptions(ifstream::failbit | ifstream::badbit);
 	this->infile.open(this->filename.c_str(), fstream::in);
@@ -36,6 +38,7 @@ FileParser::FileParser(const char* filename)
 				continue;
 			else
 			{
+				names.push_back(getSequenceName(tmp));
 				justStarted = false;
 			}
 		}
@@ -47,6 +50,7 @@ FileParser::FileParser(const char* filename)
 			}
 			else
 			{
+				names.push_back(getSequenceName(tmp));
 				trimWsChars(seq);
 				sequences.push_back(seq);
 				seq = "";
@@ -62,12 +66,21 @@ FileParser::FileParser(const char* filename)
 	}
 	infile.close();
 	it=sequences.begin();
+	itN=names.begin();
 }
 
 bool FileParser::isDefinitionLine(string& s)
 {
 	std::size_t found = s.find(">");
 	return (found !=std::string::npos);
+}
+
+string FileParser::getSequenceName(string& s)
+{
+	//string name(s);
+	s.erase(std::remove_if( s.begin(), s.end(), [](char c){ return (c =='>' || c =='\r' || c =='\t' || c == ' ' || c == '\n');}), s.end() );
+	DEBUG("Found sequence named " << s);
+	return s;//name;
 }
 
 void FileParser::trimWsChars(string& s)
@@ -81,6 +94,12 @@ string FileParser::getNextSequence()
 	return *it++;
 }
 
+string FileParser::getNextName()
+{
+	//DEBUG("Get next sequence it: " << *it);
+	return *itN++;
+}
+
 unsigned int FileParser::getSequenceCount()
 {
 	return sequences.size();
@@ -89,6 +108,11 @@ unsigned int FileParser::getSequenceCount()
 string FileParser::getSequenceAt(unsigned int position)
 {
 	return sequences.at(position);
+}
+
+string FileParser::getSequenceNameAt(unsigned int position)
+{
+	return names.at(position);
 }
 
 FileParser::~FileParser()

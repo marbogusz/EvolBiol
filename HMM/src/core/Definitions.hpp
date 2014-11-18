@@ -54,6 +54,8 @@ public:
 	constexpr static const double initialLambda = 0.02;
 	constexpr static const double initialEpsilon = 0.5;
 
+	constexpr static const unsigned int minBandDelta = 7; //This makes the min band width of 15 characters
+
 	constexpr static const double minMatrixLikelihood = -1000000.0;
 
 

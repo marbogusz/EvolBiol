@@ -13,7 +13,9 @@
 #include <string>
 #include <ctime>
 #include <vector>
-#include "DistanceMatrix.hpp"
+
+#include "core/DistanceMatrix.hpp"
+#include "core/Sequences.hpp"
 
 
 #define PREC 8                             /* precision of branch-lengths  */
@@ -49,9 +51,9 @@ private:
 	double treeLength;
 
 public:
-	BioNJ(unsigned int size, DistanceMatrix* divergenceTimes);
+	BioNJ(unsigned int size, DistanceMatrix* divergenceTimes, Sequences* seqs=NULL);
 	
-	BioNJ(unsigned int size, vector<double> divergenceTimes);
+	BioNJ(unsigned int size, vector<double> divergenceTimes, Sequences* seqs=NULL);
 
 	double getDist(unsigned int i, unsigned int j)
 	{

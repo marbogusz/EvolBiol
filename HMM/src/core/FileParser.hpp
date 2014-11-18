@@ -25,7 +25,9 @@ private:
 	string filename;
 	ifstream infile;
 	vector<string> sequences;
+	vector<string> names;
 	vector<string>::iterator it;
+	vector<string>::iterator itN;
 
 public:
 
@@ -33,11 +35,17 @@ public:
 
 	string getNextSequence();
 
+	string getNextName();
+
 	unsigned int getSequenceCount();
 
 	string getSequenceAt(unsigned int);
 
+	string getSequenceNameAt(unsigned int);
+
 	bool isDefinitionLine(string&);
+
+	string getSequenceName(string&);
 
 	void trimWsChars(string&);
 

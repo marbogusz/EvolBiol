@@ -19,6 +19,7 @@ namespace EBC
 class IParser
 {
 public:
+	virtual string getNextName() = 0;
 	virtual string getNextSequence() = 0;
 	virtual unsigned int getSequenceCount() = 0;
 	virtual string getSequenceAt(unsigned int) = 0;

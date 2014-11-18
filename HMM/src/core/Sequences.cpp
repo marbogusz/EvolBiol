@@ -37,6 +37,7 @@ Sequences::Sequences(IParser* iParser,Definitions::SequenceType st, bool fa) thr
 	while(size > 0)
 	{
 		this->rawSequences.push_back(iParser->getNextSequence());
+		this->sequenceNames.push_back(iParser->getNextName());
 		this->translatedSequences.push_back(dict->translate(*(rawSequences.end()-1),fixedAlignment==false));
 		size--;
 	}
@@ -61,6 +62,11 @@ Dictionary* Sequences::getDictionary()
 string& Sequences::getRawSequenceAt(unsigned int pos)
 {
 	return this->rawSequences[pos];
+}
+
+string& Sequences::getSequenceName(unsigned int pos)
+{
+	return this->sequenceNames[pos];
 }
 
 void Sequences::calculateObservedFrequencies()
