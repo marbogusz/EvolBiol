@@ -315,14 +315,14 @@ class HmmDistanceGenerator:
         pngfile_r = rfname.replace('.txt','_m.png'); 
         pngfile_d = tdname.replace('.txt','_s.png'); 
 
-        subprocess.call(['Rscript', 'RFmedian.R',rfname])
+        subprocess.call(['Rscript', 'plotMedian.R',rfname])
         subprocess.call(['Rscript', 'graph_TDs.R',tdname, pngfile_d, pngfile_d ])
       #if (not onlyPaml):
     
     def calculate(self, s, r, model):
         while s > 0:
             birth_rate = 0.1 * s
-            print("Calculation step {}".format(round(birth_rate,1)))
+            print("**********Calculation step {}".format(round(birth_rate,1)))
             current_dir = str(self.taxaNo) + '_taxa_' + self.model_suffix + '_' + str(self.seq_len) + '_' + str(round(birth_rate,1)) + '_Indelible_' + str(r) 
             os.chdir(current_dir)
             #self.runHMMbatch(r,outfile_all,True)

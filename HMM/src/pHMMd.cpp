@@ -113,10 +113,10 @@ int main(int argc, char ** argv) {
 			if(cmdReader->estimateAlpha())
 				alpha = tme->getAlpha();
 
-			FileLogger::Logger() << "True indel paramteres     : ";
-			FileLogger::Logger() << cmdReader->getIndelParams() << '\n';
-			FileLogger::Logger() << "Estimated indel paramteres: ";
-			FileLogger::Logger() << indelParams << '\n';
+			//FileLogger::Logger() << "True indel paramteres     : ";
+			//FileLogger::Logger() << cmdReader->getIndelParams() << '\n';
+			//FileLogger::Logger() << "Estimated indel paramteres: ";
+			//FileLogger::Logger() << indelParams << '\n';
 			//FileLogger::Logger() << "True substitution paramteres     : ";
 			//FileLogger::Logger() << cmdReader->getSubstParams();
 			//FileLogger::Logger() << "Estimated substitution paramteres: ";

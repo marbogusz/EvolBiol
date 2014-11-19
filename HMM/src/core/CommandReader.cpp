@@ -66,8 +66,8 @@ CommandReader::CommandReader(int argc, char** argv)
 		parser.check_sub_options("hky", hky_sub_opts);
 
 		parser.check_option_arg_range("param_hky", 0.0000001, 20.0);
-		parser.check_option_arg_range("param_rev", 0.0000001, 10.0);
-		parser.check_option_arg_range("i", 0.0000001, 1.0);
+		parser.check_option_arg_range("param_rev", 0.0, 10.0);
+		parser.check_option_arg_range("i", 0.0, 1.0);
 		parser.check_option_arg_range("d", 0.0000001, 3.0);
 		parser.check_option_arg_range("initAlpha", 0.0000001, 1000.0);
 
