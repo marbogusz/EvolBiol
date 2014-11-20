@@ -143,10 +143,10 @@ double ForwardPairHMM::runAlgorithm()
 					Y->setValueAt(i,j, emissionY + maths->logSum(ym,yx,yy));
 				}
 			}
-			if (loM > 0)
+			if (loM != -1)
 			{
 				hiM = bracketM.second;
-				for(i = loM; i <= hiM; i++)
+				for(i = loM == 0 ? 1 : loM; i <= hiM; i++)
 				{
 					k = i-1;
 					l = j-1;
@@ -158,10 +158,10 @@ double ForwardPairHMM::runAlgorithm()
 				}
 			}
 
-			if (loI > 0)
+			if (loI != -1)
 			{
 				hiI = bracketI.second;
-				for(i = loI; i <= hiI; i++)
+				for(i = loI == 0 ? 1 : loI; i <= hiI; i++)
 				{
 					k = i-1;
 					emissionX = ptmatrix->getLogEquilibriumFreq(seq1[i-1].getMatrixIndex());

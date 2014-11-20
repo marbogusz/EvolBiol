@@ -32,6 +32,8 @@
 #include "heuristics/SubstitutionModelEstimator.hpp"
 
 #include "hmm/ViterbiPairHMM.hpp"
+#include "hmm/ForwardPairHMM.hpp"
+#include "hmm/BackwardPairHMM.hpp"
 
 
 #include <sstream>

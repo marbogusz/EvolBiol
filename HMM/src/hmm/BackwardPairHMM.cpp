@@ -73,6 +73,7 @@ double BackwardPairHMM::runAlgorithm()
 	X->initializeData(true);
 	Y->initializeData(true);
 
+
 	for (j = ySize-1, i=xSize-1; j >= 0; j--)
 	{
 		bxp = (i==xSize-1) ? -100000 : X->getValueAt(i+1,j) + ptmatrix->getLogEquilibriumFreq(seq1[i].getMatrixIndex());
@@ -136,35 +137,80 @@ double BackwardPairHMM::runAlgorithm()
 		}
 	}
 
-
-	for (i = xSize-2; i >= 0; i--)
+	if(this->band == NULL)
 	{
+		for (i = xSize-2; i >= 0; i--)
+		{
+			for (j = ySize-2; j >= 0; j--)
+			{
+
+				bxp = X->getValueAt(i+1,j) +   ptmatrix->getLogEquilibriumFreq(seq1[i].getMatrixIndex());
+				byp = Y->getValueAt(i,j+1) +   ptmatrix->getLogEquilibriumFreq(seq2[j].getMatrixIndex());
+				bmp = M->getValueAt(i+1,j+1) + ptmatrix->getLogPairTransition (seq1[i].getMatrixIndex(), seq2[j].getMatrixIndex());
+
+				bx = maths->logSum(M->getTransitionProbabilityFromInsert() + bmp,
+						X->getTransitionProbabilityFromInsert() + bxp,
+						Y->getTransitionProbabilityFromInsert() + byp);
+
+				by = maths->logSum(M->getTransitionProbabilityFromDelete() + bmp,
+									X->getTransitionProbabilityFromDelete() + bxp,
+									Y->getTransitionProbabilityFromDelete() + byp);
+
+				bm = maths->logSum(M->getTransitionProbabilityFromMatch() + bmp,
+												X->getTransitionProbabilityFromMatch() + bxp,
+												Y->getTransitionProbabilityFromMatch() + byp);
+
+					X->setValueAt(i, j, bx);
+					Y->setValueAt(i, j, by);
+					M->setValueAt(i, j, bm);
+
+			}
+		}
+	}
+	else
+	{
+		int loI, hiI, loD, hiD, loM, hiM;
+		//banding!
 		for (j = ySize-2; j >= 0; j--)
 		{
+			//FIXME - range should be a reference perhaps
+			auto bracketM = band->getMatchRangeAt(j);
 
-			bxp = X->getValueAt(i+1,j) + ptmatrix->getLogEquilibriumFreq(seq1[i].getMatrixIndex());
-			byp = Y->getValueAt(i,j+1) + ptmatrix->getLogEquilibriumFreq(seq2[j].getMatrixIndex());
-			bmp = M->getValueAt(i+1,j+1) + ptmatrix->getLogPairTransition(seq1[i].getMatrixIndex(), seq2[j].getMatrixIndex());
+			//Only using the M range as backwards banding should not be used for custom bands.
+			//Only the default one
 
-			bx = maths->logSum(M->getTransitionProbabilityFromInsert() + bmp,
+			hiM = bracketM.first;
+			hiM = hiM > xSize-2 ? xSize-2:hiM;
+			if (hiM != -1)
+			{
+				hiM = hiM > xSize-2 ? xSize-2:hiM;
+				for(i=hiM; i>=loM; i--)
+				{
+
+					bxp = X->getValueAt(i+1,j) +   ptmatrix->getLogEquilibriumFreq(seq1[i].getMatrixIndex());
+					byp = Y->getValueAt(i,j+1) +   ptmatrix->getLogEquilibriumFreq(seq2[j].getMatrixIndex());
+					bmp = M->getValueAt(i+1,j+1) + ptmatrix->getLogPairTransition (seq1[i].getMatrixIndex(), seq2[j].getMatrixIndex());
+
+					bx = maths->logSum(M->getTransitionProbabilityFromInsert() + bmp,
 					X->getTransitionProbabilityFromInsert() + bxp,
 					Y->getTransitionProbabilityFromInsert() + byp);
 
-			by = maths->logSum(M->getTransitionProbabilityFromDelete() + bmp,
-								X->getTransitionProbabilityFromDelete() + bxp,
-								Y->getTransitionProbabilityFromDelete() + byp);
+					by = maths->logSum(M->getTransitionProbabilityFromDelete() + bmp,
+				    X->getTransitionProbabilityFromDelete() + bxp,
+					Y->getTransitionProbabilityFromDelete() + byp);
 
-			bm = maths->logSum(M->getTransitionProbabilityFromMatch() + bmp,
-											X->getTransitionProbabilityFromMatch() + bxp,
-											Y->getTransitionProbabilityFromMatch() + byp);
+					bm = maths->logSum(M->getTransitionProbabilityFromMatch() + bmp,
+					X->getTransitionProbabilityFromMatch() + bxp,
+				    Y->getTransitionProbabilityFromMatch() + byp);
 
-				X->setValueAt(i, j, bx);
-				Y->setValueAt(i, j, by);
-				M->setValueAt(i, j, bm);
+					X->setValueAt(i, j, bx);
+					Y->setValueAt(i, j, by);
+					M->setValueAt(i, j, bm);
 
+				}
+			}
 		}
 	}
-
 	sM = M->getValueAt(0, 0);
 	sX = X->getValueAt(0, 0);
 	sY = Y->getValueAt(0, 0);
