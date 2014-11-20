@@ -6,6 +6,7 @@
  */
 
 #include "heuristics/ModelEstimator.hpp"
+#include <chrono>
 
 namespace EBC
 {
@@ -24,6 +25,9 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 	tal = new TripletAligner (inputSequences, gtree->getDistanceMatrix());
 
 	tripletIdxs = tst.sampleFromTree();
+
+    chrono::time_point<chrono::system_clock> start, end;
+    start = chrono::system_clock::now();
 
 	this->estimateTripleAlignment(model);
 
@@ -113,6 +117,13 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 		ste->addPair(tripleAlignments[al][1],tripleAlignments[al][2],tb2+tb3);
 	}
 	ste->optimize();
+
+	//end time measurments here!
+	end = chrono::system_clock::now();
+    chrono::duration<double> elapsed_seconds = end-start;
+
+    cerr <<  "|||||||||||| elapsed time: " << elapsed_seconds.count() << "s ||||||||||||||\n";
+
 
 	indelModel =  ste->getIndelModel();
 	substModel =  sme->getSubstModel();
