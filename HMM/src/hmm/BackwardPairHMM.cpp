@@ -18,9 +18,10 @@ namespace EBC
 
 
 BackwardPairHMM::BackwardPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, SubstitutionModelBase* smdl,
-		IndelModel* imdl,  Definitions::DpMatrixType mt ,Band* bandObj) :
+		IndelModel* imdl,  Definitions::DpMatrixType mt ,Band* bandObj) : dpMatrixCalculated(false), posteriorsCalculated(false),
 		EvolutionaryPairHMM(s1,s2, smdl, imdl, mt, bandObj)
 {
+
 }
 
 BackwardPairHMM::~BackwardPairHMM()
@@ -29,6 +30,9 @@ BackwardPairHMM::~BackwardPairHMM()
 
 void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 {
+	if (!dpMatrixCalculated)
+		throw HmmException("Error - attempting to calculate posterior probabilities without running backward algorithm first");
+
 	DEBUG("Calculating posterior probabilities");
 
 	int i,j;
@@ -51,8 +55,27 @@ void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 		}
 	}
 
-	//dynamic_cast<DpMatrixFull*>(M->getDpMatrix())->outputValues(0);
+	posteriorsCalculated = true;
 
+	DUMP("Match");
+	dynamic_cast<DpMatrixFull*>(M->getDpMatrix())->outputValues(0);
+	DUMP("Insert");
+	dynamic_cast<DpMatrixFull*>(X->getDpMatrix())->outputValues(0);
+	DUMP("Delete");
+	dynamic_cast<DpMatrixFull*>(Y->getDpMatrix())->outputValues(0);
+
+}
+
+pair<string, string>& BackwardPairHMM::sampleAlignment()
+{
+	if (!posteriorsCalculated)
+		throw HmmException("Error - attempting to sample an alignment  without calculating posterior probabilities");
+	string s1;
+	string s2;
+	s1.reserve(this->xSize*1.2);
+	s2.reserve(this->ySize*1.2);
+	pair<string, string> retpair = make_pair(s1,s2);
+	return retpair;
 }
 
 double BackwardPairHMM::runAlgorithm()
@@ -219,8 +242,12 @@ double BackwardPairHMM::runAlgorithm()
 	DUMP("Backward results:");
 	DUMP(" sX, sY, sM, sS " << sX << "\t" << sY << "\t" << sM << "\t" << sS);
 
+	dpMatrixCalculated = true;
+
 	return sS* -1.0;
 }
 
 
 } /* namespace EBC */
+
+

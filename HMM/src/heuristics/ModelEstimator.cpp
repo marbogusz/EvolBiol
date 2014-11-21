@@ -32,6 +32,8 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 
 	this->estimateTripleAlignment(model);
 
+	//throw HmmException("Test quits");
+
 	sme = new SubstitutionModelEstimator(inputSeqs, model ,ot, rateCategories, alpha, estimateAlpha, tripletIdxs.size());
 
 	for(int al = 0; al < tripleAlignments.size(); al++)
@@ -123,7 +125,8 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 	end = chrono::system_clock::now();
     chrono::duration<double> elapsed_seconds = end-start;
 
-    cerr <<  "|||||||||||| elapsed time: " << elapsed_seconds.count() << "s ||||||||||||||\n";
+    INFO("Model Estimator elapsed time: " << elapsed_seconds.count() << " seconds");
+    cerr <<  "|||||||||||| Model Estimator elapsed time: " << elapsed_seconds.count() << "s ||||||||||||||\n";
 
 
 	indelModel =  ste->getIndelModel();
@@ -137,7 +140,7 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 	//do Viterbi using the estimates
 	//construct triplets
 }
-
+/*
 void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 {
 	DEBUG("EstimateTripleAligment");
@@ -205,7 +208,8 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 		distancesA[i][2] = gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][0],tripletIdxs[i][2]);
 
 
-		bandPairs[i] = make_pair(new Band(len1,len2),new Band(len2,len3));
+//bandPairs[i] = make_pair(new Band(len1,len2),new Band(len2,len3));
+		bandPairs[i] = make_pair(nullptr,nullptr);
 
 		f1 = new ForwardPairHMM(seqsA[i][0],seqsA[i][1], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].first);
 		f2 = new ForwardPairHMM(seqsA[i][1],seqsA[i][2], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].second);
@@ -247,6 +251,7 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 		}
 	}
 
+	DUMP("Best values a " << alphas[aBest] << " k " << kappas[kBest] << " l " << lambdas[lBest] << " e " << epsilons[eBest] << " t "<< timeMult[tBest]);
 	//found the best combination
 	//Run fwd+bwd to get posteriors!
 	substModel->setAlpha(alphas[aBest]);
@@ -263,13 +268,18 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 		hmmsA[i].second->runAlgorithm();
 		//now backward!
 
+		DUMP("Model Estimator First bwd calc");
 		BackwardPairHMM* bw1 = new BackwardPairHMM(seqsA[i][0],seqsA[i][1], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].first);
-		BackwardPairHMM* bw2 = new BackwardPairHMM(seqsA[i][1],seqsA[i][2], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].first);
-
+		bw1->setDivergenceTime(distancesA[i][0]*timeMult[tBest]);
 		bw1->runAlgorithm();
+		DUMP("Model Estimator Second bwd calc");
+		BackwardPairHMM* bw2 = new BackwardPairHMM(seqsA[i][1],seqsA[i][2], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].first);
+		bw2->setDivergenceTime(distancesA[i][1]*timeMult[tBest]);
 		bw2->runAlgorithm();
 
+		DUMP("Model Estimator First Pair Posteriors");
 		bw1->calculatePosteriors(dynamic_cast<ForwardPairHMM*>(hmmsA[i].first));
+		DUMP("Model Estimator Second Pair Posteriors");
 		bw2->calculatePosteriors(dynamic_cast<ForwardPairHMM*>(hmmsA[i].second));
 
 		delete hmmsA[i].first;
@@ -283,9 +293,9 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 	delete substModel;
 }
 
+*/
 
 
-/*
 void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 {
 	DEBUG("EstimateTripleAligment");
@@ -362,7 +372,7 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 		delete indelModel;
 		delete substModel;
 }
-*/
+
 
 
 ModelEstimator::~ModelEstimator()
