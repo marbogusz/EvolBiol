@@ -149,7 +149,9 @@ double ViterbiPairHMM::runAlgorithm()
 	DUMP("Final Viterbi X  " << mx );
 	DUMP("Final Viterbi Y  " << my );
 
-return (std::max(mm,std::max(mx,my)))*-1.0;
+	this->setTotalLikelihood(std::max(mm,std::max(mx,my)));
+
+return getTotalLikelihood()*-1.0;
 }
 
 pair<string, string> ViterbiPairHMM::getAlignment(string&a, string& b)

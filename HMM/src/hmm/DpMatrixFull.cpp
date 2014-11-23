@@ -150,7 +150,7 @@ void EBC::DpMatrixFull::outputValues(unsigned int bound=0)
 		for(unsigned int j=0; j < yl; j++)
 		{
 			TraceStep& ts = matrixData[i][j];
-			sstr << setprecision(3) << std::fixed << ts.score << "\t";
+			sstr << setprecision(3) << std::fixed << exp(ts.score) << "\t";
 		}
 		sstr << endl;
 	}

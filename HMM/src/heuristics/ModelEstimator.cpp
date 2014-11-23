@@ -32,7 +32,7 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 
 	this->estimateTripleAlignment(model);
 
-	//throw HmmException("Test quits");
+	throw HmmException("Test quits");
 
 	sme = new SubstitutionModelEstimator(inputSeqs, model ,ot, rateCategories, alpha, estimateAlpha, tripletIdxs.size());
 
@@ -140,7 +140,7 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 	//do Viterbi using the estimates
 	//construct triplets
 }
-/*
+
 void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 {
 	DEBUG("EstimateTripleAligment");
@@ -161,12 +161,17 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 			substModel = new AminoacidSubstitutionModel(dict, maths,gammaRateCategories,Definitions::aaLgModel);
 	}
 
-	vector<double> alphas = {0.5, 1.0, 3.0};
-	vector<double> kappas = {1.5, 3};
-	vector<double> lambdas ={0.02, 0.05};
-	vector<double> epsilons = {0.3, 0.6};
+	//vector<double> alphas = {0.5, 1.0, 3.0};
+	//vector<double> kappas = {1.5, 3};
+	//vector<double> lambdas ={0.02, 0.05};
+	//vector<double> epsilons = {0.3, 0.6};
+
+	vector<double> alphas = {3.0};
+	vector<double> kappas = {3};
+	vector<double> lambdas ={0.02};
+	vector<double> epsilons = {0.6};
 	//time multipliers
-	vector<double> timeMult = {0.4, 1.0, 1.6};
+	vector<double> timeMult = {0.4, 1.0};
 
 	int aBest, kBest, lBest, eBest, tBest;
 
@@ -220,7 +225,7 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 	for(int a=0; a < alphas.size(); a++)
 	{
 		substModel->setAlpha(alphas[a]);
-		for(int k=0; aaMode ? 1 : k < kappas.size(); k++)
+		for(int k=0; k < 1; k++)
 		{
 			substModel->setParameters({kappas[k]});
 			substModel->calculateModel();
@@ -288,14 +293,22 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 		hmmsA[i].first = bw1;
 		hmmsA[i].second = bw2;
 
+		ERROR("Ready to sample");
+
+		auto al = bw1->sampleAlignment(inputSequences->getRawSequenceAt(tripletIdxs[i][0]), inputSequences->getRawSequenceAt(tripletIdxs[i][1]));
+
+		//DUMP("alignment ");
+		cerr << al.first;
+		cerr << al.second;
+
 	}
 	delete indelModel;
 	delete substModel;
 }
 
-*/
 
 
+/*
 void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 {
 	DEBUG("EstimateTripleAligment");
@@ -373,7 +386,7 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 		delete substModel;
 }
 
-
+*/
 
 ModelEstimator::~ModelEstimator()
 {

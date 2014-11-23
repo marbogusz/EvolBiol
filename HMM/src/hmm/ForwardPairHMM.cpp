@@ -178,6 +178,7 @@ double ForwardPairHMM::runAlgorithm()
 	sX = X->getValueAt(xSize-1, ySize-1);
 	sY = Y->getValueAt(xSize-1, ySize-1);
 	sS = maths->logSum(sM,sX,sY);
+	this->setTotalLikelihood(sS);
 
 	//cerr << "\t" << sX << "\t" << sY << "\t"<< sM << "\t" << sS << endl;
 

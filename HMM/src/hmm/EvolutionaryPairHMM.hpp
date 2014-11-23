@@ -70,7 +70,8 @@ protected:
 	vector<SequenceElement> seq2;
 	vector<SequenceElement>::iterator itS1, itS2;
 
-
+	//cumulative likelihood for all 3 matrices
+	double totalLikelihood;
 
 	//the following assumes a fix HMM structure
 	virtual void setTransitionProbabilities();
@@ -128,6 +129,14 @@ public:
 	PairwiseHmmStateBase* getY()
 	{
 		return Y;
+	}
+
+	double getTotalLikelihood() const {
+		return totalLikelihood;
+	}
+
+	void setTotalLikelihood(double totalLikelihood) {
+		this->totalLikelihood = totalLikelihood;
 	}
 };
 
