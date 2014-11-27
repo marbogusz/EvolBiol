@@ -18,7 +18,7 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 				gtree(new GuideTree(inputSeqs)), tst(*gtree)
 {
 	DEBUG("About to sample some triplets");
-	DEBUG("Sampling triplets osf sequences for gamma shape parameter estimation");
+	DEBUG("Sampling triplets of sequences for gamma shape parameter estimation");
 	
 	maths = new Maths();
 	dict = inputSequences->getDictionary();
@@ -161,35 +161,26 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 			substModel = new AminoacidSubstitutionModel(dict, maths,gammaRateCategories,Definitions::aaLgModel);
 	}
 
-	//vector<double> alphas = {0.5, 1.0, 3.0};
-	//vector<double> kappas = {1.5, 3};
-	//vector<double> lambdas ={0.02, 0.05};
-	//vector<double> epsilons = {0.3, 0.6};
-
-	vector<double> alphas = {3.0};
+	vector<double> alphas = {0.75};
+	vector<double> kappas = {2.5};
+	vector<double> lambdas ={0.02, 0.05};
+	vector<double> epsilons = {0.3, 0.6};
 	vector<double> kappas = {3};
-	vector<double> lambdas ={0.02};
-	vector<double> epsilons = {0.6};
-	//time multipliers
-	vector<double> timeMult = {0.4, 1.0};
+	vector<double> timeMult = {1.0, 2.0};
 
 	int aBest, kBest, lBest, eBest, tBest;
 
-	DEBUG("Setting Frequencies");
 	substModel->setObservedFrequencies(inputSequences->getElementFrequencies());
-
 
 	double lnlBest = std::numeric_limits<double>::max();
 
-
 	indelModel = new NegativeBinomialGapModel();
-	//FIXME - hardcodes
-	indelModel->setParameters({0.05, 0.5});
 
 	vector<pair<Band*, Band*> > bandPairs(tripletIdxs.size());
 	vector<array<vector<SequenceElement>,3> > seqsA(tripletIdxs.size());
 	vector<array<double,3> > distancesA(tripletIdxs.size());
 	vector<pair<EvolutionaryPairHMM*, EvolutionaryPairHMM*>> hmmsA(tripletIdxs.size());
+
 
 	for (int i = 0; i < tripletIdxs.size(); i++)
 	{
@@ -213,7 +204,7 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 		distancesA[i][2] = gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][0],tripletIdxs[i][2]);
 
 
-//bandPairs[i] = make_pair(new Band(len1,len2),new Band(len2,len3));
+		//bandPairs[i] = make_pair(new Band(len1,len2),new Band(len2,len3));
 		bandPairs[i] = make_pair(nullptr,nullptr);
 
 		f1 = new ForwardPairHMM(seqsA[i][0],seqsA[i][1], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].first);
@@ -225,7 +216,7 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 	for(int a=0; a < alphas.size(); a++)
 	{
 		substModel->setAlpha(alphas[a]);
-		for(int k=0; k < 1; k++)
+		for(int k=0; k < kappas.size(); k++)
 		{
 			substModel->setParameters({kappas[k]});
 			substModel->calculateModel();
@@ -241,6 +232,15 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 							hmmsA[h].first->setDivergenceTime(distancesA[h][0]*timeMult[t]);
 							hmmsA[h].second->setDivergenceTime(distancesA[h][1]*timeMult[t]);
 							lnl += hmmsA[h].first->runAlgorithm() + hmmsA[h].second->runAlgorithm();
+
+							/*
+							BackwardPairHMM* bw1 = new BackwardPairHMM(seqsA[h][0],seqsA[h][1], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[h].first);
+							bw1->setDivergenceTime(distancesA[h][0]*timeMult[t]);
+							bw1->runAlgorithm();
+							DUMP(" POSTERIORS for the first pair alpha " << alphas[a]  << " lambda " << lambdas[l] << " epsilon " << epsilons[e] << " timeM "<< timeMult[t]);
+							bw1->calculatePosteriors(dynamic_cast<ForwardPairHMM*>(hmmsA[h].first));
+							delete bw1;
+							*/
 						}
 						if (lnl < lnlBest)
 						{
@@ -259,6 +259,7 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 	DUMP("Best values a " << alphas[aBest] << " k " << kappas[kBest] << " l " << lambdas[lBest] << " e " << epsilons[eBest] << " t "<< timeMult[tBest]);
 	//found the best combination
 	//Run fwd+bwd to get posteriors!
+/*
 	substModel->setAlpha(alphas[aBest]);
 	substModel->setParameters({kappas[kBest]});
 	substModel->calculateModel();
@@ -293,17 +294,18 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 		hmmsA[i].first = bw1;
 		hmmsA[i].second = bw2;
 
-		ERROR("Ready to sample");
+		//ERROR("Ready to sample");
 
-		auto al = bw1->sampleAlignment(inputSequences->getRawSequenceAt(tripletIdxs[i][0]), inputSequences->getRawSequenceAt(tripletIdxs[i][1]));
+		//auto al = bw1->sampleAlignment(inputSequences->getRawSequenceAt(tripletIdxs[i][0]), inputSequences->getRawSequenceAt(tripletIdxs[i][1]));
 
 		//DUMP("alignment ");
-		cerr << al.first;
-		cerr << al.second;
+		//cerr << al.first;
+		//cerr << al.second;
 
 	}
 	delete indelModel;
 	delete substModel;
+*/
 }
 
 

@@ -32,24 +32,8 @@ GuideTree::~GuideTree()
 
 double GuideTree::kimuraDist(double id)
 {
-		double p = 1 - id;
-	// Typical case: use Kimura's empirical formula
-		//if (p < 0.75)
-			return -log(1 - p - (p*p)/5);
-
-	// Per ClustalW, return 10.0 for anything over 93%
-	//	if (p > 0.93)
-	//		return 10.0;
-
-	// If p >= 0.75, use table lookup
-	//	assert(p <= 1 && p >= 0.75);
-	// Thanks for Michael Hoel for pointing out a bug
-	// in the table index calculation in versions <= 3.52.
-	//	int iTableIndex = (int) ((p - 0.75)*1000 + 0.5);
-	//	if (iTableIndex < 0 || iTableIndex >= iTableEntries)
-	//		Quit("Internal error in MSADistKimura::ComputeDist");
-
-	//	return dayhoff_pams[iTableIndex] / 100.0;
+	//TODO delete this method
+	return 0;
 }
 
 void GuideTree::constructTree()
@@ -73,18 +57,13 @@ void GuideTree::constructTree()
 			string s1 = inputSequences->getRawSequenceAt(i);
 			string s2 = inputSequences->getRawSequenceAt(j);
 			identity = 1.0 - commonKmerCount(i,j)/((double)(min(s1.size(),s2.size())));
-			//estIdentity = log(0.02 + identity)/4.12 + 0.995;
-			//kimura = kimuraDist(estIdentity);
 
-			//DEBUG("k-mer distance between seq. " << i << " and " << j << " is " << identity << " " << -log(0.02 + identity) << " " << -log(0.1 + identity)  << " "<< estIdentity << " " << kimura );
+			if(dict->getAlphabetSize() == Definitions::nucleotideCount)
+				estIdentity = this->nucFunction(identity);
+			else if(dict->getAlphabetSize() == Definitions::aminoacidCount)
+				estIdentity = aaFunction(identity);
 
-			//if(dict->getAlphabetSize() == Definitions::nucleotideCount)
-				estIdentity = identity;
-				//estIdentity = nucFunction(identity);
-			//else if(dict->getAlphabetSize() == Definitions::aminoacidCount)
-			//	estIdentity = aaFunction(identity);
-
-			DUMP("k-mer distance between seq. " << i << " and " << j << " is " << identity << " " << estIdentity );
+			DUMP("k-mer distance between seq. " << i << " and " << j << " is " << identity << " adjusted distance " << estIdentity );
 
 			distMat->addDistance(i,j,estIdentity);
 		}

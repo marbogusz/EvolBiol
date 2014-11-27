@@ -78,6 +78,7 @@ void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 	DUMP("Delete");
 	dynamic_cast<DpMatrixFull*>(Y->getDpMatrix())->outputValues(0);
 
+/*
 	for (int i=0;i<10;i++)
 		for(int j=0;j<10;j++)
 		{
@@ -91,7 +92,7 @@ void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 			dl = exp(Y->getValueAt(i,j+1)) + exp(Y->getValueAt(i+1,j)) + exp(Y->getValueAt(i+1,j+1));
 			DUMP(" M " << mt << " I " << in << " D " << dl << "\t\t\t Total " << (mt+in+dl) );
 		}
-
+*/
 }
 
 pair<string, string>& BackwardPairHMM::sampleAlignment(string&seq_a, string& seq_b)

@@ -106,19 +106,21 @@ void EBC::DpMatrixFull::outputValues(unsigned int bound=0)
 	stringstream sstr;
 
 	sstr << endl;
-/*
+
 	for(unsigned int i=0; i < xSize; i++)
 	{
 		for(unsigned int j=0; j < ySize; j++)
 		{
 			TraceStep& ts = matrixData[i][j];
 
-			if (ts.score >= -10)
+			if (ts.score >= -3)
 			{
 				if (ts.score > -1)
 					sstr << "1";
+
 				else if (ts.score > -2)
 					sstr << "2";
+				/*
 				else if (ts.score > -3)
 					sstr << "3";
 				else if (ts.score > -4)
@@ -131,16 +133,18 @@ void EBC::DpMatrixFull::outputValues(unsigned int bound=0)
 					sstr << "7";
 				else if (ts.score > -8)
 					sstr << "8";
+					*/
 				else
-					sstr << "9";
+					sstr << "3";
+
 			}
 			else
 				sstr << ".";
 		}
 			sstr << endl;
 	}
-	*/
 
+/*
 	for(unsigned int k=0; k < yl; k++)
 		sstr << k << "\t";
 	sstr << endl;
@@ -154,7 +158,7 @@ void EBC::DpMatrixFull::outputValues(unsigned int bound=0)
 		}
 		sstr << endl;
 	}
-
+*/
 	DUMP(sstr.str());
 }
 

@@ -19,12 +19,20 @@ class TreeGenerator:
         self.fullTaxonSet = []
         for i in range(100):
             self.fullTaxonSet.append('S'+str(i))
+    def get_birth_rate_from_expected_height(self, ntips, expected_height):
+        tip_sum = 0
+        for i in range(2, ntips + 1):
+            tip_sum += float(ntips) / i
+        return tip_sum / (expected_height * ntips)
 
     def rescaleTree(self, tree, factor):
         nds = [nd for nd in tree.postorder_node_iter()]
         for i, n in enumerate(nds):
             n.edge_length = round(random.gauss(n.edge_length*factor, n.edge_length*0.1*factor),3) 
             #n.edge_length = random.gauss(n.edge_length*factor, n.edge_length*0.1*factor) 
+
+    def getTreeByHeight(self, size, th):
+        return self.getTree(size,self.get_birth_rate_from_expected_height(size,th))
 
     def getTree(self, size, birthParam):
         tree = treesim.birth_death(birth_rate=birthParam, death_rate=0, taxon_set=dendropy.TaxonSet(self.fullTaxonSet[0:size]))
@@ -53,7 +61,7 @@ class HmmDistanceGenerator:
         self.steps = 15
         self.cores = 3;
         self.indelible_binary = 'indelible'
-        self.hmm_binary = 'HMMestBF3'
+        self.hmm_binary = 'HMMestBF4'
         self.hmm_base_params = ['--lD', '-F','--in']
         self.hmm_misc_params = ['-b', '1', '-o', '0', '--bf', '20']
         self.hmm_alpha_params = ['--rateCat', '5', '--initAlpha']
@@ -92,110 +100,12 @@ class HmmDistanceGenerator:
         self.gamma = 'gamma'
 
         print("HMM analysis for {} steps with {} replicates.".format(self.steps,self.replicates))
-
-    def getAlpha(self):
-        return round(random.uniform(0.1,4.0),3)
-      
-    def getLambda(self):
-        ret = round(random.gauss(0.03,0.02),3)
-        while ret  <= 0:
-            ret = round(random.gauss(0.03,0.02),3)
-        return ret
-
-        return round(random.gauss(0.03,0.02),3)
-      
-    def getEpsilon(self):
-        return round(random.uniform(0.25,0.75),3)
-    
-    def getNucleotideFrequencies(self):
-        f1=f2=f3=f4=-1.0
-        while f1  <= 0:
-            f1 = round(random.gauss(0.25,0.1),3)
-        while f2  <= 0 or f1+f2 > 1.0:
-            f2 = round(random.gauss(0.25,0.1),3)
-        while f3  <= 0 or f1+f2+f3 > 1.0:
-            f3 = round(random.gauss(0.25,0.1),3)
-        f4 = round(1.0 -f1 -f2 -f3,3);
-        return [f1,f2,f3,f4]
-    def getRevRates(self):
-        a=b=c=d=e=f=-1.0;
-        while a  <= 0:
-            a = round(random.gauss(0.9,0.3),3)
-        while b  <= 0:
-            b = round(random.gauss(0.9,0.3),3)
-        while c  <= 0:
-            c = round(random.gauss(0.9,0.3),3)
-        while d  <= 0:
-            d = round(random.gauss(0.9,0.3),3)
-        while e  <= 0:
-            e = round(random.gauss(0.9,0.3),3)
-        return [a,b,c,d,e]
-
-    def alignMafft(self, fid):
-        curr_file  = self.indelible_output + '_' + str(fid+1) + '_1.fas' 
-        mafft_file = 'mafft_' + str(fid+1) + '.fas'
-        if os.path.isfile(mafft_file):
-            return
-        mfd = open(mafft_file,'w')
-        subprocess.call([self.mafft_exec, curr_file],stdout=mfd,stderr=self.logfile)
-        mfd.close()
-
-    def alignMuscle(self, fid):
-        curr_file  = self.indelible_output + '_' + str(fid+1) +'_1.fas' 
-        muscle_file = 'muscle_' + str(fid+1) + '.fas'
-        if os.path.isfile(muscle_file):
-            return
-        subprocess.call([self.muscle_exec, '-in', curr_file, '-out', muscle_file],stdout=self.logfile,stderr=self.logfile)
-
-
-    def alignPrank(self, fid):
-        curr_file  = self.indelible_output + '_' + str(fid+1) +'_1.fas' 
-        prank_file = 'prank_' + str(fid+1)
-        if os.path.isfile(prank_file):
-            return
-        subprocess.call([self.prank_exec, '-d='+curr_file, '-o='+prank_file],stdout=self.logfile,stderr=self.logfile)
-    
-    def alignBatch(self, count):
-        for i in range(count):
-            self.alignMafft(i)
-            self.alignMuscle(i)
-            #self.alignPrank(i)
-    
-    def parseControl(self, filename, ind, sub):
-        ctl = open(filename,'r')
-        if ctl:
-            contents = ctl.read()
-        else:
-            print('cannot open ' + filename)
-
-        #get GTR section and numbers
-        pSub = re.compile(r'\s+\[submodel\]\s+GTR\s+([0-9.]+)\s+([0-9.]+)\s+([0-9.]+)\s+([0-9.]+)\s+([0-9.]+).*')
-        #get inndels
-        pLam = re.compile(r'\s+\[insertrate\]\s+([0-9.]+).*')
-        pEps = re.compile(r'\s+\[indelmodel\]\s+NB\s+([0-9.]+).*')
-
-        #get alpha 
-        pAlp = re.compile(r'\s+\[rates\]\s+0\s+([0-9.]+).*');
-
-        if self.model == 'GTR':
-            mg = pSub.search(contents)
-            sub.append(mg.group(1))
-            sub.append(mg.group(2))
-            sub.append(mg.group(3))
-            sub.append(mg.group(4))
-            sub.append(mg.group(5))
-
-        ml = pLam.search(contents)
-        me = pEps.search(contents)
-    
-        if(ml and me):
-            ind.append(ml.group(1))
-            ind.append(me.group(1))
-        ma = pAlp.search(contents)
-        if ma:
-            alp = ma.group(1)
-        return alp
-
+        
+    def run(self):
+        self.simulate(self.steps,self.replicates,self.model);
+        self.calculate(self.steps,self.replicates,self.model);
+        self.analyzeOutput(self.steps,self.replicates,self.model);
+        
     def simulate(self, s,r,modelname):
     
         ifile = open(self.file_prefix+modelname+self.gamma+self.file_suffix, 'r')
@@ -205,10 +115,11 @@ class HmmDistanceGenerator:
     
         while s > 0:
             s -= 1
+            
+            treeHeight = s + 1
+            #birth_rate = 0.1 * (s+1)
         
-            birth_rate = 0.1 * (s+1)
-        
-            current_dir = str(self.taxaNo) + '_taxa_' + self.model_suffix + '_' + str(self.seq_len) + '_' + str(round(birth_rate,1)) + '_Indelible_' + str(r) 
+            current_dir = str(self.taxaNo) + '_taxa_' + self.model_suffix + '_' + str(self.seq_len) + '_' + str(treeHeight) + '_Indelible_' + str(r) 
             if os.path.exists(current_dir):
                 print('Simulation direcory ' + current_dir + ' exists. Skipping\n') 
                 index +=1
@@ -218,7 +129,7 @@ class HmmDistanceGenerator:
 
             for rpl in range(r):
 
-                tree = self.treegen.getTree(self.taxaNo,birth_rate)
+                tree = self.treegen.getTreeByHeight(self.taxaNo,treeHeight)
                 ofile = open('control.txt', 'w');
 
                 p1 = re.compile('(\(.*\)).*')
@@ -255,29 +166,41 @@ class HmmDistanceGenerator:
                 subprocess.call('indelible',stdout=self.logfile,stderr=self.logfile)
                 os.chdir('..')
             index+=1
+    def calculate(self, s, r, model):
+        while s > 0:
+            #birth_rate = 0.1 * s
+            treeHeight = s
+            print("**********Calculation step {}".format(treeHeight))
+            current_dir = str(self.taxaNo) + '_taxa_' + self.model_suffix + '_' + str(self.seq_len) + '_' + str(treeHeight) + '_Indelible_' + str(r) 
+            os.chdir(current_dir)
+            #self.runHMMbatch(r,outfile_all,True)
+            #self.runHMMbatch(r)
+            self.alignBatch(r)
+            self.runRaxml(r)
+            os.chdir('..');
+            s -= 1
+        self.logfile.close()
+      #if (not onlyPaml):
+      #    outfile_all.close()
+      #    outfile_ltd.close()
 
-    def writeRF(self,fd,bd,dist,which):
-        fd.write(str(bd)+'\t' +str(dist) + '\t' + which + '\n')
-
-    def writeTD(self, fd,bd,dist1, dist2,which):
-        fd.write(str(bd)+'\t' +str(dist1) + '\t' +str(dist2) + '\t' + which + '\n')
-    
     def analyzeOutput(self, s, r, model):
         filepref = str(self.taxaNo) + '_taxa_' + self.model_suffix + '_' + str(self.seq_len) + '_'  + str(r) 
         
         #Robinson Foulds results
-        rfname = 'stats_RF_' + filepref + '.txt'
-        tdname = 'stats_TD_' + filepref + '.txt'
+        rfname = 'RF_' + filepref + '.txt'
+        tdname = 'TD_' + filepref + '.txt'
 
         resultsRF = open(rfname,'w')
-        resultsRF.write('BirthParam\tRFDistance\talgorithm\n');
+        resultsRF.write('TreeHeight\tDistance\talgorithm\n');
         #Total Tree distance results
         resultsTD = open(tdname,'w')
-        resultsTD.write('BirthParam\tRealDistance\tInferredDistance\talgorithm\n');
+        resultsTD.write('TreeHeight\tRealDistance\tInferredDistance\talgorithm\n');
         while s > 0:
-            birth_rate = 0.1 * s
-            print("Analysis step {}".format(round(birth_rate,1)))
-            current_dir = str(self.taxaNo) + '_taxa_' + self.model_suffix + '_' + str(self.seq_len) + '_' + str(round(birth_rate,1)) + '_Indelible_' + str(r) 
+            #birth_rate = 0.1 * s
+            treeHeight = s
+            print("Analysis step {}".format(treeHeight))
+            current_dir = str(self.taxaNo) + '_taxa_' + self.model_suffix + '_' + str(self.seq_len) + '_' + str(treeHeight) + '_Indelible_' + str(r) 
             os.chdir(current_dir)
             #create trees based on results
             rmft = []
@@ -301,15 +224,15 @@ class HmmDistanceGenerator:
                 #rmus[-1].deroot()
                 #hmmt[-1].deroot()
                 
-                self.writeRF(resultsRF, birth_rate, reftree.robinson_foulds_distance(rtru[-1]), 'True+RAxML')
-                self.writeRF(resultsRF, birth_rate, reftree.robinson_foulds_distance(rmft[-1]), 'MAFFT+RaXML')
-                self.writeRF(resultsRF, birth_rate, reftree.robinson_foulds_distance(rmus[-1]), 'MUSCLE+RaXML')
-                self.writeRF(resultsRF, birth_rate, reftree.robinson_foulds_distance(hmmt[-1]), 'alignment-free_HMM')
+                self.writeRF(resultsRF, treeHeight, reftree.robinson_foulds_distance(rtru[-1]), 'True+RAxML')
+                self.writeRF(resultsRF, treeHeight, reftree.robinson_foulds_distance(rmft[-1]), 'MAFFT+RaXML')
+                self.writeRF(resultsRF, treeHeight, reftree.robinson_foulds_distance(rmus[-1]), 'MUSCLE+RaXML')
+                self.writeRF(resultsRF, treeHeight, reftree.robinson_foulds_distance(hmmt[-1]), 'alignment-free_HMM')
 
-                self.writeTD(resultsTD, birth_rate, reftree.length(), rtru[-1].length() , 'true')
-                self.writeTD(resultsTD, birth_rate, reftree.length(), rmft[-1].length() , 'mafft')
-                self.writeTD(resultsTD, birth_rate, reftree.length(), rmus[-1].length() , 'muscle')
-                self.writeTD(resultsTD, birth_rate, reftree.length(), hmmt[-1].length() , 'hmm')
+                self.writeTD(resultsTD, treeHeight, reftree.length(), rtru[-1].length() , 'true')
+                self.writeTD(resultsTD, treeHeight, reftree.length(), rmft[-1].length() , 'mafft')
+                self.writeTD(resultsTD, treeHeight, reftree.length(), rmus[-1].length() , 'muscle')
+                self.writeTD(resultsTD, treeHeight, reftree.length(), hmmt[-1].length() , 'hmm')
 
             os.chdir('..');
             s -= 1
@@ -325,23 +248,46 @@ class HmmDistanceGenerator:
         subprocess.call(['Rscript', 'graph_TDs.R',tdname, pngfile_d, pngfile_d ])
       #if (not onlyPaml):
     
-    def calculate(self, s, r, model):
-        while s > 0:
-            birth_rate = 0.1 * s
-            print("**********Calculation step {}".format(round(birth_rate,1)))
-            current_dir = str(self.taxaNo) + '_taxa_' + self.model_suffix + '_' + str(self.seq_len) + '_' + str(round(birth_rate,1)) + '_Indelible_' + str(r) 
-            os.chdir(current_dir)
-            #self.runHMMbatch(r,outfile_all,True)
-            #self.runHMMbatch(r)
-            self.alignBatch(r)
-            self.runRaxml(r)
-            os.chdir('..');
-            s -= 1
-        self.logfile.close()
-      #if (not onlyPaml):
-      #    outfile_all.close()
-      #    outfile_ltd.close()
+    def alignBatch(self, count):
+        for i in range(count):
+            self.alignMafft(i)
+            self.alignMuscle(i)
+            #self.alignPrank(i)
+    
+    def runRaxml(self, count):
+	for i in range(count):
+	    true_fc = self.indelible_output + '_' + str(i+1) +  '_TRUE_1.fas'
+            mafft_fc = 'mafft_' + str(i+1) + '.fas'
+            muscle_fc = 'muscle_' + str(i+1) + '.fas'
+            #prank_fc = 'prank_' + str(i+1) + '.best.fas'
 
+            params_true = self.raxml_params[:]
+            params_mafft = self.raxml_params[:]
+            params_muscle = self.raxml_params[:]
+            #params_prank = self.raxml_params[:]
+
+            params_true += [true_fc,'-n', 'true'+str(i+1)]
+            params_mafft += [mafft_fc,'-n', 'mafft'+str(i+1)]
+            params_muscle += [muscle_fc,'-n', 'muscle'+str(i+1)]
+            #params_prank += [prank_fc,'-n', 'prank'+str(i+1)]
+
+            threads = []
+            t = Thread(target=self.callRaxml, args=([self.raxml_bin]+params_true,))
+            threads.append(t)
+            t.start()
+            t = Thread(target=self.callRaxml, args=([self.raxml_bin]+params_mafft,))
+            threads.append(t)
+            t.start()
+            t = Thread(target=self.callRaxml, args=([self.raxml_bin]+params_muscle,))
+            threads.append(t)
+            t.start()
+            #t = Thread(target=self.callRaxml, args=([self.raxml_bin]+params_prank,))
+            #threads.append(t)
+            #t.start()
+
+            for th in threads:
+                th.join()
+                
     def runHMMbatch(self, count):
         i = 0
         while i < count:
@@ -389,45 +335,119 @@ class HmmDistanceGenerator:
         subprocess.call(params,stdout=self.logfile,stderr=self.logfile)
 
       
-    def runRaxml(self, count):
-	for i in range(count):
-	    true_fc = self.indelible_output + '_' + str(i+1) +  '_TRUE_1.fas'
-            mafft_fc = 'mafft_' + str(i+1) + '.fas'
-            muscle_fc = 'muscle_' + str(i+1) + '.fas'
-            #prank_fc = 'prank_' + str(i+1) + '.best.fas'
+                
+    def alignMafft(self, fid):
+        curr_file  = self.indelible_output + '_' + str(fid+1) + '_1.fas' 
+        mafft_file = 'mafft_' + str(fid+1) + '.fas'
+        if os.path.isfile(mafft_file):
+            return
+        mfd = open(mafft_file,'w')
+        subprocess.call([self.mafft_exec, curr_file],stdout=mfd,stderr=self.logfile)
+        mfd.close()
 
-            params_true = self.raxml_params[:]
-            params_mafft = self.raxml_params[:]
-            params_muscle = self.raxml_params[:]
-            #params_prank = self.raxml_params[:]
+    def alignMuscle(self, fid):
+        curr_file  = self.indelible_output + '_' + str(fid+1) +'_1.fas' 
+        muscle_file = 'muscle_' + str(fid+1) + '.fas'
+        if os.path.isfile(muscle_file):
+            return
+        subprocess.call([self.muscle_exec, '-in', curr_file, '-out', muscle_file],stdout=self.logfile,stderr=self.logfile)
 
-            params_true += [true_fc,'-n', 'true'+str(i+1)]
-            params_mafft += [mafft_fc,'-n', 'mafft'+str(i+1)]
-            params_muscle += [muscle_fc,'-n', 'muscle'+str(i+1)]
-            #params_prank += [prank_fc,'-n', 'prank'+str(i+1)]
 
-            threads = []
-            t = Thread(target=self.callRaxml, args=([self.raxml_bin]+params_true,))
-            threads.append(t)
-            t.start()
-            t = Thread(target=self.callRaxml, args=([self.raxml_bin]+params_mafft,))
-            threads.append(t)
-            t.start()
-            t = Thread(target=self.callRaxml, args=([self.raxml_bin]+params_muscle,))
-            threads.append(t)
-            t.start()
-            #t = Thread(target=self.callRaxml, args=([self.raxml_bin]+params_prank,))
-            #threads.append(t)
-            #t.start()
+    def alignPrank(self, fid):
+        curr_file  = self.indelible_output + '_' + str(fid+1) +'_1.fas' 
+        prank_file = 'prank_' + str(fid+1)
+        if os.path.isfile(prank_file):
+            return
+        subprocess.call([self.prank_exec, '-d='+curr_file, '-o='+prank_file],stdout=self.logfile,stderr=self.logfile)
+    
 
-            for th in threads:
-                th.join()
 
-    def run(self):
-        self.simulate(self.steps,self.replicates,self.model);
-        self.calculate(self.steps,self.replicates,self.model);
-        self.analyzeOutput(self.steps,self.replicates,self.model);
+    def getAlpha(self):
+        return round(random.uniform(0.1,4.0),3)
+      
+    def getLambda(self):
+        ret = round(random.gauss(0.03,0.02),3)
+        while ret  <= 0:
+            ret = round(random.gauss(0.03,0.02),3)
+        return ret
 
+        return round(random.gauss(0.03,0.02),3)
+      
+    def getEpsilon(self):
+        return round(random.uniform(0.25,0.75),3)
+    
+    def getNucleotideFrequencies(self):
+        f1=f2=f3=f4=-1.0
+        while f1  <= 0:
+            f1 = round(random.gauss(0.25,0.1),3)
+        while f2  <= 0 or f1+f2 > 1.0:
+            f2 = round(random.gauss(0.25,0.1),3)
+        while f3  <= 0 or f1+f2+f3 > 1.0:
+            f3 = round(random.gauss(0.25,0.1),3)
+        f4 = round(1.0 -f1 -f2 -f3,3);
+        return [f1,f2,f3,f4]
+    def getRevRates(self):
+        a=b=c=d=e=f=-1.0;
+        while a  <= 0:
+            a = round(random.gauss(0.9,0.3),3)
+        while b  <= 0:
+            b = round(random.gauss(0.9,0.3),3)
+        while c  <= 0:
+            c = round(random.gauss(0.9,0.3),3)
+        while d  <= 0:
+            d = round(random.gauss(0.9,0.3),3)
+        while e  <= 0:
+            e = round(random.gauss(0.9,0.3),3)
+        return [a,b,c,d,e]
+
+
+    
+    def parseControl(self, filename, ind, sub):
+        ctl = open(filename,'r')
+        if ctl:
+            contents = ctl.read()
+        else:
+            print('cannot open ' + filename)
+
+        #get GTR section and numbers
+        pSub = re.compile(r'\s+\[submodel\]\s+GTR\s+([0-9.]+)\s+([0-9.]+)\s+([0-9.]+)\s+([0-9.]+)\s+([0-9.]+).*')
+        #get inndels
+        pLam = re.compile(r'\s+\[insertrate\]\s+([0-9.]+).*')
+        pEps = re.compile(r'\s+\[indelmodel\]\s+NB\s+([0-9.]+).*')
+
+        #get alpha 
+        pAlp = re.compile(r'\s+\[rates\]\s+0\s+([0-9.]+).*');
+
+        if self.model == 'GTR':
+            mg = pSub.search(contents)
+            sub.append(mg.group(1))
+            sub.append(mg.group(2))
+            sub.append(mg.group(3))
+            sub.append(mg.group(4))
+            sub.append(mg.group(5))
+
+        ml = pLam.search(contents)
+        me = pEps.search(contents)
+    
+        if(ml and me):
+            ind.append(ml.group(1))
+            ind.append(me.group(1))
+        ma = pAlp.search(contents)
+        if ma:
+            alp = ma.group(1)
+        return alp
+
+    
+    def writeRF(self,fd,bd,dist,which):
+        fd.write(str(bd)+'\t' +str(dist) + '\t' + which + '\n')
+
+    def writeTD(self, fd,bd,dist1, dist2,which):
+        fd.write(str(bd)+'\t' +str(dist1) + '\t' +str(dist2) + '\t' + which + '\n')
+    
+
+
+    
+    
 if __name__ == "__main__":
     if len(sys.argv) != 5:
         print('Usage: ' + sys.argv[0] + ' numberTaxa seqence_length replicate_no model')
