@@ -68,6 +68,8 @@ protected:
 	TripletAligner* tal;
 	ViterbiPairHMM* vphmm;
 
+	vector<pair<EvolutionaryPairHMM*, EvolutionaryPairHMM*>> posteriorHmms;
+
 	vector<array<vector<SequenceElement>, 3> > tripleAlignments;
 
 	vector<array<string, 3> > alignments;

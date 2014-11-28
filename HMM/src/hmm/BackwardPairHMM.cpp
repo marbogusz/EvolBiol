@@ -95,7 +95,7 @@ void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 */
 }
 
-pair<string, string>& BackwardPairHMM::sampleAlignment(string&seq_a, string& seq_b)
+pair<string, string>* BackwardPairHMM::sampleAlignment(string&seq_a, string& seq_b)
 {
 	//FIXME - reference from stack
 	if (!posteriorsCalculated)
@@ -107,21 +107,19 @@ pair<string, string>& BackwardPairHMM::sampleAlignment(string&seq_a, string& seq
 	cerr << xSize << endl;
 	cerr << ySize << endl;
 
-	string s1;
-	string s2;
-	s1.reserve(max(xSize,ySize)*1.2);
-	s2.reserve(max(xSize,ySize)*1.2);
-	pair<string, string> alignment = make_pair(s1,s2);
+	pair<string, string>* alignment = new pair<string,string>();
+	alignment->first.reserve(max(xSize,ySize)*1.2);
+	alignment->second.reserve(max(xSize,ySize)*1.2);
+
 
 	std::random_device rd;
 	std::mt19937 gen(rd());
-	std::uniform_real_distribution<> dis(1, 2);
 
 	unsigned i = 0;
 	unsigned j = 0;
 	double mt,in,dl, rnbr;
 
-	while(i < xSize-1 || j < ySize-1)
+	while(i < xSize-1 && j < ySize-1)
 	{
 		//get probabilities
 		mt = exp(M->getValueAt(i,j+1)) + exp(M->getValueAt(i+1,j)) + exp(M->getValueAt(i+1,j+1));
@@ -130,29 +128,44 @@ pair<string, string>& BackwardPairHMM::sampleAlignment(string&seq_a, string& seq
 
 		std::uniform_real_distribution<> dis(0, mt+in+dl);
 		rnbr = dis(gen);
-		cerr << " M " << mt << " I " << in << " D " << dl << "Sampled " << rnbr;
+		//cerr << " M " << mt << " I " << in << " D " << dl << "Sampled " << rnbr << endl;
 		if (rnbr <= mt){
-			alignment.first += seq_a[i];
-			alignment.second += seq_b[j];
+			alignment->first += seq_a[i];
+			alignment->second += seq_b[j];
 			i++;
 			j++;
 		}
 
 		else if(rnbr <= mt+in){
-			alignment.first += seq_a[i];
-			alignment.second += '-';
+			alignment->first += seq_a[i];
+			alignment->second += '-';
 			i++;
 		}
 		else{
-			alignment.first += '-';
-			alignment.second += seq_b[j];
+			alignment->first += '-';
+			alignment->second += seq_b[j];
 			j++;
 		}
-		cerr << alignment.first << i << endl;
-		cerr << alignment.second << j << endl;
 	}
 
-	cerr << "DONE" << endl;
+	if (i != xSize-1){
+		while(i< xSize-1){
+			alignment->first += seq_a[i];
+			alignment->second += '-';
+			i++;
+		}
+	}
+	else if (j != ySize-1){
+		while(j< ySize-1){
+			alignment->second += seq_b[j];
+			alignment->first += '-';
+			j++;
+		}
+	}
+
+	//cerr << alignment->first << i << endl;
+	//cerr << alignment->second << j << endl;
+
 	return alignment;
 }
 

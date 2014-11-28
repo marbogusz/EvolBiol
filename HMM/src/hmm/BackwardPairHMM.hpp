@@ -47,7 +47,7 @@ public:
 
 	void calculatePosteriors(ForwardPairHMM* fwd);
 
-	pair<string,string>& sampleAlignment(string&a, string& b);
+	pair<string,string>* sampleAlignment(string&a, string& b);
 
 };
 

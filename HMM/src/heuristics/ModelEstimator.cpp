@@ -27,6 +27,8 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 
 	tripletIdxs = tst.sampleFromTree();
 
+	posteriorHmms.resize(tripletIdxs.size());
+
     chrono::time_point<chrono::system_clock> start, end;
     start = chrono::system_clock::now();
 
@@ -165,7 +167,6 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 	vector<double> kappas = {2.5};
 	vector<double> lambdas ={0.02, 0.05};
 	vector<double> epsilons = {0.3, 0.6};
-	vector<double> kappas = {3};
 	vector<double> timeMult = {1.0, 2.0};
 
 	int aBest, kBest, lBest, eBest, tBest;
@@ -179,8 +180,6 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 	vector<pair<Band*, Band*> > bandPairs(tripletIdxs.size());
 	vector<array<vector<SequenceElement>,3> > seqsA(tripletIdxs.size());
 	vector<array<double,3> > distancesA(tripletIdxs.size());
-	vector<pair<EvolutionaryPairHMM*, EvolutionaryPairHMM*>> hmmsA(tripletIdxs.size());
-
 
 	for (int i = 0; i < tripletIdxs.size(); i++)
 	{
@@ -210,7 +209,9 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 		f1 = new ForwardPairHMM(seqsA[i][0],seqsA[i][1], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].first);
 		f2 = new ForwardPairHMM(seqsA[i][1],seqsA[i][2], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].second);
 
-		hmmsA[i] = make_pair(f1,f2);
+
+		(posteriorHmms[i]).first = f1;
+		(posteriorHmms[i]).second = f2;
 	}
 
 	for(int a=0; a < alphas.size(); a++)
@@ -227,11 +228,11 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 					for(int t=0; t < timeMult.size(); t++)
 					{
 						double lnl = 0;
-						for(int h=0; h < hmmsA.size(); h++)
+						for(int h=0; h < posteriorHmms.size(); h++)
 						{
-							hmmsA[h].first->setDivergenceTime(distancesA[h][0]*timeMult[t]);
-							hmmsA[h].second->setDivergenceTime(distancesA[h][1]*timeMult[t]);
-							lnl += hmmsA[h].first->runAlgorithm() + hmmsA[h].second->runAlgorithm();
+							posteriorHmms[h].first->setDivergenceTime(distancesA[h][0]*timeMult[t]);
+							posteriorHmms[h].second->setDivergenceTime(distancesA[h][1]*timeMult[t]);
+							lnl += posteriorHmms[h].first->runAlgorithm() + posteriorHmms[h].second->runAlgorithm();
 
 							/*
 							BackwardPairHMM* bw1 = new BackwardPairHMM(seqsA[h][0],seqsA[h][1], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[h].first);
@@ -259,19 +260,19 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 	DUMP("Best values a " << alphas[aBest] << " k " << kappas[kBest] << " l " << lambdas[lBest] << " e " << epsilons[eBest] << " t "<< timeMult[tBest]);
 	//found the best combination
 	//Run fwd+bwd to get posteriors!
-/*
+
 	substModel->setAlpha(alphas[aBest]);
 	substModel->setParameters({kappas[kBest]});
 	substModel->calculateModel();
 	indelModel->setParameters({lambdas[lBest], epsilons[eBest]});
 
-	for(int i=0; i < hmmsA.size(); i++)
+	for(int i=0; i < posteriorHmms.size(); i++)
 	{
-		hmmsA[i].first->setDivergenceTime(distancesA[i][0]*timeMult[tBest]);
-		hmmsA[i].second->setDivergenceTime(distancesA[i][1]*timeMult[tBest]);
+		posteriorHmms[i].first->setDivergenceTime(distancesA[i][0]*timeMult[tBest]);
+		posteriorHmms[i].second->setDivergenceTime(distancesA[i][1]*timeMult[tBest]);
 		//forward probs
-		hmmsA[i].first->runAlgorithm();
-		hmmsA[i].second->runAlgorithm();
+		posteriorHmms[i].first->runAlgorithm();
+		posteriorHmms[i].second->runAlgorithm();
 		//now backward!
 
 		DUMP("Model Estimator First bwd calc");
@@ -284,28 +285,28 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 		bw2->runAlgorithm();
 
 		DUMP("Model Estimator First Pair Posteriors");
-		bw1->calculatePosteriors(dynamic_cast<ForwardPairHMM*>(hmmsA[i].first));
+		bw1->calculatePosteriors(dynamic_cast<ForwardPairHMM*>(posteriorHmms[i].first));
 		DUMP("Model Estimator Second Pair Posteriors");
-		bw2->calculatePosteriors(dynamic_cast<ForwardPairHMM*>(hmmsA[i].second));
+		bw2->calculatePosteriors(dynamic_cast<ForwardPairHMM*>(posteriorHmms[i].second));
 
-		delete hmmsA[i].first;
-		delete hmmsA[i].second;
+		delete posteriorHmms[i].first;
+		delete posteriorHmms[i].second;
 
-		hmmsA[i].first = bw1;
-		hmmsA[i].second = bw2;
+		posteriorHmms[i].first = bw1;
+		posteriorHmms[i].second = bw2;
 
 		//ERROR("Ready to sample");
 
 		//auto al = bw1->sampleAlignment(inputSequences->getRawSequenceAt(tripletIdxs[i][0]), inputSequences->getRawSequenceAt(tripletIdxs[i][1]));
 
 		//DUMP("alignment ");
-		//cerr << al.first;
-		//cerr << al.second;
+		//cerr << al->first;
+		//cerr << al->second;
 
 	}
 	delete indelModel;
 	delete substModel;
-*/
+
 }
 
 
@@ -397,6 +398,11 @@ ModelEstimator::~ModelEstimator()
     delete ste;
     delete gtree;
     delete tal;
+
+    for (auto p : posteriorHmms ){
+    	delete p.first;
+    	delete p.second;
+    }
 }
 
 vector<double> ModelEstimator::getSubstitutionParameters()
