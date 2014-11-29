@@ -61,11 +61,11 @@ protected:
 public:
 	SubstitutionModelEstimator(Sequences* inputSeqs, Definitions::ModelType model,
 			Definitions::OptimizationType ot,unsigned int rateCategories, double alpha,
-			bool estimateAlpha, unsigned int sampleCount);
+			bool estimateAlpha, unsigned int matCount);
 
 	virtual ~SubstitutionModelEstimator();
 
-	void addTriplet(array<vector<SequenceElement>, 3>& tripleAlignment);
+	void addTriplet(array<vector<SequenceElement>, 3> tripleAlignment, unsigned int tiplet);
 
 	double runIteration();
 

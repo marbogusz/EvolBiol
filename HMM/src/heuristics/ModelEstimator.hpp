@@ -76,11 +76,15 @@ protected:
 
 	vector<array<unsigned int, 3> > tripletIdxs;
 
+	vector<vector<array<vector<SequenceElement>,4> > >smpldPairs;
+
 	unsigned int gammaRateCategories;
 
 	bool estimateAlpha;
 
 	void estimateTripleAlignment(Definitions::ModelType model);
+
+	array<vector<SequenceElement>, 3> sampleTripleAlignment(unsigned int triplet);
 
 public:
 	ModelEstimator(Sequences* inputSeqs, Definitions::ModelType model,
@@ -88,6 +92,8 @@ public:
 			unsigned int rateCategories, double alpha, bool estimateAlpha);
 
 	virtual ~ModelEstimator();
+
+
 
 	vector<double> getSubstitutionParameters();
 	vector<double> getIndelParameters();

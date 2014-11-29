@@ -44,7 +44,9 @@ public:
 
 	void calculateParameters();
 
-	StateTransitionML(IndelModel* im, vector<SequenceElement>&s1, vector<SequenceElement>& s2, double time);
+	StateTransitionML(IndelModel* im, double time);
+
+	void addSample(vector<SequenceElement>&s1, vector<SequenceElement>& s2);
 
 	double getLnL();
 };

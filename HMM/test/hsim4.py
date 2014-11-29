@@ -9,6 +9,7 @@ import subprocess
 import shutil
 import re
 from threading import Thread
+from multiprocessing import Process
 
 
 #print(tree.as_newick_string())
@@ -104,7 +105,7 @@ class HmmDistanceGenerator:
     def run(self):
         self.simulate(self.steps,self.replicates,self.model);
         self.calculate(self.steps,self.replicates,self.model);
-        self.analyzeOutput(self.steps,self.replicates,self.model);
+        #self.analyzeOutput(self.steps,self.replicates,self.model);
         
     def simulate(self, s,r,modelname):
     
@@ -167,7 +168,31 @@ class HmmDistanceGenerator:
                 os.chdir('..')
             index+=1
     def calculate(self, s, r, model):
-        while s > 0:
+
+        step_range = self.steps / self.cores
+        reminder = s - (self.cores * step_range)
+        print('Step range ' + str(step_range))
+
+        threads  = []
+        for i in range(self.cores):
+            start = 1 + (i*step_range)
+            end = step_range + (i*step_range)
+            if(i == self.cores-1):
+                end += reminder
+            #t = Thread(target=self.calcThread, args=(start,end,r,model,))
+            t = Process(target=self.calcThread, args=(start,end,r,model,))
+            threads.append(t)
+            t.start()
+
+        for th in threads:
+            th.join()
+        self.logfile.close()
+
+    def calcThread(self,idx_start, idx_end, r, model):
+        s = idx_start
+        os.chdir(sys.path[0])
+        print "I am", idx_start, "and my cwd is:", os.getcwd()
+        while s <= idx_end:
             #birth_rate = 0.1 * s
             treeHeight = s
             print("**********Calculation step {}".format(treeHeight))
@@ -178,8 +203,7 @@ class HmmDistanceGenerator:
             self.alignBatch(r)
             self.runRaxml(r)
             os.chdir('..');
-            s -= 1
-        self.logfile.close()
+            s += 1
       #if (not onlyPaml):
       #    outfile_all.close()
       #    outfile_ltd.close()
@@ -271,23 +295,26 @@ class HmmDistanceGenerator:
             params_muscle += [muscle_fc,'-n', 'muscle'+str(i+1)]
             #params_prank += [prank_fc,'-n', 'prank'+str(i+1)]
 
-            threads = []
-            t = Thread(target=self.callRaxml, args=([self.raxml_bin]+params_true,))
-            threads.append(t)
-            t.start()
-            t = Thread(target=self.callRaxml, args=([self.raxml_bin]+params_mafft,))
-            threads.append(t)
-            t.start()
-            t = Thread(target=self.callRaxml, args=([self.raxml_bin]+params_muscle,))
-            threads.append(t)
-            t.start()
+            #threads = []
+            #t = Thread(target=self.callRaxml, args=([self.raxml_bin]+params_true,))
+            #threads.append(t)
+            #t.start()
+            #t = Thread(target=self.callRaxml, args=([self.raxml_bin]+params_mafft,))
+            #threads.append(t)
+            #t.start()
+            #t = Thread(target=self.callRaxml, args=([self.raxml_bin]+params_muscle,))
+            #threads.append(t)
+            #t.start()
             #t = Thread(target=self.callRaxml, args=([self.raxml_bin]+params_prank,))
             #threads.append(t)
             #t.start()
 
-            for th in threads:
-                th.join()
-                
+            #for th in threads:
+            #    th.join()
+            self.callRaxml(*([self.raxml_bin]+params_muscle))
+            self.callRaxml(*([self.raxml_bin]+params_true))
+            self.callRaxml(*([self.raxml_bin]+params_mafft))
+
     def runHMMbatch(self, count):
         i = 0
         while i < count:

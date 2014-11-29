@@ -5,6 +5,7 @@
  *      Author: root
  */
 
+#include "core/Dictionary.hpp"
 #include "heuristics/ModelEstimator.hpp"
 #include <chrono>
 #include <array>
@@ -28,111 +29,57 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 	tripletIdxs = tst.sampleFromTree();
 
 	posteriorHmms.resize(tripletIdxs.size());
+	smpldPairs.resize(tripletIdxs.size());
 
     chrono::time_point<chrono::system_clock> start, end;
     start = chrono::system_clock::now();
 
 	this->estimateTripleAlignment(model);
 
-	throw HmmException("Test quits");
-
 	sme = new SubstitutionModelEstimator(inputSeqs, model ,ot, rateCategories, alpha, estimateAlpha, tripletIdxs.size());
 
-	for(int al = 0; al < tripleAlignments.size(); al++)
+	for(unsigned int al = 0; al < tripletIdxs.size(); al++)
 	{
-		sme->addTriplet(tripleAlignments[al]);
+		for (unsigned int i=0; i < Definitions::modelEstimatorPathSamples; i++)
+			sme->addTriplet(sampleTripleAlignment(al),al);
 	}
-
 	sme->optimize();
 
 	double tb1,tb2,tb3;
 
-	ste = new StateTransitionEstimator(ot);
+	ste = new StateTransitionEstimator(ot, tripleAlignments.size()*2);
 
 	for(int al = 0; al < tripleAlignments.size(); al++)
 	{
-
 		tb1 = sme->getModelParams()->getDivergenceTime(al*3);
 		tb2 = sme->getModelParams()->getDivergenceTime((al*3)+1);
 		tb3 = sme->getModelParams()->getDivergenceTime((al*3)+2);
 
+		ste->addTime(tb1+tb2,al,0);
+		ste->addTime(tb2+tb3,al,1);
+
 		DEBUG(tb1 << " " << tb2 << " " << tb3);
-		ste->addPair(tripleAlignments[al][0],tripleAlignments[al][1],tb1+tb2);
-		ste->addPair(tripleAlignments[al][1],tripleAlignments[al][2],tb2+tb3);
+		for (unsigned int i=0; i < Definitions::modelEstimatorPathSamples; i++)
+		{
+			ste->addPair(smpldPairs[al][i][0],smpldPairs[al][i][1],al,0);
+			ste->addPair(smpldPairs[al][i][2],smpldPairs[al][i][3],al,1);
+		}
 	}
+
 	ste->optimize();
 
 	DEBUG("Re-estimating model parameters");
 	//make another pass
 	tripleAlignments.clear();
 
-
 	indelModel =  ste->getIndelModel();
 	substModel =  sme->getSubstModel();
-	
-	//indelModel->summarize();
 
-
-	for (int idx = 0; idx < tripletIdxs.size(); idx++)
-	{
-
-//		DEBUG("First Viterbi Pair " << idx);
-		vphmm = new ViterbiPairHMM(inputSeqs->getSequencesAt(tripletIdxs[idx][0]), inputSeqs->getSequencesAt(tripletIdxs[idx][1]), substModel, indelModel);
-		tb1 = sme->getModelParams()->getDivergenceTime(idx*3);
-		tb2 = sme->getModelParams()->getDivergenceTime((idx*3)+1);
-		tb3 = sme->getModelParams()->getDivergenceTime((idx*3)+2);
-
-		vphmm->setDivergenceTime(tb1+tb2);
-		//vphmm->summarize();
-		vphmm->runAlgorithm();
-		auto p1 =  vphmm->getAlignment(inputSeqs->getRawSequenceAt(tripletIdxs[idx][0]), inputSeqs->getRawSequenceAt(tripletIdxs[idx][1]));
-		delete vphmm;
-//		DEBUG("Second Viterbi Pair " << idx);
-		vphmm = new ViterbiPairHMM(inputSeqs->getSequencesAt(tripletIdxs[idx][1]), inputSeqs->getSequencesAt(tripletIdxs[idx][2]), substModel, indelModel);
-		vphmm->setDivergenceTime(tb2+tb3);
-		vphmm->runAlgorithm();
-		auto p2 =  vphmm->getAlignment(inputSeqs->getRawSequenceAt(tripletIdxs[idx][1]), inputSeqs->getRawSequenceAt(tripletIdxs[idx][2]));
-		delete vphmm;
-		tripleAlignments.push_back(tal->align(p1,p2));
-		//tripleAlignments.push_back(tal.align());
-	}
-
-	delete sme;
-	delete ste;
-
-
-
-	sme = new SubstitutionModelEstimator(inputSeqs, model ,ot, rateCategories, alpha, estimateAlpha, tripletIdxs.size());
-
-	for(int al = 0; al < tripleAlignments.size(); al++)
-	{
-		sme->addTriplet(tripleAlignments[al]);
-	}
-
-	sme->optimize();
-
-	ste = new StateTransitionEstimator(ot);
-
-	for(int al = 0; al < tripleAlignments.size(); al++)
-	{
-		tb1 = sme->getModelParams()->getDivergenceTime(al*3);
-		tb2 = sme->getModelParams()->getDivergenceTime((al*3)+1);
-		tb3 = sme->getModelParams()->getDivergenceTime((al*3)+2);
-		ste->addPair(tripleAlignments[al][0],tripleAlignments[al][1],tb1+tb2);
-		ste->addPair(tripleAlignments[al][1],tripleAlignments[al][2],tb2+tb3);
-	}
-	ste->optimize();
-
-	//end time measurments here!
 	end = chrono::system_clock::now();
     chrono::duration<double> elapsed_seconds = end-start;
 
     INFO("Model Estimator elapsed time: " << elapsed_seconds.count() << " seconds");
     cerr <<  "|||||||||||| Model Estimator elapsed time: " << elapsed_seconds.count() << "s ||||||||||||||\n";
-
-
-	indelModel =  ste->getIndelModel();
-	substModel =  sme->getSubstModel();
 
 	//substModel->summarize();
 	//indelModel->summarize();
@@ -390,6 +337,24 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 }
 
 */
+
+array<vector<SequenceElement>, 3> ModelEstimator::sampleTripleAlignment(unsigned int triplet)
+{
+	Dictionary* di = inputSequences->getDictionary();
+
+	pair<string,string> p1 = dynamic_cast<BackwardPairHMM*>(posteriorHmms[triplet].first)->sampleAlignment(inputSequences->getRawSequenceAt(tripletIdxs[triplet][0]), inputSequences->getRawSequenceAt(tripletIdxs[triplet][1]));
+	pair<string,string> p2 = dynamic_cast<BackwardPairHMM*>(posteriorHmms[triplet].second)->sampleAlignment(inputSequences->getRawSequenceAt(tripletIdxs[triplet][1]), inputSequences->getRawSequenceAt(tripletIdxs[triplet][2]));
+
+
+
+
+	smpldPairs[triplet].push_back({di->translate(p1.first), di->translate(p1.second),
+		di->translate(p2.first), di->translate(p2.second)});
+
+	//TODO - do only 1 translation - pass translated seqs to tal
+	return tal->align(p1,p2);
+}
+
 
 ModelEstimator::~ModelEstimator()
 {

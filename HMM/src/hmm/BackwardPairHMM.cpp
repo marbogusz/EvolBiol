@@ -95,21 +95,21 @@ void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 */
 }
 
-pair<string, string>* BackwardPairHMM::sampleAlignment(string&seq_a, string& seq_b)
+pair<string, string> BackwardPairHMM::sampleAlignment(string&seq_a, string& seq_b)
 {
 	//FIXME - reference from stack
 	if (!posteriorsCalculated)
 		throw HmmException("Error - attempting to sample an alignment  without calculating posterior probabilities");
 
-	cerr << seq_a << endl;
-	cerr << seq_b << endl;
+	//cerr << seq_a << endl;
+	//cerr << seq_b << endl;
 
-	cerr << xSize << endl;
-	cerr << ySize << endl;
+	//cerr << xSize << endl;
+	//cerr << ySize << endl;
 
-	pair<string, string>* alignment = new pair<string,string>();
-	alignment->first.reserve(max(xSize,ySize)*1.2);
-	alignment->second.reserve(max(xSize,ySize)*1.2);
+	pair<string, string> alignment;
+	alignment.first.reserve(max(xSize,ySize)*1.2);
+	alignment.second.reserve(max(xSize,ySize)*1.2);
 
 
 	std::random_device rd;
@@ -130,35 +130,35 @@ pair<string, string>* BackwardPairHMM::sampleAlignment(string&seq_a, string& seq
 		rnbr = dis(gen);
 		//cerr << " M " << mt << " I " << in << " D " << dl << "Sampled " << rnbr << endl;
 		if (rnbr <= mt){
-			alignment->first += seq_a[i];
-			alignment->second += seq_b[j];
+			alignment.first += seq_a[i];
+			alignment.second += seq_b[j];
 			i++;
 			j++;
 		}
 
 		else if(rnbr <= mt+in){
-			alignment->first += seq_a[i];
-			alignment->second += '-';
+			alignment.first += seq_a[i];
+			alignment.second += '-';
 			i++;
 		}
 		else{
-			alignment->first += '-';
-			alignment->second += seq_b[j];
+			alignment.first += '-';
+			alignment.second += seq_b[j];
 			j++;
 		}
 	}
 
 	if (i != xSize-1){
 		while(i< xSize-1){
-			alignment->first += seq_a[i];
-			alignment->second += '-';
+			alignment.first += seq_a[i];
+			alignment.second += '-';
 			i++;
 		}
 	}
 	else if (j != ySize-1){
 		while(j< ySize-1){
-			alignment->second += seq_b[j];
-			alignment->first += '-';
+			alignment.second += seq_b[j];
+			alignment.first += '-';
 			j++;
 		}
 	}

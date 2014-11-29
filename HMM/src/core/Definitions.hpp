@@ -48,6 +48,9 @@ public:
 	constexpr static const double defaultGapPenalty = 0.5;
 
 	constexpr static const unsigned int stateCount = 3;
+
+	constexpr static const unsigned int modelEstimatorPathSamples = 10;
+
 	constexpr static const unsigned int heuristicsTreeSize = 3;
 
 	constexpr static const double divergenceBound = 3.5;

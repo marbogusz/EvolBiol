@@ -18,8 +18,8 @@ namespace EBC
 
 SubstitutionModelEstimator::SubstitutionModelEstimator(Sequences* inputSeqs, Definitions::ModelType model,
 		Definitions::OptimizationType ot,unsigned int rateCategories, double alpha,
-		bool estimateAlpha, unsigned int sampleCount) :
-				inputSequences(inputSeqs), gammaRateCategories(rateCategories), patterns(sampleCount), ptMatrices(sampleCount)
+		bool estimateAlpha, unsigned int matCount) :
+				inputSequences(inputSeqs), gammaRateCategories(rateCategories), patterns(matCount), ptMatrices(matCount)
 
 
 {
@@ -73,21 +73,22 @@ SubstitutionModelEstimator::~SubstitutionModelEstimator()
 	}
 }
 
-void SubstitutionModelEstimator::addTriplet(array<vector<SequenceElement>, 3>& tripleAlignment)
+void SubstitutionModelEstimator::addTriplet(array<vector<SequenceElement>, 3> tripleAlignment, unsigned int trp)
 {
 	for(int pos = 0; pos < tripleAlignment[0].size(); pos++)
 	{
-		patterns[currentTriplet][{{tripleAlignment[0][pos].getMatrixIndex(), tripleAlignment[1][pos].getMatrixIndex(),tripleAlignment[2][pos].getMatrixIndex()}}]++;
+		patterns[trp][{{tripleAlignment[0][pos].getMatrixIndex(), tripleAlignment[1][pos].getMatrixIndex(),tripleAlignment[2][pos].getMatrixIndex()}}]++;
 	}
-	ptMatrices[currentTriplet][0] = new PMatrixTriple(substModel);
-	ptMatrices[currentTriplet][1] = new PMatrixTriple(substModel);
-	ptMatrices[currentTriplet][2] = new PMatrixTriple(substModel);
-
-	currentTriplet++;
 }
 
 void SubstitutionModelEstimator::optimize()
 {
+	for(auto mt : ptMatrices){
+		mt[0] = new PMatrixTriple(substModel);
+		mt[1] = new PMatrixTriple(substModel);
+		mt[2] = new PMatrixTriple(substModel);
+	}
+
 	bfgs->optimize();
 	INFO("SubstitutionModelEstimator results:");
 	modelParams->logParameters();
