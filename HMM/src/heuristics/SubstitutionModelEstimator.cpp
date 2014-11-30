@@ -24,7 +24,8 @@ SubstitutionModelEstimator::SubstitutionModelEstimator(Sequences* inputSeqs, Def
 
 {
 
-	DEBUG("Starting Substitution Model Estimator");
+	DEBUG("Starting Substitution Model Estimator (SME)");
+	DUMP("SME estimate alpha : " << estimateAlpha << " alpha value " << alpha);
 
 	this->estimateSubstitutionParams = true;
 	this->estimateAlpha = estimateAlpha;
@@ -38,14 +39,17 @@ SubstitutionModelEstimator::SubstitutionModelEstimator(Sequences* inputSeqs, Def
 	if (model == Definitions::ModelType::GTR)
 	{
 		substModel = new GTRModel(dict, maths,gammaRateCategories);
+		DUMP("SME: Creating new GTR model");
 	}
 	else if (model == Definitions::ModelType::HKY85)
 	{
 		substModel = new HKY85Model(dict, maths,gammaRateCategories);
+		DUMP("SME: Creating new HKY model");
 	}
 	else if (model == Definitions::ModelType::LG)
 	{
 			substModel = new AminoacidSubstitutionModel(dict, maths,gammaRateCategories,Definitions::aaLgModel);
+			DUMP("SME: Creating new LG model");
 	}
 
 	substModel->setObservedFrequencies(inputSequences->getElementFrequencies());
@@ -54,6 +58,12 @@ SubstitutionModelEstimator::SubstitutionModelEstimator(Sequences* inputSeqs, Def
 			false, estimateAlpha, true, maths);
 
 	modelParams->setAlpha(alpha);
+
+	for(int i = 0; i < ptMatrices.size(); i++){
+		ptMatrices[i][0]  = new PMatrixTriple(substModel);
+		ptMatrices[i][1]  = new PMatrixTriple(substModel);
+		ptMatrices[i][2]  = new PMatrixTriple(substModel);
+	}
 
 	bfgs = new Optimizer(modelParams, this,ot);
 }
@@ -83,11 +93,6 @@ void SubstitutionModelEstimator::addTriplet(array<vector<SequenceElement>, 3> tr
 
 void SubstitutionModelEstimator::optimize()
 {
-	for(auto mt : ptMatrices){
-		mt[0] = new PMatrixTriple(substModel);
-		mt[1] = new PMatrixTriple(substModel);
-		mt[2] = new PMatrixTriple(substModel);
-	}
 
 	bfgs->optimize();
 	INFO("SubstitutionModelEstimator results:");

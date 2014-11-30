@@ -14,6 +14,7 @@
 //#define DEBUG_BUILD 1
 
 #define DUMP(x) do { FileLogger::DumpLogger() << "   [DUMP]\t" << x << "\n"; } while (0)
+//#define DUMP(x) do {} while (0)
 #define DEBUG(x) do { FileLogger::DebugLogger() << "  [DEBUG]\t" << x << "\n"; } while (0)
 #define INFO(x) do { FileLogger::InfoLogger() << " [INFO]\t"  << x<< "\n"; } while (0)
 #define WARN(x) do { FileLogger::WarningLogger() << "! [WARN]\t"  << x << "\n"; } while (0)
@@ -49,7 +50,7 @@ public:
 
 	constexpr static const unsigned int stateCount = 3;
 
-	constexpr static const unsigned int modelEstimatorPathSamples = 10;
+	constexpr static const unsigned int modelEstimatorPathSamples = 1;
 
 	constexpr static const unsigned int heuristicsTreeSize = 3;
 

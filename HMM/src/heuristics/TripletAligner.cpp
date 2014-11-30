@@ -69,11 +69,10 @@ void TripletAligner::assembleFromPairs(pair<string, string>& p1,
 	triAlignment[1] = inputSeqs->getDictionary()->translate(tr2, false);
 	triAlignment[2] = inputSeqs->getDictionary()->translate(tr3, false);
 
-	DEBUG("Triplet alignment : ");
-	DEBUGN(tr1 << endl);
-	DEBUGN(tr2 << endl);
-	DEBUGN(tr3 << endl);
-	DEBUGN(endl);
+	DUMP("Triplet alignment : ");
+	DUMP(tr1);
+	DUMP(tr2);
+	DUMP(tr3);
 
 }
 

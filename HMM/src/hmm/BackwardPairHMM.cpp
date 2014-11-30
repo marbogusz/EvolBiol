@@ -71,12 +71,12 @@ void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 
 	posteriorsCalculated = true;
 
-	DUMP("Match");
-	dynamic_cast<DpMatrixFull*>(M->getDpMatrix())->outputValues(0);
-	DUMP("Insert");
-	dynamic_cast<DpMatrixFull*>(X->getDpMatrix())->outputValues(0);
-	DUMP("Delete");
-	dynamic_cast<DpMatrixFull*>(Y->getDpMatrix())->outputValues(0);
+	//DUMP("Match");
+	//dynamic_cast<DpMatrixFull*>(M->getDpMatrix())->outputValues(0);
+	//DUMP("Insert");
+	//dynamic_cast<DpMatrixFull*>(X->getDpMatrix())->outputValues(0);
+	//DUMP("Delete");
+	//dynamic_cast<DpMatrixFull*>(Y->getDpMatrix())->outputValues(0);
 
 /*
 	for (int i=0;i<10;i++)

@@ -116,6 +116,8 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 	vector<double> epsilons = {0.3, 0.6};
 	vector<double> timeMult = {1.0, 2.0};
 
+	double tmpd;
+
 	int aBest, kBest, lBest, eBest, tBest;
 
 	substModel->setObservedFrequencies(inputSequences->getElementFrequencies());
@@ -134,24 +136,37 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 		//tripletIdxs[idx][1] //second  index
 		//tripletIdxs[idx][2] //third  index
 
-		seqsA[i][0] = inputSequences->getSequencesAt(tripletIdxs[i][0]),
+		seqsA[i][0] = inputSequences->getSequencesAt(tripletIdxs[i][0]);
+		DUMP("Triplet " << i << " sequence 1:");
+		DUMP(inputSequences->getRawSequenceAt(tripletIdxs[i][0]));
 		seqsA[i][1] = inputSequences->getSequencesAt(tripletIdxs[i][1]);
+		DUMP("Triplet " << i << " sequence 2:");
+		DUMP(inputSequences->getRawSequenceAt(tripletIdxs[i][1]));
 		seqsA[i][2] = inputSequences->getSequencesAt(tripletIdxs[i][2]);
+		DUMP("Triplet " << i << " sequence 3:");
+		DUMP(inputSequences->getRawSequenceAt(tripletIdxs[i][2]));
 
 		unsigned int len1 = seqsA[i][0].size();
 		unsigned int len2 = seqsA[i][1].size();
 		unsigned int len3 = seqsA[i][2].size();
 
 		//0-1
-		distancesA[i][0] = gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][0],tripletIdxs[i][1]);
+		tmpd = gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][0],tripletIdxs[i][1]);
+		DUMP("Triplet " << i << " guide distance between seq 1 and 2 " << tmpd);
+		distancesA[i][0] = tmpd;
 		//1-2
-		distancesA[i][1] = gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][1],tripletIdxs[i][2]);
+		tmpd = gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][1],tripletIdxs[i][2]);
+		DUMP("Triplet " << i << " guide distance between seq 2 and 3 " << tmpd);
+		distancesA[i][1] = tmpd;
 		//0-2
-		distancesA[i][2] = gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][0],tripletIdxs[i][2]);
 
 
+		 tmpd = gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][0],tripletIdxs[i][2]);
+		 DUMP("Triplet " << i << " guide distance between seq 1 and 3 " << tmpd);
+		 distancesA[i][2] = tmpd;
 		//bandPairs[i] = make_pair(new Band(len1,len2),new Band(len2,len3));
 		bandPairs[i] = make_pair(nullptr,nullptr);
+
 
 		f1 = new ForwardPairHMM(seqsA[i][0],seqsA[i][1], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].first);
 		f2 = new ForwardPairHMM(seqsA[i][1],seqsA[i][2], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].second);
@@ -177,6 +192,7 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 						double lnl = 0;
 						for(int h=0; h < posteriorHmms.size(); h++)
 						{
+							DUMP("Triplet " << h << " forward calculation for alpha " << alphas[a] << " k " << kappas[k] << " l " << lambdas[l] << " e " << epsilons[e] << " t "<< timeMult[t]);
 							posteriorHmms[h].first->setDivergenceTime(distancesA[h][0]*timeMult[t]);
 							posteriorHmms[h].second->setDivergenceTime(distancesA[h][1]*timeMult[t]);
 							lnl += posteriorHmms[h].first->runAlgorithm() + posteriorHmms[h].second->runAlgorithm();
@@ -215,6 +231,7 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 
 	for(int i=0; i < posteriorHmms.size(); i++)
 	{
+		DUMP("Triplet " << i << " re-calculating forward likelihoods for the best parameters");
 		posteriorHmms[i].first->setDivergenceTime(distancesA[i][0]*timeMult[tBest]);
 		posteriorHmms[i].second->setDivergenceTime(distancesA[i][1]*timeMult[tBest]);
 		//forward probs
@@ -222,18 +239,18 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 		posteriorHmms[i].second->runAlgorithm();
 		//now backward!
 
-		DUMP("Model Estimator First bwd calc");
+		DUMP("Triplet " << i <<  " model Estimator First backward calculation");
 		BackwardPairHMM* bw1 = new BackwardPairHMM(seqsA[i][0],seqsA[i][1], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].first);
 		bw1->setDivergenceTime(distancesA[i][0]*timeMult[tBest]);
 		bw1->runAlgorithm();
-		DUMP("Model Estimator Second bwd calc");
+		DUMP("Triplet " << i <<  " model Estimator Second backward calculation");
 		BackwardPairHMM* bw2 = new BackwardPairHMM(seqsA[i][1],seqsA[i][2], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].first);
 		bw2->setDivergenceTime(distancesA[i][1]*timeMult[tBest]);
 		bw2->runAlgorithm();
 
-		DUMP("Model Estimator First Pair Posteriors");
+		DUMP("Triplet " << i <<  " model Estimator First Pair Posteriors");
 		bw1->calculatePosteriors(dynamic_cast<ForwardPairHMM*>(posteriorHmms[i].first));
-		DUMP("Model Estimator Second Pair Posteriors");
+		DUMP("Triplet " << i <<  " model Estimator Second Pair Posteriors");
 		bw2->calculatePosteriors(dynamic_cast<ForwardPairHMM*>(posteriorHmms[i].second));
 
 		delete posteriorHmms[i].first;
@@ -345,8 +362,11 @@ array<vector<SequenceElement>, 3> ModelEstimator::sampleTripleAlignment(unsigned
 	pair<string,string> p1 = dynamic_cast<BackwardPairHMM*>(posteriorHmms[triplet].first)->sampleAlignment(inputSequences->getRawSequenceAt(tripletIdxs[triplet][0]), inputSequences->getRawSequenceAt(tripletIdxs[triplet][1]));
 	pair<string,string> p2 = dynamic_cast<BackwardPairHMM*>(posteriorHmms[triplet].second)->sampleAlignment(inputSequences->getRawSequenceAt(tripletIdxs[triplet][1]), inputSequences->getRawSequenceAt(tripletIdxs[triplet][2]));
 
-
-
+	DUMP("Sample triple alignment for triplet " << triplet);
+	DUMP("p1.1 " << p1.first);
+	DUMP("p1.2 " << p1.second);
+	DUMP("p2.1 " << p2.first);
+	DUMP("p2.2 " << p2.second);
 
 	smpldPairs[triplet].push_back({di->translate(p1.first), di->translate(p1.second),
 		di->translate(p2.first), di->translate(p2.second)});

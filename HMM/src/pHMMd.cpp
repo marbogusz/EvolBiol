@@ -53,9 +53,9 @@ int main(int argc, char ** argv) {
 
 		IParser* parser = cmdReader->getParser();
 
-		//FileLogger::DebugLogger().setCerr();
-		//FileLogger::DumpLogger().setCerr();
-		//FileLogger::InfoLogger().setCerr();
+		FileLogger::DebugLogger().setCerr();
+		FileLogger::DumpLogger().setCerr();
+		FileLogger::InfoLogger().setCerr();
 
 		INFO("Reading input sequences...");
 		DEBUG("Creating alignment object...");
@@ -117,13 +117,13 @@ int main(int argc, char ** argv) {
 			delete tme;
 			//FileLogger::Logger() << "True indel paramteres     : ";
 			//FileLogger::Logger() << cmdReader->getIndelParams() << '\n';
-			//FileLogger::Logger() << "Estimated indel paramteres: ";
-			//FileLogger::Logger() << indelParams << '\n';
+			FileLogger::Logger() << "Estimated indel paramteres: ";
+			FileLogger::Logger() << indelParams << '\n';
 			//FileLogger::Logger() << "True substitution paramteres     : ";
 			//FileLogger::Logger() << cmdReader->getSubstParams();
-			//FileLogger::Logger() << "Estimated substitution paramteres: ";
-			//FileLogger::Logger() << substParams;
-			FileLogger::Logger() << "True alpha      : " << cmdReader->getAlpha() << "\n";
+			FileLogger::Logger() << "Estimated substitution paramteres: ";
+			FileLogger::Logger() << substParams;
+			//FileLogger::Logger() << "True alpha      : " << cmdReader->getAlpha() << "\n";
 			FileLogger::Logger() << "Estimated alpha : " << alpha << "\n";
 
 
