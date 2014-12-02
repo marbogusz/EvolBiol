@@ -60,6 +60,7 @@ SubstitutionModelEstimator::SubstitutionModelEstimator(Sequences* inputSeqs, Def
 	modelParams->setAlpha(alpha);
 
 	for(int i = 0; i < ptMatrices.size(); i++){
+		DUMP("SME: creating ptMatrix");
 		ptMatrices[i][0]  = new PMatrixTriple(substModel);
 		ptMatrices[i][1]  = new PMatrixTriple(substModel);
 		ptMatrices[i][2]  = new PMatrixTriple(substModel);
@@ -85,9 +86,14 @@ SubstitutionModelEstimator::~SubstitutionModelEstimator()
 
 void SubstitutionModelEstimator::addTriplet(array<vector<SequenceElement>, 3> tripleAlignment, unsigned int trp)
 {
+	DUMP("SME : adding patterns for triplet " << trp);
 	for(int pos = 0; pos < tripleAlignment[0].size(); pos++)
 	{
 		patterns[trp][{{tripleAlignment[0][pos].getMatrixIndex(), tripleAlignment[1][pos].getMatrixIndex(),tripleAlignment[2][pos].getMatrixIndex()}}]++;
+	}
+	for (auto pat : patterns[trp])
+	{
+		DUMP("SME" << pat.first[0] << " " << pat.first[1] << " " << pat.first[2] << " : " << pat.second);
 	}
 }
 

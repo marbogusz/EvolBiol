@@ -59,10 +59,13 @@ class HmmDistanceGenerator:
         self.treegen = TreeGenerator()
         
         #indicates how many birth rate steps to generate
+        #max height 
         self.steps = 15
+        #min height 
+        self.stepmin = 8
         self.cores = 3;
         self.indelible_binary = 'indelible'
-        self.hmm_binary = 'HMMestBF4'
+        self.hmm_binary = 'HMMestBF3'
         self.hmm_base_params = ['--lD', '-F','--in']
         self.hmm_misc_params = ['-b', '1', '-o', '0', '--bf', '20']
         self.hmm_alpha_params = ['--rateCat', '5', '--initAlpha']
