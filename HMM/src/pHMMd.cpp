@@ -72,6 +72,17 @@ int main(int argc, char ** argv) {
 					cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
 					cmdReader->estimateAlpha());
 
+			vector<double> indelParams;
+			vector<double> substParams;
+			double alpha;
+
+			substParams = tme->getSubstitutionParameters();
+			indelParams = tme->getIndelParameters();
+			if(cmdReader->estimateAlpha())
+				alpha = tme->getAlpha();
+
+
+
 			//tme->getModelParameters();
 			delete tme;
 
