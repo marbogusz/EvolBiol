@@ -238,6 +238,21 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 		posteriorHmms[i].first->runAlgorithm();
 		posteriorHmms[i].second->runAlgorithm();
 
+		ViterbiPairHMM* v1 = new ViterbiPairHMM(seqsA[i][0],seqsA[i][1], substModel, indelModel, Definitions::DpMatrixType::Full);
+
+		ViterbiPairHMM* v2 = new ViterbiPairHMM(seqsA[i][1],seqsA[i][2], substModel, indelModel, Definitions::DpMatrixType::Full);
+
+		v1->setDivergenceTime(distancesA[i][0]*timeMult[tBest]);
+		v2->setDivergenceTime(distancesA[i][1]*timeMult[tBest]);
+
+		v1->runAlgorithm();
+		v2->runAlgorithm();
+
+		auto a1 = v1->getAlignment(inputSequences->getRawSequenceAt(tripletIdxs[i][0]), inputSequences->getRawSequenceAt(tripletIdxs[i][1]));
+		auto a2 = v2->getAlignment(inputSequences->getRawSequenceAt(tripletIdxs[i][1]), inputSequences->getRawSequenceAt(tripletIdxs[i][2]));
+
+		DUMP("Extra triplet viterbi : ");
+		auto al = tal->align(a1,a2);
 
 		/*
 		//now backward!

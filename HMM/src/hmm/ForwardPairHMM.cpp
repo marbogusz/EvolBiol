@@ -21,7 +21,89 @@ ForwardPairHMM::ForwardPairHMM(vector<SequenceElement> s1, vector<SequenceElemen
 ForwardPairHMM::~ForwardPairHMM()
 {
 }
+/*
+pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b)
+{
+	DUMP("Forward HMM sample alignment");
+	pair<string, string> alignment;
 
+	//reserve memory for out strings (20% of gaps should be ok)
+	alignment.first.reserve(max(xSize,ySize)*1.2);
+	alignment.second.reserve(max(xSize,ySize)*1.2);
+
+
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_real_distribution<> dis(0, 1.0);
+
+	unsigned int i = xSize-1;
+	unsigned int j = ySize-1;
+
+	double mtProb,inProb,dlProb,currProb, rnbr,tmp;
+
+	//choose initial state
+	PairwiseHmmStateBase* currentState;
+
+	mtProb = M->getValueAt(xSize-1, ySize-1) - this->getTotalLikelihood();
+	inProb = X->getValueAt(xSize-1, ySize-1) - this->getTotalLikelihood();
+	dlProb = Y->getValueAt(xSize-1, ySize-1) - this->getTotalLikelihood();
+
+	while(i > 0 && j > 0)
+	{
+
+		if(mtProb >= inProb && mtProb >= dlProb )
+			currentState = M;
+		else if (inProb >= dlProb)
+			currentState = X;
+		else currentState = Y;
+
+		currProb = currentState->getValueAt(i,j);
+		if (currentState->stateId == Definitions::StateId::Match)
+		{
+			alignment.first += seq_a[i-1];
+			alignment.second += seq_b[j-1];
+			i--;
+			j--;
+		}
+		else if (currentState->stateId == Definitions::StateId::Delete)
+		{
+			alignment.second += seq_b[j-1];
+			alignment.first += '-';
+			j--;
+		}
+		else //Insert
+		{
+			alignment.first += seq_a[i-1];
+			alignment.second += '-';
+			i--;
+		}
+		mtProb = currentState->getTransitionProbabilityFromMatch() + M->getValueAt(i,j) - currProb;
+		inProb = currentState->getTransitionProbabilityFromInsert() + X->getValueAt(i,j) - currProb;
+		dlProb = currentState->getTransitionProbabilityFromDelete() + Y->getValueAt(i,j) - currProb;
+	}
+
+	if (j==0)
+	{
+		while(i > 0){
+			alignment.first += seq_a[i-1];
+			alignment.second += '-';
+			i--;
+		}
+	}
+	else if (i==0)
+	{
+		while(j > 0){
+			alignment.second += seq_b[j-1];
+			alignment.first += '-';
+			j--;
+		}
+	}
+	//deal with the last row or column
+
+	return alignment;
+}
+
+*/
 pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b)
 {
 	DUMP("Forward HMM sample alignment");
@@ -78,7 +160,7 @@ pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b
 			alignment.second += '-';
 			i--;
 		}
-		mtProb = currentState->getTransitionProbabilityFromMatch() + currentState->getValueAt(i,j) - currProb;
+		mtProb = currentState->getTransitionProbabilityFromMatch() + M->getValueAt(i,j) - currProb;
 		inProb = currentState->getTransitionProbabilityFromInsert() + X->getValueAt(i,j) - currProb;
 		dlProb = currentState->getTransitionProbabilityFromDelete() + Y->getValueAt(i,j) - currProb;
 	}
