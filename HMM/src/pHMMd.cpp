@@ -49,7 +49,7 @@ int main(int argc, char ** argv) {
 
 		FileLogger::start(cmdReader->getLoggingLevel(), (string(cmdReader->getInputFileName()).append(".hmm.log")));
 
-		treefile.open((string(cmdReader->getInputFileName()).append(".hmm.tree")).c_str(),ios::out);
+
 
 		IParser* parser = cmdReader->getParser();
 
@@ -63,14 +63,12 @@ int main(int argc, char ** argv) {
 		Sequences* inputSeqs = new Sequences(parser, cmdReader->getSequenceType(),cmdReader->isFixedAlignment());
 		if (cmdReader->isMLE())
 		{
-			//MlEstimator* me = new MlEstimator(inputSeqs, cmdReader->getModelType() ,cmdReader->getIndelParams(),
-			//					cmdReader->getSubstParams(), cmdReader->getOptimizationType(), cmdReader->getCategories(),
-			//					cmdReader->getAlpha(), cmdReader->estimateAlpha(),cmdReader->getDistance(), cmdReader->isFixedAlignment() == false);
-			//DEBUG("Creating TripletModelEstimator");
-
+			//tme->getModelParameters();
+			INFO("Creating Model Parameters heuristics...");
 			ModelEstimator* tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),
 					cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
 					cmdReader->estimateAlpha());
+
 
 			vector<double> indelParams;
 			vector<double> substParams;
@@ -81,9 +79,7 @@ int main(int argc, char ** argv) {
 			if(cmdReader->estimateAlpha())
 				alpha = tme->getAlpha();
 
-
-
-			//tme->getModelParameters();
+			cerr << indelParams[0] << "\t" << indelParams[1] << "\n";
 			delete tme;
 
 		}
@@ -91,6 +87,7 @@ int main(int argc, char ** argv) {
 		else
 		{
 
+			treefile.open((string(cmdReader->getInputFileName()).append(".hmm.tree")).c_str(),ios::out);
 			/*
 			ForwardPairHMM* fwdHMM = new ForwardPairHMM(inputSeqs, cmdReader->getModelType() ,
 					cmdReader->getIndelParams(),cmdReader->getSubstParams(), cmdReader->getOptimizationType(),
@@ -124,15 +121,17 @@ int main(int argc, char ** argv) {
 			if(cmdReader->estimateAlpha())
 				alpha = tme->getAlpha();
 
+
+			delete tme;
 			//FileLogger::Logger() << "True indel paramteres     : ";
 			//FileLogger::Logger() << cmdReader->getIndelParams() << '\n';
-			//FileLogger::Logger() << "Estimated indel paramteres: ";
-			//FileLogger::Logger() << indelParams << '\n';
+			FileLogger::Logger() << "Estimated indel paramteres: ";
+			FileLogger::Logger() << indelParams << '\n';
 			//FileLogger::Logger() << "True substitution paramteres     : ";
 			//FileLogger::Logger() << cmdReader->getSubstParams();
-			//FileLogger::Logger() << "Estimated substitution paramteres: ";
-			//FileLogger::Logger() << substParams;
-			FileLogger::Logger() << "True alpha      : " << cmdReader->getAlpha() << "\n";
+			FileLogger::Logger() << "Estimated substitution paramteres: ";
+			FileLogger::Logger() << substParams;
+			//FileLogger::Logger() << "True alpha      : " << cmdReader->getAlpha() << "\n";
 			FileLogger::Logger() << "Estimated alpha : " << alpha << "\n";
 
 
@@ -151,7 +150,6 @@ int main(int argc, char ** argv) {
 
 			treefile.close();
 			delete be;
-			delete tme;
 
 		}
 
