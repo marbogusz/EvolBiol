@@ -26,6 +26,7 @@ SubstitutionModelEstimator::SubstitutionModelEstimator(Sequences* inputSeqs, Def
 
 	DEBUG("Starting Substitution Model Estimator (SME)");
 	DUMP("SME estimate alpha : " << estimateAlpha << " alpha value " << alpha);
+	DUMP("SME rate categories : " << rateCategories << " triplets number " << matCount);
 
 	this->estimateSubstitutionParams = true;
 	this->estimateAlpha = estimateAlpha;

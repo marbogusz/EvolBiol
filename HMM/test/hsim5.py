@@ -9,6 +9,7 @@ import subprocess
 import shutil
 import re
 from threading import Thread
+from multiprocessing import Process
 
 
 #print(tree.as_newick_string())
@@ -167,7 +168,29 @@ class HmmDistanceGenerator:
                 os.chdir('..')
             index+=1
     def calculate(self, s, r, model):
-        while s > 0:
+
+        step_range = self.steps / self.cores
+        reminder = s - (self.cores * step_range)
+        print('Step range ' + str(step_range))
+
+        i = s
+        while i > 0:
+            threads = []
+            for j in range(self.cores):
+                if i > 0:
+                    t = Process(target=self.calcThread, args=(i,r,model,))
+                    threads.append(t)
+                    t.start()
+                    i-=1
+            for th in threads:
+                th.join()
+
+        self.logfile.close()
+
+    def calcThread(self,idx, r, model):
+        os.chdir(sys.path[0])
+        s = idx
+        if idx > 0:
             #birth_rate = 0.1 * s
             treeHeight = s
             print("**********Calculation step {}".format(treeHeight))
@@ -177,12 +200,6 @@ class HmmDistanceGenerator:
             self.runHMMbatch(r)
             self.alignBatch(r)
             self.runRaxml(r)
-            os.chdir('..');
-            s -= 1
-        self.logfile.close()
-      #if (not onlyPaml):
-      #    outfile_all.close()
-      #    outfile_ltd.close()
 
     def analyzeOutput(self, s, r, model):
         filepref = str(self.taxaNo) + '_taxa_' + self.model_suffix + '_' + str(self.seq_len) + '_'  + str(r) 
@@ -271,38 +288,46 @@ class HmmDistanceGenerator:
             params_muscle += [muscle_fc,'-n', 'muscle'+str(i+1)]
             #params_prank += [prank_fc,'-n', 'prank'+str(i+1)]
 
-            threads = []
-            t = Thread(target=self.callRaxml, args=([self.raxml_bin]+params_true,))
-            threads.append(t)
-            t.start()
-            t = Thread(target=self.callRaxml, args=([self.raxml_bin]+params_mafft,))
-            threads.append(t)
-            t.start()
-            t = Thread(target=self.callRaxml, args=([self.raxml_bin]+params_muscle,))
-            threads.append(t)
-            t.start()
+            #threads = []
+            #t = Thread(target=self.callRaxml, args=([self.raxml_bin]+params_true,))
+            #threads.append(t)
+            #t.start()
+            #t = Thread(target=self.callRaxml, args=([self.raxml_bin]+params_mafft,))
+            #threads.append(t)
+            #t.start()
+            #t = Thread(target=self.callRaxml, args=([self.raxml_bin]+params_muscle,))
+            #threads.append(t)
+            #t.start()
             #t = Thread(target=self.callRaxml, args=([self.raxml_bin]+params_prank,))
             #threads.append(t)
             #t.start()
 
-            for th in threads:
-                th.join()
-                
+            #for th in threads:
+            #    th.join()
+            self.callRaxml(([self.raxml_bin]+params_muscle))
+            self.callRaxml(([self.raxml_bin]+params_true))
+            self.callRaxml(([self.raxml_bin]+params_mafft))
+
     def runHMMbatch(self, count):
         i = 0
         while i < count:
-            threads = []
-            for j in range(self.cores):
-                if i < count:
-                    clean_name = self.indelible_output + '_' + str(i+1) + '_1' + '.fas'
-                    i+=1
-                    if os.path.isfile(clean_name + '.hmm.tree'):
-                        continue 
-                    t = Thread(target=self.callHMM, args=(self.hmm_binary, clean_name,'control_'+str(i)+'.txt',))
-                    threads.append(t)
-                    t.start()
-            for th in threads:
-                th.join()
+            clean_name = self.indelible_output + '_' + str(i+1) + '_1' + '.fas'
+            i +=1
+            if os.path.isfile(clean_name + '.hmm.tree'):
+                continue 
+            self.callHMM(self.hmm_binary, clean_name,'control_'+str(i)+'.txt')
+            #threads = []
+            #for j in range(self.cores):
+            #    if i < count:
+            #        clean_name = self.indelible_output + '_' + str(i+1) + '_1' + '.fas'
+            #        i+=1
+            #        if os.path.isfile(clean_name + '.hmm.tree'):
+            #            continue 
+            #        t = Thread(target=self.callHMM, args=(self.hmm_binary, clean_name,'control_'+str(i)+'.txt',))
+            #        threads.append(t)
+            #        t.start()
+            #for th in threads:
+            #    th.join()
 
 
     def callHMM(self, executable, filename, controlfile):

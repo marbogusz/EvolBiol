@@ -49,13 +49,13 @@ int main(int argc, char ** argv) {
 
 		FileLogger::start(cmdReader->getLoggingLevel(), (string(cmdReader->getInputFileName()).append(".hmm.log")));
 
-		treefile.open((string(cmdReader->getInputFileName()).append(".hmm.tree")).c_str(),ios::out);
+
 
 		IParser* parser = cmdReader->getParser();
 
-		FileLogger::DebugLogger().setCerr();
-		FileLogger::DumpLogger().setCerr();
-		FileLogger::InfoLogger().setCerr();
+		//FileLogger::DebugLogger().setCerr();
+		//FileLogger::DumpLogger().setCerr();
+		//FileLogger::InfoLogger().setCerr();
 
 		INFO("Reading input sequences...");
 		DEBUG("Creating alignment object...");
@@ -63,16 +63,22 @@ int main(int argc, char ** argv) {
 		Sequences* inputSeqs = new Sequences(parser, cmdReader->getSequenceType(),cmdReader->isFixedAlignment());
 		if (cmdReader->isMLE())
 		{
-			//MlEstimator* me = new MlEstimator(inputSeqs, cmdReader->getModelType() ,cmdReader->getIndelParams(),
-			//					cmdReader->getSubstParams(), cmdReader->getOptimizationType(), cmdReader->getCategories(),
-			//					cmdReader->getAlpha(), cmdReader->estimateAlpha(),cmdReader->getDistance(), cmdReader->isFixedAlignment() == false);
-			//DEBUG("Creating TripletModelEstimator");
-
+			//tme->getModelParameters();
+			INFO("Creating Model Parameters heuristics...");
 			ModelEstimator* tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),
 					cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
 					cmdReader->estimateAlpha());
 
-			//tme->getModelParameters();
+			vector<double> indelParams;
+			vector<double> substParams;
+			double alpha;
+
+			substParams = tme->getSubstitutionParameters();
+			indelParams = tme->getIndelParameters();
+			if(cmdReader->estimateAlpha())
+				alpha = tme->getAlpha();
+
+			cerr << indelParams[0] << "\t" << indelParams[1] << "\n";
 			delete tme;
 
 		}
@@ -80,6 +86,7 @@ int main(int argc, char ** argv) {
 		else
 		{
 
+			treefile.open((string(cmdReader->getInputFileName()).append(".hmm.tree")).c_str(),ios::out);
 			/*
 			ForwardPairHMM* fwdHMM = new ForwardPairHMM(inputSeqs, cmdReader->getModelType() ,
 					cmdReader->getIndelParams(),cmdReader->getSubstParams(), cmdReader->getOptimizationType(),

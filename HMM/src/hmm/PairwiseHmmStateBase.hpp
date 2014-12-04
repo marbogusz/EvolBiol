@@ -35,6 +35,7 @@ protected:
 
 
 public:
+	Definitions::StateId stateId;
 
 	virtual void initializeData(bool backwards=false)=0;
 

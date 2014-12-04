@@ -237,6 +237,9 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 		//forward probs
 		posteriorHmms[i].first->runAlgorithm();
 		posteriorHmms[i].second->runAlgorithm();
+
+
+		/*
 		//now backward!
 
 		DUMP("Triplet " << i <<  " model Estimator First backward calculation");
@@ -252,12 +255,13 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 		bw1->calculatePosteriors(dynamic_cast<ForwardPairHMM*>(posteriorHmms[i].first));
 		DUMP("Triplet " << i <<  " model Estimator Second Pair Posteriors");
 		bw2->calculatePosteriors(dynamic_cast<ForwardPairHMM*>(posteriorHmms[i].second));
+		 */
 
-		delete posteriorHmms[i].first;
-		delete posteriorHmms[i].second;
+		//delete posteriorHmms[i].first;
+		//delete posteriorHmms[i].second;
 
-		posteriorHmms[i].first = bw1;
-		posteriorHmms[i].second = bw2;
+		//posteriorHmms[i].first = bw1;
+		//posteriorHmms[i].second = bw2;
 
 		//ERROR("Ready to sample");
 
@@ -272,97 +276,15 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 	delete substModel;
 
 }
-
-
-
-/*
-void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
-{
-	DEBUG("EstimateTripleAligment");
-	if (model == Definitions::ModelType::GTR || model == Definitions::ModelType::HKY85)
-	{
-			//FIXME - make model idiotproof by checking if parameters are set;
-			DEBUG("Setting HKY85");
-			this->substModel = new HKY85Model(dict, maths,gammaRateCategories);
-	}
-	else if (model == Definitions::ModelType::LG)
-	{
-			substModel = new AminoacidSubstitutionModel(dict, maths,gammaRateCategories,Definitions::aaLgModel);
-	}
-
-	DEBUG("Setting Frequencies");
-	substModel->setObservedFrequencies(inputSequences->getElementFrequencies());
-	substModel->setParameters({2.5});
-	substModel->setAlpha(0.75);
-	substModel->calculateModel();
-	DEBUG("Calculated models");
-
-	pair<string, string> p1;
-	pair<string, string> p2;
-	double lnlp1, lnlp2;
-	double tb1, tb2, tmp;
-
-
-	indelModel = new NegativeBinomialGapModel();
-	//FIXME - hardcodes
-	indelModel->setParameters({0.05, 0.5});
-
-
-		for (int idx = 0; idx < tripletIdxs.size(); idx++)
-		{
-			lnlp1 = std::numeric_limits<double>::max();
-			lnlp2 = std::numeric_limits<double>::max();
-			for (auto time : {0.25,0.5,0.75,1.0})
-			{
-				DEBUG("First Viterbi Pair " << idx << " time " << time);
-
-				vphmm = new ViterbiPairHMM(inputSequences->getSequencesAt(tripletIdxs[idx][0]), inputSequences->getSequencesAt(tripletIdxs[idx][1]),substModel, indelModel);
-				tb1 = time; //sme->getModelParams()->getDivergenceTime(idx*3);
-				tb2 = time; //sme->getModelParams()->getDivergenceTime((idx*3)+1);
-				vphmm->setDivergenceTime(tb1);
-				//vphmm->summarize();
-				vphmm->runAlgorithm();
-				tmp = vphmm->getViterbiSubstitutionLikelihood();
-				DEBUG("lnlp1 " << tmp << "\t\t" << lnlp1);
-				if(tmp < lnlp1)
-				{
-					lnlp1=tmp;
-					DEBUG("Setting pair 1 with time " << time);
-					p1 =  vphmm->getAlignment(inputSequences->getRawSequenceAt(tripletIdxs[idx][0]), inputSequences->getRawSequenceAt(tripletIdxs[idx][1]));
-				}
-				delete vphmm;
-				DEBUG("Second Viterbi Pair " << idx << " time " << time);
-	//			DEBUG("Second Viterbi Pair " << idx);
-				vphmm = new ViterbiPairHMM(inputSequences->getSequencesAt(tripletIdxs[idx][1]), inputSequences->getSequencesAt(tripletIdxs[idx][2]),substModel, indelModel);
-				vphmm->setDivergenceTime(tb2);
-				vphmm->runAlgorithm();
-				tmp = vphmm->getViterbiSubstitutionLikelihood();
-				DEBUG("lnlp2 " << tmp << "\t\t"<< lnlp2);
-				if(tmp < lnlp2)
-				{
-					lnlp2=tmp;
-					DEBUG("Setting pair 2 with time " << time);
-					p2 =  vphmm->getAlignment(inputSequences->getRawSequenceAt(tripletIdxs[idx][1]), inputSequences->getRawSequenceAt(tripletIdxs[idx][2]));
-				}
-				delete vphmm;
-				//tripleAlignments.push_back(tal.align());
-			}
-			tripleAlignments.push_back(tal->align(p1,p2));
-		}
-		delete indelModel;
-		delete substModel;
-}
-
-*/
-
 array<vector<SequenceElement>, 3> ModelEstimator::sampleTripleAlignment(unsigned int triplet)
 {
+	DUMP("Sample triple alignment for triplet " << triplet);
 	Dictionary* di = inputSequences->getDictionary();
 
-	pair<string,string> p1 = dynamic_cast<BackwardPairHMM*>(posteriorHmms[triplet].first)->sampleAlignment(inputSequences->getRawSequenceAt(tripletIdxs[triplet][0]), inputSequences->getRawSequenceAt(tripletIdxs[triplet][1]));
-	pair<string,string> p2 = dynamic_cast<BackwardPairHMM*>(posteriorHmms[triplet].second)->sampleAlignment(inputSequences->getRawSequenceAt(tripletIdxs[triplet][1]), inputSequences->getRawSequenceAt(tripletIdxs[triplet][2]));
+	pair<string,string> p1 = dynamic_cast<ForwardPairHMM*>(posteriorHmms[triplet].first)->sampleAlignment(inputSequences->getRawSequenceAt(tripletIdxs[triplet][0]), inputSequences->getRawSequenceAt(tripletIdxs[triplet][1]));
+	pair<string,string> p2 = dynamic_cast<ForwardPairHMM*>(posteriorHmms[triplet].second)->sampleAlignment(inputSequences->getRawSequenceAt(tripletIdxs[triplet][1]), inputSequences->getRawSequenceAt(tripletIdxs[triplet][2]));
 
-	DUMP("Sample triple alignment for triplet " << triplet);
+
 	DUMP("p1.1 " << p1.first);
 	DUMP("p1.2 " << p1.second);
 	DUMP("p2.1 " << p2.first);

@@ -16,6 +16,7 @@ PairwiseHmmInsertState::PairwiseHmmInsertState(unsigned int x, unsigned int y)
 	this->rows =x;
 	this->cols =y;
     this->dpMatrix = new DpMatrixFull(x,y);
+    stateId = Definitions::StateId::Insert;
 	//initializeData();
 }
 
