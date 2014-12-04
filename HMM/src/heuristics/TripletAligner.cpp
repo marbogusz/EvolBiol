@@ -15,9 +15,16 @@ namespace EBC
 void TripletAligner::assembleFromPairs(pair<string, string>& p1,
 		pair<string, string>& p2)
 {
+	DUMP("Triplet aligner pair 1");
+	DUMP(p1.first);
+	DUMP(p1.second);
+
 	string& anch1 = p1.second;
 	string& anch2 = p2.first;
 
+	DUMP("Triplet aligner pair 2");
+	DUMP(p2.first);
+	DUMP(p2.second);
 	string& p1al = p1.first;
 	string& p2al = p2.second;
 
@@ -69,10 +76,10 @@ void TripletAligner::assembleFromPairs(pair<string, string>& p1,
 	triAlignment[1] = inputSeqs->getDictionary()->translate(tr2, false);
 	triAlignment[2] = inputSeqs->getDictionary()->translate(tr3, false);
 
-	DEBUG("Triplet alignment : ");
-	DEBUGN(tr1 << endl);
-	DEBUGN(tr2 << endl);
-	DEBUGN(tr3 << endl);
+	DUMP("Triplet alignment : ");
+	DUMP(tr1);
+	DUMP(tr2);
+	DUMP(tr3);
 	DEBUGN(endl);
 
 }
