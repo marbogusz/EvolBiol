@@ -50,7 +50,7 @@ public:
 
 	constexpr static const unsigned int stateCount = 3;
 
-	constexpr static const unsigned int modelEstimatorPathSamples = 5;
+	constexpr static const unsigned int modelEstimatorPathSamples = 1;
 
 	constexpr static const unsigned int heuristicsTreeSize = 3;
 

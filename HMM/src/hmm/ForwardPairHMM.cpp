@@ -21,6 +21,7 @@ ForwardPairHMM::ForwardPairHMM(vector<SequenceElement> s1, vector<SequenceElemen
 ForwardPairHMM::~ForwardPairHMM()
 {
 }
+
 /*
 pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b)
 {
@@ -40,6 +41,7 @@ pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b
 	unsigned int j = ySize-1;
 
 	double mtProb,inProb,dlProb,currProb, rnbr,tmp;
+	double emission;
 
 	//choose initial state
 	PairwiseHmmStateBase* currentState;
@@ -60,6 +62,7 @@ pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b
 		currProb = currentState->getValueAt(i,j);
 		if (currentState->stateId == Definitions::StateId::Match)
 		{
+			emission = ptmatrix->getLogPairTransition(seq1[i-1].getMatrixIndex(), seq2[j-1].getMatrixIndex());
 			alignment.first += seq_a[i-1];
 			alignment.second += seq_b[j-1];
 			i--;
@@ -67,19 +70,21 @@ pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b
 		}
 		else if (currentState->stateId == Definitions::StateId::Delete)
 		{
+			ptmatrix->getLogEquilibriumFreq(seq2[j-1].getMatrixIndex());
 			alignment.second += seq_b[j-1];
 			alignment.first += '-';
 			j--;
 		}
 		else //Insert
 		{
+			emission = ptmatrix->getLogEquilibriumFreq(seq1[i-1].getMatrixIndex());
 			alignment.first += seq_a[i-1];
 			alignment.second += '-';
 			i--;
 		}
-		mtProb = currentState->getTransitionProbabilityFromMatch() + M->getValueAt(i,j) - currProb;
-		inProb = currentState->getTransitionProbabilityFromInsert() + X->getValueAt(i,j) - currProb;
-		dlProb = currentState->getTransitionProbabilityFromDelete() + Y->getValueAt(i,j) - currProb;
+		mtProb = emission + currentState->getTransitionProbabilityFromMatch() + M->getValueAt(i,j) - currProb;
+		inProb = emission + currentState->getTransitionProbabilityFromInsert() + X->getValueAt(i,j) - currProb;
+		dlProb = emission + currentState->getTransitionProbabilityFromDelete() + Y->getValueAt(i,j) - currProb;
 	}
 
 	if (j==0)
@@ -102,8 +107,8 @@ pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b
 
 	return alignment;
 }
-
 */
+
 pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b)
 {
 	DUMP("Forward HMM sample alignment");
@@ -122,6 +127,7 @@ pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b
 	unsigned int j = ySize-1;
 
 	double mtProb,inProb,dlProb,currProb, rnbr,tmp;
+	double emission = 0;
 
 	//choose initial state
 	PairwiseHmmStateBase* currentState;
@@ -143,6 +149,7 @@ pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b
 		currProb = currentState->getValueAt(i,j);
 		if (currentState->stateId == Definitions::StateId::Match)
 		{
+			emission = ptmatrix->getLogPairTransition(seq1[i-1].getMatrixIndex(), seq2[j-1].getMatrixIndex());
 			alignment.first += seq_a[i-1];
 			alignment.second += seq_b[j-1];
 			i--;
@@ -150,19 +157,21 @@ pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b
 		}
 		else if (currentState->stateId == Definitions::StateId::Delete)
 		{
+			ptmatrix->getLogEquilibriumFreq(seq2[j-1].getMatrixIndex());
 			alignment.second += seq_b[j-1];
 			alignment.first += '-';
 			j--;
 		}
 		else //Insert
 		{
+			emission = ptmatrix->getLogEquilibriumFreq(seq1[i-1].getMatrixIndex());
 			alignment.first += seq_a[i-1];
 			alignment.second += '-';
 			i--;
 		}
-		mtProb = currentState->getTransitionProbabilityFromMatch() + M->getValueAt(i,j) - currProb;
-		inProb = currentState->getTransitionProbabilityFromInsert() + X->getValueAt(i,j) - currProb;
-		dlProb = currentState->getTransitionProbabilityFromDelete() + Y->getValueAt(i,j) - currProb;
+		mtProb = emission + currentState->getTransitionProbabilityFromMatch() + M->getValueAt(i,j) - currProb;
+		inProb = emission + currentState->getTransitionProbabilityFromInsert() + X->getValueAt(i,j) - currProb;
+		dlProb = emission + currentState->getTransitionProbabilityFromDelete() + Y->getValueAt(i,j) - currProb;
 	}
 
 	if (j==0)
@@ -185,6 +194,7 @@ pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b
 
 	return alignment;
 }
+
 
 double ForwardPairHMM::runAlgorithm()
 {

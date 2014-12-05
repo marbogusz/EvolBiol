@@ -47,9 +47,9 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 
 	double tb1,tb2,tb3;
 
-	ste = new StateTransitionEstimator(ot, tripleAlignments.size()*2);
+	ste = new StateTransitionEstimator(ot, tripletIdxs.size()*2);
 
-	for(int al = 0; al < tripleAlignments.size(); al++)
+	for(int al = 0; al < tripletIdxs.size(); al++)
 	{
 		tb1 = sme->getModelParams()->getDivergenceTime(al*3);
 		tb2 = sme->getModelParams()->getDivergenceTime((al*3)+1);
@@ -58,7 +58,7 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 		ste->addTime(tb1+tb2,al,0);
 		ste->addTime(tb2+tb3,al,1);
 
-		DEBUG(tb1 << " " << tb2 << " " << tb3);
+		DEBUG("Branch divergence used by STE : 1:" << tb1 << " 2: " << tb2 << " 3: " << tb3);
 		for (unsigned int i=0; i < Definitions::modelEstimatorPathSamples; i++)
 		{
 			ste->addPair(smpldPairs[al][i][0],smpldPairs[al][i][1],al,0);
@@ -70,7 +70,6 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 
 	DEBUG("Re-estimating model parameters");
 	//make another pass
-	tripleAlignments.clear();
 
 	indelModel =  ste->getIndelModel();
 	substModel =  sme->getSubstModel();
