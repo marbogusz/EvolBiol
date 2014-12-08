@@ -33,7 +33,7 @@ namespace EBC
 
 		virtual short getSymbolIndex(string &symbol);
 		virtual short getSymbolIndex(char symbol);
-		virtual vector<SequenceElement> translate(string &sequence, bool disregardIndels);
+		virtual vector<SequenceElement> translate(string &sequence, bool disregardIndels = false);
 		virtual unsigned short getAlphabetSize();
 
 		virtual string getSymbolAt(short i);

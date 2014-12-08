@@ -54,12 +54,15 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 		DEBUG(tb1 << " " << tb2 << " " << tb3);
 		ste->addPair(tripleAlignments[al][0],tripleAlignments[al][1],tb1+tb2);
 		ste->addPair(tripleAlignments[al][1],tripleAlignments[al][2],tb2+tb3);
+		//ste->addPair(pairAlignments[al][0],pairAlignments[al][1],tb1+tb2);
+		//ste->addPair(pairAlignments[al][2],pairAlignments[al][3],tb2+tb3);
 	}
 	ste->optimize();
 
 	DEBUG("Re-estimating model parameters");
 	//make another pass
 	tripleAlignments.clear();
+	pairAlignments.clear();
 
 
 	indelModel =  ste->getIndelModel();
@@ -89,6 +92,7 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 		auto p2 =  vphmm->getAlignment(inputSeqs->getRawSequenceAt(tripletIdxs[idx][1]), inputSeqs->getRawSequenceAt(tripletIdxs[idx][2]));
 		delete vphmm;
 		tripleAlignments.push_back(tal->align(p1,p2));
+		pairAlignments.push_back({{dict->translate(p1.first),dict->translate(p1.second),dict->translate(p2.first),dict->translate(p2.second)}});
 		//tripleAlignments.push_back(tal.align());
 	}
 
@@ -115,6 +119,8 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 		tb3 = sme->getModelParams()->getDivergenceTime((al*3)+2);
 		ste->addPair(tripleAlignments[al][0],tripleAlignments[al][1],tb1+tb2);
 		ste->addPair(tripleAlignments[al][1],tripleAlignments[al][2],tb2+tb3);
+		//ste->addPair(pairAlignments[al][0],pairAlignments[al][1],tb1+tb2);
+		//ste->addPair(pairAlignments[al][2],pairAlignments[al][3],tb2+tb3);
 	}
 	ste->optimize();
 
@@ -165,7 +171,7 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 	vector<double> alphas = {0.5, 1.0, 3.0};
 	vector<double> kappas = {1.5, 3};
 	vector<double> lambdas ={0.02, 0.05};
-	vector<double> epsilons = {0.3, 0.6};
+	vector<double> epsilons = {0.25, 0.75};
 	vector<double> times = {0.2, 0.6, 1.0, 1.4};
 
 	DEBUG("Setting Frequencies");
@@ -314,49 +320,47 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 
 	indelModel = new NegativeBinomialGapModel();
 	//FIXME - hardcodes
-	indelModel->setParameters({0.05, 0.5});
+	//indelModel->setParameters({0.05, 0.5});
 
+	ViterbiPairHMM* vphmm1;
+	ViterbiPairHMM* vphmm2;
 
 		for (int idx = 0; idx < tripletIdxs.size(); idx++)
 		{
 			lnlp1 = std::numeric_limits<double>::max();
-			lnlp2 = std::numeric_limits<double>::max();
-			for (auto time : {0.25,0.5,0.75,1.0})
-			{
-				DEBUG("First Viterbi Pair " << idx << " time " << time);
+			//lnlp2 = std::numeric_limits<double>::max();
 
-				vphmm = new ViterbiPairHMM(inputSequences->getSequencesAt(tripletIdxs[idx][0]), inputSequences->getSequencesAt(tripletIdxs[idx][1]),substModel, indelModel);
-				tb1 = time; //sme->getModelParams()->getDivergenceTime(idx*3);
-				tb2 = time; //sme->getModelParams()->getDivergenceTime((idx*3)+1);
-				vphmm->setDivergenceTime(tb1);
-				//vphmm->summarize();
-				vphmm->runAlgorithm();
-				tmp = vphmm->getViterbiSubstitutionLikelihood();
-				DEBUG("lnlp1 " << tmp << "\t\t" << lnlp1);
-				if(tmp < lnlp1)
-				{
-					lnlp1=tmp;
-					DEBUG("Setting pair 1 with time " << time);
-					p1 =  vphmm->getAlignment(inputSequences->getRawSequenceAt(tripletIdxs[idx][0]), inputSequences->getRawSequenceAt(tripletIdxs[idx][1]));
+			vphmm1 = new ViterbiPairHMM(inputSequences->getSequencesAt(tripletIdxs[idx][0]), inputSequences->getSequencesAt(tripletIdxs[idx][1]),substModel, indelModel);
+			vphmm2 = new ViterbiPairHMM(inputSequences->getSequencesAt(tripletIdxs[idx][1]), inputSequences->getSequencesAt(tripletIdxs[idx][2]),substModel, indelModel);
+
+			tb1 = gtree->getDistanceMatrix()->getDistance(tripletIdxs[idx][0],tripletIdxs[idx][1]);
+		    tb2 = gtree->getDistanceMatrix()->getDistance(tripletIdxs[idx][1],tripletIdxs[idx][2]);
+			for (auto lambda : {0.02, 0.06})
+				for (auto epsilon : {0.25, 0.5}){
+					indelModel->setParameters({lambda, epsilon});
+					for (auto time : {0.4,1.0,1.6})
+					{
+						//DEBUG("First Viterbi Pair " << idx << "time multiplier" << time);
+						vphmm1->setDivergenceTime(tb1*time);
+						vphmm1->runAlgorithm();
+
+						vphmm2->setDivergenceTime(tb2*time);
+						vphmm2->runAlgorithm();
+
+						tmp = vphmm1->getViterbiSubstitutionLikelihood() + vphmm2->getViterbiSubstitutionLikelihood();
+						DEBUG("Fwd likelihood sum for lambda " << lambda << " epsilon " << epsilon << " time mult " << time << " : " << tmp << "\t\t" << lnlp1);
+						if(tmp < lnlp1)
+						{
+							lnlp1=tmp;
+							p1 =  vphmm1->getAlignment(inputSequences->getRawSequenceAt(tripletIdxs[idx][0]), inputSequences->getRawSequenceAt(tripletIdxs[idx][1]));
+							p2 =  vphmm2->getAlignment(inputSequences->getRawSequenceAt(tripletIdxs[idx][1]), inputSequences->getRawSequenceAt(tripletIdxs[idx][2]));
+						}
+					}
 				}
-				delete vphmm;
-				DEBUG("Second Viterbi Pair " << idx << " time " << time);
-	//			DEBUG("Second Viterbi Pair " << idx);
-				vphmm = new ViterbiPairHMM(inputSequences->getSequencesAt(tripletIdxs[idx][1]), inputSequences->getSequencesAt(tripletIdxs[idx][2]),substModel, indelModel);
-				vphmm->setDivergenceTime(tb2);
-				vphmm->runAlgorithm();
-				tmp = vphmm->getViterbiSubstitutionLikelihood();
-				DEBUG("lnlp2 " << tmp << "\t\t"<< lnlp2);
-				if(tmp < lnlp2)
-				{
-					lnlp2=tmp;
-					DEBUG("Setting pair 2 with time " << time);
-					p2 =  vphmm->getAlignment(inputSequences->getRawSequenceAt(tripletIdxs[idx][1]), inputSequences->getRawSequenceAt(tripletIdxs[idx][2]));
-				}
-				delete vphmm;
-				//tripleAlignments.push_back(tal.align());
-			}
 			tripleAlignments.push_back(tal->align(p1,p2));
+			pairAlignments.push_back({{dict->translate(p1.first),dict->translate(p1.second),dict->translate(p2.first),dict->translate(p2.second)}});
+			delete vphmm1;
+			delete vphmm2;
 		}
 		delete indelModel;
 		delete substModel;

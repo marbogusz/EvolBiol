@@ -79,7 +79,7 @@ int main(int argc, char ** argv) {
 			if(cmdReader->estimateAlpha())
 				alpha = tme->getAlpha();
 
-			cerr << indelParams[0] << "\t" << indelParams[1] << "\n";
+			cout << indelParams[0] << "\t" << indelParams[1] << "\n";
 			delete tme;
 
 		}

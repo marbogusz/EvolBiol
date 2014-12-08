@@ -67,6 +67,7 @@ protected:
 	ViterbiPairHMM* vphmm;
 
 	vector<array<vector<SequenceElement>, 3> > tripleAlignments;
+	vector<array<vector<SequenceElement>, 4> > pairAlignments;
 
 	vector<array<string, 3> > alignments;
 
