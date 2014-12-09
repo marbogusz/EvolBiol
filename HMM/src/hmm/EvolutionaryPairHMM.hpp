@@ -69,6 +69,9 @@ protected:
 	vector<SequenceElement> seq1;
 	vector<SequenceElement> seq2;
 	vector<SequenceElement>::iterator itS1, itS2;
+	
+	//cumulative likelihood for all 3 matrices
+	double totalLikelihood;
 
 	//state transition matrix
 	double md[Definitions::stateCount][Definitions::stateCount];
@@ -137,6 +140,16 @@ public:
 	PairwiseHmmStateBase* getY()
 	{
 		return Y;
+	}
+
+	double getAlignmentLikelihood(vector<SequenceElement>& s1, vector<SequenceElement>& s2);
+
+	double getTotalLikelihood() const {
+		return totalLikelihood;
+	}
+
+	void setTotalLikelihood(double totalLikelihood) {
+		this->totalLikelihood = totalLikelihood;
 	}
 };
 

@@ -147,6 +147,27 @@ EvolutionaryPairHMM::~EvolutionaryPairHMM()
     delete tpb;
 }
 
+double EvolutionaryPairHMM::getAlignmentLikelihood(vector<SequenceElement>& s1,
+		vector<SequenceElement>& s2)
+{
+	double lnl = 0;
+
+	for(int i=0; i< s1.size(); i++){
+		if(s2[i].isIsGap()){
+			//Insert
+		}
+		else if(s1[i].isIsGap()){
+			//Delete
+		}
+		else{
+			//Match
+		}
+
+	}
+	return lnl;
+
+}
+
 } /* namespace EBC */
 
 

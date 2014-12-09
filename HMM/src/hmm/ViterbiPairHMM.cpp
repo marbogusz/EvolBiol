@@ -24,6 +24,89 @@ ViterbiPairHMM::~ViterbiPairHMM()
 {
 }
 
+pair<string, string> ViterbiPairHMM::sampleAlignment(string&seq_a, string& seq_b)
+{
+	DUMP("Forward HMM sample alignment");
+	pair<string, string> alignment;
+
+	//reserve memory for out strings (20% of gaps should be ok)
+	alignment.first.reserve(max(xSize,ySize)*1.2);
+	alignment.second.reserve(max(xSize,ySize)*1.2);
+
+
+	unsigned int i = xSize-1;
+	unsigned int j = ySize-1;
+
+	double mtProb,inProb,dlProb,currProb, rnbr,tmp;
+	double emission;
+
+	//choose initial state
+	PairwiseHmmStateBase* currentState;
+
+	mtProb = M->getValueAt(xSize-1, ySize-1);
+	inProb = X->getValueAt(xSize-1, ySize-1);
+	dlProb = Y->getValueAt(xSize-1, ySize-1);
+
+	while(i > 0 && j > 0)
+	{
+
+		if(mtProb >= inProb && mtProb >= dlProb )
+			currentState = M;
+		else if (inProb >= dlProb)
+			currentState = X;
+		else currentState = Y;
+
+		currProb = currentState->getValueAt(i,j);
+		if (currentState->stateId == Definitions::StateId::Match)
+		{
+			emission = ptmatrix->getLogPairTransition(seq1[i-1].getMatrixIndex(), seq2[j-1].getMatrixIndex());
+			alignment.first += seq_a[i-1];
+			alignment.second += seq_b[j-1];
+			i--;
+			j--;
+		}
+		else if (currentState->stateId == Definitions::StateId::Delete)
+		{
+			ptmatrix->getLogEquilibriumFreq(seq2[j-1].getMatrixIndex());
+			alignment.second += seq_b[j-1];
+			alignment.first += '-';
+			j--;
+		}
+		else //Insert
+		{
+			emission = ptmatrix->getLogEquilibriumFreq(seq1[i-1].getMatrixIndex());
+			alignment.first += seq_a[i-1];
+			alignment.second += '-';
+			i--;
+		}
+		mtProb = currentState->getTransitionProbabilityFromMatch() + M->getValueAt(i,j);
+		inProb = currentState->getTransitionProbabilityFromInsert() + X->getValueAt(i,j);
+		dlProb = currentState->getTransitionProbabilityFromDelete() + Y->getValueAt(i,j);
+	}
+
+	if (j==0)
+	{
+		while(i > 0){
+			alignment.first += seq_a[i-1];
+			alignment.second += '-';
+			i--;
+		}
+	}
+	else if (i==0)
+	{
+		while(j > 0){
+			alignment.second += seq_b[j-1];
+			alignment.first += '-';
+			j--;
+		}
+	}
+	//deal with the last row or column
+
+	reverse(alignment.first.begin(), alignment.first.end());
+	reverse(alignment.second.begin(), alignment.second.end());
+	return alignment;
+}
+
 
 double ViterbiPairHMM::getViterbiSubstitutionLikelihood()
 {
@@ -42,7 +125,7 @@ double ViterbiPairHMM::getViterbiSubstitutionLikelihood()
 
 double ViterbiPairHMM::getMax(double m, double x, double y, unsigned int i, unsigned int j, PairwiseHmmStateBase* state)
 {
-	if(m >=x && m >=y)
+	if(m >x && m >y)
 	{
 		//state->setDiagonalAt(i,j);
 
@@ -51,7 +134,7 @@ double ViterbiPairHMM::getMax(double m, double x, double y, unsigned int i, unsi
 		state->setSourceMatrixPtr(i,j,M);
 		return m;
 	}
-	else if(x >= y)
+	else if(x > y)
 	{
 
 		//state->setVerticalAt(i,j);
