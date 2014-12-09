@@ -79,6 +79,7 @@ class HmmDistanceGenerator:
         self.mafft_exec = 'mafft-linsi'
         self.muscle_exec = 'muscle'
         self.prank_exec = 'prank'
+        self.clustal_exec = 'clustal'
         self.raxml_bin = 'raxmlHPC'
         self.raxml_prefix = 'RAxML_bestTree.'
         self.raxml_GTR_params = ['-m', 'GTRGAMMA', '-p', '12345','-#', '20']
@@ -253,22 +254,26 @@ class HmmDistanceGenerator:
             self.alignMafft(i)
             self.alignMuscle(i)
             #self.alignPrank(i)
+            self.alignClustal(i)
     
     def runRaxml(self, count):
 	for i in range(count):
 	    true_fc = self.indelible_output + '_' + str(i+1) +  '_TRUE_1.fas'
             mafft_fc = 'mafft_' + str(i+1) + '.fas'
             muscle_fc = 'muscle_' + str(i+1) + '.fas'
+            clustal_fc = 'clustal_' + str(i+1) + '.fas'
             #prank_fc = 'prank_' + str(i+1) + '.best.fas'
 
             params_true = self.raxml_params[:]
             params_mafft = self.raxml_params[:]
             params_muscle = self.raxml_params[:]
+            params_clustal = self.raxml_params[:]
             #params_prank = self.raxml_params[:]
 
             params_true += [true_fc,'-n', 'true'+str(i+1)]
             params_mafft += [mafft_fc,'-n', 'mafft'+str(i+1)]
             params_muscle += [muscle_fc,'-n', 'muscle'+str(i+1)]
+            params_clustal += [clustal_fc,'-n', 'clustal'+str(i+1)]
             #params_prank += [prank_fc,'-n', 'prank'+str(i+1)]
 
             threads = []
@@ -279,6 +284,9 @@ class HmmDistanceGenerator:
             threads.append(t)
             t.start()
             t = Thread(target=self.callRaxml, args=([self.raxml_bin]+params_muscle,))
+            threads.append(t)
+            t.start()
+            t = Thread(target=self.callRaxml, args=([self.raxml_bin]+params_clustal,))
             threads.append(t)
             t.start()
             #t = Thread(target=self.callRaxml, args=([self.raxml_bin]+params_prank,))
@@ -359,6 +367,15 @@ class HmmDistanceGenerator:
         if os.path.isfile(prank_file):
             return
         subprocess.call([self.prank_exec, '-d='+curr_file, '-o='+prank_file],stdout=self.logfile,stderr=self.logfile)
+
+    def alignClustal(self, fid):
+        curr_file  = self.indelible_output + '_' + str(fid+1) +'_1.fas' 
+        prank_file = 'clustal_' + str(fid+1)
+        if os.path.isfile(prank_file):
+            return
+        subprocess.call([self.clustal_exec, '-i '+curr_file, '-o '+clustal_file],stdout=self.logfile,stderr=self.logfile)
+    
+
     
 
 
