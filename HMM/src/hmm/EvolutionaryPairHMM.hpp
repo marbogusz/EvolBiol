@@ -70,7 +70,14 @@ protected:
 	vector<SequenceElement> seq2;
 	vector<SequenceElement>::iterator itS1, itS2;
 
+	//state transition matrix
+	double md[Definitions::stateCount][Definitions::stateCount];
 
+	//gap probs;
+	double e,g;
+
+	//state equilibruim frequencies
+	double piM, piI, piD;
 
 	//the following assumes a fix HMM structure
 	virtual void setTransitionProbabilities();
@@ -78,6 +85,8 @@ protected:
 	virtual void calculateModels();
 
 	virtual void initializeStates(Definitions::DpMatrixType mt);
+
+	void getStateEquilibriums();
 
 
 public:

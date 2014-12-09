@@ -29,6 +29,10 @@ EvolutionaryPairHMM::EvolutionaryPairHMM(vector<SequenceElement> s1, vector<Sequ
 
 	this->tpb = new TransitionProbabilities(indelModel);
 
+	piM = 0;
+	piI = Definitions::minMatrixLikelihood;
+	piD = Definitions::minMatrixLikelihood;
+
 	initializeStates(mt);
 }
 
@@ -40,10 +44,27 @@ void EvolutionaryPairHMM::setDivergenceTime(double time)
 
 }
 
+void EvolutionaryPairHMM::getStateEquilibriums()
+{
+	md[0][0] = 1.0-2*g;
+	md[1][1] = e+((1.0-e)*g);
+	md[2][2] = e+((1.0-e)*g);
+	md[0][1] = g;
+	md[0][2] = g;
+
+	md[1][0] = (1.0-e)*(1-2*g);
+	md[2][0] = (1.0-e)*(1-2*g);
+
+	md[2][1] = (1.0-e)*g;
+	md[1][2] = (1.0-e)*g;
+
+	piD = ((1.0-md[0][0])+(md[0][1]*(1.0-md[0][0]+md[1][0])/(md[1][1]-1.0-md[0][1])))/(((md[0][1]-md[2][1])*(1.0-md[0][0]+md[1][0])/(md[1][1]-1.0-md[0][1]))+md[2][0]-md[0][0]+1);
+	piI = ((piD*(md[0][1]-md[2][1]))-md[0][1])/(md[1][1]-1.0-md[0][1]);
+	piM = 1.0 -piI - piD;
+}
+
 void EvolutionaryPairHMM::setTransitionProbabilities()
 {
-	double e,g;
-
 	e = tpb->getGapExtension();
 	g = tpb->getGapOpening();
 
@@ -65,7 +86,6 @@ void EvolutionaryPairHMM::setTransitionProbabilities()
 
 void EvolutionaryPairHMM::summarize()
 {
-	double e,g;
 	e = tpb->getGapExtension();
 	g = tpb->getGapOpening();
 
@@ -128,3 +148,5 @@ EvolutionaryPairHMM::~EvolutionaryPairHMM()
 }
 
 } /* namespace EBC */
+
+
