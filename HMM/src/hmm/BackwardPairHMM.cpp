@@ -55,6 +55,84 @@ void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 
 }
 
+double BackwardPairHMM::getAlignmentLikelihood(vector<SequenceElement> s1,
+		vector<SequenceElement> s2)
+{
+	double lnl = 0;
+	double avp = 0;
+	int k =0;
+	int l =0;
+	PairwiseHmmStateBase* previous;
+	if(s2[0].isIsGap()){
+		previous = X;
+		k++;
+		lnl += ptmatrix->getLogEquilibriumFreq(s1[0].getMatrixIndex());
+		DUMP("I " << 0 << "\tlnl\t" << lnl << "\tposterior\t" << exp(previous->getValueAt(k,l)));
+	}
+	else if(s1[0].isIsGap()){
+		previous = Y;
+		l++;
+		lnl += ptmatrix->getLogEquilibriumFreq(s2[0].getMatrixIndex());
+		DUMP("D " << 0 << "\tlnl\t" << lnl << "\tposterior\t" << exp(previous->getValueAt(k,l)));
+	}
+	else{
+		previous = M;
+		k++;
+		l++;
+		lnl += ptmatrix->getLogPairTransition(s1[0].getMatrixIndex(), s2[0].getMatrixIndex());
+		DUMP("M " << 0 << "\tlnl\t" << lnl << "\tposterior\t" << exp(previous->getValueAt(k,l)));
+	}
+
+	for(int i=1; i< s1.size(); i++){
+		avp += exp(previous->getValueAt(k,l));
+		if(s2[i].isIsGap()){
+			//Insert
+			k++;
+			if (previous == X)
+				lnl += X->getTransitionProbabilityFromInsert();
+			else if (previous == Y)
+				lnl += X->getTransitionProbabilityFromDelete();
+			else
+				lnl+=X->getTransitionProbabilityFromMatch();
+			lnl += ptmatrix->getLogEquilibriumFreq(s1[i].getMatrixIndex());
+			DUMP("I " << i << "\tlnl\t" << lnl << "\tposterior\t" << exp(previous->getValueAt(k,l)));
+			previous = X;
+		}
+		else if(s1[i].isIsGap()){
+			//Delete
+			l++;
+			if (previous == X)
+				lnl += Y->getTransitionProbabilityFromInsert();
+			else if (previous == Y)
+				lnl += Y->getTransitionProbabilityFromDelete();
+			else
+				lnl+=Y->getTransitionProbabilityFromMatch();
+			lnl += ptmatrix->getLogEquilibriumFreq(s2[i].getMatrixIndex());
+			DUMP("D " << i << "\tlnl\t" << lnl << "\tposterior\t" << exp(previous->getValueAt(k,l)));
+			previous = Y;
+		}
+		else{
+			//Match
+			k++;
+			l++;
+			if (previous == X)
+				lnl += M->getTransitionProbabilityFromInsert();
+			else if (previous == Y)
+				lnl += M->getTransitionProbabilityFromDelete();
+			else
+				lnl+=M->getTransitionProbabilityFromMatch();
+			lnl += ptmatrix->getLogPairTransition(s1[i].getMatrixIndex(), s2[i].getMatrixIndex());
+			DUMP("M " << i << "\tlnl\t" << lnl << "\tposterior\t" << exp(previous->getValueAt(k,l)));
+			previous = M;
+		}
+
+	}
+	DUMP("Average posterior prob: " << (avp/s1.size()));
+	//cerr << endl;
+	return lnl;
+
+}
+
 double BackwardPairHMM::runAlgorithm()
 {
 	calculateModels();

@@ -116,7 +116,7 @@ void EBC::DpMatrixFull::outputValues(unsigned int bound=0)
 			TraceStep& ts = matrixData[i][j];
 
 
-			sstr << (int)ts.score << "\t";
+			sstr << ts.score << "\t";
 		}
 		sstr << endl;
 	}

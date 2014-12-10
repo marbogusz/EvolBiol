@@ -44,6 +44,8 @@ public:
 
 	void calculatePosteriors(ForwardPairHMM* fwd);
 
+	double getAlignmentLikelihood(vector<SequenceElement> s1, vector<SequenceElement> s2);
+
 };
 
 } /* namespace EBC */

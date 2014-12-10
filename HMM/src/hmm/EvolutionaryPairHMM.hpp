@@ -142,7 +142,7 @@ public:
 		return Y;
 	}
 
-	double getAlignmentLikelihood(vector<SequenceElement>& s1, vector<SequenceElement>& s2);
+	double getAlignmentLikelihood(vector<SequenceElement> s1, vector<SequenceElement> s2);
 
 	double getTotalLikelihood() const {
 		return totalLikelihood;

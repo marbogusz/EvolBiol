@@ -7,6 +7,7 @@
 
 #include "heuristics/ModelEstimator.hpp"
 #include "hmm/ForwardPairHMM.hpp"
+#include "hmm/BackwardPairHMM.hpp"
 #include <chrono>
 
 namespace EBC
@@ -313,8 +314,10 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 	substModel->calculateModel();
 	DEBUG("Calculated models");
 
-	pair<string, string> p1;
-	pair<string, string> p2;
+	pair<string, string> vp1;
+	pair<string, string> vp2;
+	pair<string, string> fp1;
+	pair<string, string> fp2;
 	double lnlp1, lnlp2;
 	double tb1, tb2, tmp;
 
@@ -358,57 +361,94 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 							l = lambda;
 							t = time;
 							e = epsilon;
-							p1 =  vphmm1->getAlignment(inputSequences->getRawSequenceAt(tripletIdxs[idx][0]), inputSequences->getRawSequenceAt(tripletIdxs[idx][1]));
-							p2 =  vphmm2->getAlignment(inputSequences->getRawSequenceAt(tripletIdxs[idx][1]), inputSequences->getRawSequenceAt(tripletIdxs[idx][2]));
+							vp1 =  vphmm1->getAlignment(inputSequences->getRawSequenceAt(tripletIdxs[idx][0]), inputSequences->getRawSequenceAt(tripletIdxs[idx][1]));
+							vp2 =  vphmm2->getAlignment(inputSequences->getRawSequenceAt(tripletIdxs[idx][1]), inputSequences->getRawSequenceAt(tripletIdxs[idx][2]));
 						}
 					}
 				}
-			tripleAlignments.push_back(tal->align(p1,p2));
-			pairAlignments.push_back({{dict->translate(p1.first),dict->translate(p1.second),dict->translate(p2.first),dict->translate(p2.second)}});
+			tripleAlignments.push_back(tal->align(vp1,vp2));
+			pairAlignments.push_back({{dict->translate(vp1.first),dict->translate(vp1.second),dict->translate(vp2.first),dict->translate(vp2.second)}});
 			delete vphmm1;
 			delete vphmm2;
 
 			tb1 = gtree->getDistanceMatrix()->getDistance(tripletIdxs[0][0],tripletIdxs[0][1]);
 		    tb2 = gtree->getDistanceMatrix()->getDistance(tripletIdxs[0][1],tripletIdxs[0][2]);
 			indelModel->setParameters({l, e});
+
+
+
+			DUMP("*******VITERBI AGAIN********");
 			vphmm1 = new ViterbiPairHMM(inputSequences->getSequencesAt(tripletIdxs[0][0]), inputSequences->getSequencesAt(tripletIdxs[0][1]),substModel, indelModel);
-			vphmm2 = new ViterbiPairHMM(inputSequences->getSequencesAt(tripletIdxs[0][1]), inputSequences->getSequencesAt(tripletIdxs[0][2]),substModel, indelModel);
 			vphmm1->setDivergenceTime(tb1*t);
 			vphmm1->runAlgorithm();
+			vphmm2 = new ViterbiPairHMM(inputSequences->getSequencesAt(tripletIdxs[0][1]), inputSequences->getSequencesAt(tripletIdxs[0][2]),substModel, indelModel);
 			vphmm2->setDivergenceTime(tb2*t);
 			vphmm2->runAlgorithm();
 
-			DUMP("*******VITERBI AGAIN********");
-			p1 =  vphmm1->sampleAlignment(inputSequences->getRawSequenceAt(tripletIdxs[0][0]), inputSequences->getRawSequenceAt(tripletIdxs[0][1]));
-			DUMP("First pair");
-			DUMP(p1.first);
-			DUMP(p1.second);
-			p2 =  vphmm2->sampleAlignment(inputSequences->getRawSequenceAt(tripletIdxs[0][1]), inputSequences->getRawSequenceAt(tripletIdxs[0][2]));
-			DUMP("Second Pair");
-			DUMP(p2.first);
-			DUMP(p2.second);
 
+
+
+			DUMP("First pair");
+			vp1 =  vphmm1->sampleAlignment(inputSequences->getRawSequenceAt(tripletIdxs[0][0]), inputSequences->getRawSequenceAt(tripletIdxs[0][1]));
+			DUMP(vp1.first);
+			DUMP(vp1.second);
+
+
+			DUMP("Second Pair");
+			vp2 =  vphmm2->sampleAlignment(inputSequences->getRawSequenceAt(tripletIdxs[0][1]), inputSequences->getRawSequenceAt(tripletIdxs[0][2]));
+			DUMP(vp2.first);
+			DUMP(vp2.second);
+
+			/*
+			DUMP("*******VITERBI Lnl1********");
+			DUMP(vphmm1->getAlignmentLikelihood(dict->translate(vp1.first), dict->translate(vp1.second)));
+			DUMP("*******VITERBI Lnl2********");
+			DUMP(vphmm2->getAlignmentLikelihood(dict->translate(vp2.first), dict->translate(vp2.second)));
+*/
 			ForwardPairHMM* fphmm1;
 			ForwardPairHMM* fphmm2;
 
+			DUMP("*******    Forward  ********");
 			fphmm1 = new ForwardPairHMM(inputSequences->getSequencesAt(tripletIdxs[0][0]), inputSequences->getSequencesAt(tripletIdxs[0][1]),substModel, indelModel,Definitions::DpMatrixType::Full, nullptr);
-			fphmm2 = new ForwardPairHMM(inputSequences->getSequencesAt(tripletIdxs[0][1]), inputSequences->getSequencesAt(tripletIdxs[0][2]),substModel, indelModel,Definitions::DpMatrixType::Full, nullptr);
 			fphmm1->setDivergenceTime(tb1*t);
 			fphmm1->runAlgorithm();
+			fphmm2 = new ForwardPairHMM(inputSequences->getSequencesAt(tripletIdxs[0][1]), inputSequences->getSequencesAt(tripletIdxs[0][2]),substModel, indelModel,Definitions::DpMatrixType::Full, nullptr);
 			fphmm2->setDivergenceTime(tb2*t);
 			fphmm2->runAlgorithm();
 
-			DUMP("*******    Forward  ********");
-			p1 = fphmm1->sampleAlignment(inputSequences->getRawSequenceAt(tripletIdxs[0][0]), inputSequences->getRawSequenceAt(tripletIdxs[0][1]));
-			p2 = fphmm2->sampleAlignment(inputSequences->getRawSequenceAt(tripletIdxs[0][1]), inputSequences->getRawSequenceAt(tripletIdxs[0][2]));
-
 			DUMP("First pair");
-			DUMP(p1.first);
-			DUMP(p1.second);
+			fp1 = fphmm1->sampleAlignment(inputSequences->getRawSequenceAt(tripletIdxs[0][0]), inputSequences->getRawSequenceAt(tripletIdxs[0][1]));
+			DUMP(fp1.first);
+			DUMP(fp1.second);
 
 			DUMP("Second Pair");
-			DUMP(p2.first);
-			DUMP(p2.second);
+			fp2 = fphmm2->sampleAlignment(inputSequences->getRawSequenceAt(tripletIdxs[0][1]), inputSequences->getRawSequenceAt(tripletIdxs[0][2]));
+
+			DUMP(fp2.first);
+			DUMP(fp2.second);
+/*
+			DUMP("*******FWD Lnl1********");
+			DUMP(fphmm1->getAlignmentLikelihood(dict->translate(fp1.first), dict->translate(fp1.second)));
+			DUMP("*******FWD Lnl2********");
+			DUMP(fphmm2->getAlignmentLikelihood(dict->translate(fp2.first), dict->translate(fp2.second)));
+*/
+			BackwardPairHMM* bphmm1;
+			BackwardPairHMM* bphmm2;
+			bphmm1 = new BackwardPairHMM(inputSequences->getSequencesAt(tripletIdxs[0][0]), inputSequences->getSequencesAt(tripletIdxs[0][1]),substModel, indelModel,Definitions::DpMatrixType::Full, nullptr);
+			bphmm1->setDivergenceTime(tb1*t);
+			bphmm1->runAlgorithm();
+			bphmm2 = new BackwardPairHMM(inputSequences->getSequencesAt(tripletIdxs[0][1]), inputSequences->getSequencesAt(tripletIdxs[0][2]),substModel, indelModel,Definitions::DpMatrixType::Full, nullptr);
+			bphmm2->setDivergenceTime(tb2*t);
+			bphmm2->runAlgorithm();
+
+			bphmm1->calculatePosteriors(fphmm1);
+			bphmm2->calculatePosteriors(fphmm2);
+
+			DUMP("*******VITERBI Lnl1********");
+			DUMP(bphmm1->getAlignmentLikelihood(dict->translate(vp1.first), dict->translate(vp1.second)));
+			DUMP("*******FWD Lnl1********");
+			DUMP(bphmm1->getAlignmentLikelihood(dict->translate(fp1.first), dict->translate(fp1.second)));
+
 
 
 		}

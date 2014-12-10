@@ -26,7 +26,7 @@ ViterbiPairHMM::~ViterbiPairHMM()
 
 pair<string, string> ViterbiPairHMM::sampleAlignment(string&seq_a, string& seq_b)
 {
-	DUMP("Forward HMM sample alignment");
+	DUMP("Viterbi HMM get alignment");
 	pair<string, string> alignment;
 
 	//reserve memory for out strings (20% of gaps should be ok)
@@ -162,7 +162,7 @@ double ViterbiPairHMM::runAlgorithm()
 
 	unsigned int i,j,k,l;
 
-	double xx,xy,xm,yx,yy,ym,mx,my,mm;
+	double xx,xy,xm,yx,yy,ym,mx,my,mm, sS;
 
 	double emissionM;
 	double emissionX;
@@ -214,6 +214,7 @@ double ViterbiPairHMM::runAlgorithm()
 	mx = X->getValueAt(xSize-1,ySize-1);
 	my = Y->getValueAt(xSize-1,ySize-1);
 	mm = M->getValueAt(xSize-1,ySize-1);
+
 /*
 	if(mm >=mx && mm >=my)
 	{
