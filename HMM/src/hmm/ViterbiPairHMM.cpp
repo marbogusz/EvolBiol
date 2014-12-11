@@ -24,7 +24,7 @@ ViterbiPairHMM::~ViterbiPairHMM()
 {
 }
 
-pair<string, string> ViterbiPairHMM::sampleAlignment(string&seq_a, string& seq_b)
+pair<string, string> ViterbiPairHMM::getBestAlignment(string&seq_a, string& seq_b)
 {
 	DUMP("Viterbi HMM get alignment");
 	pair<string, string> alignment;

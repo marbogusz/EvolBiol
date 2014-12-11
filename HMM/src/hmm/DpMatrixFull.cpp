@@ -115,12 +115,14 @@ void EBC::DpMatrixFull::outputValues(unsigned int bound=0)
 		{
 			TraceStep& ts = matrixData[i][j];
 
+			if (ts.score > -5.0)
+				sstr << int(ts.score*-1.0);
+			else sstr << ".";
 
-			sstr << ts.score << "\t";
 		}
 		sstr << endl;
 	}
-	DEBUG(sstr.str());
+	DUMP(sstr.str());
 }
 
 void EBC::DpMatrixFull::outputValuesWithBands(const vector<pair<int, int> >& band, const vector<pair<int, int> >& oband1, const vector<pair<int, int> >& oband2, char os1, char os2) {
@@ -153,7 +155,7 @@ void EBC::DpMatrixFull::outputValuesWithBands(const vector<pair<int, int> >& ban
 			}
 			sstr << endl;
 		}
-		DEBUG(sstr.str());
+		DUMP(sstr.str());
 }
 
 void EBC::DpMatrixFull::setDiagonalAt(unsigned int i, unsigned int j)

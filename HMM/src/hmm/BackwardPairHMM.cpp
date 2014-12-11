@@ -51,12 +51,18 @@ void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 		}
 	}
 
-	//dynamic_cast<DpMatrixFull*>(M->getDpMatrix())->outputValues(0);
+	DUMP("#####Match posteriors########");
+	dynamic_cast<DpMatrixFull*>(M->getDpMatrix())->outputValues(0);
+	//DUMP("#####Insert posteriors########");
+	//dynamic_cast<DpMatrixFull*>(X->getDpMatrix())->outputValues(0);
+	//DUMP("#####Delete posteriors########");
+	//dynamic_cast<DpMatrixFull*>(Y->getDpMatrix())->outputValues(0);
 
 }
 
+
 double BackwardPairHMM::getAlignmentLikelihood(vector<SequenceElement> s1,
-		vector<SequenceElement> s2)
+		vector<SequenceElement> s2, bool post, vector<vector<double> >& posteriors)
 {
 	double lnl = 0;
 	double avp = 0;
@@ -67,20 +73,18 @@ double BackwardPairHMM::getAlignmentLikelihood(vector<SequenceElement> s1,
 		previous = X;
 		k++;
 		lnl += ptmatrix->getLogEquilibriumFreq(s1[0].getMatrixIndex());
-		DUMP("I " << 0 << "\tlnl\t" << lnl << "\tposterior\t" << exp(previous->getValueAt(k,l)));
 	}
 	else if(s1[0].isIsGap()){
 		previous = Y;
 		l++;
 		lnl += ptmatrix->getLogEquilibriumFreq(s2[0].getMatrixIndex());
-		DUMP("D " << 0 << "\tlnl\t" << lnl << "\tposterior\t" << exp(previous->getValueAt(k,l)));
 	}
 	else{
 		previous = M;
 		k++;
 		l++;
+		posteriors[k][l] += 1;
 		lnl += ptmatrix->getLogPairTransition(s1[0].getMatrixIndex(), s2[0].getMatrixIndex());
-		DUMP("M " << 0 << "\tlnl\t" << lnl << "\tposterior\t" << exp(previous->getValueAt(k,l)));
 	}
 
 	for(int i=1; i< s1.size(); i++){
@@ -95,7 +99,7 @@ double BackwardPairHMM::getAlignmentLikelihood(vector<SequenceElement> s1,
 			else
 				lnl+=X->getTransitionProbabilityFromMatch();
 			lnl += ptmatrix->getLogEquilibriumFreq(s1[i].getMatrixIndex());
-			DUMP("I " << i << "\tlnl\t" << lnl << "\tposterior\t" << exp(previous->getValueAt(k,l)));
+			if (post) DUMP("I " << i << "\tlnl\t" << lnl << "\tposterior\t" << exp(previous->getValueAt(k,l)));
 			previous = X;
 		}
 		else if(s1[i].isIsGap()){
@@ -108,7 +112,7 @@ double BackwardPairHMM::getAlignmentLikelihood(vector<SequenceElement> s1,
 			else
 				lnl+=Y->getTransitionProbabilityFromMatch();
 			lnl += ptmatrix->getLogEquilibriumFreq(s2[i].getMatrixIndex());
-			DUMP("D " << i << "\tlnl\t" << lnl << "\tposterior\t" << exp(previous->getValueAt(k,l)));
+			if (post) DUMP("D " << i << "\tlnl\t" << lnl << "\tposterior\t" << exp(previous->getValueAt(k,l)));
 			previous = Y;
 		}
 		else{
@@ -122,12 +126,13 @@ double BackwardPairHMM::getAlignmentLikelihood(vector<SequenceElement> s1,
 			else
 				lnl+=M->getTransitionProbabilityFromMatch();
 			lnl += ptmatrix->getLogPairTransition(s1[i].getMatrixIndex(), s2[i].getMatrixIndex());
-			DUMP("M " << i << "\tlnl\t" << lnl << "\tposterior\t" << exp(previous->getValueAt(k,l)));
+			posteriors[k][l] += 1;
+			if (post) DUMP("M " << i << "\tlnl\t" << lnl << "\tposterior\t" << exp(previous->getValueAt(k,l)));
 			previous = M;
 		}
 
 	}
-	DUMP("Average posterior prob: " << (avp/s1.size()));
+	if (post) DUMP("Average posterior prob: " << (avp/s1.size()));
 	//cerr << endl;
 	return lnl;
 

@@ -23,9 +23,9 @@ ForwardPairHMM::~ForwardPairHMM()
 }
 
 
-pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b)
+pair<string, string> ForwardPairHMM::getBestAlignment(string&seq_a, string& seq_b)
 {
-	DUMP("Forward HMM sample alignment");
+	DUMP("Forward HMM getBestAlignment");
 	pair<string, string> alignment;
 
 	//reserve memory for out strings (20% of gaps should be ok)
@@ -33,9 +33,9 @@ pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b
 	alignment.second.reserve(max(xSize,ySize)*1.2);
 
 
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	std::uniform_real_distribution<> dis(0, 1.0);
+	//std::random_device rd;
+	//std::mt19937 gen(rd());
+	//std::uniform_real_distribution<> dis(0, 1.0);
 
 	unsigned int i = xSize-1;
 	unsigned int j = ySize-1;
@@ -111,10 +111,10 @@ pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b
 }
 
 
-/*
+
 pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b)
 {
-	DUMP("Forward HMM sample alignment");
+	//DUMP("Forward HMM sample alignment");
 	pair<string, string> alignment;
 
 	//reserve memory for out strings (20% of gaps should be ok)
@@ -123,14 +123,14 @@ pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b
 
 
 	std::random_device rd;
-	std::mt19937 gen(rd());
-	std::uniform_real_distribution<> dis(0, 1.0);
+	std::default_random_engine gen(rd());
+	std::uniform_real_distribution<double> dis(0, 1.0);
 
 	unsigned int i = xSize-1;
 	unsigned int j = ySize-1;
 
 	double mtProb,inProb,dlProb,currProb, rnbr,tmp;
-	double emission = 0;
+	double emission = 0.0;
 
 	//choose initial state
 	PairwiseHmmStateBase* currentState;
@@ -197,7 +197,7 @@ pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b
 
 	return alignment;
 }
-*/
+
 
 double ForwardPairHMM::runAlgorithm()
 {
@@ -360,8 +360,8 @@ double ForwardPairHMM::runAlgorithm()
 
 	//cerr << "\t" << sX << "\t" << sY << "\t"<< sM << "\t" << sS << endl;
 
-	DUMP ("Forward results:");
-	DUMP (" sX, sY, sM, sS " << sX << "\t" << sY << "\t" << sM << "\t" << sS);
+	DUMP ("Forward matrix likelihoods:");
+	DUMP (" X, Y, M, Total " << sX << "\t" << sY << "\t" << sM << "\t" << sS);
 
 	return sS* -1.0;
 }

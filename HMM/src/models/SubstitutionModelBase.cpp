@@ -6,6 +6,7 @@
  */
 
 #include "models/SubstitutionModelBase.hpp"
+#include <sstream>
 
 namespace EBC
 {
@@ -191,19 +192,18 @@ void SubstitutionModelBase::summarizeRates()
 		cout << endl;
 	}
 
-	/*
-	cout << "Rate Matrix: " << endl;
+	stringstream matrixstr;
+	matrixstr << "Rate Matrix (T C A G): " << endl;
 
 		for (int i =0; i< matrixSize; i++ )
 		{
 				for (int j =0; j<  matrixSize; j++ )
 				{
-					cout << qMatrix[(i*matrixSize)+j] << "\t\t";
+					matrixstr << qMatrix[(i*matrixSize)+j] << "\t\t";
 				}
-				cout << endl;
+				matrixstr << endl;
 		}
-		cout << endl;
-*/
+	INFO(matrixstr.str());
 }
 
 } /* namespace EBC */
