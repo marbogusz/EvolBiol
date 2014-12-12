@@ -33,17 +33,18 @@ void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 
 	int i,j;
 	double xval, yval, mval;
-	double fwdM;
+	//totalForward
+	double fwdT;
 
-	fwdM = fwd->M->getValueAt(xSize-1,ySize-1);
+	fwdT = fwd->getTotalLikelihood();
 
 	for (i = 0; i<xSize-1; i++)
 	{
 		for (j = 0; j<ySize-1; j++)
 		{
-			xval = X->getValueAt(i,j) + fwd->X->getValueAt(i,j) - fwdM;
-			yval = Y->getValueAt(i,j) + fwd->Y->getValueAt(i,j) - fwdM;
-			mval = M->getValueAt(i,j) + fwd->M->getValueAt(i,j) - fwdM;
+			xval = X->getValueAt(i,j) + fwd->X->getValueAt(i,j) - fwdT;
+			yval = Y->getValueAt(i,j) + fwd->Y->getValueAt(i,j) - fwdT;
+			mval = M->getValueAt(i,j) + fwd->M->getValueAt(i,j) - fwdT;
 
 			X->setValueAt(i,j,xval);
 			Y->setValueAt(i,j,yval);

@@ -123,7 +123,7 @@ pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b
 
 
 	std::random_device rd;
-	std::default_random_engine gen(rd());
+	std::mt19937_64 gen(rd());
 	std::uniform_real_distribution<double> dis(0, 1.0);
 
 	unsigned int i = xSize-1;
@@ -175,6 +175,7 @@ pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b
 		mtProb = emission + currentState->getTransitionProbabilityFromMatch() + M->getValueAt(i,j) - currProb;
 		inProb = emission + currentState->getTransitionProbabilityFromInsert() + X->getValueAt(i,j) - currProb;
 		dlProb = emission + currentState->getTransitionProbabilityFromDelete() + Y->getValueAt(i,j) - currProb;
+
 	}
 
 	if (j==0)

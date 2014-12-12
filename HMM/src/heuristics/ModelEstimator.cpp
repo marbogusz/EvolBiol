@@ -463,6 +463,7 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 
 			DEBUG("*******VITERBI Lnl1********");
 			vlnl = fphmm1->getAlignmentLikelihood(dict->translate(vp1.first), dict->translate(vp1.second));
+			vlnl -=0.1;
 			DEBUG(vlnl);
 			DEBUG("*******FWD Lnl1********");
 			flnl = fphmm1->getAlignmentLikelihood(dict->translate(fp1.first), dict->translate(fp1.second));
@@ -485,11 +486,11 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 			double tlnl;
 
 			int ctr;
-			for(ctr = 0; ctr < 50000000; ctr++){
+			for(ctr = 0; ctr < 10000000; ctr++){
 				auto pr1 = fphmm1->sampleAlignment(inputSequences->getRawSequenceAt(tripletIdxs[0][0]), inputSequences->getRawSequenceAt(tripletIdxs[0][1]));
 				tlnl = bphmm1->getAlignmentLikelihood(dict->translate(pr1.first), dict->translate(pr1.second),false, posteriors);
-				//if (tlnl == flnl)
-				//	DUMP("Best forward path sampled " << tlnl);
+				if (tlnl > vlnl)
+					DUMP("Viterbi sampled ");
 				//if (tlnl > flnl)
 				//{
 				//	DUMP("Better than forward path sampled " << tlnl);
