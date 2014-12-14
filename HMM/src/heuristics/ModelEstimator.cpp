@@ -463,7 +463,7 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 
 			DEBUG("*******VITERBI Lnl1********");
 			vlnl = fphmm1->getAlignmentLikelihood(dict->translate(vp1.first), dict->translate(vp1.second));
-			vlnl -=0.1;
+			vlnl -=0.01;
 			DEBUG(vlnl);
 			DEBUG("*******FWD Lnl1********");
 			flnl = fphmm1->getAlignmentLikelihood(dict->translate(fp1.first), dict->translate(fp1.second));
@@ -485,12 +485,86 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 
 			double tlnl;
 
+			vector<double> freqs(100,0.0);
+
 			int ctr;
-			for(ctr = 0; ctr < 10000000; ctr++){
+			int total = 0;
+			for(ctr = 0; ctr < 10000; ctr++){
 				auto pr1 = fphmm1->sampleAlignment(inputSequences->getRawSequenceAt(tripletIdxs[0][0]), inputSequences->getRawSequenceAt(tripletIdxs[0][1]));
 				tlnl = bphmm1->getAlignmentLikelihood(dict->translate(pr1.first), dict->translate(pr1.second),false, posteriors);
-				if (tlnl > vlnl)
-					DUMP("Viterbi sampled ");
+
+				for(int cats=0; cats<100;cats++)
+				{
+					if (tlnl > vlnl-((cats+1)*2.0)){
+						freqs[cats] +=1;
+						total ++;
+						break;
+					}
+				}
+				/*
+				if (tlnl > vlnl-2.0){
+					cerr << "FND!!!!";
+					freqs[0] += 1;
+				}
+				else if (tlnl > vlnl-4.0)
+					freqs[1] += 1;
+				else if (tlnl > vlnl-6.0)
+					freqs[2] += 1;
+				else if (tlnl > vlnl-8.0)
+					freqs[3] += 1;
+				else if (tlnl > vlnl-10.0)
+					freqs[4] += 1;
+				else if (tlnl > vlnl-12.0)
+					freqs[5] += 1;
+				else if (tlnl > vlnl-14.0)
+					freqs[6] += 1;
+				else if (tlnl > vlnl-16.0)
+					freqs[7] += 1;
+				else if (tlnl > vlnl-18.0)
+					freqs[8] += 1;
+				else if (tlnl > vlnl-20.0)
+					freqs[9] += 1;
+				else if (tlnl > vlnl-22.0)
+					freqs[10] += 1;
+				else if (tlnl > vlnl-24.0)
+					freqs[11] += 1;
+				else if (tlnl > vlnl-26.0)
+					freqs[12] += 1;
+				else if (tlnl > vlnl-28.0)
+					freqs[13] += 1;
+				else if (tlnl > vlnl-30.0)
+					freqs[14] += 1;
+				else if (tlnl > vlnl-32.0)
+					freqs[15] += 1;
+				else if (tlnl > vlnl-34.0)
+					freqs[16] += 1;
+				else if (tlnl > vlnl-36.0)
+					freqs[17] += 1;
+				else if (tlnl > vlnl-38.0)
+					freqs[18] += 1;
+				else if (tlnl > vlnl-40.0)
+					freqs[19] += 1;
+				else if (tlnl > vlnl-42.0)
+					freqs[20] += 1;
+				else if (tlnl > vlnl-44.0)
+					freqs[21] += 1;
+				else if (tlnl > vlnl-46.0)
+					freqs[22] += 1;
+				else if (tlnl > vlnl-48.0)
+					freqs[23] += 1;
+				else if (tlnl > vlnl-50.0)
+					freqs[24] += 1;
+				else if (tlnl > vlnl-52.0)
+					freqs[25] += 1;
+				else if (tlnl > vlnl-54.0)
+					freqs[26] += 1;
+				else if (tlnl > vlnl-56.0)
+					freqs[27] += 1;
+				else if (tlnl > vlnl-58.0)
+					freqs[28] += 1;
+				else
+					freqs[29] += 1;
+				*/
 				//if (tlnl > flnl)
 				//{
 				//	DUMP("Better than forward path sampled " << tlnl);
@@ -500,8 +574,8 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 				//DUMP(tlnl);
 			}
 
-
-
+			cerr << total << endl;
+/*
 			stringstream sstr;
 
 			sstr << endl;
@@ -522,7 +596,10 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 			}
 			DUMP("&&&&&&&&COUNTED POSTERIORS FOR MATCH&&&&&&&&&&&&&&&&&&");
 			DUMP(sstr.str());
+*/
 
+			for(int ct =0; ct < freqs.size(); ct++)
+				INFO("lnl up to " << ((ct+1)*-2) << "\t\t " << (freqs[ct]/ctr));
 
 		}
 		delete indelModel;
