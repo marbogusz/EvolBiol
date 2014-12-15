@@ -63,23 +63,33 @@ int main(int argc, char ** argv) {
 		Sequences* inputSeqs = new Sequences(parser, cmdReader->getSequenceType(),cmdReader->isFixedAlignment());
 		if (cmdReader->isMLE())
 		{
-			//tme->getModelParameters();
-			INFO("Creating Model Parameters heuristics...");
-			ModelEstimator* tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),
-					cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
-					cmdReader->estimateAlpha());
-
 
 			vector<double> indelParams;
 			vector<double> substParams;
-			double alpha;
+			double alpha = 100;
 
-			substParams = tme->getSubstitutionParameters();
+			double dist =  cmdReader->getDistance();
+			if (dist < 0)
+				dist = 1.0;
+
+			substParams = cmdReader->getSubstParams();
+			indelParams = cmdReader->getIndelParams();
+			if(cmdReader->estimateAlpha())
+				alpha = cmdReader->getAlpha();
+
+			//tme->getModelParameters();
+			INFO("Creating Model Parameters heuristics...");
+			ModelEstimator* tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),
+					cmdReader->getOptimizationType(), cmdReader->getCategories(), alpha,
+					cmdReader->estimateAlpha(), indelParams, substParams, dist);
+
+			/*substParams = tme->getSubstitutionParameters();
 			indelParams = tme->getIndelParameters();
 			if(cmdReader->estimateAlpha())
 				alpha = tme->getAlpha();
 
 			cout << indelParams[0] << "\t" << indelParams[1] << "\n";
+			*/
 			delete tme;
 
 		}
@@ -106,15 +116,15 @@ int main(int argc, char ** argv) {
 			fwdHMM->runForwardAlgorithm();
 			*/
 
-
+/*
 			INFO("Creating Model Parameters heuristics...");
 			ModelEstimator* tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),
 					cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
-					cmdReader->estimateAlpha());
+					cmdReader->estimateAlpha();
 
 			vector<double> indelParams;
 			vector<double> substParams;
-			double alpha;
+			double alpha = 100;
 
 			substParams = tme->getSubstitutionParameters();
 			indelParams = tme->getIndelParameters();
@@ -150,7 +160,7 @@ int main(int argc, char ** argv) {
 
 			treefile.close();
 			delete be;
-
+*/
 		}
 
 

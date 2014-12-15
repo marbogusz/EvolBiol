@@ -32,6 +32,9 @@
 #include "heuristics/SubstitutionModelEstimator.hpp"
 
 #include "hmm/ViterbiPairHMM.hpp"
+#include "hmm/ForwardPairHMM.hpp"
+#include "hmm/BackwardPairHMM.hpp"
+#include "hmm/DpMatrixFull.hpp"
 
 
 #include <sstream>
@@ -77,12 +80,14 @@ protected:
 
 	bool estimateAlpha;
 
-	void estimateTripleAlignment(Definitions::ModelType model);
+	void estimateTripleAlignment(Definitions::ModelType model, std::vector<double>& indel_params, std::vector<double>& subst_params, double al, double divergence);
+
+	void sampleAlignments(ForwardPairHMM* hmm);
 
 public:
 	ModelEstimator(Sequences* inputSeqs, Definitions::ModelType model,
 			Definitions::OptimizationType ot,
-			unsigned int rateCategories, double alpha, bool estimateAlpha);
+			unsigned int rateCategories, double alpha, bool estimateAlpha,std::vector<double> indel_params, std::vector<double> subst_params, double divergence);
 
 	virtual ~ModelEstimator();
 
