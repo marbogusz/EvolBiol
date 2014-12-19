@@ -11,69 +11,71 @@
 namespace EBC
 {
 
+void StateTransitionML::addSample(vector<SequenceElement>&s1, vector<SequenceElement>& s2, double weight)
+{
+	Definitions::StateId previousState;
 
-StateTransitionML::StateTransitionML(IndelModel* im, vector<SequenceElement>&s1, vector<SequenceElement>& s2, double tme)
+		if (s1[0].isIsGap())
+			previousState = Definitions::StateId::Delete;
+		else if(s2[0].isIsGap())
+			previousState = Definitions::StateId::Insert;
+		else
+			previousState = Definitions::StateId::Match;
+
+
+
+		for(int pos = 1; pos < s1.size(); pos++)
+		{
+			if (s1[pos].isIsGap())
+			{
+				//Delete
+				if(previousState == Definitions::StateId::Match)
+					counts[Definitions::StateId::Match][Definitions::StateId::Delete] += weight;
+				if(previousState == Definitions::StateId::Insert)
+					counts[Definitions::StateId::Insert][Definitions::StateId::Delete] += weight;
+				if(previousState == Definitions::StateId::Delete)
+					counts[Definitions::StateId::Delete][Definitions::StateId::Delete] += weight;
+
+				previousState = Definitions::StateId::Delete;
+			}
+			else if(s2[pos].isIsGap())
+			{
+				//Insert
+				if(previousState == Definitions::StateId::Match)
+					counts[Definitions::StateId::Match][Definitions::StateId::Insert] += weight;
+				if(previousState == Definitions::StateId::Insert)
+					counts[Definitions::StateId::Insert][Definitions::StateId::Insert] += weight;
+				if(previousState == Definitions::StateId::Delete)
+					counts[Definitions::StateId::Delete][Definitions::StateId::Insert] += weight;
+				previousState = Definitions::StateId::Insert;
+			}
+			else
+			{
+				//Match
+				if(previousState == Definitions::StateId::Match)
+					counts[Definitions::StateId::Match][Definitions::StateId::Match] += weight;
+				if(previousState == Definitions::StateId::Insert)
+					counts[Definitions::StateId::Insert][Definitions::StateId::Match] += weight;
+				if(previousState == Definitions::StateId::Delete)
+					counts[Definitions::StateId::Delete][Definitions::StateId::Match] += weight;
+
+				previousState = Definitions::StateId::Match;
+			}
+		}
+
+}
+
+StateTransitionML::StateTransitionML(IndelModel* im, double tme)
 {
 	this->tpb = new TransitionProbabilities(im);
 	this->time = tme;
 	tpb->setTime(time);
 
-	DEBUG("State Transition ML for time " << time);
-
-	Definitions::StateId previousState;
-
 	for(int i = 0; i < Definitions::stateCount; i++)
-		for(int j = 0; j<Definitions::stateCount; j++)
-			counts[i][j] = 0;
+			for(int j = 0; j<Definitions::stateCount; j++)
+				counts[i][j] = 0.0;
 
-	if (s1[0].isIsGap())
-		previousState = Definitions::StateId::Delete;
-	else if(s2[0].isIsGap())
-		previousState = Definitions::StateId::Insert;
-	else
-		previousState = Definitions::StateId::Match;
-
-
-
-	for(int pos = 1; pos < s1.size(); pos++)
-	{
-		if (s1[pos].isIsGap())
-		{
-			//Delete
-			if(previousState == Definitions::StateId::Match)
-				counts[Definitions::StateId::Match][Definitions::StateId::Delete]++;
-			if(previousState == Definitions::StateId::Insert)
-				counts[Definitions::StateId::Insert][Definitions::StateId::Delete]++;
-			if(previousState == Definitions::StateId::Delete)
-				counts[Definitions::StateId::Delete][Definitions::StateId::Delete]++;
-
-			previousState = Definitions::StateId::Delete;
-		}
-		else if(s2[pos].isIsGap())
-		{
-			//Insert
-			if(previousState == Definitions::StateId::Match)
-				counts[Definitions::StateId::Match][Definitions::StateId::Insert]++;
-			if(previousState == Definitions::StateId::Insert)
-				counts[Definitions::StateId::Insert][Definitions::StateId::Insert]++;
-			if(previousState == Definitions::StateId::Delete)
-				counts[Definitions::StateId::Delete][Definitions::StateId::Insert]++;
-			previousState = Definitions::StateId::Insert;
-		}
-		else
-		{
-			//Match
-			if(previousState == Definitions::StateId::Match)
-				counts[Definitions::StateId::Match][Definitions::StateId::Match]++;
-			if(previousState == Definitions::StateId::Insert)
-				counts[Definitions::StateId::Insert][Definitions::StateId::Match]++;
-			if(previousState == Definitions::StateId::Delete)
-				counts[Definitions::StateId::Delete][Definitions::StateId::Match]++;
-
-			previousState = Definitions::StateId::Match;
-		}
-	}
-
+	DEBUG("State Transition ML for time " << time);
 }
 
 StateTransitionML::~StateTransitionML()

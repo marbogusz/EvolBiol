@@ -37,6 +37,34 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 
 	this->estimateTripleAlignment(model, indel_params, subst_params, alpha, divergence);
 
+	//1 pair for now
+	ste = new StateTransitionEstimator(ot, 1);
+
+
+
+	ste->addTime(divergence,0,0);
+
+
+	auto it=alSamples.rbegin();
+
+	int cap = Definitions::pathInformativeCount < alSamples.size() ? Definitions::pathInformativeCount : alSamples.size();
+
+	for (unsigned int i=0; i < cap; i++)
+	{
+		DUMP("lnl: " << it->first << "\t total lnl: " << totalSampleLnl);
+		ste->addPair((it->second).first,(it->second).second,0,0,(double)exp((it->first)-(this->totalSampleLnl)));
+		it++;
+	}
+
+
+	ste->optimize();
+
+	DEBUG("Re-estimating model parameters");
+	//make another pass
+
+	indelModel =  ste->getIndelModel();
+	//indelModel->summarize();
+
 	/*
 	sme = new SubstitutionModelEstimator(inputSeqs, model ,ot, rateCategories, alpha, estimateAlpha, tripletIdxs.size());
 
@@ -136,7 +164,7 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 	end = chrono::system_clock::now();
     chrono::duration<double> elapsed_seconds = end-start;
 
-    cerr <<  "|||||||||||| elapsed time: " << elapsed_seconds.count() << "s ||||||||||||||\n";
+//    cerr <<  "|||||||||||| elapsed time: " << elapsed_seconds.count() << "s ||||||||||||||\n";
 
 
 /*
@@ -192,7 +220,7 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model, std::
 	ViterbiPairHMM* vphmm1;
 	ViterbiPairHMM* vphmm2;
 
-	if (!(dist > 0 && indel_params.size() >0 && subst_params.size() > 0)){
+	if (!(dist > 0 && indel_params.size() >0)){
 		for (int idx = 0; idx < tripletIdxs.size(); idx++)
 		{
 			lnlp1 = std::numeric_limits<double>::max();
@@ -404,39 +432,36 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model, std::
 void ModelEstimator::sampleAlignments(ForwardPairHMM* hmm)
 {
 
-	map<double, pair<string, string> > alignments;
 
-	int sampleCount = 10000;
-	int analysisCount = 50;
-	double totalLnl = 0;
+
+	int sampleCount = Definitions::pathSampleCount;
+	int analysisCount = Definitions::pathInformativeCount;
+	totalSampleLnl = 0;
 	double lnl;
 	int ctr;
-	pair<double, pair<string, string> > pr;
+	pair<string, string> smplPr;
+	pair<double, pair<vector<SequenceElement>, vector<SequenceElement> > > pr;
+	totalSampleLnl = Definitions::minMatrixLikelihood;
 
 	//do the first sample
-	pr = std::make_pair(0.0, hmm->sampleAlignment(inputSequences->getRawSequenceAt(tripletIdxs[0][0]), inputSequences->getRawSequenceAt(tripletIdxs[0][1])));
-	lnl = hmm->getAlignmentLikelihood(dict->translate(pr.second.first), dict->translate(pr.second.second));
-	pr.first = lnl;
-	alignments.insert(pr);
-	totalLnl = lnl;
+
+
 
 	for(ctr = 1; ctr < sampleCount; ctr++){
-		pr = make_pair(0.0, hmm->sampleAlignment(inputSequences->getRawSequenceAt(tripletIdxs[0][0]), inputSequences->getRawSequenceAt(tripletIdxs[0][1])));
-		lnl = hmm->getAlignmentLikelihood(dict->translate(pr.second.first), dict->translate(pr.second.second));
-		totalLnl = maths->logSum(totalLnl, lnl);
+		smplPr = hmm->sampleAlignment(inputSequences->getRawSequenceAt(tripletIdxs[0][0]), inputSequences->getRawSequenceAt(tripletIdxs[0][1]));
+		pr = make_pair(0.0, make_pair(dict->translate(smplPr.first), dict->translate(smplPr.second)));
+
+
+
+		lnl = hmm->getAlignmentLikelihood(pr.second.first, pr.second.second);
+		totalSampleLnl = maths->logSum(totalSampleLnl, lnl);
 		pr.first = lnl;
-		alignments.insert(pr);
-	}
+		//cerr << smplPr.first << endl;
+		//cerr << smplPr.second << endl;
+		//cerr << lnl << endl;
+		alSamples.insert(pr);
 
-	std::cout << "mymap contains:\n";
-	auto it=alignments.rbegin();
-	for (int c=0; c < analysisCount; c++)
-	{
-	    std::cout << it->first << '\n';
-	    it++;
 	}
-	cout << "Total " << totalLnl << endl;
-
 
 }
 

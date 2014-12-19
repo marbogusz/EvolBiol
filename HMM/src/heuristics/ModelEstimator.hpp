@@ -72,6 +72,10 @@ protected:
 	vector<array<vector<SequenceElement>, 3> > tripleAlignments;
 	vector<array<vector<SequenceElement>, 4> > pairAlignments;
 
+	map<double, pair<vector<SequenceElement>, vector<SequenceElement> > > alSamples;
+
+	double totalSampleLnl;
+
 	vector<array<string, 3> > alignments;
 
 	vector<array<unsigned int, 3> > tripletIdxs;

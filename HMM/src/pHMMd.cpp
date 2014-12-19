@@ -7,24 +7,23 @@
 
 #include "core/CommandReader.hpp"
 #include "core/Sequences.hpp"
-#include "hmm/ForwardPairHMM.hpp"
 #include "core/HmmException.hpp"
-#include "core/PairwiseEstimator.hpp"
 #include "core/BandingEstimator.hpp"
 #include "core/MlEstimator.hpp"
 #include "core/BioNJ.hpp"
 #include <iostream>
 #include <fstream>
 #include <iomanip>
-#include "heuristics/GuideTree.hpp"
-#include "heuristics/GotohAlgorithm.hpp"
-#include "heuristics/TripletAligner.hpp"
 #include "heuristics/ModelEstimator.hpp"
 #include <array>
 #include <chrono>
 #include <ctime>
 
 #include "core/FileLogger.hpp"
+
+#include "core/OptimizedModelParameters.hpp"
+#include "hmm/ForwardPairHMM.hpp"
+#include "hmm/ViterbiPairHMM.hpp"
 
 using namespace std;
 using namespace EBC;
@@ -61,7 +60,87 @@ int main(int argc, char ** argv) {
 		DEBUG("Creating alignment object...");
 
 		Sequences* inputSeqs = new Sequences(parser, cmdReader->getSequenceType(),cmdReader->isFixedAlignment());
-		if (cmdReader->isMLE())
+		if (cmdReader->isFdist() || cmdReader->isVdist())
+		{
+			vector<double> indelParams;
+			vector<double> substParams;
+			substParams = cmdReader->getSubstParams();
+			indelParams = cmdReader->getIndelParams();
+
+			Optimizer* bfgs;
+			Dictionary* dict;
+			SubstitutionModelBase* substModel;
+			IndelModel* indelModel;
+			Maths* maths;
+			Definitions::AlgorithmType algorithm;
+			OptimizedModelParameters* modelParams;
+
+			maths = new Maths();
+			dict = inputSeqs->getDictionary();
+
+			if (cmdReader->getModelType() == Definitions::ModelType::GTR)
+			{
+				substModel = new GTRModel(dict, maths,1);
+			}
+			else if (cmdReader->getModelType() == Definitions::ModelType::HKY85)
+			{
+				substModel = new HKY85Model(dict, maths,1);
+			}
+			else if (cmdReader->getModelType() == Definitions::ModelType::LG)
+			{
+					substModel = new AminoacidSubstitutionModel(dict, maths,1,Definitions::aaLgModel);
+			}
+
+			indelModel = new NegativeBinomialGapModel();
+
+			modelParams = new OptimizedModelParameters(substModel, indelModel,2, 1, false,
+					false, false, true, maths);
+
+
+			modelParams->setUserIndelParams(indelParams);
+			modelParams->setUserSubstParams(substParams);
+
+			substModel->setObservedFrequencies(inputSeqs->getElementFrequencies());
+			substModel->setParameters(modelParams->getSubstParameters());
+			substModel->calculateModel();
+
+
+			indelModel->setParameters(modelParams->getIndelParameters());
+
+			EvolutionaryPairHMM *hmm;
+
+			bfgs = new Optimizer(modelParams, NULL, cmdReader->getOptimizationType());
+
+			PairHmmCalculationWrapper* wrapper = new PairHmmCalculationWrapper();
+
+			std::pair<unsigned int, unsigned int> idxs = inputSeqs->getPairOfSequenceIndices(0);
+
+			if (cmdReader->isVdist())
+			{
+				DEBUG("Creating Viterbi algorithm to optimize the pairwise divergence time...");
+				hmm = new ViterbiPairHMM(inputSeqs->getSequencesAt(idxs.first), inputSeqs->getSequencesAt(idxs.second),
+					substModel, indelModel, Definitions::DpMatrixType::Full, nullptr);
+			}
+			else if (cmdReader->isFdist())
+			{
+				DEBUG("Creating forward algorithm to optimize the pairwise divergence time...");
+				hmm = new ForwardPairHMM(inputSeqs->getSequencesAt(idxs.first), inputSeqs->getSequencesAt(idxs.second),
+					substModel, indelModel, Definitions::DpMatrixType::Full, nullptr);
+			}
+
+			//hmm->setDivergenceTime(modelParams->getDivergenceTime(0)); //zero as there's only one pair!
+			wrapper->setTargetHMM(hmm);
+			wrapper->setModelParameters(modelParams);
+
+			bfgs->setTarget(wrapper);
+			bfgs->optimize();
+
+			cout << modelParams->getDivergenceTime(0);
+
+
+		}
+
+		else if (cmdReader->isMLE())
 		{
 
 			vector<double> indelParams;
@@ -83,13 +162,13 @@ int main(int argc, char ** argv) {
 					cmdReader->getOptimizationType(), cmdReader->getCategories(), alpha,
 					cmdReader->estimateAlpha(), indelParams, substParams, dist);
 
-			/*substParams = tme->getSubstitutionParameters();
+			//substParams = tme->getSubstitutionParameters();
 			indelParams = tme->getIndelParameters();
-			if(cmdReader->estimateAlpha())
-				alpha = tme->getAlpha();
+			//if(cmdReader->estimateAlpha())
+			//	alpha = tme->getAlpha();
 
 			cout << indelParams[0] << "\t" << indelParams[1] << "\n";
-			*/
+
 			delete tme;
 
 		}
