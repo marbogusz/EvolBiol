@@ -32,9 +32,11 @@ protected:
 
 
 public:
-	StateTransitionEstimator(Definitions::OptimizationType ot);
+	StateTransitionEstimator(Definitions::OptimizationType ot, unsigned int pairCategories);
 
-	void addPair(vector<SequenceElement>& s1,vector<SequenceElement>& s2, double time);
+	void addTime(double time, unsigned int triplet, unsigned int pr);
+
+	void addPair(vector<SequenceElement>& s1, vector<SequenceElement>& s2, unsigned int triplet, unsigned int pr, double weight);
 
 	double runIteration();
 

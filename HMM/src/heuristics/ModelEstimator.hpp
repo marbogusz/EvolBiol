@@ -32,6 +32,9 @@
 #include "heuristics/SubstitutionModelEstimator.hpp"
 
 #include "hmm/ViterbiPairHMM.hpp"
+#include "hmm/ForwardPairHMM.hpp"
+#include "hmm/BackwardPairHMM.hpp"
+#include "hmm/DpMatrixFull.hpp"
 
 
 #include <sstream>
@@ -69,13 +72,26 @@ protected:
 	vector<array<vector<SequenceElement>, 3> > tripleAlignments;
 	vector<array<vector<SequenceElement>, 4> > pairAlignments;
 
+	map<double, pair<vector<SequenceElement>, vector<SequenceElement> > > alSamples1;
+
+	double totalSampleLnl1;
+	
+	map<double, pair<vector<SequenceElement>, vector<SequenceElement> > > alSamples2;
+
+	double totalSampleLnl2;
+
 	vector<array<string, 3> > alignments;
 
 	vector<array<unsigned int, 3> > tripletIdxs;
 
+	ForwardPairHMM* fphmm1;
+	ForwardPairHMM* fphmm2;
+
 	unsigned int gammaRateCategories;
 
 	bool estimateAlpha;
+	
+	void sampleAlignments(ForwardPairHMM* hmm, map<double, pair<vector<SequenceElement>, vector<SequenceElement> > >&, double&);
 
 	void estimateTripleAlignment(Definitions::ModelType model);
 
