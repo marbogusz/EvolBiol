@@ -371,7 +371,8 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 			pairAlignments.push_back({{dict->translate(vp1.first),dict->translate(vp1.second),dict->translate(vp2.first),dict->translate(vp2.second)}});
 			delete vphmm1;
 			delete vphmm2;
-
+		}
+/*
 			tb1 = gtree->getDistanceMatrix()->getDistance(tripletIdxs[0][0],tripletIdxs[0][1]);
 		    tb2 = gtree->getDistanceMatrix()->getDistance(tripletIdxs[0][1],tripletIdxs[0][2]);
 			indelModel->setParameters({l, e});
@@ -406,12 +407,12 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 			//DUMP(vp2.first);
 			//DUMP(vp2.second);
 
-			/*
+
 			DUMP("*******VITERBI Lnl1********");
 			DUMP(vphmm1->getAlignmentLikelihood(dict->translate(vp1.first), dict->translate(vp1.second)));
 			DUMP("*******VITERBI Lnl2********");
 			DUMP(vphmm2->getAlignmentLikelihood(dict->translate(vp2.first), dict->translate(vp2.second)));
-*/
+
 			ForwardPairHMM* fphmm1;
 			ForwardPairHMM* fphmm2;
 
@@ -433,12 +434,12 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 
 			//DUMP(fp2.first);
 			//DUMP(fp2.second);
-/*
+
 			DUMP("*******FWD Lnl1********");
 			DUMP(fphmm1->getAlignmentLikelihood(dict->translate(fp1.first), dict->translate(fp1.second)));
 			DUMP("*******FWD Lnl2********");
 			DUMP(fphmm2->getAlignmentLikelihood(dict->translate(fp2.first), dict->translate(fp2.second)));
-*/
+
 			BackwardPairHMM* bphmm1;
 			BackwardPairHMM* bphmm2;
 			bphmm1 = new BackwardPairHMM(inputSequences->getSequencesAt(tripletIdxs[0][0]), inputSequences->getSequencesAt(tripletIdxs[0][1]),substModel, indelModel,Definitions::DpMatrixType::Full, nullptr);
@@ -501,7 +502,7 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 						break;
 					}
 				}
-				/*
+
 				if (tlnl > vlnl-2.0){
 					cerr << "FND!!!!";
 					freqs[0] += 1;
@@ -564,7 +565,7 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 					freqs[28] += 1;
 				else
 					freqs[29] += 1;
-				*/
+
 				//if (tlnl > flnl)
 				//{
 				//	DUMP("Better than forward path sampled " << tlnl);
@@ -575,7 +576,7 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 			}
 
 			cerr << total << endl;
-/*
+
 			stringstream sstr;
 
 			sstr << endl;
@@ -596,12 +597,13 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 			}
 			DUMP("&&&&&&&&COUNTED POSTERIORS FOR MATCH&&&&&&&&&&&&&&&&&&");
 			DUMP(sstr.str());
-*/
+
 
 			for(int ct =0; ct < freqs.size(); ct++)
 				INFO("lnl up to " << ((ct+1)*-2) << "\t\t " << (freqs[ct]/ctr));
 
 		}
+		*/
 		delete indelModel;
 		delete substModel;
 }
