@@ -10,6 +10,7 @@
 #include "hmm/BackwardPairHMM.hpp"
 #include "hmm/DpMatrixFull.hpp"
 #include <chrono>
+#include <map>
 
 namespace EBC
 {
@@ -145,152 +146,6 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 	//do Viterbi using the estimates
 	//construct triplets
 }
-/*
-void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
-{
-	DEBUG("EstimateTripleAligment");
-	//amino acid mode
-	bool aaMode = false;
-
-	Band* band1;
-	Band* band2;
-
-	ForwardPairHMM *f1, *f2;
-
-	if (model == Definitions::ModelType::GTR || model == Definitions::ModelType::HKY85)
-	{
-			//FIXME - make model idiotproof by checking if parameters are set;
-			DEBUG("Setting HKY85");
-			this->substModel = new HKY85Model(dict, maths,gammaRateCategories);
-	}
-	else if (model == Definitions::ModelType::LG)
-	{
-			aaMode = true;
-			substModel = new AminoacidSubstitutionModel(dict, maths,gammaRateCategories,Definitions::aaLgModel);
-	}
-
-
-
-	vector<double> alphas = {0.5, 1.0, 3.0};
-	vector<double> kappas = {1.5, 3};
-	vector<double> lambdas ={0.02, 0.05};
-	vector<double> epsilons = {0.25, 0.75};
-	vector<double> times = {0.2, 0.6, 1.0, 1.4};
-
-	DEBUG("Setting Frequencies");
-	substModel->setObservedFrequencies(inputSequences->getElementFrequencies());
-
-
-	//substModel->setParameters({2.5});
-	//substModel->setAlpha(0.75);
-	//substModel->calculateModel();
-	//DEBUG("Calculated models");
-
-
-
-	pair<string, string> p1;
-	pair<string, string> p2;
-	double lnlp1, lnlp2;
-	double tb1, tb2, tmp;
-
-
-	indelModel = new NegativeBinomialGapModel();
-	//FIXME - hardcodes
-	indelModel->setParameters({0.05, 0.5});
-
-	for (int idx = 0; idx < tripletIdxs.size(); idx++)
-	{
-		//tripletIdxs[idx][0] //first  index
-		//tripletIdxs[idx][1] //second  index
-		//tripletIdxs[idx][2] //third  index
-		auto seq1 = inputSequences->getSequencesAt(tripletIdxs[idx][0]);
-		auto seq2 = inputSequences->getSequencesAt(tripletIdxs[idx][1]);
-		auto seq3 = inputSequences->getSequencesAt(tripletIdxs[idx][2]);
-
-		unsigned int len1 = seq1.size();
-		unsigned int len2 = seq2.size();
-		unsigned int len3 = seq3.size();
-
-		band1 = new Band(len1,len2);
-		band2 = new Band(len2,len3);
-
-		f1 = new ForwardPairHMM(seq1,seq2, substModel, indelModel, band1);
-		f2 = new ForwardPairHMM(seq2,seq3, substModel, indelModel, band2);
-
-		for(int a=0; a < alphas.size(); a++)
-		{
-			substModel->setAlpha(alphas[a]);
-			for(int k=0; aaMode ? 1 : k < kappas.size(); k++)
-			{
-				substModel->setParameters({kappas[k]});
-				substModel->calculateModel();
-				for(int e=0; e < epsilons.size(); e++)
-					for(int l=0; l < lambdas.size(); l++)
-					{
-						indelModel->setParameters({lambdas[l], epsilons[e]});
-						for(int t1=0; t1 < times.size(); t1++)
-						{
-							f1->setDivergenceTime(times[t1]);
-						}
-						for(int t2=0; t2 < times.size(); t2++)
-						{
-							f2->setDivergenceTime(times[t2]);
-						}
-					}
-			}
-		}
-		delete band2;
-		delete band1
-	}
-
-
-
-
-	for (int idx = 0; idx < tripletIdxs.size(); idx++)
-	{
-		lnlp1 = std::numeric_limits<double>::max();
-		lnlp2 = std::numeric_limits<double>::max();
-		for (auto time : {0.25,0.5,0.75,1.0})
-		{
-			DEBUG("First Viterbi Pair " << idx << " time " << time);
-
-			vphmm = new ViterbiPairHMM(inputSequences->getSequencesAt(tripletIdxs[idx][0]), inputSequences->getSequencesAt(tripletIdxs[idx][1]),substModel, indelModel);
-			tb1 = time; //sme->getModelParams()->getDivergenceTime(idx*3);
-			tb2 = time; //sme->getModelParams()->getDivergenceTime((idx*3)+1);
-			vphmm->setDivergenceTime(tb1);
-			//vphmm->summarize();
-			vphmm->runAlgorithm();
-			tmp = vphmm->getViterbiSubstitutionLikelihood();
-			DEBUG("lnlp1 " << tmp << "\t\t" << lnlp1);
-			if(tmp < lnlp1)
-			{
-				lnlp1=tmp;
-				DEBUG("Setting pair 1 with time " << time);
-				p1 =  vphmm->getAlignment(inputSequences->getRawSequenceAt(tripletIdxs[idx][0]), inputSequences->getRawSequenceAt(tripletIdxs[idx][1]));
-			}
-			delete vphmm;
-			DEBUG("Second Viterbi Pair " << idx << " time " << time);
-//			DEBUG("Second Viterbi Pair " << idx);
-			vphmm = new ViterbiPairHMM(inputSequences->getSequencesAt(tripletIdxs[idx][1]), inputSequences->getSequencesAt(tripletIdxs[idx][2]),substModel, indelModel);
-			vphmm->setDivergenceTime(tb2);
-			vphmm->runAlgorithm();
-			tmp = vphmm->getViterbiSubstitutionLikelihood();
-			DEBUG("lnlp2 " << tmp << "\t\t"<< lnlp2);
-			if(tmp < lnlp2)
-			{
-				lnlp2=tmp;
-				DEBUG("Setting pair 2 with time " << time);
-				p2 =  vphmm->getAlignment(inputSequences->getRawSequenceAt(tripletIdxs[idx][1]), inputSequences->getRawSequenceAt(tripletIdxs[idx][2]));
-			}
-			delete vphmm;
-			//tripleAlignments.push_back(tal.align());
-		}
-		tripleAlignments.push_back(tal->align(p1,p2));
-	}
-	delete indelModel;
-	delete substModel;
-}
-*/
 
 
 
@@ -310,8 +165,8 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 
 	DEBUG("Setting Frequencies");
 	substModel->setObservedFrequencies(inputSequences->getElementFrequencies());
-	substModel->setParameters({2.5});
-	substModel->setAlpha(0.75);
+	substModel->setParameters({2.0});
+	substModel->setAlpha(99);
 	substModel->calculateModel();
 	DEBUG("Calculated models");
 
@@ -332,6 +187,10 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 	ViterbiPairHMM* vphmm1;
 	ViterbiPairHMM* vphmm2;
 
+	tripletIdxs[0][0] = 0;
+	tripletIdxs[0][1] = 1;
+	tripletIdxs[0][2] = 2;
+
 		for (int idx = 0; idx < tripletIdxs.size(); idx++)
 		{
 			lnlp1 = std::numeric_limits<double>::max();
@@ -342,16 +201,16 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 
 			tb1 = gtree->getDistanceMatrix()->getDistance(tripletIdxs[idx][0],tripletIdxs[idx][1]);
 		    tb2 = gtree->getDistanceMatrix()->getDistance(tripletIdxs[idx][1],tripletIdxs[idx][2]);
-			for (auto lambda : {0.02, 0.06})
-				for (auto epsilon : {0.25, 0.5}){
+			for (auto lambda : {0.03})
+				for (auto epsilon : {0.8}){
 					indelModel->setParameters({lambda, epsilon});
-					for (auto time : {0.4,1.0,1.6})
+					for (auto time : {0.4})
 					{
 						//DEBUG("First Viterbi Pair " << idx << "time multiplier" << time);
-						vphmm1->setDivergenceTime(tb1*time);
+						vphmm1->setDivergenceTime(time);
 						vphmm1->runAlgorithm();
 
-						vphmm2->setDivergenceTime(tb2*time);
+						vphmm2->setDivergenceTime(time);
 						vphmm2->runAlgorithm();
 
 						tmp = vphmm1->getViterbiSubstitutionLikelihood() + vphmm2->getViterbiSubstitutionLikelihood();
@@ -372,21 +231,21 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 			delete vphmm1;
 			delete vphmm2;
 
-			tb1 = gtree->getDistanceMatrix()->getDistance(tripletIdxs[0][0],tripletIdxs[0][1]);
-		    tb2 = gtree->getDistanceMatrix()->getDistance(tripletIdxs[0][1],tripletIdxs[0][2]);
+			tb1 = 0.4;//gtree->getDistanceMatrix()->getDistance(tripletIdxs[0][0],tripletIdxs[0][1]);
+		    tb2 = 0.4;//gtree->getDistanceMatrix()->getDistance(tripletIdxs[0][1],tripletIdxs[0][2]);
 			indelModel->setParameters({l, e});
 
-			DEBUG("###########################MODEL PARAMETERS##################");
-			DEBUG("HKY85 kappa " << 2.5 << " discrete gamma " << this->gammaRateCategories <<  "categories, alpha = 0.75");
-			DEBUG("Indel parameters : lambda: " << l << " geometric gap opening (epsilon) " << e );
-			DEBUG("Divergence time : " << (tb1*t));
+			//DEBUG("###########################MODEL PARAMETERS##################");
+			//DEBUG("HKY85 kappa " << 2.5 << " discrete gamma " << this->gammaRateCategories <<  "categories, alpha = 0.75");
+			//DEBUG("Indel parameters : lambda: " << l << " geometric gap opening (epsilon) " << e );
+			//DEBUG("Divergence time : " << (tb1*t));
 
 			substModel->summarize();
 
 
 			DEBUG("*******VITERBI********");
 			vphmm1 = new ViterbiPairHMM(inputSequences->getSequencesAt(tripletIdxs[0][0]), inputSequences->getSequencesAt(tripletIdxs[0][1]),substModel, indelModel);
-			vphmm1->setDivergenceTime(tb1*t);
+			vphmm1->setDivergenceTime(tb1);
 			vphmm1->runAlgorithm();
 			//vphmm2 = new ViterbiPairHMM(inputSequences->getSequencesAt(tripletIdxs[0][1]), inputSequences->getSequencesAt(tripletIdxs[0][2]),substModel, indelModel);
 			//vphmm2->setDivergenceTime(tb2*t);
@@ -395,7 +254,7 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 
 
 
-			//DEBUG("First pair");
+			DEBUG("Viterbi alignment");
 			vp1 =  vphmm1->getBestAlignment(inputSequences->getRawSequenceAt(tripletIdxs[0][0]), inputSequences->getRawSequenceAt(tripletIdxs[0][1]));
 			DEBUG(vp1.first);
 			DEBUG(vp1.second);
@@ -406,9 +265,10 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 			//DUMP(vp2.first);
 			//DUMP(vp2.second);
 
-			/*
-			DUMP("*******VITERBI Lnl1********");
+
+			DUMP("*******VITERBI lnL********");
 			DUMP(vphmm1->getAlignmentLikelihood(dict->translate(vp1.first), dict->translate(vp1.second)));
+			/*
 			DUMP("*******VITERBI Lnl2********");
 			DUMP(vphmm2->getAlignmentLikelihood(dict->translate(vp2.first), dict->translate(vp2.second)));
 */
@@ -417,14 +277,15 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 
 			DEBUG("*******    Forward  ********");
 			fphmm1 = new ForwardPairHMM(inputSequences->getSequencesAt(tripletIdxs[0][0]), inputSequences->getSequencesAt(tripletIdxs[0][1]),substModel, indelModel,Definitions::DpMatrixType::Full, nullptr);
-			fphmm1->setDivergenceTime(tb1*t);
+			fphmm1->setDivergenceTime(tb1);
 			fphmm1->runAlgorithm();
 			//fphmm2 = new ForwardPairHMM(inputSequences->getSequencesAt(tripletIdxs[0][1]), inputSequences->getSequencesAt(tripletIdxs[0][2]),substModel, indelModel,Definitions::DpMatrixType::Full, nullptr);
 			//fphmm2->setDivergenceTime(tb2*t);
 			//fphmm2->runAlgorithm();
 
-			DUMP("First pair");
+			DUMP("Forward best alignment");
 			fp1 = fphmm1->getBestAlignment(inputSequences->getRawSequenceAt(tripletIdxs[0][0]), inputSequences->getRawSequenceAt(tripletIdxs[0][1]));
+
 			DEBUG(fp1.first);
 			DEBUG(fp1.second);
 
@@ -440,9 +301,11 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 			DUMP(fphmm2->getAlignmentLikelihood(dict->translate(fp2.first), dict->translate(fp2.second)));
 */
 			BackwardPairHMM* bphmm1;
-			BackwardPairHMM* bphmm2;
+			//BackwardPairHMM* bphmm2;
+
+			DEBUG("*******    Backward  ********");
 			bphmm1 = new BackwardPairHMM(inputSequences->getSequencesAt(tripletIdxs[0][0]), inputSequences->getSequencesAt(tripletIdxs[0][1]),substModel, indelModel,Definitions::DpMatrixType::Full, nullptr);
-			bphmm1->setDivergenceTime(tb1*t);
+			bphmm1->setDivergenceTime(tb1);
 			bphmm1->runAlgorithm();
 
 			//DUMP("#####Match BW########");
@@ -456,6 +319,7 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 			//bphmm2->setDivergenceTime(tb2*t);
 			//bphmm2->runAlgorithm();
 
+			DEBUG("*******   Calculate posteriors   ********");
 			bphmm1->calculatePosteriors(fphmm1);
 			//bphmm2->calculatePosteriors(fphmm2);
 
@@ -463,7 +327,7 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 
 			DEBUG("*******VITERBI Lnl1********");
 			vlnl = fphmm1->getAlignmentLikelihood(dict->translate(vp1.first), dict->translate(vp1.second));
-			vlnl -=0.01;
+			vlnl -=0.0001;
 			DEBUG(vlnl);
 			DEBUG("*******FWD Lnl1********");
 			flnl = fphmm1->getAlignmentLikelihood(dict->translate(fp1.first), dict->translate(fp1.second));
@@ -481,101 +345,35 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 			int s1len = (inputSequences->getRawSequenceAt(tripletIdxs[0][0])).size()+1;
 			int s2len = (inputSequences->getRawSequenceAt(tripletIdxs[0][1])).size()+1;
 
-			vector<vector<double> > posteriors (s1len , std::vector<double> ( s2len, 0.01 ));
+			vector<vector<double> > posteriors (s1len , std::vector<double> ( s2len, 0.00000001 ));
 
 			double tlnl;
 
-			vector<double> freqs(100,0.0);
+			vector<double> freqs(50,0.0);
+
+			map<double, pair<string, string> > alSamples;
 
 			int ctr;
 			int total = 0;
-			for(ctr = 0; ctr < 10000; ctr++){
+			for(ctr = 0; ctr < 10000000; ctr++){
 				auto pr1 = fphmm1->sampleAlignment(inputSequences->getRawSequenceAt(tripletIdxs[0][0]), inputSequences->getRawSequenceAt(tripletIdxs[0][1]));
 				tlnl = bphmm1->getAlignmentLikelihood(dict->translate(pr1.first), dict->translate(pr1.second),false, posteriors);
 
-				for(int cats=0; cats<100;cats++)
+				alSamples.insert(make_pair(tlnl, pr1));
+
+				for(int cats=0; cats<50;cats++)
 				{
-					if (tlnl > vlnl-((cats+1)*2.0)){
+					if (tlnl > vlnl-((cats+1)*0.5)){
 						freqs[cats] +=1;
 						total ++;
 						break;
 					}
 				}
-				/*
-				if (tlnl > vlnl-2.0){
-					cerr << "FND!!!!";
-					freqs[0] += 1;
-				}
-				else if (tlnl > vlnl-4.0)
-					freqs[1] += 1;
-				else if (tlnl > vlnl-6.0)
-					freqs[2] += 1;
-				else if (tlnl > vlnl-8.0)
-					freqs[3] += 1;
-				else if (tlnl > vlnl-10.0)
-					freqs[4] += 1;
-				else if (tlnl > vlnl-12.0)
-					freqs[5] += 1;
-				else if (tlnl > vlnl-14.0)
-					freqs[6] += 1;
-				else if (tlnl > vlnl-16.0)
-					freqs[7] += 1;
-				else if (tlnl > vlnl-18.0)
-					freqs[8] += 1;
-				else if (tlnl > vlnl-20.0)
-					freqs[9] += 1;
-				else if (tlnl > vlnl-22.0)
-					freqs[10] += 1;
-				else if (tlnl > vlnl-24.0)
-					freqs[11] += 1;
-				else if (tlnl > vlnl-26.0)
-					freqs[12] += 1;
-				else if (tlnl > vlnl-28.0)
-					freqs[13] += 1;
-				else if (tlnl > vlnl-30.0)
-					freqs[14] += 1;
-				else if (tlnl > vlnl-32.0)
-					freqs[15] += 1;
-				else if (tlnl > vlnl-34.0)
-					freqs[16] += 1;
-				else if (tlnl > vlnl-36.0)
-					freqs[17] += 1;
-				else if (tlnl > vlnl-38.0)
-					freqs[18] += 1;
-				else if (tlnl > vlnl-40.0)
-					freqs[19] += 1;
-				else if (tlnl > vlnl-42.0)
-					freqs[20] += 1;
-				else if (tlnl > vlnl-44.0)
-					freqs[21] += 1;
-				else if (tlnl > vlnl-46.0)
-					freqs[22] += 1;
-				else if (tlnl > vlnl-48.0)
-					freqs[23] += 1;
-				else if (tlnl > vlnl-50.0)
-					freqs[24] += 1;
-				else if (tlnl > vlnl-52.0)
-					freqs[25] += 1;
-				else if (tlnl > vlnl-54.0)
-					freqs[26] += 1;
-				else if (tlnl > vlnl-56.0)
-					freqs[27] += 1;
-				else if (tlnl > vlnl-58.0)
-					freqs[28] += 1;
-				else
-					freqs[29] += 1;
-				*/
-				//if (tlnl > flnl)
-				//{
-				//	DUMP("Better than forward path sampled " << tlnl);
-				//	DUMP(pr1.first);
-				//	DUMP(pr1.second);
-				//}
-				//DUMP(tlnl);
+
 			}
 
-			cerr << total << endl;
-/*
+
+
 			stringstream sstr;
 
 			sstr << endl;
@@ -588,7 +386,7 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 				{
 					lv = log(posteriors[i][j]/ctr);
 					if (lv > -5.0)
-						sstr << int(lv*-1.0);
+						sstr << (int)round(lv*-1.0);
 					else sstr << ".";
 
 				}
@@ -596,10 +394,23 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 			}
 			DUMP("&&&&&&&&COUNTED POSTERIORS FOR MATCH&&&&&&&&&&&&&&&&&&");
 			DUMP(sstr.str());
-*/
+
 
 			for(int ct =0; ct < freqs.size(); ct++)
-				INFO("lnl up to " << ((ct+1)*-2) << "\t\t " << (freqs[ct]/ctr));
+				INFO("lnl up to " << ((ct+1)*-0.5) << "\t\t " << (freqs[ct]/ctr));
+
+			DEBUG("Top 100 alignments");
+			auto it=alSamples.rbegin();
+			int cap = 100 < alSamples.size() ? 100 : alSamples.size();
+
+			for (int c=0;c<cap; c++)
+			{
+				DEBUG(it->first);
+				DEBUG(it->second.first);
+				DEBUG(it->second.second);
+				it++;
+			}
+
 
 		}
 		delete indelModel;

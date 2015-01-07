@@ -37,6 +37,7 @@ void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 	double fwdT;
 
 	fwdT = fwd->getTotalLikelihood();
+	//fwdT = fwd->M->getValueAt(xSize-1,ySize-1);
 
 	for (i = 0; i<xSize-1; i++)
 	{
@@ -84,7 +85,7 @@ double BackwardPairHMM::getAlignmentLikelihood(vector<SequenceElement> s1,
 		previous = M;
 		k++;
 		l++;
-		posteriors[k][l] += 1;
+		posteriors[k][l] += 1.0;
 		lnl += ptmatrix->getLogPairTransition(s1[0].getMatrixIndex(), s2[0].getMatrixIndex());
 	}
 

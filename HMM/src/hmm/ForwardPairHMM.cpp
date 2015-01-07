@@ -196,6 +196,8 @@ pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b
 	}
 	//deal with the last row or column
 
+	reverse(alignment.first.begin(), alignment.first.end());
+	reverse(alignment.second.begin(), alignment.second.end());
 	return alignment;
 }
 

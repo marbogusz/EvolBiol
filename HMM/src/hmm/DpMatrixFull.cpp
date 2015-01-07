@@ -116,7 +116,7 @@ void EBC::DpMatrixFull::outputValues(unsigned int bound=0)
 			TraceStep& ts = matrixData[i][j];
 
 			if (ts.score > -5.0)
-				sstr << int(ts.score*-1.0);
+				sstr << (int)round(ts.score*-1.0);
 			else sstr << ".";
 
 		}
