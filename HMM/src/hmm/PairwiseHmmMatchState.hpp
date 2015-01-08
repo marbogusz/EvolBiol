@@ -18,7 +18,7 @@ class PairwiseHmmMatchState: public EBC::PairwiseHmmStateBase
 {
 
 public:
-	void initializeData(bool backwards=false);
+	void initializeData(double lnl, bool backwards=false);
 
 	PairwiseHmmMatchState(unsigned int x, unsigned int y);
 

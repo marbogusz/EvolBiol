@@ -14,7 +14,8 @@ namespace EBC
 
 EvolutionaryPairHMM::EvolutionaryPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2,
 			SubstitutionModelBase* smdl, IndelModel* imdl,
-			Definitions::DpMatrixType mt, Band* bandObj) : substModel(smdl), indelModel(imdl), band(bandObj)
+			Definitions::DpMatrixType mt, Band* bandObj, bool useEquilibriumFreqs) :
+					substModel(smdl), indelModel(imdl), band(bandObj), equilibriumFreqs(useEquilibriumFreqs)
 {
 	M = X = Y = NULL;
 
@@ -47,6 +48,8 @@ void EvolutionaryPairHMM::setDivergenceTime(double time)
 
 void EvolutionaryPairHMM::getStateEquilibriums()
 {
+	double minPi = exp(Definitions::minMatrixLikelihood);
+
 	md[0][0] = 1.0-2*g;
 	md[1][1] = e+((1.0-e)*g);
 	md[2][2] = e+((1.0-e)*g);
@@ -62,6 +65,12 @@ void EvolutionaryPairHMM::getStateEquilibriums()
 	piD = ((1.0-md[0][0])+(md[0][1]*(1.0-md[0][0]+md[1][0])/(md[1][1]-1.0-md[0][1])))/(((md[0][1]-md[2][1])*(1.0-md[0][0]+md[1][0])/(md[1][1]-1.0-md[0][1]))+md[2][0]-md[0][0]+1);
 	piI = ((piD*(md[0][1]-md[2][1]))-md[0][1])/(md[1][1]-1.0-md[0][1]);
 	piM = 1.0 -piI - piD;
+
+	DUMP("Decimal equilibriums : PiM\t" << piM << "\tPiI\t" << piI << "\tPiD\t" << piD);
+
+	piD = piD < minPi ? Definitions::minMatrixLikelihood : log(piD);
+	piI = piI < minPi ? Definitions::minMatrixLikelihood : log(piI);
+	piM = piM < minPi ? Definitions::minMatrixLikelihood : log(piM);
 }
 
 void EvolutionaryPairHMM::setTransitionProbabilities()

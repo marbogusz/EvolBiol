@@ -13,8 +13,8 @@ namespace EBC
 
 
 ForwardPairHMM::ForwardPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, SubstitutionModelBase* smdl,
-		IndelModel* imdl, Definitions::DpMatrixType mt, Band* bandObj) :
-		EvolutionaryPairHMM(s1,s2, smdl, imdl, mt, bandObj)
+		IndelModel* imdl, Definitions::DpMatrixType mt, Band* bandObj, bool useEquilibriumFreqs) :
+		EvolutionaryPairHMM(s1,s2, smdl, imdl, mt, bandObj, useEquilibriumFreqs)
 {
 }
 
@@ -207,6 +207,8 @@ double ForwardPairHMM::runAlgorithm()
 
 	calculateModels();
 	setTransitionProbabilities();
+	if (this->equilibriumFreqs)
+		this->getStateEquilibriums();
 
 	int i;
 	int j;
@@ -222,9 +224,12 @@ double ForwardPairHMM::runAlgorithm()
 	double emissionY;
 
 	//FIXME - multiple runs using the same hmm object do not require dp matrix zeroing as long as the band stays the same!
-	M->initializeData();
-	X->initializeData();
-	Y->initializeData();
+
+	DUMP("Forward equilibriums : PiM\t" << piM << "\tPiI\t" << piI << "\tPiD\t" << piD);
+
+	M->initializeData(this->piM);
+	X->initializeData(this->piI);
+	Y->initializeData(this->piD);
 
 	if(this->band == NULL)
 	{

@@ -30,13 +30,13 @@ PairwiseHmmMatchState::~PairwiseHmmMatchState()
 {
 }
 
-void PairwiseHmmMatchState::initializeData(bool backwards)
+void PairwiseHmmMatchState::initializeData(double lnl, bool backwards)
 {
 	if (!backwards)
 	{
 		//dpMatrix->setWholeCol(0,-100000);
 		//dpMatrix->setWholeRow(0,-100000);
-		dpMatrix->setValue(0,0,0);
+		dpMatrix->setValue(0,0,lnl);
 	}
 	/*else
 	{

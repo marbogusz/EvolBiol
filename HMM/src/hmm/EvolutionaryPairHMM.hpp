@@ -64,6 +64,8 @@ protected:
 
 	bool bandingEnabled;
 
+	bool equilibriumFreqs;
+
 	Band* band;
 
 	vector<SequenceElement> seq1;
@@ -102,7 +104,7 @@ public:
 	PairwiseHmmStateBase* Y;
 
 	EvolutionaryPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, SubstitutionModelBase* smdl,
-			IndelModel* imdl, Definitions::DpMatrixType, Band* bandObj);
+			IndelModel* imdl, Definitions::DpMatrixType, Band* bandObj, bool useEquilibriumFreqs);
 
 	virtual ~EvolutionaryPairHMM();
 

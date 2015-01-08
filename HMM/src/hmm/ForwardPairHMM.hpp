@@ -24,7 +24,7 @@ protected:
 public:
 	ForwardPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2,
 			SubstitutionModelBase* smdl, IndelModel* imdl,
-			Definitions::DpMatrixType mt, Band* bandObj = nullptr);
+			Definitions::DpMatrixType mt, Band* bandObj = nullptr, bool useEquilibriumProbabilities = false);
 
 	virtual ~ForwardPairHMM();
 

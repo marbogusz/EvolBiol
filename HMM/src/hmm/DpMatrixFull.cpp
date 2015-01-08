@@ -108,7 +108,7 @@ void EBC::DpMatrixFull::outputValues(unsigned int bound=0)
 	for(unsigned int k=0; k < yl; k++)
 		sstr << k << "\t";
 	sstr << endl;
-
+/*
 	for(unsigned int i=0; i < xl; i++)
 	{
 		for(unsigned int j=0; j < yl; j++)
@@ -122,6 +122,19 @@ void EBC::DpMatrixFull::outputValues(unsigned int bound=0)
 		}
 		sstr << endl;
 	}
+*/
+	for(unsigned int i=0; i < xl; i++)
+		{
+			for(unsigned int j=0; j < yl; j++)
+			{
+				TraceStep& ts = matrixData[i][j];
+
+
+					sstr << ts.score*-1.0 << "\t";
+
+			}
+			sstr << endl;
+		}
 	DUMP(sstr.str());
 }
 

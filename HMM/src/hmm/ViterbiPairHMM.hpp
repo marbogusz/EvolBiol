@@ -28,7 +28,7 @@ protected:
 public:
 	ViterbiPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2,
 			SubstitutionModelBase* smdl, IndelModel* imdl,
-			Definitions::DpMatrixType mt = Definitions::DpMatrixType::Full, Band* bandObj = nullptr);
+			Definitions::DpMatrixType mt = Definitions::DpMatrixType::Full, Band* bandObj = nullptr, bool useEquilibriumFreqs = false);
 
 	virtual ~ViterbiPairHMM();
 

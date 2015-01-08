@@ -26,11 +26,12 @@ PairwiseHmmInsertState::PairwiseHmmInsertState(DpMatrixBase *matrix)
 	//initializeData();
 }
 
-void PairwiseHmmInsertState::initializeData(bool backwards)
+void PairwiseHmmInsertState::initializeData(double lnl, bool backwards)
 {
-	/*
+
 	if(!backwards)
-		dpMatrix->setWholeRow(0,-100000);
+		dpMatrix->setWholeRow(0,lnl);
+	/*
 	else
 	{
 		dpMatrix->setWholeCol(this->cols-1,-100000);

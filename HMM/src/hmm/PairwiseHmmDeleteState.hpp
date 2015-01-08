@@ -16,7 +16,7 @@ namespace EBC
 class PairwiseHmmDeleteState: public EBC::PairwiseHmmStateBase
 {
 public:
-	void initializeData(bool backwards=false);
+	void initializeData(double lnl, bool backwards=false);
 
 	PairwiseHmmDeleteState(unsigned int x, unsigned int y);
 
