@@ -247,31 +247,52 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 			vphmm1 = new ViterbiPairHMM(inputSequences->getSequencesAt(tripletIdxs[0][0]), inputSequences->getSequencesAt(tripletIdxs[0][1]),substModel, indelModel);
 			vphmm1->setDivergenceTime(tb1);
 			vphmm1->runAlgorithm();
+
+
 			//vphmm2 = new ViterbiPairHMM(inputSequences->getSequencesAt(tripletIdxs[0][1]), inputSequences->getSequencesAt(tripletIdxs[0][2]),substModel, indelModel);
 			//vphmm2->setDivergenceTime(tb2*t);
 			//vphmm2->runAlgorithm();
-
-
-
-
-			DEBUG("Viterbi alignment");
+			DEBUG("Viterbi alignment NO EQUILIBRIUMS");
 			vp1 =  vphmm1->getBestAlignment(inputSequences->getRawSequenceAt(tripletIdxs[0][0]), inputSequences->getRawSequenceAt(tripletIdxs[0][1]));
 			DEBUG(vp1.first);
 			DEBUG(vp1.second);
-
-
 			//DUMP("Second Pair");
 			//vp2 =  vphmm2->getBestAlignment(inputSequences->getRawSequenceAt(tripletIdxs[0][1]), inputSequences->getRawSequenceAt(tripletIdxs[0][2]));
 			//DUMP(vp2.first);
 			//DUMP(vp2.second);
-
-
-			DUMP("*******VITERBI lnL********");
+			dynamic_cast<DpMatrixFull*>(vphmm1->M->getDpMatrix())->outputValues(0);
+			dynamic_cast<DpMatrixFull*>(vphmm1->X->getDpMatrix())->outputValues(0);
+			dynamic_cast<DpMatrixFull*>(vphmm1->Y->getDpMatrix())->outputValues(0);
+			DUMP("*******VITERBI lnL NO Equilibruims********");
 			DUMP(vphmm1->getAlignmentLikelihood(dict->translate(vp1.first), dict->translate(vp1.second)));
 			/*
 			DUMP("*******VITERBI Lnl2********");
 			DUMP(vphmm2->getAlignmentLikelihood(dict->translate(vp2.first), dict->translate(vp2.second)));
-*/
+			*/
+
+			vphmm1 = new ViterbiPairHMM(inputSequences->getSequencesAt(tripletIdxs[0][0]), inputSequences->getSequencesAt(tripletIdxs[0][1]),substModel, indelModel,Definitions::DpMatrixType::Full, nullptr, true);
+			vphmm1->setDivergenceTime(tb1);
+			vphmm1->runAlgorithm();
+			//vphmm2 = new ViterbiPairHMM(inputSequences->getSequencesAt(tripletIdxs[0][1]), inputSequences->getSequencesAt(tripletIdxs[0][2]),substModel, indelModel);
+			//vphmm2->setDivergenceTime(tb2*t);
+			//vphmm2->runAlgorithm();
+			DEBUG("Viterbi alignment WITH EQUILIBRIUMS");
+			vp1 =  vphmm1->getBestAlignment(inputSequences->getRawSequenceAt(tripletIdxs[0][0]), inputSequences->getRawSequenceAt(tripletIdxs[0][1]));
+			DEBUG(vp1.first);
+			DEBUG(vp1.second);
+			//DUMP("Second Pair");
+			//vp2 =  vphmm2->getBestAlignment(inputSequences->getRawSequenceAt(tripletIdxs[0][1]), inputSequences->getRawSequenceAt(tripletIdxs[0][2]));
+			//DUMP(vp2.first);
+			//DUMP(vp2.second);
+			dynamic_cast<DpMatrixFull*>(vphmm1->M->getDpMatrix())->outputValues(0);
+			dynamic_cast<DpMatrixFull*>(vphmm1->X->getDpMatrix())->outputValues(0);
+			dynamic_cast<DpMatrixFull*>(vphmm1->Y->getDpMatrix())->outputValues(0);
+			DUMP("*******VITERBI lnL WITH EQUILIBRIUMS********");
+			DUMP(vphmm1->getAlignmentLikelihood(dict->translate(vp1.first), dict->translate(vp1.second)));
+
+			//DUMP("*******VITERBI Lnl2********");
+			//DUMP(vphmm2->getAlignmentLikelihood(dict->translate(vp2.first), dict->translate(vp2.second)));
+
 			ForwardPairHMM* fphmm1;
 			ForwardPairHMM* fphmm2;
 
@@ -355,7 +376,7 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 
 			int ctr;
 			int total = 0;
-			for(ctr = 0; ctr < 10000000; ctr++){
+			for(ctr = 0; ctr < 1000; ctr++){
 				auto pr1 = fphmm1->sampleAlignment(inputSequences->getRawSequenceAt(tripletIdxs[0][0]), inputSequences->getRawSequenceAt(tripletIdxs[0][1]));
 				tlnl = bphmm1->getAlignmentLikelihood(dict->translate(pr1.first), dict->translate(pr1.second),false, posteriors);
 
