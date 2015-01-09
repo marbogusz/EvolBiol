@@ -30,7 +30,7 @@ void PairwiseHmmInsertState::initializeData(double lnl, bool backwards)
 {
 
 	if(!backwards)
-		dpMatrix->setWholeRow(0,lnl);
+		dpMatrix->setValue(0,0,lnl);
 	/*
 	else
 	{

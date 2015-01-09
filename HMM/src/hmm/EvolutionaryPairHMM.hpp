@@ -68,6 +68,10 @@ protected:
 
 	Band* band;
 
+	double initTransM;
+	double initTransX;
+	double initTransY;
+
 	vector<SequenceElement> seq1;
 	vector<SequenceElement> seq2;
 	vector<SequenceElement>::iterator itS1, itS2;

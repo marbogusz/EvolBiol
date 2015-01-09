@@ -260,9 +260,9 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 			//vp2 =  vphmm2->getBestAlignment(inputSequences->getRawSequenceAt(tripletIdxs[0][1]), inputSequences->getRawSequenceAt(tripletIdxs[0][2]));
 			//DUMP(vp2.first);
 			//DUMP(vp2.second);
-			dynamic_cast<DpMatrixFull*>(vphmm1->M->getDpMatrix())->outputValues(0);
-			dynamic_cast<DpMatrixFull*>(vphmm1->X->getDpMatrix())->outputValues(0);
-			dynamic_cast<DpMatrixFull*>(vphmm1->Y->getDpMatrix())->outputValues(0);
+			//dynamic_cast<DpMatrixFull*>(vphmm1->M->getDpMatrix())->outputValues(0);
+			//dynamic_cast<DpMatrixFull*>(vphmm1->X->getDpMatrix())->outputValues(0);
+			//dynamic_cast<DpMatrixFull*>(vphmm1->Y->getDpMatrix())->outputValues(0);
 			DUMP("*******VITERBI lnL NO Equilibruims********");
 			DUMP(vphmm1->getAlignmentLikelihood(dict->translate(vp1.first), dict->translate(vp1.second)));
 			/*
@@ -284,9 +284,9 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 			//vp2 =  vphmm2->getBestAlignment(inputSequences->getRawSequenceAt(tripletIdxs[0][1]), inputSequences->getRawSequenceAt(tripletIdxs[0][2]));
 			//DUMP(vp2.first);
 			//DUMP(vp2.second);
-			dynamic_cast<DpMatrixFull*>(vphmm1->M->getDpMatrix())->outputValues(0);
-			dynamic_cast<DpMatrixFull*>(vphmm1->X->getDpMatrix())->outputValues(0);
-			dynamic_cast<DpMatrixFull*>(vphmm1->Y->getDpMatrix())->outputValues(0);
+			//dynamic_cast<DpMatrixFull*>(vphmm1->M->getDpMatrix())->outputValues(0);
+			//dynamic_cast<DpMatrixFull*>(vphmm1->X->getDpMatrix())->outputValues(0);
+			//dynamic_cast<DpMatrixFull*>(vphmm1->Y->getDpMatrix())->outputValues(0);
 			DUMP("*******VITERBI lnL WITH EQUILIBRIUMS********");
 			DUMP(vphmm1->getAlignmentLikelihood(dict->translate(vp1.first), dict->translate(vp1.second)));
 
@@ -297,7 +297,7 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 			ForwardPairHMM* fphmm2;
 
 			DEBUG("*******    Forward  ********");
-			fphmm1 = new ForwardPairHMM(inputSequences->getSequencesAt(tripletIdxs[0][0]), inputSequences->getSequencesAt(tripletIdxs[0][1]),substModel, indelModel,Definitions::DpMatrixType::Full, nullptr);
+			fphmm1 = new ForwardPairHMM(inputSequences->getSequencesAt(tripletIdxs[0][0]), inputSequences->getSequencesAt(tripletIdxs[0][1]),substModel, indelModel,Definitions::DpMatrixType::Full, nullptr, true);
 			fphmm1->setDivergenceTime(tb1);
 			fphmm1->runAlgorithm();
 			//fphmm2 = new ForwardPairHMM(inputSequences->getSequencesAt(tripletIdxs[0][1]), inputSequences->getSequencesAt(tripletIdxs[0][2]),substModel, indelModel,Definitions::DpMatrixType::Full, nullptr);

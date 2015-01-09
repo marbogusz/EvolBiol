@@ -30,7 +30,7 @@ void PairwiseHmmDeleteState::initializeData(double lnl, bool backwards)
 {
 
 	if(!backwards)
-		dpMatrix->setWholeCol(0,lnl);
+		dpMatrix->setValue(0,0,lnl);
 	/*
 	else
 	{
