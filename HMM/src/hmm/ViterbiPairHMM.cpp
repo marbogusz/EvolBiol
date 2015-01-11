@@ -159,6 +159,8 @@ double ViterbiPairHMM::runAlgorithm()
 
 	calculateModels();
 	setTransitionProbabilities();
+	if (this->equilibriumFreqs)
+		this->getStateEquilibriums();
 
 	unsigned int i,j,k,l;
 
@@ -168,9 +170,11 @@ double ViterbiPairHMM::runAlgorithm()
 	double emissionX;
 	double emissionY;
 
-	M->initializeData();
-	X->initializeData();
-	Y->initializeData();
+	DUMP("Viterbi equilibriums : PiM\t" << piM << "\tPiI\t" << piI << "\tPiD\t" << piD);
+
+	M->initializeData(this->piM);
+	X->initializeData(this->piI);
+	Y->initializeData(this->piD);
 
 		//while (i != xSize && j != ySize)
 

@@ -196,6 +196,8 @@ pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b
 	}
 	//deal with the last row or column
 
+	reverse(alignment.first.begin(), alignment.first.end());
+	reverse(alignment.second.begin(), alignment.second.end());
 	return alignment;
 }
 
@@ -205,6 +207,8 @@ double ForwardPairHMM::runAlgorithm()
 
 	calculateModels();
 	setTransitionProbabilities();
+	if (this->equilibriumFreqs)
+		this->getStateEquilibriums();
 
 	int i;
 	int j;
@@ -220,9 +224,12 @@ double ForwardPairHMM::runAlgorithm()
 	double emissionY;
 
 	//FIXME - multiple runs using the same hmm object do not require dp matrix zeroing as long as the band stays the same!
-	M->initializeData();
-	X->initializeData();
-	Y->initializeData();
+
+	DUMP("Forward equilibriums : PiM\t" << piM << "\tPiI\t" << piI << "\tPiD\t" << piD);
+
+	M->initializeData(this->piM);
+	X->initializeData(this->piI);
+	Y->initializeData(this->piD);
 
 	if(this->band == NULL)
 	{

@@ -37,7 +37,7 @@ protected:
 public:
 	Definitions::StateId stateId;
 
-	virtual void initializeData(bool backwards=false)=0;
+	virtual void initializeData(double lnl, bool backwards=false)=0;
 
 	inline double getValueAt(unsigned int row, unsigned int column)
 	{

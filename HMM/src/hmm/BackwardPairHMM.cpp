@@ -73,19 +73,19 @@ double BackwardPairHMM::getAlignmentLikelihood(vector<SequenceElement> s1,
 	if(s2[0].isIsGap()){
 		previous = X;
 		k++;
-		lnl += ptmatrix->getLogEquilibriumFreq(s1[0].getMatrixIndex());
+		lnl += ptmatrix->getLogEquilibriumFreq(s1[0].getMatrixIndex()) + initTransX;
 	}
 	else if(s1[0].isIsGap()){
 		previous = Y;
 		l++;
-		lnl += ptmatrix->getLogEquilibriumFreq(s2[0].getMatrixIndex());
+		lnl += ptmatrix->getLogEquilibriumFreq(s2[0].getMatrixIndex()) + initTransY;
 	}
 	else{
 		previous = M;
 		k++;
 		l++;
-		posteriors[k][l] += 1;
-		lnl += ptmatrix->getLogPairTransition(s1[0].getMatrixIndex(), s2[0].getMatrixIndex());
+		posteriors[k][l] += 1.0;
+		lnl += ptmatrix->getLogPairTransition(s1[0].getMatrixIndex(), s2[0].getMatrixIndex()) + initTransM;
 	}
 
 	for(int i=1; i< s1.size(); i++){
@@ -143,6 +143,8 @@ double BackwardPairHMM::runAlgorithm()
 {
 	calculateModels();
 	setTransitionProbabilities();
+	//FIXME - setting the following for test purposes!
+	this->getStateEquilibriums();
 
 	int i;
 	int j;

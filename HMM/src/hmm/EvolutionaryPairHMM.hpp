@@ -64,7 +64,13 @@ protected:
 
 	bool bandingEnabled;
 
+	bool equilibriumFreqs;
+
 	Band* band;
+
+	double initTransM;
+	double initTransX;
+	double initTransY;
 
 	vector<SequenceElement> seq1;
 	vector<SequenceElement> seq2;

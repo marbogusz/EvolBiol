@@ -26,11 +26,12 @@ PairwiseHmmDeleteState::PairwiseHmmDeleteState(DpMatrixBase *matrix)
 	//initializeData();
 }
 
-void PairwiseHmmDeleteState::initializeData(bool backwards)
+void PairwiseHmmDeleteState::initializeData(double lnl, bool backwards)
 {
-	/*
+
 	if(!backwards)
-		dpMatrix->setWholeCol(0,-100000);
+		dpMatrix->setValue(0,0,lnl);
+	/*
 	else
 	{
 		dpMatrix->setWholeCol(this->cols-1,-100000);
