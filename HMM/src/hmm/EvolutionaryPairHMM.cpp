@@ -78,9 +78,11 @@ void EvolutionaryPairHMM::getStateEquilibriums()
 	piI = piI < minPi ? Definitions::minMatrixLikelihood : log(piI);
 	piM = piM < minPi ? Definitions::minMatrixLikelihood : log(piM);
 
-	initTransX = max(max(X->getTransitionProbabilityFromInsert() + piI, X->getTransitionProbabilityFromDelete() * piD), X->getTransitionProbabilityFromMatch() * piM);
-	initTransY = max(max(Y->getTransitionProbabilityFromInsert() + piI, Y->getTransitionProbabilityFromDelete() * piD), Y->getTransitionProbabilityFromMatch() * piM);
-	initTransM = max(max(M->getTransitionProbabilityFromInsert() + piI, M->getTransitionProbabilityFromDelete() * piD), M->getTransitionProbabilityFromMatch() * piM);
+	initTransX = max(max(X->getTransitionProbabilityFromInsert() + piI, X->getTransitionProbabilityFromDelete() + piD), X->getTransitionProbabilityFromMatch() + piM);
+	initTransY = max(max(Y->getTransitionProbabilityFromInsert() + piI, Y->getTransitionProbabilityFromDelete() + piD), Y->getTransitionProbabilityFromMatch() + piM);
+	initTransM = max(max(M->getTransitionProbabilityFromInsert() + piI, M->getTransitionProbabilityFromDelete() + piD), M->getTransitionProbabilityFromMatch() + piM);
+
+	DUMP("Initial transition likelihood component : M\t" << initTransM << "\tI\t" << initTransX << "\tD\t" << initTransY);
 }
 
 void EvolutionaryPairHMM::setTransitionProbabilities()
@@ -189,20 +191,20 @@ double EvolutionaryPairHMM::getAlignmentLikelihood(vector<SequenceElement> s1,
 	if(s2[0].isIsGap()){
 		previous = X;
 		k++;
-		lnl += ptmatrix->getLogEquilibriumFreq(s1[0].getMatrixIndex()) + initTransX;
+		lnl += (ptmatrix->getLogEquilibriumFreq(s1[0].getMatrixIndex()) + initTransX);
 		//DUMP("I " << 0 << "\tlnl\t" << lnl << "\tmatrix\t" << previous->getValueAt(k,l));
 	}
 	else if(s1[0].isIsGap()){
 		previous = Y;
 		l++;
-		lnl += ptmatrix->getLogEquilibriumFreq(s2[0].getMatrixIndex()) + initTransY;
+		lnl += (ptmatrix->getLogEquilibriumFreq(s2[0].getMatrixIndex()) + initTransY);
 		//DUMP("D " << 0 << "\tlnl\t" << lnl << "\tmatrix\t" << previous->getValueAt(k,l));
 	}
 	else{
 		previous = M;
 		k++;
 		l++;
-		lnl += ptmatrix->getLogPairTransition(s1[0].getMatrixIndex(), s2[0].getMatrixIndex())+ initTransM;
+		lnl += (ptmatrix->getLogPairTransition(s1[0].getMatrixIndex(), s2[0].getMatrixIndex())+ initTransM);
 		//DUMP("M " << 0 << "\tlnl\t" << lnl << "\tmatrix\t" << previous->getValueAt(k,l));
 	}
 	for(int i=1; i< s1.size(); i++){

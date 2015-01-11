@@ -144,6 +144,8 @@ double BackwardPairHMM::runAlgorithm()
 {
 	calculateModels();
 	setTransitionProbabilities();
+	//FIXME - setting the following for test purposes!
+	this->getStateEquilibriums();
 
 	int i;
 	int j;
