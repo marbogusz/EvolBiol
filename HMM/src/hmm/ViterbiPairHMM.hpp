@@ -38,6 +38,7 @@ public:
 
 	double getViterbiSubstitutionLikelihood();
 
+	pair<string,string> getBestAlignment(string&a, string& b);
 };
 
 } /* namespace EBC */

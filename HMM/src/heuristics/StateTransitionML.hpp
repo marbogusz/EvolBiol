@@ -33,7 +33,7 @@ protected:
 
 	double md[Definitions::stateCount][Definitions::stateCount];
 	//match,insert, delete
-	unsigned int counts[Definitions::stateCount][Definitions::stateCount];
+	double counts[Definitions::stateCount][Definitions::stateCount];
 	double pis[Definitions::stateCount];
 
 public:
@@ -46,7 +46,7 @@ public:
 
 	StateTransitionML(IndelModel* im, double time);
 
-	void addSample(vector<SequenceElement>&s1, vector<SequenceElement>& s2);
+	void addSample(vector<SequenceElement>&s1, vector<SequenceElement>& s2, double weight);
 
 	double getLnL();
 };

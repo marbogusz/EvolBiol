@@ -19,9 +19,6 @@ class BackwardPairHMM: public EBC::EvolutionaryPairHMM
 
 protected:
 
-	bool dpMatrixCalculated;
-	bool posteriorsCalculated;
-
 	void getBandWidth()
 	{
 		this->bandSpan = ySize/(bandFactor);
@@ -47,7 +44,7 @@ public:
 
 	void calculatePosteriors(ForwardPairHMM* fwd);
 
-	pair<string,string> sampleAlignment(string&a, string& b);
+	double getAlignmentLikelihood(vector<SequenceElement> s1, vector<SequenceElement> s2, bool post, vector<vector<double> >& posteriors);
 
 };
 

@@ -11,7 +11,7 @@
 namespace EBC
 {
 
-void StateTransitionML::addSample(vector<SequenceElement>&s1, vector<SequenceElement>& s2)
+void StateTransitionML::addSample(vector<SequenceElement>&s1, vector<SequenceElement>& s2, double weight)
 {
 	Definitions::StateId previousState;
 
@@ -30,11 +30,11 @@ void StateTransitionML::addSample(vector<SequenceElement>&s1, vector<SequenceEle
 			{
 				//Delete
 				if(previousState == Definitions::StateId::Match)
-					counts[Definitions::StateId::Match][Definitions::StateId::Delete]++;
+					counts[Definitions::StateId::Match][Definitions::StateId::Delete] += weight;
 				if(previousState == Definitions::StateId::Insert)
-					counts[Definitions::StateId::Insert][Definitions::StateId::Delete]++;
+					counts[Definitions::StateId::Insert][Definitions::StateId::Delete] += weight;
 				if(previousState == Definitions::StateId::Delete)
-					counts[Definitions::StateId::Delete][Definitions::StateId::Delete]++;
+					counts[Definitions::StateId::Delete][Definitions::StateId::Delete] += weight;
 
 				previousState = Definitions::StateId::Delete;
 			}
@@ -42,22 +42,22 @@ void StateTransitionML::addSample(vector<SequenceElement>&s1, vector<SequenceEle
 			{
 				//Insert
 				if(previousState == Definitions::StateId::Match)
-					counts[Definitions::StateId::Match][Definitions::StateId::Insert]++;
+					counts[Definitions::StateId::Match][Definitions::StateId::Insert] += weight;
 				if(previousState == Definitions::StateId::Insert)
-					counts[Definitions::StateId::Insert][Definitions::StateId::Insert]++;
+					counts[Definitions::StateId::Insert][Definitions::StateId::Insert] += weight;
 				if(previousState == Definitions::StateId::Delete)
-					counts[Definitions::StateId::Delete][Definitions::StateId::Insert]++;
+					counts[Definitions::StateId::Delete][Definitions::StateId::Insert] += weight;
 				previousState = Definitions::StateId::Insert;
 			}
 			else
 			{
 				//Match
 				if(previousState == Definitions::StateId::Match)
-					counts[Definitions::StateId::Match][Definitions::StateId::Match]++;
+					counts[Definitions::StateId::Match][Definitions::StateId::Match] += weight;
 				if(previousState == Definitions::StateId::Insert)
-					counts[Definitions::StateId::Insert][Definitions::StateId::Match]++;
+					counts[Definitions::StateId::Insert][Definitions::StateId::Match] += weight;
 				if(previousState == Definitions::StateId::Delete)
-					counts[Definitions::StateId::Delete][Definitions::StateId::Match]++;
+					counts[Definitions::StateId::Delete][Definitions::StateId::Match] += weight;
 
 				previousState = Definitions::StateId::Match;
 			}
@@ -73,7 +73,7 @@ StateTransitionML::StateTransitionML(IndelModel* im, double tme)
 
 	for(int i = 0; i < Definitions::stateCount; i++)
 			for(int j = 0; j<Definitions::stateCount; j++)
-				counts[i][j] = 0;
+				counts[i][j] = 0.0;
 
 	DEBUG("State Transition ML for time " << time);
 }

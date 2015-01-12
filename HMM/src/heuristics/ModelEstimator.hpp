@@ -34,6 +34,9 @@
 #include "hmm/ViterbiPairHMM.hpp"
 #include "hmm/ForwardPairHMM.hpp"
 #include "hmm/BackwardPairHMM.hpp"
+#include "hmm/ForwardPairHMM.hpp"
+#include "hmm/BackwardPairHMM.hpp"
+#include "hmm/DpMatrixFull.hpp"
 
 
 #include <sstream>
@@ -68,15 +71,16 @@ protected:
 	TripletAligner* tal;
 	ViterbiPairHMM* vphmm;
 
-	vector<pair<EvolutionaryPairHMM*, EvolutionaryPairHMM*>> posteriorHmms;
-
 	vector<array<vector<SequenceElement>, 3> > tripleAlignments;
+	vector<array<vector<SequenceElement>, 4> > pairAlignments;
+
+	map<double, pair<vector<SequenceElement>, vector<SequenceElement> > > alSamples;
+
+	double totalSampleLnl;
 
 	vector<array<string, 3> > alignments;
 
 	vector<array<unsigned int, 3> > tripletIdxs;
-
-	vector<vector<array<vector<SequenceElement>,4> > >smpldPairs;
 
 	unsigned int gammaRateCategories;
 
@@ -84,7 +88,7 @@ protected:
 
 	void estimateTripleAlignment(Definitions::ModelType model);
 
-	array<vector<SequenceElement>, 3> sampleTripleAlignment(unsigned int triplet);
+	void sampleAlignments(ForwardPairHMM* hmm);
 
 public:
 	ModelEstimator(Sequences* inputSeqs, Definitions::ModelType model,

@@ -9,7 +9,6 @@
 #include <iostream>
 #include <cmath>
 #include <sstream>
-#include <iomanip>
 
 using namespace std;
 
@@ -106,45 +105,6 @@ void EBC::DpMatrixFull::outputValues(unsigned int bound=0)
 	stringstream sstr;
 
 	sstr << endl;
-
-	for(unsigned int i=0; i < xSize; i++)
-	{
-		for(unsigned int j=0; j < ySize; j++)
-		{
-			TraceStep& ts = matrixData[i][j];
-
-			if (ts.score >= -3)
-			{
-				if (ts.score > -1)
-					sstr << "1";
-
-				else if (ts.score > -2)
-					sstr << "2";
-				/*
-				else if (ts.score > -3)
-					sstr << "3";
-				else if (ts.score > -4)
-					sstr << "4";
-				else if (ts.score > -5)
-					sstr << "5";
-				else if (ts.score > -6)
-					sstr << "6";
-				else if (ts.score > -7)
-					sstr << "7";
-				else if (ts.score > -8)
-					sstr << "8";
-					*/
-				else
-					sstr << "3";
-
-			}
-			else
-				sstr << ".";
-		}
-			sstr << endl;
-	}
-
-/*
 	for(unsigned int k=0; k < yl; k++)
 		sstr << k << "\t";
 	sstr << endl;
@@ -154,11 +114,14 @@ void EBC::DpMatrixFull::outputValues(unsigned int bound=0)
 		for(unsigned int j=0; j < yl; j++)
 		{
 			TraceStep& ts = matrixData[i][j];
-			sstr << setprecision(3) << std::fixed << exp(ts.score) << "\t";
+
+			if (ts.score > -5.0)
+				sstr << int(ts.score*-1.0);
+			else sstr << ".";
+
 		}
 		sstr << endl;
 	}
-*/
 	DUMP(sstr.str());
 }
 
@@ -192,7 +155,7 @@ void EBC::DpMatrixFull::outputValuesWithBands(const vector<pair<int, int> >& ban
 			}
 			sstr << endl;
 		}
-		DEBUG(sstr.str());
+		DUMP(sstr.str());
 }
 
 void EBC::DpMatrixFull::setDiagonalAt(unsigned int i, unsigned int j)

@@ -45,9 +45,10 @@ void StateTransitionEstimator::addTime(double time, unsigned int triplet, unsign
 }
 
 void StateTransitionEstimator::addPair(vector<SequenceElement>& s1,
-		vector<SequenceElement>& s2, unsigned int triplet, unsigned int pr)
+		vector<SequenceElement>& s2, unsigned int triplet, unsigned int pr, double weight)
 {
-	stmSamples[2*triplet+pr]->addSample(s1,s2);
+	DUMP("add pair for triplet " << triplet << " and pair no " << pr << " with weight " << weight);
+	stmSamples[2*triplet+pr]->addSample(s1,s2, weight);
 }
 
 void StateTransitionEstimator::optimize()

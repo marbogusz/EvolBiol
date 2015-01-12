@@ -64,14 +64,29 @@ protected:
 
 	bool bandingEnabled;
 
+	bool equilibriumFreqs;
+
 	Band* band;
+
+	double initTransM;
+	double initTransX;
+	double initTransY;
 
 	vector<SequenceElement> seq1;
 	vector<SequenceElement> seq2;
 	vector<SequenceElement>::iterator itS1, itS2;
-
+	
 	//cumulative likelihood for all 3 matrices
 	double totalLikelihood;
+
+	//state transition matrix
+	double md[Definitions::stateCount][Definitions::stateCount];
+
+	//gap probs;
+	double e,g;
+
+	//state equilibruim frequencies
+	double piM, piI, piD;
 
 	//the following assumes a fix HMM structure
 	virtual void setTransitionProbabilities();
@@ -79,6 +94,8 @@ protected:
 	virtual void calculateModels();
 
 	virtual void initializeStates(Definitions::DpMatrixType mt);
+
+	void getStateEquilibriums();
 
 
 public:
@@ -130,6 +147,8 @@ public:
 	{
 		return Y;
 	}
+
+	double getAlignmentLikelihood(vector<SequenceElement> s1, vector<SequenceElement> s2);
 
 	double getTotalLikelihood() const {
 		return totalLikelihood;

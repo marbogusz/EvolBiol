@@ -42,6 +42,8 @@ void PMatrixDouble::calculatePairSitePatterns()
 	for (int i =0; i<= matrixSize; i++ )
 		for (int j =0; j<= matrixSize; j++ )
 		{
+			if (i == j && i == matrixSize)
+				continue;
 			if (i == matrixSize)
 			{
 				sitePatterns[i][j]  = log(getEquilibriumFreq(j));

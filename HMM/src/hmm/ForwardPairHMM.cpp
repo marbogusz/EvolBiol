@@ -22,10 +22,10 @@ ForwardPairHMM::~ForwardPairHMM()
 {
 }
 
-/*
-pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b)
+
+pair<string, string> ForwardPairHMM::getBestAlignment(string&seq_a, string& seq_b)
 {
-	DUMP("Forward HMM sample alignment");
+	DUMP("Forward HMM getBestAlignment");
 	pair<string, string> alignment;
 
 	//reserve memory for out strings (20% of gaps should be ok)
@@ -33,9 +33,9 @@ pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b
 	alignment.second.reserve(max(xSize,ySize)*1.2);
 
 
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	std::uniform_real_distribution<> dis(0, 1.0);
+	//std::random_device rd;
+	//std::mt19937 gen(rd());
+	//std::uniform_real_distribution<> dis(0, 1.0);
 
 	unsigned int i = xSize-1;
 	unsigned int j = ySize-1;
@@ -105,13 +105,16 @@ pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b
 	}
 	//deal with the last row or column
 
+	reverse(alignment.first.begin(), alignment.first.end());
+	reverse(alignment.second.begin(), alignment.second.end());
 	return alignment;
 }
-*/
+
+
 
 pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b)
 {
-	DUMP("Forward HMM sample alignment");
+	//DUMP("Forward HMM sample alignment");
 	pair<string, string> alignment;
 
 	//reserve memory for out strings (20% of gaps should be ok)
@@ -120,14 +123,14 @@ pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b
 
 
 	std::random_device rd;
-	std::mt19937 gen(rd());
-	std::uniform_real_distribution<> dis(0, 1.0);
+	std::mt19937_64 gen(rd());
+	std::uniform_real_distribution<double> dis(0, 1.0);
 
 	unsigned int i = xSize-1;
 	unsigned int j = ySize-1;
 
 	double mtProb,inProb,dlProb,currProb, rnbr,tmp;
-	double emission = 0;
+	double emission = 0.0;
 
 	//choose initial state
 	PairwiseHmmStateBase* currentState;
@@ -172,6 +175,7 @@ pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b
 		mtProb = emission + currentState->getTransitionProbabilityFromMatch() + M->getValueAt(i,j) - currProb;
 		inProb = emission + currentState->getTransitionProbabilityFromInsert() + X->getValueAt(i,j) - currProb;
 		dlProb = emission + currentState->getTransitionProbabilityFromDelete() + Y->getValueAt(i,j) - currProb;
+
 	}
 
 	if (j==0)
@@ -192,6 +196,8 @@ pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b
 	}
 	//deal with the last row or column
 
+	reverse(alignment.first.begin(), alignment.first.end());
+	reverse(alignment.second.begin(), alignment.second.end());
 	return alignment;
 }
 
@@ -201,6 +207,8 @@ double ForwardPairHMM::runAlgorithm()
 
 	calculateModels();
 	setTransitionProbabilities();
+	if (this->equilibriumFreqs)
+		this->getStateEquilibriums();
 
 	int i;
 	int j;
@@ -216,9 +224,12 @@ double ForwardPairHMM::runAlgorithm()
 	double emissionY;
 
 	//FIXME - multiple runs using the same hmm object do not require dp matrix zeroing as long as the band stays the same!
-	M->initializeData();
-	X->initializeData();
-	Y->initializeData();
+
+	DUMP("Forward equilibriums : PiM\t" << piM << "\tPiI\t" << piI << "\tPiD\t" << piD);
+
+	M->initializeData(this->piM);
+	X->initializeData(this->piI);
+	Y->initializeData(this->piD);
 
 	if(this->band == NULL)
 	{
@@ -317,10 +328,10 @@ double ForwardPairHMM::runAlgorithm()
 					Y->setValueAt(i,j, emissionY + maths->logSum(ym,yx,yy));
 				}
 			}
-			if (loM != -1)
+			if (loM > 0)
 			{
 				hiM = bracketM.second;
-				for(i = loM == 0 ? 1 : loM; i <= hiM; i++)
+				for(i = loM; i <= hiM; i++)
 				{
 					k = i-1;
 					l = j-1;
@@ -332,10 +343,10 @@ double ForwardPairHMM::runAlgorithm()
 				}
 			}
 
-			if (loI != -1)
+			if (loI > 0)
 			{
 				hiI = bracketI.second;
-				for(i = loI == 0 ? 1 : loI; i <= hiI; i++)
+				for(i = loI; i <= hiI; i++)
 				{
 					k = i-1;
 					emissionX = ptmatrix->getLogEquilibriumFreq(seq1[i-1].getMatrixIndex());
@@ -352,12 +363,13 @@ double ForwardPairHMM::runAlgorithm()
 	sX = X->getValueAt(xSize-1, ySize-1);
 	sY = Y->getValueAt(xSize-1, ySize-1);
 	sS = maths->logSum(sM,sX,sY);
+
 	this->setTotalLikelihood(sS);
 
 	//cerr << "\t" << sX << "\t" << sY << "\t"<< sM << "\t" << sS << endl;
 
-	DUMP ("Forward results:");
-	DUMP (" sX, sY, sM, sS " << sX << "\t" << sY << "\t" << sM << "\t" << sS);
+	DUMP ("Forward matrix likelihoods:");
+	DUMP (" X, Y, M, Total " << sX << "\t" << sY << "\t" << sM << "\t" << sS);
 
 	return sS* -1.0;
 }

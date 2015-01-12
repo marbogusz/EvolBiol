@@ -538,6 +538,10 @@ namespace EBC
         float length;
         length=0.5*(Distance(i,j,delta) + Distance(i,k,delta)
                 -Distance(j,k,delta));
+        if (length < 0){
+        	ERROR("NEGATIVE BRANCH LENGTH IN BIONJ!!! setting branch to a positive value");
+        	length = length * -1.0;
+        }
         return(length);
     }
 
@@ -667,6 +671,11 @@ namespace EBC
         length=0.5*(Distance(a,b,delta)                         /* Formula (2) */
                 +(Sum_S(a,delta)
                     -Sum_S(b,delta))/(r-2));
+        if (length < 0)
+        {
+        	ERROR("NEGATIVE BRANCH LENGTH IN BIONJ!!! setting branch to a positive value");
+        	length = length * -1.0;
+        }
         return(length);
     }
 

@@ -39,6 +39,16 @@ public:
 		return parser.option("M");
 	}
 
+	//2 below are optional and new
+	inline bool isFdist()
+	{
+		return parser.option("X");
+	}
+	inline bool isVdist()
+	{
+		return parser.option("Y");
+	}
+
 	inline bool isFixedAlignment()
 	{
 		return parser.option("fa");

@@ -11,7 +11,6 @@
 #include "models/HKY85Model.hpp"
 #include "models/AminoacidSubstitutionModel.hpp"
 #include "hmm/DpMatrixFull.hpp"
-#include <random>
 
 
 namespace EBC
@@ -19,10 +18,9 @@ namespace EBC
 
 
 BackwardPairHMM::BackwardPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, SubstitutionModelBase* smdl,
-		IndelModel* imdl,  Definitions::DpMatrixType mt ,Band* bandObj) : dpMatrixCalculated(false), posteriorsCalculated(false),
+		IndelModel* imdl,  Definitions::DpMatrixType mt ,Band* bandObj) :
 		EvolutionaryPairHMM(s1,s2, smdl, imdl, mt, bandObj)
 {
-
 }
 
 BackwardPairHMM::~BackwardPairHMM()
@@ -31,9 +29,6 @@ BackwardPairHMM::~BackwardPairHMM()
 
 void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 {
-	if (!dpMatrixCalculated)
-		throw HmmException("Error - attempting to calculate posterior probabilities without running backward algorithm first");
-
 	DEBUG("Calculating posterior probabilities");
 
 	int i,j;
@@ -48,20 +43,8 @@ void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 		for (j = 0; j<ySize-1; j++)
 		{
 			xval = X->getValueAt(i,j) + fwd->X->getValueAt(i,j) - fwdT;
-			if (xval > 0.01){
-				ERROR("Posterior lnl > 0 X " << xval << " bw " << X->getValueAt(i,j) << " fwx " <<  fwd->X->getValueAt(i,j) << " fwtM "
-						<<  fwdT << " fwtX" << fwd->X->getValueAt(xSize-1,ySize-1) << " fwtY" << fwd->Y->getValueAt(xSize-1,ySize-1));
-			}
 			yval = Y->getValueAt(i,j) + fwd->Y->getValueAt(i,j) - fwdT;
-			if (yval > 0.01){
-				ERROR("Posterior lnl > 0 Y " << yval << " bw " << Y->getValueAt(i,j) << " fwy " <<  fwd->Y->getValueAt(i,j) << " fwtM "
-						<<  fwdT << " fwtX" << fwd->X->getValueAt(xSize-1,ySize-1) << " fwtY" << fwd->Y->getValueAt(xSize-1,ySize-1));
-			}
 			mval = M->getValueAt(i,j) + fwd->M->getValueAt(i,j) - fwdT;
-			if (mval > 0.01){
-				ERROR("Posterior lnl > 0 M " << mval << " bw " << M->getValueAt(i,j) << " fwm " <<  fwd->M->getValueAt(i,j) << " fwtM "
-						<<  fwdT << " fwtX" << fwd->X->getValueAt(xSize-1,ySize-1) << " fwtY" << fwd->Y->getValueAt(xSize-1,ySize-1));
-			}
 
 			X->setValueAt(i,j,xval);
 			Y->setValueAt(i,j,yval);
@@ -69,110 +52,99 @@ void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 		}
 	}
 
-	posteriorsCalculated = true;
-
-	//DUMP("Match");
+	//DUMP("#####Match posteriors########");
 	//dynamic_cast<DpMatrixFull*>(M->getDpMatrix())->outputValues(0);
-	//DUMP("Insert");
+	//DUMP("#####Insert posteriors########");
 	//dynamic_cast<DpMatrixFull*>(X->getDpMatrix())->outputValues(0);
-	//DUMP("Delete");
+	//DUMP("#####Delete posteriors########");
 	//dynamic_cast<DpMatrixFull*>(Y->getDpMatrix())->outputValues(0);
 
-/*
-	for (int i=0;i<10;i++)
-		for(int j=0;j<10;j++)
-		{
-			double mt,in,dl;
-			//DUMP("M-H " << exp(M->getValueAt(i,j+1)) << " M-V " << exp(M->getValueAt(i+1,j)) << " M-D " << exp(M->getValueAt(i+1,j+1)));
-			//DUMP("I-H " << exp(X->getValueAt(i,j+1)) << " I-V " << exp(X->getValueAt(i+1,j)) << " I-D " << exp(X->getValueAt(i+1,j+1)));
-			//DUMP("D-H " << exp(Y->getValueAt(i,j+1)) << " D-V " << exp(Y->getValueAt(i+1,j)) << " D-D " << exp(Y->getValueAt(i+1,j+1)));
-			//DUMP("M-D + I-V + D-H " <<  (exp(M->getValueAt(i+1,j+1))+exp(X->getValueAt(i+1,j))+exp(Y->getValueAt(i,j+1))));
-			mt = exp(M->getValueAt(i,j+1)) + exp(M->getValueAt(i+1,j)) + exp(M->getValueAt(i+1,j+1));
-			in = exp(X->getValueAt(i,j+1)) + exp(X->getValueAt(i+1,j)) + exp(X->getValueAt(i+1,j+1));
-			dl = exp(Y->getValueAt(i,j+1)) + exp(Y->getValueAt(i+1,j)) + exp(Y->getValueAt(i+1,j+1));
-			DUMP(" M " << mt << " I " << in << " D " << dl << "\t\t\t Total " << (mt+in+dl) );
-		}
-*/
 }
 
-pair<string, string> BackwardPairHMM::sampleAlignment(string&seq_a, string& seq_b)
+
+double BackwardPairHMM::getAlignmentLikelihood(vector<SequenceElement> s1,
+		vector<SequenceElement> s2, bool post, vector<vector<double> >& posteriors)
 {
-	//FIXME - reference from stack
-	if (!posteriorsCalculated)
-		throw HmmException("Error - attempting to sample an alignment  without calculating posterior probabilities");
+	double lnl = 0;
+	double avp = 0;
+	int k =0;
+	int l =0;
+	PairwiseHmmStateBase* previous;
+	if(s2[0].isIsGap()){
+		previous = X;
+		k++;
+		lnl += ptmatrix->getLogEquilibriumFreq(s1[0].getMatrixIndex()) + initTransX;
+	}
+	else if(s1[0].isIsGap()){
+		previous = Y;
+		l++;
+		lnl += ptmatrix->getLogEquilibriumFreq(s2[0].getMatrixIndex()) + initTransY;
+	}
+	else{
+		previous = M;
+		k++;
+		l++;
+		posteriors[k][l] += 1.0;
+		lnl += ptmatrix->getLogPairTransition(s1[0].getMatrixIndex(), s2[0].getMatrixIndex()) + initTransM;
+	}
 
-	//cerr << seq_a << endl;
-	//cerr << seq_b << endl;
-
-	//cerr << xSize << endl;
-	//cerr << ySize << endl;
-
-	pair<string, string> alignment;
-	alignment.first.reserve(max(xSize,ySize)*1.2);
-	alignment.second.reserve(max(xSize,ySize)*1.2);
-
-
-	std::random_device rd;
-	std::mt19937 gen(rd());
-
-	unsigned i = 0;
-	unsigned j = 0;
-	double mt,in,dl, rnbr;
-
-	while(i < xSize-1 && j < ySize-1)
-	{
-		//get probabilities
-		mt = exp(M->getValueAt(i,j+1)) + exp(M->getValueAt(i+1,j)) + exp(M->getValueAt(i+1,j+1));
-		in = exp(X->getValueAt(i,j+1)) + exp(X->getValueAt(i+1,j)) + exp(X->getValueAt(i+1,j+1));
-		dl = exp(Y->getValueAt(i,j+1)) + exp(Y->getValueAt(i+1,j)) + exp(Y->getValueAt(i+1,j+1));
-
-		std::uniform_real_distribution<> dis(0, mt+in+dl);
-		rnbr = dis(gen);
-		//cerr << " M " << mt << " I " << in << " D " << dl << "Sampled " << rnbr << endl;
-		if (rnbr <= mt){
-			alignment.first += seq_a[i];
-			alignment.second += seq_b[j];
-			i++;
-			j++;
+	for(int i=1; i< s1.size(); i++){
+		avp += exp(previous->getValueAt(k,l));
+		if(s2[i].isIsGap()){
+			//Insert
+			k++;
+			if (previous == X)
+				lnl += X->getTransitionProbabilityFromInsert();
+			else if (previous == Y)
+				lnl += X->getTransitionProbabilityFromDelete();
+			else
+				lnl+=X->getTransitionProbabilityFromMatch();
+			lnl += ptmatrix->getLogEquilibriumFreq(s1[i].getMatrixIndex());
+			if (post) DUMP("I " << i << "\tlnl\t" << lnl << "\tposterior\t" << exp(previous->getValueAt(k,l)));
+			previous = X;
 		}
-
-		else if(rnbr <= mt+in){
-			alignment.first += seq_a[i];
-			alignment.second += '-';
-			i++;
+		else if(s1[i].isIsGap()){
+			//Delete
+			l++;
+			if (previous == X)
+				lnl += Y->getTransitionProbabilityFromInsert();
+			else if (previous == Y)
+				lnl += Y->getTransitionProbabilityFromDelete();
+			else
+				lnl+=Y->getTransitionProbabilityFromMatch();
+			lnl += ptmatrix->getLogEquilibriumFreq(s2[i].getMatrixIndex());
+			if (post) DUMP("D " << i << "\tlnl\t" << lnl << "\tposterior\t" << exp(previous->getValueAt(k,l)));
+			previous = Y;
 		}
 		else{
-			alignment.first += '-';
-			alignment.second += seq_b[j];
-			j++;
+			//Match
+			k++;
+			l++;
+			if (previous == X)
+				lnl += M->getTransitionProbabilityFromInsert();
+			else if (previous == Y)
+				lnl += M->getTransitionProbabilityFromDelete();
+			else
+				lnl+=M->getTransitionProbabilityFromMatch();
+			lnl += ptmatrix->getLogPairTransition(s1[i].getMatrixIndex(), s2[i].getMatrixIndex());
+			posteriors[k][l] += 1;
+			if (post) DUMP("M " << i << "\tlnl\t" << lnl << "\tposterior\t" << exp(previous->getValueAt(k,l)));
+			previous = M;
 		}
-	}
 
-	if (i != xSize-1){
-		while(i< xSize-1){
-			alignment.first += seq_a[i];
-			alignment.second += '-';
-			i++;
-		}
 	}
-	else if (j != ySize-1){
-		while(j< ySize-1){
-			alignment.second += seq_b[j];
-			alignment.first += '-';
-			j++;
-		}
-	}
+	if (post) DUMP("Average posterior prob: " << (avp/s1.size()));
+	//cerr << endl;
+	return lnl;
 
-	//cerr << alignment->first << i << endl;
-	//cerr << alignment->second << j << endl;
-
-	return alignment;
 }
 
 double BackwardPairHMM::runAlgorithm()
 {
 	calculateModels();
 	setTransitionProbabilities();
+	//FIXME - setting the following for test purposes!
+	this->getStateEquilibriums();
 
 	int i;
 	int j;
@@ -186,7 +158,6 @@ double BackwardPairHMM::runAlgorithm()
 	M->initializeData(true);
 	X->initializeData(true);
 	Y->initializeData(true);
-
 
 	for (j = ySize-1, i=xSize-1; j >= 0; j--)
 	{
@@ -251,96 +222,45 @@ double BackwardPairHMM::runAlgorithm()
 		}
 	}
 
-	if(this->band == NULL)
+
+	for (i = xSize-2; i >= 0; i--)
 	{
-		for (i = xSize-2; i >= 0; i--)
-		{
-			for (j = ySize-2; j >= 0; j--)
-			{
-
-				bxp = X->getValueAt(i+1,j) +   ptmatrix->getLogEquilibriumFreq(seq1[i].getMatrixIndex());
-				byp = Y->getValueAt(i,j+1) +   ptmatrix->getLogEquilibriumFreq(seq2[j].getMatrixIndex());
-				bmp = M->getValueAt(i+1,j+1) + ptmatrix->getLogPairTransition (seq1[i].getMatrixIndex(), seq2[j].getMatrixIndex());
-
-				bx = maths->logSum(M->getTransitionProbabilityFromInsert() + bmp,
-						X->getTransitionProbabilityFromInsert() + bxp,
-						Y->getTransitionProbabilityFromInsert() + byp);
-
-				by = maths->logSum(M->getTransitionProbabilityFromDelete() + bmp,
-									X->getTransitionProbabilityFromDelete() + bxp,
-									Y->getTransitionProbabilityFromDelete() + byp);
-
-				bm = maths->logSum(M->getTransitionProbabilityFromMatch() + bmp,
-												X->getTransitionProbabilityFromMatch() + bxp,
-												Y->getTransitionProbabilityFromMatch() + byp);
-
-					X->setValueAt(i, j, bx);
-					Y->setValueAt(i, j, by);
-					M->setValueAt(i, j, bm);
-
-			}
-		}
-	}
-	else
-	{
-		int loI, hiI, loD, hiD, loM, hiM;
-		//banding!
 		for (j = ySize-2; j >= 0; j--)
 		{
-			//FIXME - range should be a reference perhaps
-			auto bracketM = band->getMatchRangeAt(j);
 
-			//Only using the M range as backwards banding should not be used for custom bands.
-			//Only the default one
+			bxp = X->getValueAt(i+1,j) + ptmatrix->getLogEquilibriumFreq(seq1[i].getMatrixIndex());
+			byp = Y->getValueAt(i,j+1) + ptmatrix->getLogEquilibriumFreq(seq2[j].getMatrixIndex());
+			bmp = M->getValueAt(i+1,j+1) + ptmatrix->getLogPairTransition(seq1[i].getMatrixIndex(), seq2[j].getMatrixIndex());
 
-			hiM = bracketM.first;
-			hiM = hiM > xSize-2 ? xSize-2:hiM;
-			if (hiM != -1)
-			{
-				hiM = hiM > xSize-2 ? xSize-2:hiM;
-				for(i=hiM; i>=loM; i--)
-				{
-
-					bxp = X->getValueAt(i+1,j) +   ptmatrix->getLogEquilibriumFreq(seq1[i].getMatrixIndex());
-					byp = Y->getValueAt(i,j+1) +   ptmatrix->getLogEquilibriumFreq(seq2[j].getMatrixIndex());
-					bmp = M->getValueAt(i+1,j+1) + ptmatrix->getLogPairTransition (seq1[i].getMatrixIndex(), seq2[j].getMatrixIndex());
-
-					bx = maths->logSum(M->getTransitionProbabilityFromInsert() + bmp,
+			bx = maths->logSum(M->getTransitionProbabilityFromInsert() + bmp,
 					X->getTransitionProbabilityFromInsert() + bxp,
 					Y->getTransitionProbabilityFromInsert() + byp);
 
-					by = maths->logSum(M->getTransitionProbabilityFromDelete() + bmp,
-				    X->getTransitionProbabilityFromDelete() + bxp,
-					Y->getTransitionProbabilityFromDelete() + byp);
+			by = maths->logSum(M->getTransitionProbabilityFromDelete() + bmp,
+								X->getTransitionProbabilityFromDelete() + bxp,
+								Y->getTransitionProbabilityFromDelete() + byp);
 
-					bm = maths->logSum(M->getTransitionProbabilityFromMatch() + bmp,
-					X->getTransitionProbabilityFromMatch() + bxp,
-				    Y->getTransitionProbabilityFromMatch() + byp);
+			bm = maths->logSum(M->getTransitionProbabilityFromMatch() + bmp,
+											X->getTransitionProbabilityFromMatch() + bxp,
+											Y->getTransitionProbabilityFromMatch() + byp);
 
-					X->setValueAt(i, j, bx);
-					Y->setValueAt(i, j, by);
-					M->setValueAt(i, j, bm);
+				X->setValueAt(i, j, bx);
+				Y->setValueAt(i, j, by);
+				M->setValueAt(i, j, bm);
 
-				}
-			}
 		}
 	}
+
 	sM = M->getValueAt(0, 0);
 	sX = X->getValueAt(0, 0);
 	sY = Y->getValueAt(0, 0);
 	sS = maths->logSum(sM,sX,sY);
 
-	this->setTotalLikelihood(sS);
-
 	DUMP("Backward results:");
 	DUMP(" sX, sY, sM, sS " << sX << "\t" << sY << "\t" << sM << "\t" << sS);
-
-	dpMatrixCalculated = true;
 
 	return sS* -1.0;
 }
 
 
 } /* namespace EBC */
-
-

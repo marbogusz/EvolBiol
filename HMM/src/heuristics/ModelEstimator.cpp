@@ -9,6 +9,9 @@
 #include "heuristics/ModelEstimator.hpp"
 #include <chrono>
 #include <array>
+#include <map>
+
+using namespace std;
 
 namespace EBC
 {
@@ -23,19 +26,41 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 	
 	maths = new Maths();
 	dict = inputSequences->getDictionary();
-
 	tal = new TripletAligner (inputSequences, gtree->getDistanceMatrix());
 
 	tripletIdxs = tst.sampleFromTree();
-
-	posteriorHmms.resize(tripletIdxs.size());
-	smpldPairs.resize(tripletIdxs.size());
 
     chrono::time_point<chrono::system_clock> start, end;
     start = chrono::system_clock::now();
 
 	this->estimateTripleAlignment(model);
 
+	//1 pair for now
+	ste = new StateTransitionEstimator(ot, 1);
+
+	ste->addTime(1.0,0,0);
+
+	auto it=alSamples.rbegin();
+
+	int cap = Definitions::pathInformativeCount < alSamples.size() ? Definitions::pathInformativeCount : alSamples.size();
+
+	for (unsigned int i=0; i < cap; i++)
+	{
+		DUMP("lnl: " << it->first << "\t total lnl: " << totalSampleLnl);
+		ste->addPair((it->second).first,(it->second).second,0,0,(double)exp((it->first)-(this->totalSampleLnl)));
+		it++;
+	}
+
+
+	ste->optimize();
+
+	DEBUG("Re-estimating model parameters");
+	//make another pass
+
+	indelModel =  ste->getIndelModel();
+	//indelModel->summarize();
+
+/*
 	sme = new SubstitutionModelEstimator(inputSeqs, model ,ot, rateCategories, alpha, estimateAlpha, tripletIdxs.size());
 
 	for(unsigned int al = 0; al < tripletIdxs.size(); al++)
@@ -87,6 +112,8 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 	//re-estimate
 	//do Viterbi using the estimates
 	//construct triplets
+	 * 
+	 */
 }
 
 void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
@@ -170,9 +197,6 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 		f1 = new ForwardPairHMM(seqsA[i][0],seqsA[i][1], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].first);
 		f2 = new ForwardPairHMM(seqsA[i][1],seqsA[i][2], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].second);
 
-
-		(posteriorHmms[i]).first = f1;
-		(posteriorHmms[i]).second = f2;
 	}
 
 	for(int a=0; a < alphas.size(); a++)
@@ -189,12 +213,12 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 					for(int t=0; t < timeMult.size(); t++)
 					{
 						double lnl = 0;
-						for(int h=0; h < posteriorHmms.size(); h++)
+						for(int h=0; h < tripletIdxs.size(); h++)
 						{
 							DUMP("Triplet " << h << " forward calculation for alpha " << alphas[a] << " k " << kappas[k] << " l " << lambdas[l] << " e " << epsilons[e] << " t "<< timeMult[t]);
-							posteriorHmms[h].first->setDivergenceTime(distancesA[h][0]*timeMult[t]);
-							posteriorHmms[h].second->setDivergenceTime(distancesA[h][1]*timeMult[t]);
-							lnl += posteriorHmms[h].first->runAlgorithm() + posteriorHmms[h].second->runAlgorithm();
+							//posteriorHmms[h].first->setDivergenceTime(distancesA[h][0]*timeMult[t]);
+							//posteriorHmms[h].second->setDivergenceTime(distancesA[h][1]*timeMult[t]);
+							//lnl += posteriorHmms[h].first->runAlgorithm() + posteriorHmms[h].second->runAlgorithm();
 
 							/*
 							BackwardPairHMM* bw1 = new BackwardPairHMM(seqsA[h][0],seqsA[h][1], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[h].first);
@@ -228,87 +252,46 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 	substModel->calculateModel();
 	indelModel->setParameters({lambdas[lBest], epsilons[eBest]});
 
-	for(int i=0; i < posteriorHmms.size(); i++)
-	{
-		DUMP("Triplet " << i << " re-calculating forward likelihoods for the best parameters");
-		posteriorHmms[i].first->setDivergenceTime(distancesA[i][0]*timeMult[tBest]);
-		posteriorHmms[i].second->setDivergenceTime(distancesA[i][1]*timeMult[tBest]);
-		//forward probs
-		posteriorHmms[i].first->runAlgorithm();
-		posteriorHmms[i].second->runAlgorithm();
-
-		ViterbiPairHMM* v1 = new ViterbiPairHMM(seqsA[i][0],seqsA[i][1], substModel, indelModel, Definitions::DpMatrixType::Full);
-
-		ViterbiPairHMM* v2 = new ViterbiPairHMM(seqsA[i][1],seqsA[i][2], substModel, indelModel, Definitions::DpMatrixType::Full);
-
-		v1->setDivergenceTime(distancesA[i][0]*timeMult[tBest]);
-		v2->setDivergenceTime(distancesA[i][1]*timeMult[tBest]);
-
-		v1->runAlgorithm();
-		v2->runAlgorithm();
-
-		auto a1 = v1->getAlignment(inputSequences->getRawSequenceAt(tripletIdxs[i][0]), inputSequences->getRawSequenceAt(tripletIdxs[i][1]));
-		auto a2 = v2->getAlignment(inputSequences->getRawSequenceAt(tripletIdxs[i][1]), inputSequences->getRawSequenceAt(tripletIdxs[i][2]));
-
-		DUMP("Extra triplet viterbi : ");
-		auto al = tal->align(a1,a2);
-
-		/*
-		//now backward!
-
-		DUMP("Triplet " << i <<  " model Estimator First backward calculation");
-		BackwardPairHMM* bw1 = new BackwardPairHMM(seqsA[i][0],seqsA[i][1], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].first);
-		bw1->setDivergenceTime(distancesA[i][0]*timeMult[tBest]);
-		bw1->runAlgorithm();
-		DUMP("Triplet " << i <<  " model Estimator Second backward calculation");
-		BackwardPairHMM* bw2 = new BackwardPairHMM(seqsA[i][1],seqsA[i][2], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].first);
-		bw2->setDivergenceTime(distancesA[i][1]*timeMult[tBest]);
-		bw2->runAlgorithm();
-
-		DUMP("Triplet " << i <<  " model Estimator First Pair Posteriors");
-		bw1->calculatePosteriors(dynamic_cast<ForwardPairHMM*>(posteriorHmms[i].first));
-		DUMP("Triplet " << i <<  " model Estimator Second Pair Posteriors");
-		bw2->calculatePosteriors(dynamic_cast<ForwardPairHMM*>(posteriorHmms[i].second));
-		 */
-
-		//delete posteriorHmms[i].first;
-		//delete posteriorHmms[i].second;
-
-		//posteriorHmms[i].first = bw1;
-		//posteriorHmms[i].second = bw2;
-
-		//ERROR("Ready to sample");
-
-		//auto al = bw1->sampleAlignment(inputSequences->getRawSequenceAt(tripletIdxs[i][0]), inputSequences->getRawSequenceAt(tripletIdxs[i][1]));
-
-		//DUMP("alignment ");
-		//cerr << al->first;
-		//cerr << al->second;
-
-	}
 	delete indelModel;
 	delete substModel;
+	
+	
 
 }
-array<vector<SequenceElement>, 3> ModelEstimator::sampleTripleAlignment(unsigned int triplet)
+void ModelEstimator::sampleAlignments(ForwardPairHMM* hmm)
 {
-	DUMP("Sample triple alignment for triplet " << triplet);
-	Dictionary* di = inputSequences->getDictionary();
-
-	pair<string,string> p1 = dynamic_cast<ForwardPairHMM*>(posteriorHmms[triplet].first)->sampleAlignment(inputSequences->getRawSequenceAt(tripletIdxs[triplet][0]), inputSequences->getRawSequenceAt(tripletIdxs[triplet][1]));
-	pair<string,string> p2 = dynamic_cast<ForwardPairHMM*>(posteriorHmms[triplet].second)->sampleAlignment(inputSequences->getRawSequenceAt(tripletIdxs[triplet][1]), inputSequences->getRawSequenceAt(tripletIdxs[triplet][2]));
 
 
-	DUMP("p1.1 " << p1.first);
-	DUMP("p1.2 " << p1.second);
-	DUMP("p2.1 " << p2.first);
-	DUMP("p2.2 " << p2.second);
 
-	smpldPairs[triplet].push_back({di->translate(p1.first), di->translate(p1.second),
-		di->translate(p2.first), di->translate(p2.second)});
+	int sampleCount = Definitions::pathSampleCount;
+	int analysisCount = Definitions::pathInformativeCount;
+	totalSampleLnl = 0;
+	double lnl;
+	int ctr;
+	pair<string, string> smplPr;
+	pair<double, pair<vector<SequenceElement>, vector<SequenceElement> > > pr;
+	totalSampleLnl = Definitions::minMatrixLikelihood;
 
-	//TODO - do only 1 translation - pass translated seqs to tal
-	return tal->align(p1,p2);
+	//do the first sample
+
+
+
+	for(ctr = 1; ctr < sampleCount; ctr++){
+		smplPr = hmm->sampleAlignment(inputSequences->getRawSequenceAt(tripletIdxs[0][0]), inputSequences->getRawSequenceAt(tripletIdxs[0][1]));
+		pr = make_pair(0.0, make_pair(dict->translate(smplPr.first), dict->translate(smplPr.second)));
+
+
+
+		lnl = hmm->getAlignmentLikelihood(pr.second.first, pr.second.second);
+		totalSampleLnl = maths->logSum(totalSampleLnl, lnl);
+		pr.first = lnl;
+		//cerr << smplPr.first << endl;
+		//cerr << smplPr.second << endl;
+		//cerr << lnl << endl;
+		alSamples.insert(pr);
+
+	}
+
 }
 
 
@@ -319,11 +302,6 @@ ModelEstimator::~ModelEstimator()
     delete ste;
     delete gtree;
     delete tal;
-
-    for (auto p : posteriorHmms ){
-    	delete p.first;
-    	delete p.second;
-    }
 }
 
 vector<double> ModelEstimator::getSubstitutionParameters()

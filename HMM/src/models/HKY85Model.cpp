@@ -50,9 +50,11 @@ void HKY85Model::buildSmatrix() {
 
 void HKY85Model::summarize()
 {
-	cout << endl << "HKY85 model summary:" << endl;
-	cout << "kappa" << endl;
-	cout << *k  << endl;
+	INFO("HKY85 model summary:");
+	INFO("kappa " << *k );
+	INFO("Frequencies (T C A G)");
+	INFO(this->piFreqs[0] << '\t' << this->piFreqs[1] << '\t' << this->piFreqs[2] << '\t' << this->piFreqs[3] << '\t');
+	summarizeRates();
 }
 
 } /* namespace EBC */

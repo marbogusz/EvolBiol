@@ -30,6 +30,8 @@ public:
 
 	double runAlgorithm();
 
+	pair<string,string> getBestAlignment(string&a, string& b);
+
 	pair<string,string> sampleAlignment(string&a, string& b);
 
 };
