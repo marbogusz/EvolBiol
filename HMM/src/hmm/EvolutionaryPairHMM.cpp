@@ -14,7 +14,8 @@ namespace EBC
 
 EvolutionaryPairHMM::EvolutionaryPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2,
 			SubstitutionModelBase* smdl, IndelModel* imdl,
-			Definitions::DpMatrixType mt, Band* bandObj) : substModel(smdl), indelModel(imdl), band(bandObj)
+			Definitions::DpMatrixType mt, Band* bandObj, bool useEquilibriumFreqs) :
+					substModel(smdl), indelModel(imdl), band(bandObj), equilibriumFreqs(useEquilibriumFreqs)
 {
 	M = X = Y = NULL;
     equilibriumFreqs = true;
@@ -175,8 +176,8 @@ EvolutionaryPairHMM::~EvolutionaryPairHMM()
     delete tpb;
 }
 
-double EvolutionaryPairHMM::getAlignmentLikelihood(vector<SequenceElement> s1,
-		vector<SequenceElement> s2)
+double EvolutionaryPairHMM::getAlignmentLikelihood(vector<SequenceElement>& s1,
+		vector<SequenceElement>& s2)
 {
 	double lnl = 0;
 

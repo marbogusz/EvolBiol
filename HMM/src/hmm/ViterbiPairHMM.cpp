@@ -14,8 +14,8 @@ namespace EBC
 
 
 ViterbiPairHMM::ViterbiPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, SubstitutionModelBase* smdl,
-		IndelModel* imdl,Definitions::DpMatrixType mt, Band* bandObj) :
-		EvolutionaryPairHMM(s1,s2, smdl, imdl,mt, bandObj)
+		IndelModel* imdl,Definitions::DpMatrixType mt, Band* bandObj, bool useEquilibriumFreqs ) :
+		EvolutionaryPairHMM(s1,s2, smdl, imdl,mt, bandObj, useEquilibriumFreqs)
 {
 	this->alignment.reserve(xSize);
 }

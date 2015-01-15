@@ -74,7 +74,16 @@ protected:
 	vector<array<vector<SequenceElement>, 3> > tripleAlignments;
 	vector<array<vector<SequenceElement>, 4> > pairAlignments;
 
-	map<double, pair<vector<SequenceElement>, vector<SequenceElement> > > alSamples;
+	vector<pair<ForwardPairHMM*, ForwardPairHMM*> > samplingHMMs;
+
+	vector<map<double, pair<vector<SequenceElement>, vector<SequenceElement> > > > alSamplesBranch1;
+	vector<map<double, pair<vector<SequenceElement>, vector<SequenceElement> > > > alSamplesBranch2;
+
+	vector<map<double, array<vector<SequenceElement>, 3> > >  alSamplesTriplet;
+
+	vector<double> SamplesBranch1Lnls;
+	vector<double> SamplesBranch2Lnls;
+	vector<double> SamplesTripletLnls;
 
 	double totalSampleLnl;
 
@@ -86,9 +95,11 @@ protected:
 
 	bool estimateAlpha;
 
-	void estimateTripleAlignment(Definitions::ModelType model);
+	void calculateInitialHMMs(Definitions::ModelType model);
 
-	void sampleAlignments(ForwardPairHMM* hmm);
+	void sampleAlignments();
+
+	void estimateParameters();
 
 public:
 	ModelEstimator(Sequences* inputSeqs, Definitions::ModelType model,

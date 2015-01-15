@@ -13,8 +13,8 @@ namespace EBC
 
 
 ForwardPairHMM::ForwardPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, SubstitutionModelBase* smdl,
-		IndelModel* imdl, Definitions::DpMatrixType mt, Band* bandObj) :
-		EvolutionaryPairHMM(s1,s2, smdl, imdl, mt, bandObj)
+		IndelModel* imdl, Definitions::DpMatrixType mt, Band* bandObj, bool useEquilibriumFreqs) :
+		EvolutionaryPairHMM(s1,s2, smdl, imdl, mt, bandObj, useEquilibriumFreqs)
 {
 }
 
@@ -110,6 +110,104 @@ pair<string, string> ForwardPairHMM::getBestAlignment(string&seq_a, string& seq_
 	return alignment;
 }
 
+pair<double, pair<vector<SequenceElement>, vector<SequenceElement> > >ForwardPairHMM::sampleAlignment()
+{
+	//DUMP("Forward HMM sample alignment");
+
+	double likelihood;
+
+	pair<vector<SequenceElement>, vector<SequenceElement> > alignment;
+
+	int worstCaseLen = (int)(max(xSize-1,ySize-1) * (1.0+(2*g*(1.0/1.0-e))));
+
+	//reserve memory for out strings (20% of gaps should be ok)
+	alignment.first.reserve(worstCaseLen);
+	alignment.second.reserve(worstCaseLen);
+
+	SequenceElement gapElem(true,this->dict->getSymbolIndex('-'), NULL, "-");
+
+
+	std::random_device rd;
+	std::mt19937_64 gen(rd());
+	std::uniform_real_distribution<double> dis(0, 1.0);
+
+	unsigned int i = xSize-1;
+	unsigned int j = ySize-1;
+
+	double mtProb,inProb,dlProb,currProb, rnbr,tmp;
+	double emission = 0.0;
+
+	//choose initial state
+	PairwiseHmmStateBase* currentState;
+
+	mtProb = M->getValueAt(xSize-1, ySize-1) - this->getTotalLikelihood();
+	inProb = X->getValueAt(xSize-1, ySize-1) - this->getTotalLikelihood();
+	dlProb = Y->getValueAt(xSize-1, ySize-1) - this->getTotalLikelihood();
+
+	while(i > 0 && j > 0)
+	{
+		rnbr = dis(gen);
+		tmp  = exp(mtProb);
+		if(rnbr < tmp)
+			currentState = M;
+		else if (rnbr < (tmp + exp(inProb)))
+			currentState = X;
+		else currentState = Y;
+
+		currProb = currentState->getValueAt(i,j);
+		if (currentState->stateId == Definitions::StateId::Match)
+		{
+			emission = ptmatrix->getLogPairTransition(seq1[i-1].getMatrixIndex(), seq2[j-1].getMatrixIndex());
+			alignment.first.push_back(seq1[i-1]);
+			alignment.second.push_back(seq2[j-1]);
+			i--;
+			j--;
+		}
+		else if (currentState->stateId == Definitions::StateId::Delete)
+		{
+			ptmatrix->getLogEquilibriumFreq(seq2[j-1].getMatrixIndex());
+			alignment.second.push_back(seq2[j-1]);
+			alignment.first.push_back(gapElem);
+			j--;
+		}
+		else //Insert
+		{
+			emission = ptmatrix->getLogEquilibriumFreq(seq1[i-1].getMatrixIndex());
+			alignment.first.push_back(seq1[i-1]);
+			alignment.second.push_back(gapElem);
+			i--;
+		}
+		mtProb = emission + currentState->getTransitionProbabilityFromMatch() + M->getValueAt(i,j) - currProb;
+		inProb = emission + currentState->getTransitionProbabilityFromInsert() + X->getValueAt(i,j) - currProb;
+		dlProb = emission + currentState->getTransitionProbabilityFromDelete() + Y->getValueAt(i,j) - currProb;
+
+	}
+
+	if (j==0)
+	{
+		while(i > 0){
+			alignment.first.push_back(seq1[i-1]);
+			alignment.second.push_back(gapElem);
+			i--;
+		}
+	}
+	else if (i==0)
+	{
+		while(j > 0){
+			alignment.second.push_back(seq2[j-1]);
+			alignment.first.push_back(gapElem);
+			j--;
+		}
+	}
+	//deal with the last row or column
+
+	reverse(alignment.first.begin(), alignment.first.end());
+	reverse(alignment.second.begin(), alignment.second.end());
+
+	likelihood = this->getAlignmentLikelihood(alignment.first,alignment.second);
+
+	return make_pair(likelihood, alignment);
+}
 
 
 pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b)

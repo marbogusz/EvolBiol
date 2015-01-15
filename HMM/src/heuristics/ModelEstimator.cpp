@@ -30,11 +30,22 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 
 	tripletIdxs = tst.sampleFromTree();
 
+	this->alSamplesBranch1.resize(tripletIdxs.size());
+	this->alSamplesBranch2.resize(tripletIdxs.size());
+
+	this->alSamplesTriplet.resize(tripletIdxs.size());
+
+
+	this->SamplesBranch1Lnls.resize(tripletIdxs.size());
+	this->SamplesBranch2Lnls.resize(tripletIdxs.size());
+	this->SamplesTripletLnls.resize(tripletIdxs.size());
+
     chrono::time_point<chrono::system_clock> start, end;
     start = chrono::system_clock::now();
 
-	this->estimateTripleAlignment(model);
+	this->calculateInitialHMMs(model);
 
+	this
 	//1 pair for now
 	ste = new StateTransitionEstimator(ot, 1);
 
@@ -116,13 +127,34 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 	 */
 }
 
-void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
+void ModelEstimator::estimateParameters()
+{
+	sme = new SubstitutionModelEstimator(inputSeqs, model ,ot, rateCategories, alpha, estimateAlpha, tripletIdxs.size());
+
+	for(unsigned int al = 0; al < tripletIdxs.size(); al++)
+	{
+		for (unsigned int i=0; i < Definitions::modelEstimatorPathSamples; i++)
+			sme->addTriplet(sampleTripleAlignment(al),al);
+	}
+	sme->optimize();
+
+	double tb1,tb2,tb3;
+}
+
+void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 {
 	DEBUG("EstimateTripleAligment");
 	//amino acid mode
 	bool aaMode = false;
 
-	EvolutionaryPairHMM *f1, *f2;
+	double initAlpha = 0.75;
+	double initKappa = 2.5;
+	double initLambda = 0.02;
+	double initEpsilon = 0.5;
+	//k-mers tend to underestimate the distances;
+	double initTimeModifier = 1.5;
+
+	ForwardPairHMM *f1, *f2;
 
 	if (model == Definitions::ModelType::GTR || model == Definitions::ModelType::HKY85)
 	{
@@ -136,19 +168,14 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 			substModel = new AminoacidSubstitutionModel(dict, maths,gammaRateCategories,Definitions::aaLgModel);
 	}
 
-	vector<double> alphas = {0.75};
-	vector<double> kappas = {2.5};
-	vector<double> lambdas ={0.02, 0.05};
-	vector<double> epsilons = {0.3, 0.6};
-	vector<double> timeMult = {1.0, 2.0};
 
-	double tmpd;
-
-	int aBest, kBest, lBest, eBest, tBest;
 
 	substModel->setObservedFrequencies(inputSequences->getElementFrequencies());
-
-	double lnlBest = std::numeric_limits<double>::max();
+	//alpha setting will have no effect if we're dealing with 1 rate category
+	substModel->setAlpha(initAlpha);
+	if (!aaMode)
+		substModel->setParameters({initKappa});
+	substModel->calculateModel();
 
 	indelModel = new NegativeBinomialGapModel();
 
@@ -158,9 +185,7 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 
 	for (int i = 0; i < tripletIdxs.size(); i++)
 	{
-		//tripletIdxs[idx][0] //first  index
-		//tripletIdxs[idx][1] //second  index
-		//tripletIdxs[idx][2] //third  index
+
 
 		seqsA[i][0] = inputSequences->getSequencesAt(tripletIdxs[i][0]);
 		DUMP("Triplet " << i << " sequence 1:");
@@ -187,85 +212,32 @@ void ModelEstimator::estimateTripleAlignment(Definitions::ModelType model)
 		//0-2
 
 
-		 tmpd = gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][0],tripletIdxs[i][2]);
-		 DUMP("Triplet " << i << " guide distance between seq 1 and 3 " << tmpd);
-		 distancesA[i][2] = tmpd;
+		tmpd = gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][0],tripletIdxs[i][2]);
+		DUMP("Triplet " << i << " guide distance between seq 1 and 3 " << tmpd);
+		distancesA[i][2] = tmpd;
 		//bandPairs[i] = make_pair(new Band(len1,len2),new Band(len2,len3));
 		bandPairs[i] = make_pair(nullptr,nullptr);
 
 
-		f1 = new ForwardPairHMM(seqsA[i][0],seqsA[i][1], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].first);
-		f2 = new ForwardPairHMM(seqsA[i][1],seqsA[i][2], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].second);
+		f1 = new ForwardPairHMM(seqsA[i][0],seqsA[i][1], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].first,true);
+		f2 = new ForwardPairHMM(seqsA[i][1],seqsA[i][2], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].second,true);
+
+		this->samplingHMMs.push_back(make_pair(f1,f2));
 
 	}
-
-	for(int a=0; a < alphas.size(); a++)
-	{
-		substModel->setAlpha(alphas[a]);
-		for(int k=0; k < kappas.size(); k++)
-		{
-			substModel->setParameters({kappas[k]});
-			substModel->calculateModel();
-			for(int e=0; e < epsilons.size(); e++)
-				for(int l=0; l < lambdas.size(); l++)
-				{
-					indelModel->setParameters({lambdas[l], epsilons[e]});
-					for(int t=0; t < timeMult.size(); t++)
-					{
-						double lnl = 0;
-						for(int h=0; h < tripletIdxs.size(); h++)
-						{
-							DUMP("Triplet " << h << " forward calculation for alpha " << alphas[a] << " k " << kappas[k] << " l " << lambdas[l] << " e " << epsilons[e] << " t "<< timeMult[t]);
-							//posteriorHmms[h].first->setDivergenceTime(distancesA[h][0]*timeMult[t]);
-							//posteriorHmms[h].second->setDivergenceTime(distancesA[h][1]*timeMult[t]);
-							//lnl += posteriorHmms[h].first->runAlgorithm() + posteriorHmms[h].second->runAlgorithm();
-
-							/*
-							BackwardPairHMM* bw1 = new BackwardPairHMM(seqsA[h][0],seqsA[h][1], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[h].first);
-							bw1->setDivergenceTime(distancesA[h][0]*timeMult[t]);
-							bw1->runAlgorithm();
-							DUMP(" POSTERIORS for the first pair alpha " << alphas[a]  << " lambda " << lambdas[l] << " epsilon " << epsilons[e] << " timeM "<< timeMult[t]);
-							bw1->calculatePosteriors(dynamic_cast<ForwardPairHMM*>(hmmsA[h].first));
-							delete bw1;
-							*/
-						}
-						if (lnl < lnlBest)
-						{
-							lnlBest = lnl;
-							aBest = a;
-							kBest = k;
-							eBest = e;
-							lBest = l;
-							tBest = t;
-						}
-					}
-				}
-		}
-	}
-
-	DUMP("Best values a " << alphas[aBest] << " k " << kappas[kBest] << " l " << lambdas[lBest] << " e " << epsilons[eBest] << " t "<< timeMult[tBest]);
-	//found the best combination
-	//Run fwd+bwd to get posteriors!
-
-	substModel->setAlpha(alphas[aBest]);
-	substModel->setParameters({kappas[kBest]});
-	substModel->calculateModel();
-	indelModel->setParameters({lambdas[lBest], epsilons[eBest]});
-
-	delete indelModel;
-	delete substModel;
-	
-	
-
 }
-void ModelEstimator::sampleAlignments(ForwardPairHMM* hmm)
+
+
+
+void ModelEstimator::sampleAlignments()
 {
-
-
+	//FIXME  - check if maps are empty, zero if not
+	//Same with likelihood values
 
 	int sampleCount = Definitions::pathSampleCount;
 	int analysisCount = Definitions::pathInformativeCount;
-	totalSampleLnl = 0;
+	double totalBranchSampleLnl = 0;
+	double totalPairSampleLnl = 0;
 	double lnl;
 	int ctr;
 	pair<string, string> smplPr;
@@ -274,29 +246,31 @@ void ModelEstimator::sampleAlignments(ForwardPairHMM* hmm)
 
 	//do the first sample
 
+	for (int i = 0; i < samplingHMMs.size(); i++)
+	{
+		for(ctr = 1; ctr < sampleCount; ctr++){
+			auto branch1Sample = samplingHMMs[i].first->sampleAlignment();
+			auto branch2Sample = samplingHMMs[i].second->sampleAlignment();
 
+			alSamplesBranch1[i].insert(branch1Sample);
+			alSamplesBranch1[i].insert(branch2Sample);
 
-	for(ctr = 1; ctr < sampleCount; ctr++){
-		smplPr = hmm->sampleAlignment(inputSequences->getRawSequenceAt(tripletIdxs[0][0]), inputSequences->getRawSequenceAt(tripletIdxs[0][1]));
-		pr = make_pair(0.0, make_pair(dict->translate(smplPr.first), dict->translate(smplPr.second)));
+			SamplesBranch1Lnls[i] += branch1Sample.first;
+			SamplesBranch2Lnls[i] += branch2Sample.first;
 
-
-
-		lnl = hmm->getAlignmentLikelihood(pr.second.first, pr.second.second);
-		totalSampleLnl = maths->logSum(totalSampleLnl, lnl);
-		pr.first = lnl;
-		//cerr << smplPr.first << endl;
-		//cerr << smplPr.second << endl;
-		//cerr << lnl << endl;
-		alSamples.insert(pr);
-
+			auto tripletSample = tal->align(branch1Sample.second, branch2Sample.second)
+			alSamplesTriplet[i].insert(make_pair(branch1Sample.first+branch2Sample.first, tripletSample));
+		}
 	}
-
 }
-
 
 ModelEstimator::~ModelEstimator()
 {
+	for (auto pr : samplingHMMs)
+	{
+		delete pr.first;
+		delete pr.second;
+	}
     delete maths;
     delete sme;
     delete ste;

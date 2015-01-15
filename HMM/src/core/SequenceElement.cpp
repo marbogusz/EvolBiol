@@ -23,4 +23,9 @@ SequenceElement::SequenceElement(bool isGap, short index, short* alternativeInde
 
 SequenceElement::SequenceElement() : SequenceElement(false,0, NULL, ""){}
 
+bool SequenceElement::operator== (SequenceElement &cP1, SequenceElement &cP2)
+{
+	return cP1.matrixIndex == cP2.matrixIndex;
+}
+
 } /* namespace EBC */

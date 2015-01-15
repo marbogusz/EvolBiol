@@ -45,6 +45,9 @@ public:
 		return symbol;
 	}
 
+	friend bool operator== (SequenceElement &cP1, SequenceElement &cP2);
+
+
 };
 
 } /* namespace EBC */
