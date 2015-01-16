@@ -62,7 +62,7 @@ public:
 
 	inline void output()
 	{
-		for(int i =0; i< matchBand.size(); i++)
+		for(unsigned int i =0; i< matchBand.size(); i++)
 		{
 			DUMP("M/X/Y bands " << i << "\t" << getMatchRangeAt(i).first <<"\t" << getMatchRangeAt(i).second
 							<< "\t" << getInsertRangeAt(i).first <<"\t" << getInsertRangeAt(i).second

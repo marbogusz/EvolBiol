@@ -22,7 +22,7 @@ AminoacidSubstitutionModel::AminoacidSubstitutionModel(Dictionary* dict, Maths* 
 	std::copy(modelDef.aaRates,modelDef.aaRates + this->matrixFullSize, this->qMatrix);
 	std::copy(modelDef.aaFreqs,modelDef.aaFreqs + this->matrixSize, this->piFreqs);
 
-	for(int i = 0; i< this->matrixSize; i++)
+	for(unsigned int i = 0; i< this->matrixSize; i++)
 	{
 			piLogFreqs[i] = log(piFreqs[i]);
 	}

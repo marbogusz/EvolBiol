@@ -39,8 +39,6 @@ namespace EBC
 class EvolutionaryPairHMM
 {
 protected:
-
-	Dictionary* dict;
 	SubstitutionModelBase* substModel;
 
 	PMatrixDouble* ptmatrix;
@@ -64,9 +62,9 @@ protected:
 
 	bool bandingEnabled;
 
-	bool equilibriumFreqs;
-
 	Band* band;
+
+	bool equilibriumFreqs;
 
 	double initTransM;
 	double initTransX;

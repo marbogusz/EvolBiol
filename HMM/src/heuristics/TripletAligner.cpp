@@ -9,6 +9,8 @@
 #include <vector>
 #include <array>
 
+#include <sstream>
+
 namespace EBC
 {
 
@@ -86,6 +88,36 @@ array<vector<SequenceElement>, 3> TripletAligner::align(
 
 array<vector<SequenceElement>, 3> TripletAligner::align(pair<vector<SequenceElement>, vector<SequenceElement> >& p1, pair<vector<SequenceElement>, vector<SequenceElement> >& p2)
 {
+	stringstream sp1, sp2, sp3, sp4;
+
+	for (auto i1 : p1.first)
+	{
+		sp1 << i1.getSymbol();
+	}
+	for (auto i2 : p1.second)
+	{
+		sp2 << i2.getSymbol();
+	}
+	for (auto i3 : p2.first)
+	{
+		sp3 << i3.getSymbol();
+	}
+	for (auto i4 : p2.second)
+	{
+		sp4 << i4.getSymbol();
+	}
+	//cout << "TRIPLET ALIGNER " << endl;
+	//cout << sp1.str() << endl;
+	//cout << sp2.str() << endl;
+	//cout << sp3.str() << endl;
+	//cout << sp4.str() << endl<<endl;
+
+	DUMP("TRIPLET ALIGNER ");
+	DUMP(sp1.str());
+	DUMP(sp2.str());
+	DUMP(sp3.str());
+	DUMP(sp4.str());
+
 	vector<SequenceElement> tr1;
 	vector<SequenceElement> tr2;
 	vector<SequenceElement> tr3;

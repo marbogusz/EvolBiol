@@ -31,7 +31,7 @@ void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 {
 	DEBUG("Calculating posterior probabilities");
 
-	int i,j;
+	unsigned int i,j;
 	double xval, yval, mval;
 	//totalForward
 	double fwdT;
@@ -88,7 +88,7 @@ double BackwardPairHMM::getAlignmentLikelihood(vector<SequenceElement> s1,
 		lnl += ptmatrix->getLogPairTransition(s1[0].getMatrixIndex(), s2[0].getMatrixIndex()) + initTransM;
 	}
 
-	for(int i=1; i< s1.size(); i++){
+	for(unsigned int i=1; i< s1.size(); i++){
 		avp += exp(previous->getValueAt(k,l));
 		if(s2[i].isIsGap()){
 			//Insert
@@ -146,8 +146,8 @@ double BackwardPairHMM::runAlgorithm()
 	//FIXME - setting the following for test purposes!
 	this->getStateEquilibriums();
 
-	int i;
-	int j;
+	unsigned int i;
+	unsigned int j;
 
 	double sX,sY,sM, sS;
 

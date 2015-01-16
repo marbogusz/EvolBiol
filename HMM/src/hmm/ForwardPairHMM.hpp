@@ -34,7 +34,7 @@ public:
 
 	pair<string,string> sampleAlignment(string&a, string& b);
 
-	pair< double, pair<vector<SequenceElement>, vector<SequenceElement> > > sampleAlignment();
+	pair< double, pair<vector<SequenceElement>, vector<SequenceElement> > > sampleAlignment(Dictionary* dictionary);
 
 };
 

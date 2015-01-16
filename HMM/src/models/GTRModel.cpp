@@ -25,7 +25,7 @@ GTRModel::GTRModel(Dictionary* dict, Maths* alg, unsigned int rates)
 
 void GTRModel::setParameters(const vector<double>& par)
 {
-	for (int i = 0; i< paramsNumber; i++)
+	for (unsigned int i = 0; i< paramsNumber; i++)
 	{
 		this->parameters[i] = par[i];
 	}

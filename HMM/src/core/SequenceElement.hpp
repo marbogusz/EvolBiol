@@ -45,8 +45,10 @@ public:
 		return symbol;
 	}
 
-	friend bool operator== (SequenceElement &cP1, SequenceElement &cP2);
-
+	inline bool operator== (SequenceElement &cP2)
+	{
+		return (cP2.getMatrixIndex() == getMatrixIndex());
+	}
 
 };
 

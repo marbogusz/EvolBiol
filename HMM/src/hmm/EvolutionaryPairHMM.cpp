@@ -205,7 +205,7 @@ double EvolutionaryPairHMM::getAlignmentLikelihood(vector<SequenceElement>& s1,
 		lnl += (ptmatrix->getLogPairTransition(s1[0].getMatrixIndex(), s2[0].getMatrixIndex())+ initTransM);
 		//DUMP("M " << 0 << "\tlnl\t" << lnl << "\tmatrix\t" << previous->getValueAt(k,l));
 	}
-	for(int i=1; i< s1.size(); i++){
+	for(unsigned int i=1; i< s1.size(); i++){
 		if(s2[i].isIsGap()){
 			//Insert
 			k++;

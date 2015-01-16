@@ -85,12 +85,12 @@ SubstitutionModelEstimator::~SubstitutionModelEstimator()
 	}
 }
 
-void SubstitutionModelEstimator::addTriplet(array<vector<SequenceElement>, 3> tripleAlignment, unsigned int trp)
+void SubstitutionModelEstimator::addTriplet(array<vector<SequenceElement>, 3> tripleAlignment, unsigned int trp, double weight)
 {
 	DUMP("SME : adding patterns for triplet " << trp);
 	for(int pos = 0; pos < tripleAlignment[0].size(); pos++)
 	{
-		patterns[trp][{{tripleAlignment[0][pos].getMatrixIndex(), tripleAlignment[1][pos].getMatrixIndex(),tripleAlignment[2][pos].getMatrixIndex()}}]++;
+		patterns[trp][{{tripleAlignment[0][pos].getMatrixIndex(), tripleAlignment[1][pos].getMatrixIndex(),tripleAlignment[2][pos].getMatrixIndex()}}] += weight;
 	}
 	for (auto pat : patterns[trp])
 	{

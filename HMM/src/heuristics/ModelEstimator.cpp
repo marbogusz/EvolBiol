@@ -21,6 +21,8 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 				inputSequences(inputSeqs), gammaRateCategories(rateCategories),
 				gtree(new GuideTree(inputSeqs)), tst(*gtree)
 {
+	int cap;
+
 	DEBUG("About to sample some triplets");
 	DEBUG("Sampling triplets of sequences for gamma shape parameter estimation");
 	
@@ -44,65 +46,56 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
     start = chrono::system_clock::now();
 
 	this->calculateInitialHMMs(model);
+	this->sampleAlignments();
 
-	this
-	//1 pair for now
-	ste = new StateTransitionEstimator(ot, 1);
+	//SUBSTITUTION PART
+	sme = new SubstitutionModelEstimator(inputSequences, model ,ot, rateCategories, alpha, estimateAlpha, tripletIdxs.size());
 
-	ste->addTime(1.0,0,0);
+	auto it= alSamplesTriplet.rbegin();
+	cap = Definitions::pathInformativeCount < alSamplesTriplet.size() ? Definitions::pathInformativeCount : alSamplesTriplet.size();
 
-	auto it=alSamples.rbegin();
-
-	int cap = Definitions::pathInformativeCount < alSamples.size() ? Definitions::pathInformativeCount : alSamples.size();
-
-	for (unsigned int i=0; i < cap; i++)
+	for(unsigned int trp = 0; trp < tripletIdxs.size(); trp++)
 	{
-		DUMP("lnl: " << it->first << "\t total lnl: " << totalSampleLnl);
-		ste->addPair((it->second).first,(it->second).second,0,0,(double)exp((it->first)-(this->totalSampleLnl)));
-		it++;
-	}
-
-
-	ste->optimize();
-
-	DEBUG("Re-estimating model parameters");
-	//make another pass
-
-	indelModel =  ste->getIndelModel();
-	//indelModel->summarize();
-
-/*
-	sme = new SubstitutionModelEstimator(inputSeqs, model ,ot, rateCategories, alpha, estimateAlpha, tripletIdxs.size());
-
-	for(unsigned int al = 0; al < tripletIdxs.size(); al++)
-	{
-		for (unsigned int i=0; i < Definitions::modelEstimatorPathSamples; i++)
-			sme->addTriplet(sampleTripleAlignment(al),al);
+		auto it= alSamplesTriplet[trp].rbegin();
+		cap = Definitions::pathInformativeCount < alSamplesTriplet[trp].size() ? Definitions::pathInformativeCount : alSamplesTriplet[trp].size();
+		for (unsigned int i=0; i < cap; i++)
+		{
+			sme->addTriplet(it->second, trp, (double)exp((it->first)-(SamplesBranch1Lnls[trp]+SamplesBranch2Lnls[trp])));
+			it++;
+		}
 	}
 	sme->optimize();
 
+	//INDEL PART
+	ste = new StateTransitionEstimator(ot, 2*tripletIdxs.size());
 	double tb1,tb2,tb3;
 
-	ste = new StateTransitionEstimator(ot, tripletIdxs.size()*2);
-
-	for(int al = 0; al < tripletIdxs.size(); al++)
+	for(unsigned int trp = 0; trp < tripletIdxs.size(); trp++)
 	{
-		tb1 = sme->getModelParams()->getDivergenceTime(al*3);
-		tb2 = sme->getModelParams()->getDivergenceTime((al*3)+1);
-		tb3 = sme->getModelParams()->getDivergenceTime((al*3)+2);
+		tb1 = sme->getTripletDivergence(trp,0);
+		tb2 = sme->getTripletDivergence(trp,1);
+		tb3 = sme->getTripletDivergence(trp,2);
 
-		ste->addTime(tb1+tb2,al,0);
-		ste->addTime(tb2+tb3,al,1);
+		ste->addTime(tb1+tb2,trp,0);
+		ste->addTime(tb3+tb2,trp,1);
 
-		DEBUG("Branch divergence used by STE : 1:" << tb1 << " 2: " << tb2 << " 3: " << tb3);
-		for (unsigned int i=0; i < Definitions::modelEstimatorPathSamples; i++)
+		auto itPr1=alSamplesBranch1[trp].rbegin();
+		auto itPr2=alSamplesBranch2[trp].rbegin();
+
+		cap = min(alSamplesBranch1[trp].size(),alSamplesBranch2[trp].size());
+		cap = Definitions::pathInformativeCount < cap ? Definitions::pathInformativeCount : cap;
+
+		for (unsigned int i=0; i < cap; i++)
 		{
-			ste->addPair(smpldPairs[al][i][0],smpldPairs[al][i][1],al,0);
-			ste->addPair(smpldPairs[al][i][2],smpldPairs[al][i][3],al,1);
+			ste->addPair((itPr1->second).first,(itPr1->second).second,trp,0,(double)exp((itPr1->first)-(SamplesBranch1Lnls[trp])));
+			ste->addPair((itPr2->second).first,(itPr2->second).second,trp,1,(double)exp((itPr2->first)-(SamplesBranch2Lnls[trp])));
+			itPr1++;
+			itPr2++;
 		}
 	}
 
 	ste->optimize();
+
 
 	DEBUG("Re-estimating model parameters");
 	//make another pass
@@ -116,29 +109,13 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
     INFO("Model Estimator elapsed time: " << elapsed_seconds.count() << " seconds");
     cerr <<  "|||||||||||| Model Estimator elapsed time: " << elapsed_seconds.count() << "s ||||||||||||||\n";
 
-	//substModel->summarize();
-	//indelModel->summarize();
-	//substModel->summarize();
-	//we have new alignments!
-	//re-estimate
-	//do Viterbi using the estimates
-	//construct triplets
-	 * 
-	 */
+	substModel->summarize();
+	indelModel->summarize();
 }
 
 void ModelEstimator::estimateParameters()
 {
-	sme = new SubstitutionModelEstimator(inputSeqs, model ,ot, rateCategories, alpha, estimateAlpha, tripletIdxs.size());
 
-	for(unsigned int al = 0; al < tripletIdxs.size(); al++)
-	{
-		for (unsigned int i=0; i < Definitions::modelEstimatorPathSamples; i++)
-			sme->addTriplet(sampleTripleAlignment(al),al);
-	}
-	sme->optimize();
-
-	double tb1,tb2,tb3;
 }
 
 void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
@@ -146,6 +123,7 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 	DEBUG("EstimateTripleAligment");
 	//amino acid mode
 	bool aaMode = false;
+	double tmpd;
 
 	double initAlpha = 0.75;
 	double initKappa = 2.5;
@@ -233,7 +211,7 @@ void ModelEstimator::sampleAlignments()
 {
 	//FIXME  - check if maps are empty, zero if not
 	//Same with likelihood values
-
+	int cap;
 	int sampleCount = Definitions::pathSampleCount;
 	int analysisCount = Definitions::pathInformativeCount;
 	double totalBranchSampleLnl = 0;
@@ -246,20 +224,31 @@ void ModelEstimator::sampleAlignments()
 
 	//do the first sample
 
-	for (int i = 0; i < samplingHMMs.size(); i++)
+	for (unsigned int i = 0; i < samplingHMMs.size(); i++)
 	{
 		for(ctr = 1; ctr < sampleCount; ctr++){
-			auto branch1Sample = samplingHMMs[i].first->sampleAlignment();
-			auto branch2Sample = samplingHMMs[i].second->sampleAlignment();
+			auto branch1Sample = samplingHMMs[i].first->sampleAlignment(dict);
+			auto branch2Sample = samplingHMMs[i].second->sampleAlignment(dict);
 
 			alSamplesBranch1[i].insert(branch1Sample);
-			alSamplesBranch1[i].insert(branch2Sample);
+			alSamplesBranch2[i].insert(branch2Sample);
 
 			SamplesBranch1Lnls[i] += branch1Sample.first;
 			SamplesBranch2Lnls[i] += branch2Sample.first;
+		}
 
-			auto tripletSample = tal->align(branch1Sample.second, branch2Sample.second)
-			alSamplesTriplet[i].insert(make_pair(branch1Sample.first+branch2Sample.first, tripletSample));
+		auto itPr1=alSamplesBranch1[i].rbegin();
+		auto itPr2=alSamplesBranch2[i].rbegin();
+
+		cap = min(alSamplesBranch1[i].size(),alSamplesBranch2[i].size());
+		cap = Definitions::pathInformativeCount < cap ? Definitions::pathInformativeCount : cap;
+
+		for (unsigned int i=0; i < cap; i++)
+		{
+			auto tripletSample = tal->align(itPr1->second, itPr2->second);
+			alSamplesTriplet[i].insert(make_pair(itPr1->first+itPr2->first, tripletSample));
+			itPr1++;
+			itPr2++;
 		}
 	}
 }

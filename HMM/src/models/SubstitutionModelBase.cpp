@@ -95,7 +95,7 @@ double* SubstitutionModelBase::calculatePt(double t, unsigned int rateCategory)
 
 void SubstitutionModelBase::setDiagonalMeans()
 {
-		int i,j;
+		unsigned int i,j;
 		double sum;
 
 		maths->matrixByDiagonalMultiplyMutable(qMatrix,piFreqs,matrixSize);
@@ -157,7 +157,7 @@ void SubstitutionModelBase::setObservedFrequencies(double* observedFrequencies)
 	this->piFreqs = observedFrequencies;
 	if(this->piLogFreqs == NULL)
 		this->piLogFreqs = new double[this->matrixSize];
-	for(int i = 0; i< this->matrixSize; i++)
+	for(unsigned int i = 0; i< this->matrixSize; i++)
 	{
 		piLogFreqs[i] = log(piFreqs[i]);
 	}
@@ -178,13 +178,13 @@ void SubstitutionModelBase::summarizeRates()
 	if(this->rateCategories != 1)
 	{
 		cout << "Rate categories: " << endl;
-		for(int r=0; r< rateCategories; r++)
+		for(unsigned int r=0; r< rateCategories; r++)
 		{
 			cout << gammaRates[r] << "\t\t";
 		}
 		cout << endl;
 		cout << "Rate frequencies : " << endl;
-		for(int f=0; f< rateCategories; f++)
+		for(unsigned int f=0; f< rateCategories; f++)
 		{
 			cout << this->gammaFrequencies[f] << "\t\t";
 		}
@@ -195,9 +195,9 @@ void SubstitutionModelBase::summarizeRates()
 	stringstream matrixstr;
 	matrixstr << "Rate Matrix (T C A G): " << endl;
 
-		for (int i =0; i< matrixSize; i++ )
+		for (unsigned int i =0; i< matrixSize; i++ )
 		{
-				for (int j =0; j<  matrixSize; j++ )
+				for (unsigned int j =0; j<  matrixSize; j++ )
 				{
 					matrixstr << qMatrix[(i*matrixSize)+j] << "\t\t";
 				}

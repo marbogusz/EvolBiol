@@ -125,6 +125,7 @@ public:
 			logFile << param;
 			if (logger.stderrout)
 				std::cerr << param;
+			logFile.flush();
 		}
 		return logger;
 	}
@@ -141,6 +142,7 @@ public:
 				{
 					std::cerr << v[i] << "\t\t";
 				}
+				logFile.flush();
 			}
 		}
 		return logger;
@@ -152,7 +154,7 @@ public:
 private:
     FileLogger() : active(false), stderrout(false) {}
     FileLogger(const FileLogger& logger) {}
-    FileLogger& operator = (const FileLogger& logger) {}
+    //FileLogger& operator = (const FileLogger& logger) {}
 	static FileLogger errL;
 	static FileLogger wrnL;
 	static FileLogger dbgL;

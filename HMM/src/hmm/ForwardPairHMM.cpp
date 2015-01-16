@@ -40,8 +40,8 @@ pair<string, string> ForwardPairHMM::getBestAlignment(string&seq_a, string& seq_
 	unsigned int i = xSize-1;
 	unsigned int j = ySize-1;
 
-	double mtProb,inProb,dlProb,currProb, rnbr,tmp;
-	double emission;
+	double mtProb,inProb,dlProb,currProb;
+	double emission = 0.0;
 
 	//choose initial state
 	PairwiseHmmStateBase* currentState;
@@ -110,7 +110,7 @@ pair<string, string> ForwardPairHMM::getBestAlignment(string&seq_a, string& seq_
 	return alignment;
 }
 
-pair<double, pair<vector<SequenceElement>, vector<SequenceElement> > >ForwardPairHMM::sampleAlignment()
+pair<double, pair<vector<SequenceElement>, vector<SequenceElement> > >ForwardPairHMM::sampleAlignment(Dictionary* dictionary)
 {
 	//DUMP("Forward HMM sample alignment");
 
@@ -124,7 +124,7 @@ pair<double, pair<vector<SequenceElement>, vector<SequenceElement> > >ForwardPai
 	alignment.first.reserve(worstCaseLen);
 	alignment.second.reserve(worstCaseLen);
 
-	SequenceElement gapElem(true,this->dict->getSymbolIndex('-'), NULL, "-");
+	SequenceElement gapElem(true,dictionary->getSymbolIndex('-'), NULL, "-");
 
 
 	std::random_device rd;
@@ -134,7 +134,7 @@ pair<double, pair<vector<SequenceElement>, vector<SequenceElement> > >ForwardPai
 	unsigned int i = xSize-1;
 	unsigned int j = ySize-1;
 
-	double mtProb,inProb,dlProb,currProb, rnbr,tmp;
+	double mtProb,inProb,currProb, rnbr,tmp;
 	double emission = 0.0;
 
 	//choose initial state
@@ -142,7 +142,7 @@ pair<double, pair<vector<SequenceElement>, vector<SequenceElement> > >ForwardPai
 
 	mtProb = M->getValueAt(xSize-1, ySize-1) - this->getTotalLikelihood();
 	inProb = X->getValueAt(xSize-1, ySize-1) - this->getTotalLikelihood();
-	dlProb = Y->getValueAt(xSize-1, ySize-1) - this->getTotalLikelihood();
+	//dlProb = Y->getValueAt(xSize-1, ySize-1) - this->getTotalLikelihood();
 
 	while(i > 0 && j > 0)
 	{
@@ -179,7 +179,7 @@ pair<double, pair<vector<SequenceElement>, vector<SequenceElement> > >ForwardPai
 		}
 		mtProb = emission + currentState->getTransitionProbabilityFromMatch() + M->getValueAt(i,j) - currProb;
 		inProb = emission + currentState->getTransitionProbabilityFromInsert() + X->getValueAt(i,j) - currProb;
-		dlProb = emission + currentState->getTransitionProbabilityFromDelete() + Y->getValueAt(i,j) - currProb;
+		//dlProb = emission + currentState->getTransitionProbabilityFromDelete() + Y->getValueAt(i,j) - currProb;
 
 	}
 
@@ -227,7 +227,7 @@ pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b
 	unsigned int i = xSize-1;
 	unsigned int j = ySize-1;
 
-	double mtProb,inProb,dlProb,currProb, rnbr,tmp;
+	double mtProb,inProb,currProb, rnbr,tmp;
 	double emission = 0.0;
 
 	//choose initial state
@@ -235,7 +235,7 @@ pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b
 
 	mtProb = M->getValueAt(xSize-1, ySize-1) - this->getTotalLikelihood();
 	inProb = X->getValueAt(xSize-1, ySize-1) - this->getTotalLikelihood();
-	dlProb = Y->getValueAt(xSize-1, ySize-1) - this->getTotalLikelihood();
+	//dlProb = Y->getValueAt(xSize-1, ySize-1) - this->getTotalLikelihood();
 
 	while(i > 0 && j > 0)
 	{
@@ -272,7 +272,7 @@ pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b
 		}
 		mtProb = emission + currentState->getTransitionProbabilityFromMatch() + M->getValueAt(i,j) - currProb;
 		inProb = emission + currentState->getTransitionProbabilityFromInsert() + X->getValueAt(i,j) - currProb;
-		dlProb = emission + currentState->getTransitionProbabilityFromDelete() + Y->getValueAt(i,j) - currProb;
+		//dlProb = emission + currentState->getTransitionProbabilityFromDelete() + Y->getValueAt(i,j) - currProb;
 
 	}
 

@@ -45,7 +45,7 @@ protected:
 
 	vector<array<PMatrixTriple* ,3> > ptMatrices;
 
-	vector<map<array<short, 3>, unsigned int> > patterns;
+	vector<map<array<short, 3>, double> > patterns;
 
 	unsigned int gammaRateCategories;
 
@@ -65,11 +65,17 @@ public:
 
 	virtual ~SubstitutionModelEstimator();
 
-	void addTriplet(array<vector<SequenceElement>, 3> tripleAlignment, unsigned int tiplet);
+	void addTriplet(array<vector<SequenceElement>, 3> tripleAlignment, unsigned int tiplet, double weight);
 
 	double runIteration();
 
 	void optimize();
+
+	double getTripletDivergence(unsigned int triplet, unsigned int branch)
+	{
+		//no bound checks - beware
+		return modelParams->getDivergenceTime(((triplet*3)+branch));
+	}
 
 	OptimizedModelParameters* getModelParams()
 	{
