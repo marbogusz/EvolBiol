@@ -50,6 +50,8 @@ public:
 		return (cP2.getMatrixIndex() == getMatrixIndex());
 	}
 
+
+
 };
 
 } /* namespace EBC */

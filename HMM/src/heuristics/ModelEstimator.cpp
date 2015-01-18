@@ -236,7 +236,7 @@ void ModelEstimator::sampleAlignments()
 			SamplesBranch1Lnls[i] += branch1Sample.first;
 			SamplesBranch2Lnls[i] += branch2Sample.first;
 		}
-
+/*
 		auto itPr1=alSamplesBranch1[i].rbegin();
 		auto itPr2=alSamplesBranch2[i].rbegin();
 
@@ -249,6 +249,47 @@ void ModelEstimator::sampleAlignments()
 			alSamplesTriplet[i].insert(make_pair(itPr1->first+itPr2->first, tripletSample));
 			itPr1++;
 			itPr2++;
+		}
+*/
+		map<double, pair<string, string> > alSamples1;
+		map<double, pair<string, string> > alSamples2;
+		for(ctr = 0; ctr < 10000; ctr++){
+			auto pr1 = samplingHMMs[i].first->sampleAlignment(inputSequences->getRawSequenceAt(tripletIdxs[i][0]), inputSequences->getRawSequenceAt(tripletIdxs[i][1]));
+			auto v1= dict->translate(pr1.first);
+			auto v2= dict->translate(pr1.second);
+			double tlnl = samplingHMMs[i].first->getAlignmentLikelihood(v1,v2);
+			alSamples1.insert(make_pair(tlnl, pr1));
+		}
+
+		DUMP("Top 100 alignments String ver");
+			auto its=alSamples1.rbegin();
+			int cap = 100 < alSamples1.size() ? 100 : alSamples1.size();
+
+			for (int c=0;c<cap; c++)
+			{
+				stringstream ss1;
+				DUMP(its->first);
+				DUMP(its->second.first);
+				DUMP(its->second.second);
+				its++;
+			}
+
+		DUMP("Top 100 alignments SeqEL ver");
+		auto it=alSamplesBranch1[i].rbegin();
+		cap = 100 < alSamplesBranch1[i].size() ? 100 : alSamplesBranch1[i].size();
+
+		for (int c=0;c<cap; c++)
+		{
+			stringstream ss1;
+			DUMP(it->first);
+			for (auto el : it->second.first)
+				ss1 << el.getSymbol();
+			DUMP(ss1.str());
+			stringstream ss2;
+			for (auto el : it->second.second)
+				ss2 << el.getSymbol();
+			DUMP(ss2.str());
+			it++;
 		}
 	}
 }

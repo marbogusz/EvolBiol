@@ -142,8 +142,9 @@ public:
 				{
 					std::cerr << v[i] << "\t\t";
 				}
-				logFile.flush();
+
 			}
+			logFile.flush();
 		}
 		return logger;
 	}
