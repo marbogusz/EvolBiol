@@ -156,6 +156,7 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 	substModel->calculateModel();
 
 	indelModel = new NegativeBinomialGapModel();
+	indelModel->setParameters({initLambda,initEpsilon});
 
 	vector<pair<Band*, Band*> > bandPairs(tripletIdxs.size());
 	vector<array<vector<SequenceElement>,3> > seqsA(tripletIdxs.size());
@@ -200,6 +201,12 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 		f1 = new ForwardPairHMM(seqsA[i][0],seqsA[i][1], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].first,true);
 		f2 = new ForwardPairHMM(seqsA[i][1],seqsA[i][2], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].second,true);
 
+		f1->setDivergenceTime(distancesA[i][0]*initTimeModifier);
+		f2->setDivergenceTime(distancesA[i][1]*initTimeModifier);
+
+		f1->runAlgorithm();
+		f2->runAlgorithm();
+
 		this->samplingHMMs.push_back(make_pair(f1,f2));
 
 	}
@@ -236,7 +243,7 @@ void ModelEstimator::sampleAlignments()
 			SamplesBranch1Lnls[i] += branch1Sample.first;
 			SamplesBranch2Lnls[i] += branch2Sample.first;
 		}
-/*
+
 		auto itPr1=alSamplesBranch1[i].rbegin();
 		auto itPr2=alSamplesBranch2[i].rbegin();
 
@@ -250,7 +257,8 @@ void ModelEstimator::sampleAlignments()
 			itPr1++;
 			itPr2++;
 		}
-*/
+
+		/*
 		map<double, pair<string, string> > alSamples1;
 		map<double, pair<string, string> > alSamples2;
 		for(ctr = 0; ctr < 10000; ctr++){
@@ -291,6 +299,7 @@ void ModelEstimator::sampleAlignments()
 			DUMP(ss2.str());
 			it++;
 		}
+		*/
 	}
 }
 
