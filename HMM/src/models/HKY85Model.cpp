@@ -54,7 +54,7 @@ void HKY85Model::summarize()
 	INFO("kappa " << *k );
 	INFO("Frequencies (T C A G)");
 	INFO(this->piFreqs[0] << '\t' << this->piFreqs[1] << '\t' << this->piFreqs[2] << '\t' << this->piFreqs[3] << '\t');
-	summarizeRates();
+	//summarizeRates();
 }
 
 } /* namespace EBC */

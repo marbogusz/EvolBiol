@@ -303,11 +303,6 @@ pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b
 double ForwardPairHMM::runAlgorithm()
 {
 
-	calculateModels();
-	setTransitionProbabilities();
-	if (this->equilibriumFreqs)
-		this->getStateEquilibriums();
-
 	int i;
 	int j;
 	int k;

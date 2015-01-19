@@ -166,7 +166,7 @@ void BandingEstimator::optimizePairByPair()
 					substModel, indelModel, Definitions::DpMatrixType::Full, band);
 		}
 
-		//hmm->setDivergenceTime(modelParams->getDivergenceTime(0)); //zero as there's only one pair!
+		//hmm->setDivergenceTimeAndCalculateModels(modelParams->getDivergenceTime(0)); //zero as there's only one pair!
 		wrapper->setTargetHMM(hmm);
 		DUMP("Set model parameter in the hmm...");
 		wrapper->setModelParameters(modelParams);
@@ -220,7 +220,7 @@ double BandingEstimator::runIteration()
 	for(unsigned int i =0; i<pairCount; i++)
 	{
 		hmm = hmms[i];
-		hmm->setDivergenceTime(modelParams->getDivergenceTime(i));
+		hmm->setDivergenceTimeAndCalculateModels(modelParams->getDivergenceTime(i));
 		//indelModel->setTime(modelParams->getDivergenceTime(i));
 		//indelModel->calculate();
 		tmp = hmm->runAlgorithm();

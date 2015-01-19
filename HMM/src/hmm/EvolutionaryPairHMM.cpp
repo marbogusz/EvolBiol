@@ -44,10 +44,15 @@ EvolutionaryPairHMM::EvolutionaryPairHMM(vector<SequenceElement> s1, vector<Sequ
 	initializeStates(mt);
 }
 
-void EvolutionaryPairHMM::setDivergenceTime(double time)
+void EvolutionaryPairHMM::setDivergenceTimeAndCalculateModels(double time)
 {
 	ptmatrix->setTime(time);
 	tpb->setTime(time);
+
+	calculateModels();
+	setTransitionProbabilities();
+	if (this->equilibriumFreqs)
+		this->getStateEquilibriums();
 
 
 }

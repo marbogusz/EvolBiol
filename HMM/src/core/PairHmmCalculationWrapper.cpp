@@ -19,7 +19,7 @@ PairHmmCalculationWrapper::~PairHmmCalculationWrapper() {
 
 double PairHmmCalculationWrapper::runIteration() {
 
-	this->phmm->setDivergenceTime(modelParams->getDivergenceTime(0));
+	this->phmm->setDivergenceTimeAndCalculateModels(modelParams->getDivergenceTime(0));
 	return this->phmm->runAlgorithm();
 }
 

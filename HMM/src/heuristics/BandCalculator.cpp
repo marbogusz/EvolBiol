@@ -31,7 +31,7 @@ BandCalculator::BandCalculator(vector<SequenceElement>& s1, vector<SequenceEleme
 	{
 
 		fwd[i] = new ForwardPairHMM(seq1,seq2, substModel,indelModel, Definitions::DpMatrixType::Full);
-		fwd[i]->setDivergenceTime(time*multipliers[i]);
+		fwd[i]->setDivergenceTimeAndCalculateModels(time*multipliers[i]);
 		lnl = fwd[i]->runAlgorithm();
 		DUMP("Calculation "<< i << " with divergence time " << time*multipliers[i] << " and lnL " << lnl);
 		if(lnl < tmpRes)
@@ -40,12 +40,12 @@ BandCalculator::BandCalculator(vector<SequenceElement>& s1, vector<SequenceEleme
 			tmpRes = lnl;
 		}
 		//bwd[i] = new BackwardPairHMM(seq1,seq2, false, substModel,indelModel, 0, Definitions::DpMatrixType::Full);
-		//bwd[i]->setDivergenceTime(time*multipliers[i]);
+		//bwd[i]->setDivergenceTimeAndCalculateModels(time*multipliers[i]);
 		//bwd[i]->runAlgorithm();
 	}
 
 	bwd =  new BackwardPairHMM(seq1,seq2, substModel,indelModel, Definitions::DpMatrixType::Full);
-	bwd->setDivergenceTime(time*multipliers[best]);
+	bwd->setDivergenceTimeAndCalculateModels(time*multipliers[best]);
 	DUMP("Backward calculation runs...");
 	bwd->runAlgorithm();
 

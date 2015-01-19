@@ -16,10 +16,10 @@
 namespace EBC
 {
 
-SubstitutionModelEstimator::SubstitutionModelEstimator(Sequences* inputSeqs, Definitions::ModelType model,
+SubstitutionModelEstimator::SubstitutionModelEstimator(Sequences* inputSeqs, SubstitutionModelBase* model,
 		Definitions::OptimizationType ot,unsigned int rateCategories, double alpha,
 		bool estimateAlpha, unsigned int matCount) :
-				inputSequences(inputSeqs), gammaRateCategories(rateCategories), patterns(matCount), ptMatrices(matCount)
+				inputSequences(inputSeqs), substModel(model), gammaRateCategories(rateCategories), patterns(matCount), ptMatrices(matCount)
 
 
 {
@@ -37,24 +37,6 @@ SubstitutionModelEstimator::SubstitutionModelEstimator(Sequences* inputSeqs, Def
 	maths = new Maths();
 	dict = inputSequences->getDictionary();
 
-	if (model == Definitions::ModelType::GTR)
-	{
-		substModel = new GTRModel(dict, maths,gammaRateCategories);
-		DUMP("SME: Creating new GTR model");
-	}
-	else if (model == Definitions::ModelType::HKY85)
-	{
-		substModel = new HKY85Model(dict, maths,gammaRateCategories);
-		DUMP("SME: Creating new HKY model");
-	}
-	else if (model == Definitions::ModelType::LG)
-	{
-			substModel = new AminoacidSubstitutionModel(dict, maths,gammaRateCategories,Definitions::aaLgModel);
-			DUMP("SME: Creating new LG model");
-	}
-
-	substModel->setObservedFrequencies(inputSequences->getElementFrequencies());
-
 	modelParams = new OptimizedModelParameters(substModel, NULL,3, 3*patterns.size(), estimateSubstitutionParams,
 			false, estimateAlpha, true, maths);
 
@@ -70,11 +52,26 @@ SubstitutionModelEstimator::SubstitutionModelEstimator(Sequences* inputSeqs, Def
 	bfgs = new Optimizer(modelParams, this,ot);
 }
 
+void SubstitutionModelEstimator::clean()
+{
+	//for(auto entry : ptMatrices)
+	//{
+	//	delete entry[0];
+	//	delete entry[1];
+	//	delete entry[2];
+	//}
+
+	for(auto entry : patterns)
+	{
+		entry.clear();
+	}
+}
+
 SubstitutionModelEstimator::~SubstitutionModelEstimator()
 {
 	delete bfgs;
 	delete modelParams;
-	delete substModel;
+	//delete substModel;
 	delete maths;
 
 	for(auto entry : ptMatrices)
@@ -87,14 +84,14 @@ SubstitutionModelEstimator::~SubstitutionModelEstimator()
 
 void SubstitutionModelEstimator::addTriplet(array<vector<SequenceElement>, 3> tripleAlignment, unsigned int trp, double weight)
 {
-	DUMP("SME : adding patterns for triplet " << trp);
+	DUMP("SME : adding patterns for triplet " << trp << "\t triplet weight : " << weight);
 	for(int pos = 0; pos < tripleAlignment[0].size(); pos++)
 	{
 		patterns[trp][{{tripleAlignment[0][pos].getMatrixIndex(), tripleAlignment[1][pos].getMatrixIndex(),tripleAlignment[2][pos].getMatrixIndex()}}] += weight;
 	}
 	for (auto pat : patterns[trp])
 	{
-		DUMP("SME" << pat.first[0] << " " << pat.first[1] << " " << pat.first[2] << " : " << pat.second);
+		DUMP("SME " << pat.first[0] << " " << pat.first[1] << " " << pat.first[2] << " : " << pat.second);
 	}
 }
 

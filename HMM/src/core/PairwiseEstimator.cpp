@@ -217,7 +217,7 @@ double PairwiseEstimator::runIteration()
 	for(unsigned int i =0; i<pairCount; i++)
 	{
 		hmm = hmms[i];
-		hmm->setDivergenceTime(modelParams->getDivergenceTime(i));
+		hmm->setDivergenceTimeAndCalculateModels(modelParams->getDivergenceTime(i));
 		indelModel->setTime(modelParams->getDivergenceTime(i));
 		indelModel->calculate();
 		result += hmm->runAlgorithm();

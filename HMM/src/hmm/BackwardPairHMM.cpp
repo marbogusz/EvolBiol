@@ -141,11 +141,6 @@ double BackwardPairHMM::getAlignmentLikelihood(vector<SequenceElement> s1,
 
 double BackwardPairHMM::runAlgorithm()
 {
-	calculateModels();
-	setTransitionProbabilities();
-	//FIXME - setting the following for test purposes!
-	this->getStateEquilibriums();
-
 	unsigned int i;
 	unsigned int j;
 

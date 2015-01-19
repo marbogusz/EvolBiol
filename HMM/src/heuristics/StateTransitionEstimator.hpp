@@ -32,7 +32,7 @@ protected:
 
 
 public:
-	StateTransitionEstimator(Definitions::OptimizationType ot, unsigned int pairCategories);
+	StateTransitionEstimator(IndelModel* im, Definitions::OptimizationType ot, unsigned int pairCategories);
 
 	void addTime(double time, unsigned int triplet, unsigned int pr);
 
@@ -41,6 +41,8 @@ public:
 	double runIteration();
 
 	void optimize();
+
+	void clean();
 
 	virtual ~StateTransitionEstimator();
 

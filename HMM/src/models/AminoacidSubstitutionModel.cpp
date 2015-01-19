@@ -52,7 +52,7 @@ AminoacidSubstitutionModel::~AminoacidSubstitutionModel()
 
 void AminoacidSubstitutionModel::summarize()
 {
-	summarizeRates();
+	//summarizeRates();
 }
 
 } /* namespace EBC */

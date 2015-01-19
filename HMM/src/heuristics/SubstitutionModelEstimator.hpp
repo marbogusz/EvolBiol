@@ -59,7 +59,7 @@ protected:
 	unsigned int currentTriplet;
 
 public:
-	SubstitutionModelEstimator(Sequences* inputSeqs, Definitions::ModelType model,
+	SubstitutionModelEstimator(Sequences* inputSeqs, SubstitutionModelBase* model,
 			Definitions::OptimizationType ot,unsigned int rateCategories, double alpha,
 			bool estimateAlpha, unsigned int matCount);
 
@@ -70,6 +70,8 @@ public:
 	double runIteration();
 
 	void optimize();
+
+	void clean();
 
 	double getTripletDivergence(unsigned int triplet, unsigned int branch)
 	{

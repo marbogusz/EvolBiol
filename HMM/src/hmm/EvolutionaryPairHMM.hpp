@@ -114,7 +114,7 @@ public:
 
 	void summarize();
 
-	void setDivergenceTime(double time);
+	void setDivergenceTimeAndCalculateModels(double time);
 
 	unsigned int getIndelParameterCount()
 	{

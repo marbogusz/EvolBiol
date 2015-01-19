@@ -156,12 +156,6 @@ double ViterbiPairHMM::getMax(double m, double x, double y, unsigned int i, unsi
 
 double ViterbiPairHMM::runAlgorithm()
 {
-
-	calculateModels();
-	setTransitionProbabilities();
-	if (this->equilibriumFreqs)
-		this->getStateEquilibriums();
-
 	unsigned int i,j,k,l;
 
 	double xx,xy,xm,yx,yy,ym,mx,my,mm, sS;

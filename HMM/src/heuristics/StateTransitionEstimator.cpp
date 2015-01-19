@@ -11,10 +11,10 @@
 namespace EBC
 {
 
-StateTransitionEstimator::StateTransitionEstimator(Definitions::OptimizationType ot, unsigned int pc) : stmSamples(pc)
+StateTransitionEstimator::StateTransitionEstimator(IndelModel* im, Definitions::OptimizationType ot, unsigned int pc) : indelModel(im), stmSamples(pc)
 {
 	DEBUG("Starting State Transition Estimator");
-	indelModel = new NegativeBinomialGapModel();
+	//indelModel = new NegativeBinomialGapModel();
 	maths = new Maths();
 
 	modelParams = new OptimizedModelParameters(NULL, indelModel,0, 0, false,
@@ -41,13 +41,15 @@ double StateTransitionEstimator::runIteration()
 
 void StateTransitionEstimator::addTime(double time, unsigned int triplet, unsigned int pr)
 {
+
+	DEBUG("State Transition Estimator add time for triplet " << triplet << "\t pair " << pr << "\ttime " << time);
 	stmSamples[2*triplet+pr] = new StateTransitionML(indelModel, time);
 }
 
 void StateTransitionEstimator::addPair(vector<SequenceElement>& s1,
 		vector<SequenceElement>& s2, unsigned int triplet, unsigned int pr, double weight)
 {
-	DUMP("add pair for triplet " << triplet << " and pair no " << pr << " with weight " << weight);
+	DUMP("State Transition Estimator add pair for triplet " << triplet << " and pair no " << pr << " with weight " << weight);
 	stmSamples[2*triplet+pr]->addSample(s1,s2, weight);
 }
 
@@ -59,16 +61,24 @@ void StateTransitionEstimator::optimize()
 	//modelParams->outputParameters();
 }
 
+void StateTransitionEstimator::clean()
+{
+    for(auto tm : stmSamples)
+    {
+    	delete tm;
+    }
+}
+
 StateTransitionEstimator::~StateTransitionEstimator()
 {
 	delete bfgs;
 	delete modelParams;
     delete maths;
-    for(auto tm : stmSamples)
-    {
-    	delete tm;
-    }
-    delete indelModel;
+    //for(auto tm : stmSamples)
+    //{
+    //	delete tm;
+    //}
+    //delete indelModel;
 }
 
 } /* namespace EBC */
