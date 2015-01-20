@@ -89,10 +89,10 @@ void SubstitutionModelEstimator::addTriplet(array<vector<SequenceElement>, 3> tr
 	{
 		patterns[trp][{{tripleAlignment[0][pos].getMatrixIndex(), tripleAlignment[1][pos].getMatrixIndex(),tripleAlignment[2][pos].getMatrixIndex()}}] += weight;
 	}
-	for (auto pat : patterns[trp])
-	{
-		DUMP("SME " << pat.first[0] << " " << pat.first[1] << " " << pat.first[2] << " : " << pat.second);
-	}
+	//for (auto pat : patterns[trp])
+	//{
+	//	DUMP("SME " << pat.first[0] << " " << pat.first[1] << " " << pat.first[2] << " : " << pat.second);
+	//}
 }
 
 void SubstitutionModelEstimator::optimize()

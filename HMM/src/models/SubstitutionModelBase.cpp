@@ -24,6 +24,8 @@ SubstitutionModelBase::SubstitutionModelBase(Dictionary* dict, Maths* alg, unsig
 	this->alpha = 0;
 	this->piFreqs = NULL;
 	this->piLogFreqs = NULL;
+	this->parameters = NULL;
+
 	//FIXME - maybe initial alpha set to a value ?
 }
 

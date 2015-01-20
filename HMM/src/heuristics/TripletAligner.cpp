@@ -89,7 +89,7 @@ array<vector<SequenceElement>, 3> TripletAligner::align(
 array<vector<SequenceElement>, 3> TripletAligner::align(pair<vector<SequenceElement>, vector<SequenceElement> >& p1, pair<vector<SequenceElement>, vector<SequenceElement> >& p2)
 {
 	stringstream sp1, sp2, sp3, sp4;
-
+/*
 	for (auto i1 : p1.first)
 	{
 		sp1 << i1.getSymbol();
@@ -117,7 +117,7 @@ array<vector<SequenceElement>, 3> TripletAligner::align(pair<vector<SequenceElem
 	DUMP(sp2.str());
 	DUMP(sp3.str());
 	DUMP(sp4.str());
-
+*/
 	vector<SequenceElement> tr1;
 	vector<SequenceElement> tr2;
 	vector<SequenceElement> tr3;
@@ -172,6 +172,21 @@ array<vector<SequenceElement>, 3> TripletAligner::align(pair<vector<SequenceElem
 	triAlignment[1] = tr2;
 	triAlignment[2] = tr3;
 
+	for (auto i1 : tr1)
+	{
+		sp1 << i1.getSymbol();
+	}
+	for (auto i2 : tr2)
+	{
+		sp2 << i2.getSymbol();
+	}
+	for (auto i3 : tr3)
+	{
+		sp3 << i3.getSymbol();
+	}
+	DUMP(sp1.str());
+	DUMP(sp2.str());
+	DUMP(sp3.str());
 	return triAlignment;
 }
 

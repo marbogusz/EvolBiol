@@ -13,6 +13,7 @@ namespace EBC
 NucleotideSubstitutionModel::NucleotideSubstitutionModel(Dictionary* dict, Maths* alg, unsigned int alpha, unsigned int pcnt) :
 	SubstitutionModelBase(dict,alg,alpha,pcnt)
 {
+	this->parameters = new double[this->paramsNumber];
 }
 
 

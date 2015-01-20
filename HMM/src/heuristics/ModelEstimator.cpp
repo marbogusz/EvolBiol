@@ -116,7 +116,7 @@ void ModelEstimator::estimateParameters()
 	for(unsigned int trp = 0; trp < tripletIdxs.size(); trp++)
 	{
 		auto it= (*alSamplesTriplet)[trp].rbegin();
-		cap = Definitions::pathInformativeCount < alSamplesTriplet[trp].size() ? Definitions::pathInformativeCount : alSamplesTriplet[trp].size();
+		cap = Definitions::pathInformativeCount < (*alSamplesTriplet)[trp].size() ? Definitions::pathInformativeCount : (*alSamplesTriplet)[trp].size();
 		for (unsigned int i=0; i < cap; i++)
 		{
 			DUMP("About to add triplet with lnl " << it->first << "\ttotal lnl " << (SamplesBranch1Lnls[trp]+SamplesBranch2Lnls[trp]));
@@ -233,6 +233,7 @@ void ModelEstimator::rescoreSamples()
 
 void ModelEstimator::sampleAlignments()
 {
+	DEBUG("\n****MODEL ESTIMATOR ALIGNMNENT SAMPLER****\n");
 	//FIXME  - check if maps are empty, zero if not
 	//Same with likelihood values
 	int cap;
@@ -265,15 +266,20 @@ void ModelEstimator::sampleAlignments()
 		SamplesBranch1Lnls[trpIdx] = totalSampleLnlB1;
 		SamplesBranch2Lnls[trpIdx] = totalSampleLnlB2;
 
+		DUMP("****** Sampler totalSampleLnlB1\t" << totalSampleLnlB1 << " totalSampleLnlB2\t" << totalSampleLnlB2  );
+
 		auto itPr1=(*alSamplesBranch1)[trpIdx].rbegin();
 		auto itPr2=(*alSamplesBranch2)[trpIdx].rbegin();
 
-		cap = min(alSamplesBranch1[trpIdx].size(),alSamplesBranch2[trpIdx].size());
+		cap = min((*alSamplesBranch1)[trpIdx].size(),(*alSamplesBranch2)[trpIdx].size());
 		cap = Definitions::pathInformativeCount < cap ? Definitions::pathInformativeCount : cap;
+
+		DUMP("****** Sampler " << cap << " triple alignments will be added"  );
 
 		for (unsigned int i=0; i < cap; i++)
 		{
 			//auto tripletSample = tal->align(itPr1->second, itPr2->second);
+			DUMP("****** Sampler adding triple alignment with lnl " << (itPr1->first+itPr2->first) );
 			(*alSamplesTriplet)[trpIdx].insert(make_pair((itPr1->first+itPr2->first), tal->align(itPr1->second, itPr2->second)));
 			itPr1++;
 			itPr2++;

@@ -13,11 +13,9 @@ namespace EBC
 GTRModel::GTRModel(Dictionary* dict, Maths* alg, unsigned int rates)
 	: NucleotideSubstitutionModel(dict, alg, rates, Definitions::GTRParamCount)
 {
-
-	this->parameters = new double[this->paramsNumber];
-
 	for (int i=0;i<5;i++)
 	{
+		//FIXME - move magic numbers to definitions
 		this->parameterLoBounds[i] = 0.000001;
 		this->parameterHiBounds[i] = 5;
 	}
