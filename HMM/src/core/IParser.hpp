@@ -10,6 +10,7 @@
 
 #include "core/Definitions.hpp"
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -23,6 +24,9 @@ public:
 	virtual string getNextSequence() = 0;
 	virtual unsigned int getSequenceCount() = 0;
 	virtual string getSequenceAt(unsigned int) = 0;
+	virtual vector<string>* getNames() =0;
+	virtual vector<string>* getSequences() =0;
+
 };
 
 } /* namespace EBC */

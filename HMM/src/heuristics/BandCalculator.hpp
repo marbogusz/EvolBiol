@@ -38,8 +38,8 @@ protected:
 	vector<ForwardPairHMM*> fwd;
 	BackwardPairHMM* bwd;
 
-	vector<SequenceElement>& seq1;
-	vector<SequenceElement>& seq2;
+	vector<SequenceElement*>* seq1;
+	vector<SequenceElement*>* seq2;
 
 	SubstitutionModelBase* substModel;
 	IndelModel* indelModel;
@@ -58,7 +58,7 @@ protected:
 	void processPosteriorProbabilities(BackwardPairHMM* hmm, Band* band);
 
 public:
-	BandCalculator(vector<SequenceElement>& s1, vector<SequenceElement>& s2, SubstitutionModelBase* sm, IndelModel* im, double divergenceTime);
+	BandCalculator(vector<SequenceElement*>* s1, vector<SequenceElement*>* s2, SubstitutionModelBase* sm, IndelModel* im, double divergenceTime);
 	virtual ~BandCalculator();
 
 	inline Band* getBand()

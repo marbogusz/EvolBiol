@@ -22,21 +22,24 @@ namespace EBC
 	{
 	protected:
 		unsigned short alphabetSize;
-		vector<string> alphabet;
-		map<string,short> translator;
+		unsigned short gapId;
+		string alphabet;
+		map<char,SequenceElement*> translator;
 
 	public:
 
-		static const char nucleotides[4];
-		static const char aminoacids[20];
+		static const char nucleotides[5];
+		static const char aminoacids[21];
 		static const char gapChar;
 
-		virtual short getSymbolIndex(string &symbol);
-		virtual short getSymbolIndex(char symbol);
-		virtual vector<SequenceElement> translate(string &sequence, bool disregardIndels = false);
+		//virtual short getSymbolIndex(string &symbol);
+		virtual unsigned short getSymbolIndex(char symbol);
+		virtual vector<SequenceElement*>* translate(string &sequence, bool disregardIndels = false);
 		virtual unsigned short getAlphabetSize();
 
-		virtual string getSymbolAt(short i);
+		SequenceElement* getSequenceElement(char symbol);
+
+		virtual char getSymbolAt(unsigned short i);
 
 		virtual void outputAlphabet();
 

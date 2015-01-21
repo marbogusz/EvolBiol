@@ -11,22 +11,22 @@
 namespace EBC
 {
 
-void StateTransitionML::addSample(vector<SequenceElement>&s1, vector<SequenceElement>& s2, double weight)
+void StateTransitionML::addSample(vector<SequenceElement*>* s1, vector<SequenceElement*>* s2, double weight)
 {
 	Definitions::StateId previousState;
 
-		if (s1[0].isIsGap())
+		if ((*s1)[0]->isIsGap())
 			previousState = Definitions::StateId::Delete;
-		else if(s2[0].isIsGap())
+		else if((*s2)[0]->isIsGap())
 			previousState = Definitions::StateId::Insert;
 		else
 			previousState = Definitions::StateId::Match;
 
 
 
-		for(int pos = 1; pos < s1.size(); pos++)
+		for(int pos = 1; pos < s1->size(); pos++)
 		{
-			if (s1[pos].isIsGap())
+			if ((*s1)[pos]->isIsGap())
 			{
 				//Delete
 				if(previousState == Definitions::StateId::Match)
@@ -38,7 +38,7 @@ void StateTransitionML::addSample(vector<SequenceElement>&s1, vector<SequenceEle
 
 				previousState = Definitions::StateId::Delete;
 			}
-			else if(s2[pos].isIsGap())
+			else if((*s2)[pos]->isIsGap())
 			{
 				//Insert
 				if(previousState == Definitions::StateId::Match)

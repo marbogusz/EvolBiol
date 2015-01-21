@@ -10,7 +10,6 @@
 
 #include "core/Sequences.hpp"
 #include "core/DistanceMatrix.hpp"
-#include "heuristics/GotohAlgorithm.hpp"
 #include "core/SequenceElement.hpp"
 #include <array>
 #include <vector>
@@ -44,11 +43,11 @@ private:
 public:
 	TripletAligner(Sequences* inputSeq, DistanceMatrix* dm);
 
-	array<vector<SequenceElement>, 3> align(array<unsigned int, 3> triplet);
+	//array<vector<SequenceElement>, 3> align(array<unsigned int, 3> triplet);
 
-	array<vector<SequenceElement>, 3> align(pair<string, string>& p1,pair<string, string>& p2);
+	//array<vector<SequenceElement>, 3> align(pair<string, string>& p1,pair<string, string>& p2);
 
-	array<vector<SequenceElement>, 3> align(pair<vector<SequenceElement>, vector<SequenceElement> >& p1, pair<vector<SequenceElement>, vector<SequenceElement> >& p2);
+	array<vector<SequenceElement*>*, 3>* align(pair<vector<SequenceElement*>*, vector<SequenceElement*>* >* p1, pair<vector<SequenceElement*>*, vector<SequenceElement*>* >* p2);
 };
 
 } /* namespace EBC */

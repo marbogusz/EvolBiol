@@ -17,6 +17,9 @@ FileParser::FileParser(const char* filename)
 {
 	//FIXME - check the file structure to avoid errors from phylip, nexus and other non-fasta files
 
+	sequences = new vector<string>();
+	names = new vector<string>();
+
 	this->filename = filename;
 	//this->infile.exceptions(ifstream::failbit | ifstream::badbit);
 	this->infile.open(this->filename.c_str(), fstream::in);
@@ -38,7 +41,7 @@ FileParser::FileParser(const char* filename)
 				continue;
 			else
 			{
-				names.push_back(getSequenceName(tmp));
+				names->push_back(getSequenceName(tmp));
 				justStarted = false;
 			}
 		}
@@ -50,9 +53,9 @@ FileParser::FileParser(const char* filename)
 			}
 			else
 			{
-				names.push_back(getSequenceName(tmp));
+				names->push_back(getSequenceName(tmp));
 				trimWsChars(seq);
-				sequences.push_back(seq);
+				sequences->push_back(seq);
 				seq = "";
 			}
 		}
@@ -61,12 +64,12 @@ FileParser::FileParser(const char* filename)
 	if(seq != "")
 	{
 		trimWsChars(seq);
-		sequences.push_back(seq);
+		sequences->push_back(seq);
 		seq = "";
 	}
 	infile.close();
-	it=sequences.begin();
-	itN=names.begin();
+	it=sequences->begin();
+	itN=names->begin();
 }
 
 bool FileParser::isDefinitionLine(string& s)
@@ -102,17 +105,17 @@ string FileParser::getNextName()
 
 unsigned int FileParser::getSequenceCount()
 {
-	return sequences.size();
+	return sequences->size();
 }
 
 string FileParser::getSequenceAt(unsigned int position)
 {
-	return sequences.at(position);
+	return sequences->at(position);
 }
 
 string FileParser::getSequenceNameAt(unsigned int position)
 {
-	return names.at(position);
+	return names->at(position);
 }
 
 FileParser::~FileParser()

@@ -46,7 +46,7 @@ public:
 
 	StateTransitionML(IndelModel* im, double time);
 
-	void addSample(vector<SequenceElement>&s1, vector<SequenceElement>& s2, double weight);
+	void addSample(vector<SequenceElement*>*, vector<SequenceElement*>* s2, double weight);
 
 	double getLnL();
 };

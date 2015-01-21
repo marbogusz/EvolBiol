@@ -34,16 +34,15 @@ Sequences::Sequences(IParser* iParser,Definitions::SequenceType st, bool fa) thr
 
 		pairIterator = pairs.begin();
 
-	while(size > 0)
-	{
-		this->rawSequences.push_back(iParser->getNextSequence());
-		this->sequenceNames.push_back(iParser->getNextName());
-		this->translatedSequences.push_back(dict->translate(*(rawSequences.end()-1),fixedAlignment==false));
-		size--;
-	}
+	this->rawSequences = iParser->getSequences();
+	this->sequenceNames = iParser->getNames();
+
+	for (auto it = rawSequences->begin(); it != rawSequences->end(); it++)
+		this->translatedSequences.push_back(dict->translate(*it,fixedAlignment==false));
+
 }
 
-vector<SequenceElement>& Sequences::getSequencesAt(int pos) {
+vector<SequenceElement*>* Sequences::getSequencesAt(unsigned int pos){
 		return translatedSequences[pos];
 }
 
@@ -61,38 +60,39 @@ Dictionary* Sequences::getDictionary()
 //FIXME - RETURN A REFERENCE!
 string& Sequences::getRawSequenceAt(unsigned int pos)
 {
-	return this->rawSequences[pos];
+	return (*rawSequences)[pos];
 }
 
 string& Sequences::getSequenceName(unsigned int pos)
 {
-	return this->sequenceNames[pos];
+	return (*sequenceNames)[pos];
 }
 
 void Sequences::calculateObservedFrequencies()
 {
 	this->observedFrequencies = new double[dict->getAlphabetSize()];
-	int i;
+
+	unsigned int i;
 
 	for (i=0; i<dict->getAlphabetSize(); i++)
 		this->observedFrequencies[i] = 0;
 
 	unsigned int count =0;
 
-	for (vector<vector<SequenceElement> >::iterator it1 = translatedSequences.begin() ; it1 != translatedSequences.end(); ++it1)
+	for (auto it1 = translatedSequences.begin() ; it1 != translatedSequences.end(); ++it1)
 	{
-		for(vector<SequenceElement>::iterator it2 = it1->begin(); it2 != it1->end(); ++it2)
+		for(auto it2 = (*it1)->begin(); it2 != (*it1)->end(); ++it2)
 		{
-			if (!(it2->isIsGap()))
+			if (!((*it2)->isIsGap()))
 			{
 				count++;
-				observedFrequencies[it2->getMatrixIndex()]++;
+				observedFrequencies[(*it2)->getMatrixIndex()]++;
 			}
 		}
 	}
 
-	for (i=0; i<dict->getAlphabetSize(); i++)
-		this->observedFrequencies[i]/=count;
+	for (i=0; i < dict->getAlphabetSize(); i++)
+		this->observedFrequencies[i] /= count;
 }
 
 double* Sequences::getElementFrequencies()
@@ -103,7 +103,7 @@ double* Sequences::getElementFrequencies()
 	return observedFrequencies;
 }
 
-double* Sequences::getElementFrequencies(array<unsigned int, 3> triplet)
+double* Sequences::getElementFrequencies(array<unsigned int, 3>& triplet)
 {
 
 	if(observedFrequencies == NULL)
@@ -117,18 +117,18 @@ double* Sequences::getElementFrequencies(array<unsigned int, 3> triplet)
 
 	for (auto it1 : triplet)
 	{
-		for(vector<SequenceElement>::iterator it2 = translatedSequences[it1].begin(); it2 != translatedSequences[it1].end(); ++it2)
+		for(auto it2 = (translatedSequences[it1])->begin(); it2 != (translatedSequences[it1])->end(); ++it2)
 		{
-			if (!(it2->isIsGap()))
+			if (!((*it2)->isIsGap()))
 			{
 				count++;
-				observedFrequencies[it2->getMatrixIndex()]++;
+				observedFrequencies[(*it2)->getMatrixIndex()]++;
 			}
 		}
 	}
 
-	for (i=0; i<dict->getAlphabetSize(); i++)
-		this->observedFrequencies[i]/=count;
+	for (i=0; i < dict->getAlphabetSize(); i++)
+		this->observedFrequencies[i] /= count;
 
 	//DEBUGV(observedFrequencies,4);
 	return observedFrequencies;

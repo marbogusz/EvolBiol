@@ -26,7 +26,7 @@ protected:
 	double getMax(double m, double x, double y, unsigned int i, unsigned int j, PairwiseHmmStateBase* state);
 
 public:
-	ViterbiPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2,
+	ViterbiPairHMM(vector<SequenceElement*>* s1, vector<SequenceElement*>* s2,
 			SubstitutionModelBase* smdl, IndelModel* imdl,
 			Definitions::DpMatrixType mt = Definitions::DpMatrixType::Full, Band* bandObj = nullptr, bool useEquilibriumFreqs = false);
 

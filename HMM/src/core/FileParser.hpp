@@ -24,8 +24,8 @@ private:
 
 	string filename;
 	ifstream infile;
-	vector<string> sequences;
-	vector<string> names;
+	vector<string>* sequences;
+	vector<string>* names;
 	vector<string>::iterator it;
 	vector<string>::iterator itN;
 
@@ -50,6 +50,14 @@ public:
 	void trimWsChars(string&);
 
 	virtual ~FileParser();
+
+	inline vector<string>* getNames() {
+		return names;
+	}
+
+	inline vector<string>* getSequences() {
+		return sequences;
+	}
 };
 
 } /* namespace EBC */

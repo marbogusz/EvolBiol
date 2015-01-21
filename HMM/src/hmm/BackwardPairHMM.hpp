@@ -35,7 +35,7 @@ protected:
 
 
 public:
-	BackwardPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, SubstitutionModelBase* smdl, IndelModel* imdl,
+	BackwardPairHMM(vector<SequenceElement*>* s1, vector<SequenceElement*>* s2, SubstitutionModelBase* smdl, IndelModel* imdl,
 			Definitions::DpMatrixType mt, Band* bandObj = nullptr);
 
 	virtual ~BackwardPairHMM();
@@ -44,7 +44,7 @@ public:
 
 	void calculatePosteriors(ForwardPairHMM* fwd);
 
-	double getAlignmentLikelihood(vector<SequenceElement> s1, vector<SequenceElement> s2, bool post, vector<vector<double> >& posteriors);
+	double getAlignmentLikelihood(vector<SequenceElement*>* s1, vector<SequenceElement*>* s2, bool post, vector<vector<double> >& posteriors);
 
 };
 

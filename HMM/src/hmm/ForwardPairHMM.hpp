@@ -22,7 +22,7 @@ protected:
 	vector<double> userSubstParameters;
 
 public:
-	ForwardPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2,
+	ForwardPairHMM(vector<SequenceElement*>* s1, vector<SequenceElement*>* s2,
 			SubstitutionModelBase* smdl, IndelModel* imdl,
 			Definitions::DpMatrixType mt, Band* bandObj = nullptr, bool useEquilibriumProbabilities = false);
 
@@ -34,7 +34,7 @@ public:
 
 	pair<string,string> sampleAlignment(string&a, string& b);
 
-	pair< double, pair<vector<SequenceElement>, vector<SequenceElement> > > sampleAlignment(Dictionary* dictionary);
+	pair< double, pair<vector<SequenceElement*>*, vector<SequenceElement*>* >* > sampleAlignment(Dictionary* dictionary);
 
 };
 

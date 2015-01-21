@@ -12,7 +12,7 @@ namespace EBC
 {
 
 
-ForwardPairHMM::ForwardPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, SubstitutionModelBase* smdl,
+ForwardPairHMM::ForwardPairHMM(vector<SequenceElement*>* s1, vector<SequenceElement*>* s2, SubstitutionModelBase* smdl,
 		IndelModel* imdl, Definitions::DpMatrixType mt, Band* bandObj, bool useEquilibriumFreqs) :
 		EvolutionaryPairHMM(s1,s2, smdl, imdl, mt, bandObj, useEquilibriumFreqs)
 {
@@ -62,7 +62,7 @@ pair<string, string> ForwardPairHMM::getBestAlignment(string&seq_a, string& seq_
 		currProb = currentState->getValueAt(i,j);
 		if (currentState->stateId == Definitions::StateId::Match)
 		{
-			emission = ptmatrix->getLogPairTransition(seq1[i-1].getMatrixIndex(), seq2[j-1].getMatrixIndex());
+			emission = ptmatrix->getLogPairTransition((*seq1)[i-1]->getMatrixIndex(), (*seq2)[j-1]->getMatrixIndex());
 			alignment.first += seq_a[i-1];
 			alignment.second += seq_b[j-1];
 			i--;
@@ -70,14 +70,14 @@ pair<string, string> ForwardPairHMM::getBestAlignment(string&seq_a, string& seq_
 		}
 		else if (currentState->stateId == Definitions::StateId::Delete)
 		{
-			ptmatrix->getLogEquilibriumFreq(seq2[j-1].getMatrixIndex());
+			ptmatrix->getLogEquilibriumFreq((*seq2)[j-1]->getMatrixIndex());
 			alignment.second += seq_b[j-1];
 			alignment.first += '-';
 			j--;
 		}
 		else //Insert
 		{
-			emission = ptmatrix->getLogEquilibriumFreq(seq1[i-1].getMatrixIndex());
+			emission = ptmatrix->getLogEquilibriumFreq((*seq1)[i-1]->getMatrixIndex());
 			alignment.first += seq_a[i-1];
 			alignment.second += '-';
 			i--;
@@ -110,21 +110,22 @@ pair<string, string> ForwardPairHMM::getBestAlignment(string&seq_a, string& seq_
 	return alignment;
 }
 
-pair<double, pair<vector<SequenceElement>, vector<SequenceElement> > >ForwardPairHMM::sampleAlignment(Dictionary* dictionary)
+pair<double, pair<vector<SequenceElement*>*, vector<SequenceElement*>* >* >ForwardPairHMM::sampleAlignment(Dictionary* dictionary)
 {
 	//DUMP("Forward HMM sample alignment");
 
 	double likelihood;
 
-	pair<vector<SequenceElement>, vector<SequenceElement> > alignment;
+	pair<vector<SequenceElement*>*, vector<SequenceElement*>* >* alignment =
+			new pair<vector<SequenceElement*>*, vector<SequenceElement*>* >(new vector<SequenceElement*>(), new vector<SequenceElement*>());
 
 	int worstCaseLen = (int)(max(xSize-1,ySize-1) * (1.0+(2*g*(1.0/1.0-e))));
 
 	//reserve memory for out strings (20% of gaps should be ok)
-	alignment.first.reserve(worstCaseLen);
-	alignment.second.reserve(worstCaseLen);
+	alignment->first->reserve(worstCaseLen);
+	alignment->second->reserve(worstCaseLen);
 
-	SequenceElement gapElem(true,dictionary->getSymbolIndex('-'), NULL, "-");
+	SequenceElement* gapElem = dictionary->getSequenceElement(Dictionary::gapChar);
 
 
 	std::random_device rd;
@@ -157,24 +158,24 @@ pair<double, pair<vector<SequenceElement>, vector<SequenceElement> > >ForwardPai
 		currProb = currentState->getValueAt(i,j);
 		if (currentState->stateId == Definitions::StateId::Match)
 		{
-			emission = ptmatrix->getLogPairTransition(seq1[i-1].getMatrixIndex(), seq2[j-1].getMatrixIndex());
-			alignment.first.push_back(seq1[i-1]);
-			alignment.second.push_back(seq2[j-1]);
+			emission = ptmatrix->getLogPairTransition((*seq1)[i-1]->getMatrixIndex(), (*seq2)[j-1]->getMatrixIndex());
+			alignment->first->push_back((*seq1)[i-1]);
+			alignment->second->push_back((*seq2)[j-1]);
 			i--;
 			j--;
 		}
 		else if (currentState->stateId == Definitions::StateId::Delete)
 		{
-			ptmatrix->getLogEquilibriumFreq(seq2[j-1].getMatrixIndex());
-			alignment.second.push_back(seq2[j-1]);
-			alignment.first.push_back(gapElem);
+			ptmatrix->getLogEquilibriumFreq((*seq2)[j-1]->getMatrixIndex());
+			alignment->second->push_back((*seq2)[j-1]);
+			alignment->first->push_back(gapElem);
 			j--;
 		}
 		else //Insert
 		{
-			emission = ptmatrix->getLogEquilibriumFreq(seq1[i-1].getMatrixIndex());
-			alignment.first.push_back(seq1[i-1]);
-			alignment.second.push_back(gapElem);
+			emission = ptmatrix->getLogEquilibriumFreq((*seq1)[i-1]->getMatrixIndex());
+			alignment->first->push_back((*seq1)[i-1]);
+			alignment->second->push_back(gapElem);
 			i--;
 		}
 		mtProb = emission + currentState->getTransitionProbabilityFromMatch() + M->getValueAt(i,j) - currProb;
@@ -186,25 +187,25 @@ pair<double, pair<vector<SequenceElement>, vector<SequenceElement> > >ForwardPai
 	if (j==0)
 	{
 		while(i > 0){
-			alignment.first.push_back(seq1[i-1]);
-			alignment.second.push_back(gapElem);
+			alignment->first->push_back((*seq1)[i-1]);
+			alignment->second->push_back(gapElem);
 			i--;
 		}
 	}
 	else if (i==0)
 	{
 		while(j > 0){
-			alignment.second.push_back(seq2[j-1]);
-			alignment.first.push_back(gapElem);
+			alignment->second->push_back((*seq2)[j-1]);
+			alignment->first->push_back(gapElem);
 			j--;
 		}
 	}
 	//deal with the last row or column
 
-	reverse(alignment.first.begin(), alignment.first.end());
-	reverse(alignment.second.begin(), alignment.second.end());
+	reverse(alignment->first->begin(), alignment->first->end());
+	reverse(alignment->second->begin(), alignment->second->end());
 
-	likelihood = this->getAlignmentLikelihood(alignment.first,alignment.second);
+	likelihood = this->getAlignmentLikelihood(alignment->first,alignment->second);
 
 	return make_pair(likelihood, alignment);
 }
@@ -250,7 +251,7 @@ pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b
 		currProb = currentState->getValueAt(i,j);
 		if (currentState->stateId == Definitions::StateId::Match)
 		{
-			emission = ptmatrix->getLogPairTransition(seq1[i-1].getMatrixIndex(), seq2[j-1].getMatrixIndex());
+			emission = ptmatrix->getLogPairTransition((*seq1)[i-1]->getMatrixIndex(), (*seq2)[j-1]->getMatrixIndex());
 			alignment.first += seq_a[i-1];
 			alignment.second += seq_b[j-1];
 			i--;
@@ -258,14 +259,14 @@ pair<string, string> ForwardPairHMM::sampleAlignment(string&seq_a, string& seq_b
 		}
 		else if (currentState->stateId == Definitions::StateId::Delete)
 		{
-			ptmatrix->getLogEquilibriumFreq(seq2[j-1].getMatrixIndex());
+			ptmatrix->getLogEquilibriumFreq((*seq2)[j-1]->getMatrixIndex());
 			alignment.second += seq_b[j-1];
 			alignment.first += '-';
 			j--;
 		}
 		else //Insert
 		{
-			emission = ptmatrix->getLogEquilibriumFreq(seq1[i-1].getMatrixIndex());
+			emission = ptmatrix->getLogEquilibriumFreq((*seq1)[i-1]->getMatrixIndex());
 			alignment.first += seq_a[i-1];
 			alignment.second += '-';
 			i--;
@@ -331,7 +332,7 @@ double ForwardPairHMM::runAlgorithm()
 		for(i=1,j=0; i< xSize; i++)
 		{
 			k = i-1;
-			emissionX = ptmatrix->getLogEquilibriumFreq(seq1[i-1].getMatrixIndex());
+			emissionX = ptmatrix->getLogEquilibriumFreq((*seq1)[i-1]->getMatrixIndex());
 			xm = M->getValueAt(k,j) + X->getTransitionProbabilityFromMatch();
 			xx = X->getValueAt(k,j) + X->getTransitionProbabilityFromInsert();
 			xy = Y->getValueAt(k,j) + X->getTransitionProbabilityFromDelete();
@@ -341,7 +342,7 @@ double ForwardPairHMM::runAlgorithm()
 		for(j=1,i=0; j< ySize; j++)
 		{
 			k = j-1;
-			emissionY = ptmatrix->getLogEquilibriumFreq(seq2[j-1].getMatrixIndex());
+			emissionY = ptmatrix->getLogEquilibriumFreq((*seq2)[j-1]->getMatrixIndex());
 			ym = M->getValueAt(i,k) + Y->getTransitionProbabilityFromMatch();
 			yx = X->getValueAt(i,k) + Y->getTransitionProbabilityFromInsert();
 			yy = Y->getValueAt(i,k) + Y->getTransitionProbabilityFromDelete();
@@ -355,14 +356,14 @@ double ForwardPairHMM::runAlgorithm()
 			{
 
 				k = i-1;
-				emissionX = ptmatrix->getLogEquilibriumFreq(seq1[i-1].getMatrixIndex());
+				emissionX = ptmatrix->getLogEquilibriumFreq((*seq1)[i-1]->getMatrixIndex());
 				xm = M->getValueAt(k,j) + X->getTransitionProbabilityFromMatch();
 				xx = X->getValueAt(k,j) + X->getTransitionProbabilityFromInsert();
 				xy = Y->getValueAt(k,j) + X->getTransitionProbabilityFromDelete();
 				X->setValueAt(i,j, emissionX + maths->logSum(xm,xx,xy));
 
 				k = j-1;
-				emissionY = ptmatrix->getLogEquilibriumFreq(seq2[j-1].getMatrixIndex());
+				emissionY = ptmatrix->getLogEquilibriumFreq((*seq2)[j-1]->getMatrixIndex());
 				ym = M->getValueAt(i,k) + Y->getTransitionProbabilityFromMatch();
 				yx = X->getValueAt(i,k) + Y->getTransitionProbabilityFromInsert();
 				yy = Y->getValueAt(i,k) + Y->getTransitionProbabilityFromDelete();
@@ -370,7 +371,7 @@ double ForwardPairHMM::runAlgorithm()
 
 				k = i-1;
 				l = j-1;
-				emissionM = ptmatrix->getLogPairTransition(seq1[i-1].getMatrixIndex(), seq2[j-1].getMatrixIndex());
+				emissionM = ptmatrix->getLogPairTransition((*seq1)[i-1]->getMatrixIndex(), (*seq2)[j-1]->getMatrixIndex());
 				mm = M->getValueAt(k,l) + M->getTransitionProbabilityFromMatch();
 				mx = X->getValueAt(k,l) + M->getTransitionProbabilityFromInsert();
 				my = Y->getValueAt(k,l) + M->getTransitionProbabilityFromDelete();
@@ -391,7 +392,7 @@ double ForwardPairHMM::runAlgorithm()
 			for(i=loI,j=0; i<= hiI; i++)
 			{
 				k = i-1;
-				emissionX = ptmatrix->getLogEquilibriumFreq(seq1[i-1].getMatrixIndex());
+				emissionX = ptmatrix->getLogEquilibriumFreq((*seq1)[i-1]->getMatrixIndex());
 				xm = M->getValueAt(k,j) + X->getTransitionProbabilityFromMatch();
 				xx = X->getValueAt(k,j) + X->getTransitionProbabilityFromInsert();
 				xy = Y->getValueAt(k,j) + X->getTransitionProbabilityFromDelete();
@@ -414,7 +415,7 @@ double ForwardPairHMM::runAlgorithm()
 				for(i = loD; i <= hiD; i++)
 				{
 					k = j-1;
-					emissionY = ptmatrix->getLogEquilibriumFreq(seq2[j-1].getMatrixIndex());
+					emissionY = ptmatrix->getLogEquilibriumFreq((*seq2)[j-1]->getMatrixIndex());
 					ym = M->getValueAt(i,k) + Y->getTransitionProbabilityFromMatch();
 					yx = X->getValueAt(i,k) + Y->getTransitionProbabilityFromInsert();
 					yy = Y->getValueAt(i,k) + Y->getTransitionProbabilityFromDelete();
@@ -428,7 +429,7 @@ double ForwardPairHMM::runAlgorithm()
 				{
 					k = i-1;
 					l = j-1;
-					emissionM = ptmatrix->getLogPairTransition(seq1[i-1].getMatrixIndex(), seq2[j-1].getMatrixIndex());
+					emissionM = ptmatrix->getLogPairTransition((*seq1)[i-1]->getMatrixIndex(), (*seq2)[j-1]->getMatrixIndex());
 					mm = M->getValueAt(k,l) + M->getTransitionProbabilityFromMatch();
 					mx = X->getValueAt(k,l) + M->getTransitionProbabilityFromInsert();
 					my = Y->getValueAt(k,l) + M->getTransitionProbabilityFromDelete();
@@ -442,7 +443,7 @@ double ForwardPairHMM::runAlgorithm()
 				for(i = loI; i <= hiI; i++)
 				{
 					k = i-1;
-					emissionX = ptmatrix->getLogEquilibriumFreq(seq1[i-1].getMatrixIndex());
+					emissionX = ptmatrix->getLogEquilibriumFreq((*seq1)[i-1]->getMatrixIndex());
 					xm = M->getValueAt(k,j) + X->getTransitionProbabilityFromMatch();
 					xx = X->getValueAt(k,j) + X->getTransitionProbabilityFromInsert();
 					xy = Y->getValueAt(k,j) + X->getTransitionProbabilityFromDelete();

@@ -162,12 +162,13 @@ int main(int argc, char ** argv) {
 					cmdReader->getOptimizationType(), cmdReader->getCategories(), alpha,
 					cmdReader->estimateAlpha());
 
-			//substParams = tme->getSubstitutionParameters();
+			substParams = tme->getSubstitutionParameters();
 			indelParams = tme->getIndelParameters();
 			//if(cmdReader->estimateAlpha())
 			//	alpha = tme->getAlpha();
 
 			cout << indelParams[0] << "\t" << indelParams[1] << "\n";
+			cout << substParams[0] << endl;
 
 			delete tme;
 

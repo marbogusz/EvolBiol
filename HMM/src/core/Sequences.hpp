@@ -16,10 +16,13 @@
 #include "core/SequenceElement.hpp"
 #include "core/Definitions.hpp"
 #include <array>
+#include <vector>
+
+
+using namespace std;
 
 namespace EBC
 {
-
 
 class Sequences
 {
@@ -27,13 +30,12 @@ private:
 
 
 	//FIXME - how about just copying from the parser or better, a pointer to the sequences instantiated in parser?
-	vector<string> rawSequences;
+	vector<string>* rawSequences;
 
-	vector<string> sequenceNames;
+	vector<string>* sequenceNames;
 
-	vector<vector<SequenceElement> > translatedSequences;
+	vector<vector<SequenceElement*>* > translatedSequences;
 	vector<std::pair<unsigned int, unsigned int> > pairs;
-
 	vector<std::pair<unsigned int, unsigned int> >::iterator pairIterator;
 
 	Dictionary* dict;
@@ -56,12 +58,12 @@ public:
 	//FIXME - change to A T C G
 	double* getElementFrequencies();
 
-	double* getElementFrequencies(array<unsigned int, 3> triplet);
+	double* getElementFrequencies(array<unsigned int, 3>& triplet);
 
 	//void getSequencePair(vector<SequenceElement> s1, vector<SequenceElement> s2 );
-	vector<SequenceElement>& getSequencesAt(int pos);
+	vector<SequenceElement*>* getSequencesAt(unsigned int pos);
 
-	unsigned int getPairCount()
+	inline unsigned int getPairCount()
 	{
 		unsigned int ct = translatedSequences.size();
 		return (ct*(ct-1))/2;

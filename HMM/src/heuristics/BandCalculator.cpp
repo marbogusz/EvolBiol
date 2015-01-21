@@ -10,7 +10,7 @@
 namespace EBC
 {
 
-BandCalculator::BandCalculator(vector<SequenceElement>& s1, vector<SequenceElement>& s2, SubstitutionModelBase* sm, IndelModel* im, double divergenceTime) :
+BandCalculator::BandCalculator(vector<SequenceElement*>* s1, vector<SequenceElement*>* s2, SubstitutionModelBase* sm, IndelModel* im, double divergenceTime) :
 		fwd(3,nullptr), seq1(s1), seq2(s2), substModel(sm), indelModel(im), time(divergenceTime)
 {
 	DEBUG("Band estimator running...");
@@ -50,7 +50,7 @@ BandCalculator::BandCalculator(vector<SequenceElement>& s1, vector<SequenceEleme
 	bwd->runAlgorithm();
 
 	//combine fwd and bwd metrics into one!
-	band = new Band(s2.size()+1);
+	band = new Band(s2->size()+1);
 
 	bwd->calculatePosteriors(fwd[best]);
 	this->processPosteriorProbabilities(bwd, band);

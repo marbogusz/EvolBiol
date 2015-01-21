@@ -70,9 +70,9 @@ protected:
 	double initTransX;
 	double initTransY;
 
-	vector<SequenceElement> seq1;
-	vector<SequenceElement> seq2;
-	vector<SequenceElement>::iterator itS1, itS2;
+	vector<SequenceElement*>* seq1;
+	vector<SequenceElement*>* seq2;
+	//vector<SequenceElement>::iterator itS1, itS2;
 	
 	//cumulative likelihood for all 3 matrices
 	double totalLikelihood;
@@ -105,7 +105,7 @@ public:
 	//Delete state
 	PairwiseHmmStateBase* Y;
 
-	EvolutionaryPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2, SubstitutionModelBase* smdl,
+	EvolutionaryPairHMM(vector<SequenceElement*>* s1, vector<SequenceElement*>* s2, SubstitutionModelBase* smdl,
 			IndelModel* imdl, Definitions::DpMatrixType, Band* bandObj, bool useEquilibriumFreqs);
 
 	virtual ~EvolutionaryPairHMM();
@@ -146,7 +146,7 @@ public:
 		return Y;
 	}
 
-	double getAlignmentLikelihood(vector<SequenceElement>& s1, vector<SequenceElement>& s2);
+	double getAlignmentLikelihood(vector<SequenceElement*>* s1, vector<SequenceElement*>* s2);
 
 	double getTotalLikelihood() const {
 		return totalLikelihood;

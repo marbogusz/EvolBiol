@@ -12,7 +12,7 @@
 namespace EBC
 {
 
-EvolutionaryPairHMM::EvolutionaryPairHMM(vector<SequenceElement> s1, vector<SequenceElement> s2,
+EvolutionaryPairHMM::EvolutionaryPairHMM(vector<SequenceElement*>* s1, vector<SequenceElement*>* s2,
 			SubstitutionModelBase* smdl, IndelModel* imdl,
 			Definitions::DpMatrixType mt, Band* bandObj, bool useEquilibriumFreqs) :
 					substModel(smdl), indelModel(imdl), band(bandObj), equilibriumFreqs(useEquilibriumFreqs)
@@ -22,8 +22,8 @@ EvolutionaryPairHMM::EvolutionaryPairHMM(vector<SequenceElement> s1, vector<Sequ
 	this->seq1 = s1;
 	this->seq2 = s2;
 
-	this->xSize = seq1.size() +1;
-	this->ySize = seq2.size() +1;
+	this->xSize = seq1->size() +1;
+	this->ySize = seq2->size() +1;
 
 	DUMP("Evolutionary Pair HMM for seqence 1 with size " << xSize << " and sequence 2 with size " << ySize);
 
@@ -181,8 +181,8 @@ EvolutionaryPairHMM::~EvolutionaryPairHMM()
     delete tpb;
 }
 
-double EvolutionaryPairHMM::getAlignmentLikelihood(vector<SequenceElement>& s1,
-		vector<SequenceElement>& s2)
+double EvolutionaryPairHMM::getAlignmentLikelihood(vector<SequenceElement*>* s1,
+		vector<SequenceElement*>* s2)
 {
 	double lnl = 0;
 
@@ -191,27 +191,27 @@ double EvolutionaryPairHMM::getAlignmentLikelihood(vector<SequenceElement>& s1,
 	int k =0;
 	int l =0;
 	PairwiseHmmStateBase* previous;
-	if(s2[0].isIsGap()){
+	if((*s2)[0]->isIsGap()){
 		previous = X;
 		k++;
-		lnl += (ptmatrix->getLogEquilibriumFreq(s1[0].getMatrixIndex()) + initTransX);
+		lnl += (ptmatrix->getLogEquilibriumFreq((*s1)[0]->getMatrixIndex()) + initTransX);
 		//DUMP("I " << 0 << "\tlnl\t" << lnl << "\tmatrix\t" << previous->getValueAt(k,l));
 	}
-	else if(s1[0].isIsGap()){
+	else if((*s1)[0]->isIsGap()){
 		previous = Y;
 		l++;
-		lnl += (ptmatrix->getLogEquilibriumFreq(s2[0].getMatrixIndex()) + initTransY);
+		lnl += (ptmatrix->getLogEquilibriumFreq((*s2)[0]->getMatrixIndex()) + initTransY);
 		//DUMP("D " << 0 << "\tlnl\t" << lnl << "\tmatrix\t" << previous->getValueAt(k,l));
 	}
 	else{
 		previous = M;
 		k++;
 		l++;
-		lnl += (ptmatrix->getLogPairTransition(s1[0].getMatrixIndex(), s2[0].getMatrixIndex())+ initTransM);
+		lnl += (ptmatrix->getLogPairTransition((*s1)[0]->getMatrixIndex(), (*s2)[0]->getMatrixIndex())+ initTransM);
 		//DUMP("M " << 0 << "\tlnl\t" << lnl << "\tmatrix\t" << previous->getValueAt(k,l));
 	}
-	for(unsigned int i=1; i< s1.size(); i++){
-		if(s2[i].isIsGap()){
+	for(unsigned int i=1; i< s1->size(); i++){
+		if((*s2)[i]->isIsGap()){
 			//Insert
 			k++;
 			if (previous == X)
@@ -220,11 +220,11 @@ double EvolutionaryPairHMM::getAlignmentLikelihood(vector<SequenceElement>& s1,
 				lnl += X->getTransitionProbabilityFromDelete();
 			else
 				lnl+=X->getTransitionProbabilityFromMatch();
-			lnl += ptmatrix->getLogEquilibriumFreq(s1[i].getMatrixIndex());
+			lnl += ptmatrix->getLogEquilibriumFreq((*s1)[i]->getMatrixIndex());
 			//DUMP("I " 0 << "\tlnl\t" << lnl << "\tmatrix\t" << previous->getValueAt(i,j));
 			previous = X;
 		}
-		else if(s1[i].isIsGap()){
+		else if((*s1)[i]->isIsGap()){
 			//Delete
 			l++;
 			if (previous == X)
@@ -233,7 +233,7 @@ double EvolutionaryPairHMM::getAlignmentLikelihood(vector<SequenceElement>& s1,
 				lnl += Y->getTransitionProbabilityFromDelete();
 			else
 				lnl+=Y->getTransitionProbabilityFromMatch();
-			lnl += ptmatrix->getLogEquilibriumFreq(s2[i].getMatrixIndex());
+			lnl += ptmatrix->getLogEquilibriumFreq((*s2)[i]->getMatrixIndex());
 			//DUMP("D " 0 << "\tlnl\t" << lnl << "\tmatrix\t" << previous->getValueAt(i,j));
 			previous = Y;
 		}
@@ -247,7 +247,7 @@ double EvolutionaryPairHMM::getAlignmentLikelihood(vector<SequenceElement>& s1,
 				lnl += M->getTransitionProbabilityFromDelete();
 			else
 				lnl+=M->getTransitionProbabilityFromMatch();
-			lnl += ptmatrix->getLogPairTransition(s1[i].getMatrixIndex(), s2[i].getMatrixIndex());
+			lnl += ptmatrix->getLogPairTransition((*s1)[i]->getMatrixIndex(), (*s2)[i]->getMatrixIndex());
 			//DUMP("M " 0 << "\tlnl\t" << lnl << "\tmatrix\t" << previous->getValueAt(i,j));
 			previous = M;
 		}

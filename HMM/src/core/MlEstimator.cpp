@@ -130,11 +130,11 @@ MlEstimator::MlEstimator(Sequences* inputSeqs, Definitions::ModelType model ,std
 	{
 		ptMatrices[i] = new PMatrixDouble(substModel);
 		std::pair<unsigned int, unsigned int> idxs = inputSequences->getPairOfSequenceIndices(i);
-		vector<SequenceElement>  s1 = inputSequences->getSequencesAt(idxs.first);
-		vector<SequenceElement>  s2 = inputSequences->getSequencesAt(idxs.second);
-		for(int j = 0; j< s1.size(); j++)
+		vector<SequenceElement*>*  s1 = inputSequences->getSequencesAt(idxs.first);
+		vector<SequenceElement*>*  s2 = inputSequences->getSequencesAt(idxs.second);
+		for(int j = 0; j< s1->size(); j++)
 		{
-			patterns[i][{{s1[j].getMatrixIndex(),s2[j].getMatrixIndex()}}]++;
+			patterns[i][{{(*s1)[j]->getMatrixIndex(),(*s2)[j]->getMatrixIndex()}}]++;
 		}
 	}
 

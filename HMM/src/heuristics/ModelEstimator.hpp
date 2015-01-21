@@ -76,23 +76,22 @@ protected:
 
 	vector<pair<ForwardPairHMM*, ForwardPairHMM*> > samplingHMMs;
 
-	vector<map<double, pair<vector<SequenceElement>, vector<SequenceElement> > > > alSamplesBranch1Set1;
-	vector<map<double, pair<vector<SequenceElement>, vector<SequenceElement> > > > alSamplesBranch1Set2;
-	vector<map<double, pair<vector<SequenceElement>, vector<SequenceElement> > > > alSamplesBranch2Set1;
-	vector<map<double, pair<vector<SequenceElement>, vector<SequenceElement> > > > alSamplesBranch2Set2;
+	vector<map<double, pair<vector<SequenceElement*>*, vector<SequenceElement*>* >* > > alSamplesBranch1Set1;
+	vector<map<double, pair<vector<SequenceElement*>*, vector<SequenceElement*>* >* > > alSamplesBranch2Set1;
+	vector<map<double, pair<vector<SequenceElement*>*, vector<SequenceElement*>* >* > > alSamplesBranch1Set2;
+	vector<map<double, pair<vector<SequenceElement*>*, vector<SequenceElement*>* >* > > alSamplesBranch2Set2;
 
-	vector<map<double, array<vector<SequenceElement>, 3> > >  alSamplesTripletSet1;
-	vector<map<double, array<vector<SequenceElement>, 3> > >  alSamplesTripletSet2;
+	vector<map<double, array<vector<SequenceElement*>*, 3>* > >  alSamplesTripletSet1;
+	vector<map<double, array<vector<SequenceElement*>*, 3>* > >  alSamplesTripletSet2;
 
-	vector<map<double, pair<vector<SequenceElement>, vector<SequenceElement> > > >* alSamplesBranch1;
-	vector<map<double, pair<vector<SequenceElement>, vector<SequenceElement> > > >* alSamplesBranch2;
+	vector<map<double, pair<vector<SequenceElement*>*, vector<SequenceElement*>* >* > >* alSamplesBranch1;
+	vector<map<double, pair<vector<SequenceElement*>*, vector<SequenceElement*>* >* > >* alSamplesBranch2;
 
-	vector<map<double, array<vector<SequenceElement>, 3> > >*  alSamplesTriplet;
+	vector<map<double, pair<vector<SequenceElement*>*, vector<SequenceElement*>* >* > >* alSamplesBranch1Prev;
+	vector<map<double, pair<vector<SequenceElement*>*, vector<SequenceElement*>* >* > >* alSamplesBranch2Prev;
 
-	vector<map<double, pair<vector<SequenceElement>, vector<SequenceElement> > > >* alSamplesBranch1Prev;
-	vector<map<double, pair<vector<SequenceElement>, vector<SequenceElement> > > >* alSamplesBranch2Prev;
-
-	vector<map<double, array<vector<SequenceElement>, 3> > >*  alSamplesTripletPrev;
+	vector<map<double, array<vector<SequenceElement*>*, 3>* > >*  alSamplesTriplet;
+	vector<map<double, array<vector<SequenceElement*>*, 3>* > >*  alSamplesTripletPrev;
 
 	vector<double> SamplesBranch1Lnls;
 	vector<double> SamplesBranch2Lnls;

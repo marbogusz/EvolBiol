@@ -22,36 +22,26 @@ class SequenceElement
 
 protected:
 	bool isGap;
-	short matrixIndex;
-	std::string symbol;
+	unsigned short matrixIndex;
+	char symbol;
 	//vector<short> alternativeIndexes;
 public:
-	SequenceElement(bool, short, short*, string smbl);
+	SequenceElement(bool, short, short*, char smbl);
 
-	SequenceElement();
-
-	bool isIsGap() const
+	inline bool isIsGap() const
 	{
 		return isGap;
 	}
 
-	inline short getMatrixIndex()
+	inline unsigned short getMatrixIndex()
 	{
 		return matrixIndex;
 	}
 
-	inline string& getSymbol()
+	inline char getSymbol()
 	{
 		return symbol;
 	}
-
-	inline bool operator== (SequenceElement &cP2)
-	{
-		return (cP2.getMatrixIndex() == getMatrixIndex());
-	}
-
-
-
 };
 
 } /* namespace EBC */

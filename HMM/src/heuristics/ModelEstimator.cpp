@@ -31,6 +31,8 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 
 	tripletIdxs = tst.sampleFromTree();
 
+	//FIXME - release the memory!!!! - delete pair objects and vectors (arrays) of SeqEls
+
 	this->alSamplesBranch1Set1.resize(tripletIdxs.size());
 	this->alSamplesBranch2Set1.resize(tripletIdxs.size());
 	this->alSamplesTripletSet1.resize(tripletIdxs.size());
@@ -146,8 +148,8 @@ void ModelEstimator::estimateParameters()
 
 		for (unsigned int i=0; i < cap; i++)
 		{
-			ste->addPair((itPr1->second).first,(itPr1->second).second,trp,0,(double)exp((itPr1->first)-(SamplesBranch1Lnls[trp])));
-			ste->addPair((itPr2->second).first,(itPr2->second).second,trp,1,(double)exp((itPr2->first)-(SamplesBranch2Lnls[trp])));
+			ste->addPair((itPr1->second)->first,(itPr1->second)->second,trp,0,(double)exp((itPr1->first)-(SamplesBranch1Lnls[trp])));
+			ste->addPair((itPr2->second)->first,(itPr2->second)->second,trp,1,(double)exp((itPr2->first)-(SamplesBranch2Lnls[trp])));
 			itPr1++;
 			itPr2++;
 		}
@@ -192,8 +194,8 @@ void ModelEstimator::rescoreSamples()
 
 		for (unsigned int pos = 0; pos < this->alSamplesTriplet[trpIdx].size(); pos ++)
 		{
-			lnlB1 = samplingHMMs[trpIdx].first->getAlignmentLikelihood(itPr1->second.first, itPr1->second.second);
-			lnlB2 = samplingHMMs[trpIdx].second->getAlignmentLikelihood(itPr2->second.first, itPr2->second.second);
+			lnlB1 = samplingHMMs[trpIdx].first->getAlignmentLikelihood(itPr1->second->first, itPr1->second->second);
+			lnlB2 = samplingHMMs[trpIdx].second->getAlignmentLikelihood(itPr2->second->first, itPr2->second->second);
 
 			(*alSamplesBranch1Prev)[trpIdx].insert(make_pair(lnlB1, itPr1->second));
 			(*alSamplesBranch2Prev)[trpIdx].insert(make_pair(lnlB2, itPr2->second));
@@ -212,9 +214,9 @@ void ModelEstimator::rescoreSamples()
 	}
 	//swap pointers
 
-	vector<map<double, array<vector<SequenceElement>, 3> > >*  tmpTriplet;
-	vector<map<double, pair<vector<SequenceElement>, vector<SequenceElement> > > >* tmpBranch1;
-	vector<map<double, pair<vector<SequenceElement>, vector<SequenceElement> > > >* tmpBranch2;
+	vector<map<double, array<vector<SequenceElement*>*, 3>* > >*  tmpTriplet;
+	vector<map<double, pair<vector<SequenceElement*>*, vector<SequenceElement*>* >* > >* tmpBranch1;
+	vector<map<double, pair<vector<SequenceElement*>*, vector<SequenceElement*>* >* > >* tmpBranch2;
 
 	tmpTriplet = alSamplesTriplet;
 	tmpBranch1 = alSamplesBranch1;
@@ -243,8 +245,8 @@ void ModelEstimator::sampleAlignments()
 	double totalSampleLnlB2;
 	double lnl;
 	int ctr;
-	pair<string, string> smplPr;
-	pair<double, pair<vector<SequenceElement>, vector<SequenceElement> > > pr;
+	//pair<string, string> smplPr;
+	//pair<double, pair<vector<SequenceElement>, vector<SequenceElement> > > pr;
 
 
 	//do the first sample
@@ -371,7 +373,7 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 	indelModel->setParameters({initLambda,initEpsilon});
 
 	vector<pair<Band*, Band*> > bandPairs(tripletIdxs.size());
-	vector<array<vector<SequenceElement>,3> > seqsA(tripletIdxs.size());
+	vector<array<vector<SequenceElement*>*,3> > seqsA(tripletIdxs.size());
 	vector<array<double,3> > distancesA(tripletIdxs.size());
 
 	for (int i = 0; i < tripletIdxs.size(); i++)
@@ -388,9 +390,9 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 		DUMP("Triplet " << i << " sequence 3:");
 		DUMP(inputSequences->getRawSequenceAt(tripletIdxs[i][2]));
 
-		unsigned int len1 = seqsA[i][0].size();
-		unsigned int len2 = seqsA[i][1].size();
-		unsigned int len3 = seqsA[i][2].size();
+		unsigned int len1 = seqsA[i][0]->size();
+		unsigned int len2 = seqsA[i][1]->size();
+		unsigned int len3 = seqsA[i][2]->size();
 
 		//0-1
 		tmpd = gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][0],tripletIdxs[i][1]);

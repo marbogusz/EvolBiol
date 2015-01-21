@@ -12,7 +12,7 @@ namespace EBC
 
 
 
-SequenceElement::SequenceElement(bool isGap, short index, short* alternativeIndexes, string sy) : symbol(sy)
+SequenceElement::SequenceElement(bool isGap, short index, short* alternativeIndexes, char sy) : symbol(sy)
 {
 	this->isGap = isGap;
 	//matrix index of -1 means gap or multiple options!
@@ -20,7 +20,5 @@ SequenceElement::SequenceElement(bool isGap, short index, short* alternativeInde
 	//FIXME - implememnt the following
 	//vector<short> alternativeIndexes
 }
-
-SequenceElement::SequenceElement() : SequenceElement(false,0, NULL, ""){}
 
 } /* namespace EBC */
