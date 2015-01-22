@@ -36,6 +36,8 @@ protected:
 	double counts[Definitions::stateCount][Definitions::stateCount];
 	double pis[Definitions::stateCount];
 
+	unsigned char isGap;
+
 public:
 	virtual ~StateTransitionML();
 
@@ -44,9 +46,9 @@ public:
 
 	void calculateParameters();
 
-	StateTransitionML(IndelModel* im, double time);
+	StateTransitionML(IndelModel* im, double time, unsigned char);
 
-	void addSample(vector<SequenceElement*>*, vector<SequenceElement*>* s2, double weight);
+	void addSample(vector<unsigned char>*, vector<unsigned char>* s2, double weight);
 
 	double getLnL();
 };

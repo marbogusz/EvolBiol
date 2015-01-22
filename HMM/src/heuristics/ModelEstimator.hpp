@@ -76,6 +76,8 @@ protected:
 
 	vector<pair<ForwardPairHMM*, ForwardPairHMM*> > samplingHMMs;
 
+
+
 	vector<map<double, pair<vector<SequenceElement*>*, vector<SequenceElement*>* >* > > alSamplesBranch1Set1;
 	vector<map<double, pair<vector<SequenceElement*>*, vector<SequenceElement*>* >* > > alSamplesBranch2Set1;
 	vector<map<double, pair<vector<SequenceElement*>*, vector<SequenceElement*>* >* > > alSamplesBranch1Set2;

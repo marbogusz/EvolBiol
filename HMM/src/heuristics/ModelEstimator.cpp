@@ -81,7 +81,7 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 	substModel->setObservedFrequencies(inputSequences->getElementFrequencies());
 
 	sme = new SubstitutionModelEstimator(inputSequences, substModel ,ot, rateCategories, alpha, estimateAlpha, tripletIdxs.size());
-	ste = new StateTransitionEstimator(indelModel, ot, 2*tripletIdxs.size());
+	ste = new StateTransitionEstimator(indelModel, ot, 2*tripletIdxs.size(), dict->getGapID());
 
 	estimateParameters();
 	rescoreSamples();

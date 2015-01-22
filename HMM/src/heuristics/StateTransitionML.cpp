@@ -11,61 +11,61 @@
 namespace EBC
 {
 
-void StateTransitionML::addSample(vector<SequenceElement*>* s1, vector<SequenceElement*>* s2, double weight)
+void StateTransitionML::addSample(vector<unsigned char>* s1, vector<unsigned char>* s2, double weight)
 {
 	Definitions::StateId previousState;
 
-		if ((*s1)[0]->isIsGap())
-			previousState = Definitions::StateId::Delete;
-		else if((*s2)[0]->isIsGap())
-			previousState = Definitions::StateId::Insert;
-		else
-			previousState = Definitions::StateId::Match;
+	if ((*s1)[0] == isGap)
+		previousState = Definitions::StateId::Delete;
+	else if((*s2)[0] == isGap)
+		previousState = Definitions::StateId::Insert;
+	else
+		previousState = Definitions::StateId::Match;
 
 
 
-		for(int pos = 1; pos < s1->size(); pos++)
+	for(int pos = 1; pos < s1->size(); pos++)
+	{
+		if ((*s1)[pos] == isGap)
 		{
-			if ((*s1)[pos]->isIsGap())
-			{
-				//Delete
-				if(previousState == Definitions::StateId::Match)
-					counts[Definitions::StateId::Match][Definitions::StateId::Delete] += weight;
-				if(previousState == Definitions::StateId::Insert)
-					counts[Definitions::StateId::Insert][Definitions::StateId::Delete] += weight;
-				if(previousState == Definitions::StateId::Delete)
-					counts[Definitions::StateId::Delete][Definitions::StateId::Delete] += weight;
+			//Delete
+			if(previousState == Definitions::StateId::Match)
+				counts[Definitions::StateId::Match][Definitions::StateId::Delete] += weight;
+			if(previousState == Definitions::StateId::Insert)
+				counts[Definitions::StateId::Insert][Definitions::StateId::Delete] += weight;
+			if(previousState == Definitions::StateId::Delete)
+				counts[Definitions::StateId::Delete][Definitions::StateId::Delete] += weight;
 
-				previousState = Definitions::StateId::Delete;
-			}
-			else if((*s2)[pos]->isIsGap())
-			{
-				//Insert
-				if(previousState == Definitions::StateId::Match)
-					counts[Definitions::StateId::Match][Definitions::StateId::Insert] += weight;
-				if(previousState == Definitions::StateId::Insert)
-					counts[Definitions::StateId::Insert][Definitions::StateId::Insert] += weight;
-				if(previousState == Definitions::StateId::Delete)
-					counts[Definitions::StateId::Delete][Definitions::StateId::Insert] += weight;
-				previousState = Definitions::StateId::Insert;
-			}
-			else
-			{
-				//Match
-				if(previousState == Definitions::StateId::Match)
-					counts[Definitions::StateId::Match][Definitions::StateId::Match] += weight;
-				if(previousState == Definitions::StateId::Insert)
-					counts[Definitions::StateId::Insert][Definitions::StateId::Match] += weight;
-				if(previousState == Definitions::StateId::Delete)
-					counts[Definitions::StateId::Delete][Definitions::StateId::Match] += weight;
-
-				previousState = Definitions::StateId::Match;
-			}
+			previousState = Definitions::StateId::Delete;
 		}
+		else if((*s2)[pos] == isGap)
+		{
+			//Insert
+			if(previousState == Definitions::StateId::Match)
+				counts[Definitions::StateId::Match][Definitions::StateId::Insert] += weight;
+			if(previousState == Definitions::StateId::Insert)
+				counts[Definitions::StateId::Insert][Definitions::StateId::Insert] += weight;
+			if(previousState == Definitions::StateId::Delete)
+				counts[Definitions::StateId::Delete][Definitions::StateId::Insert] += weight;
+			previousState = Definitions::StateId::Insert;
+		}
+		else
+		{
+			//Match
+			if(previousState == Definitions::StateId::Match)
+				counts[Definitions::StateId::Match][Definitions::StateId::Match] += weight;
+			if(previousState == Definitions::StateId::Insert)
+				counts[Definitions::StateId::Insert][Definitions::StateId::Match] += weight;
+			if(previousState == Definitions::StateId::Delete)
+				counts[Definitions::StateId::Delete][Definitions::StateId::Match] += weight;
+
+			previousState = Definitions::StateId::Match;
+		}
+	}
 
 }
 
-StateTransitionML::StateTransitionML(IndelModel* im, double tme)
+StateTransitionML::StateTransitionML(IndelModel* im, double tme, unsigned char gap) : isGap(gap)
 {
 	this->tpb = new TransitionProbabilities(im);
 	this->time = tme;

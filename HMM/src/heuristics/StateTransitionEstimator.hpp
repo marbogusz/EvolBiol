@@ -30,13 +30,15 @@ protected:
 
 	Maths* maths;
 
+	unsigned char gapCharacter
+
 
 public:
-	StateTransitionEstimator(IndelModel* im, Definitions::OptimizationType ot, unsigned int pairCategories);
+	StateTransitionEstimator(IndelModel* im, Definitions::OptimizationType ot, unsigned int pairCategories, unsigned char);
 
 	void addTime(double time, unsigned int triplet, unsigned int pr);
 
-	void addPair(vector<SequenceElement*>* s1, vector<SequenceElement*>* s2, unsigned int triplet, unsigned int pr, double weight);
+	void addPair(vector<unsigned char>* s1, vector<unsigned char>* s2, unsigned int triplet, unsigned int pr, double weight);
 
 	double runIteration();
 

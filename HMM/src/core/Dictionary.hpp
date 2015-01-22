@@ -22,7 +22,7 @@ namespace EBC
 	{
 	protected:
 		unsigned short alphabetSize;
-		unsigned short gapId;
+		unsigned char gapId;
 		string alphabet;
 		map<char,SequenceElement*> translator;
 
@@ -33,7 +33,7 @@ namespace EBC
 		static const char gapChar;
 
 		//virtual short getSymbolIndex(string &symbol);
-		virtual unsigned short getSymbolIndex(char symbol);
+		virtual unsigned char getSymbolIndex(char symbol);
 		virtual vector<SequenceElement*>* translate(string &sequence, bool disregardIndels = false);
 		virtual unsigned short getAlphabetSize();
 
@@ -42,6 +42,11 @@ namespace EBC
 		virtual char getSymbolAt(unsigned short i);
 
 		virtual void outputAlphabet();
+
+		inline unsigned char getGapID()
+		{
+			return gapId;
+		}
 
 	protected:
 		virtual void setAlphabet(char alphabet[], unsigned short size);

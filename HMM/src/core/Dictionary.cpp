@@ -43,7 +43,7 @@ char Dictionary::getSymbolAt(unsigned short index)
 }
 
 
-unsigned short Dictionary::getSymbolIndex(char symbol)
+unsigned char Dictionary::getSymbolIndex(char symbol)
 {
 	return (translator[symbol])->getMatrixIndex();
 }

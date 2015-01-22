@@ -180,6 +180,83 @@ EvolutionaryPairHMM::~EvolutionaryPairHMM()
     delete ptmatrix;
     delete tpb;
 }
+double EvolutionaryPairHMM::getAlignmentLikelihood(vector<unsigned char>* s1,
+		vector<unsigned char>* s2, Dictionary* dict)
+{
+	double lnl = 0;
+
+	//cerr << endl;
+	unsigned char isGap = dict->getGapID();
+
+	int k =0;
+	int l =0;
+	PairwiseHmmStateBase* previous;
+	if((*s2)[0] == isGap){
+		previous = X;
+		k++;
+		lnl += (ptmatrix->getLogEquilibriumFreq((*s1)[0]) + initTransX);
+		//DUMP("I " << 0 << "\tlnl\t" << lnl << "\tmatrix\t" << previous->getValueAt(k,l));
+	}
+	else if((*s1)[0] == isGap){
+		previous = Y;
+		l++;
+		lnl += (ptmatrix->getLogEquilibriumFreq((*s2)[0]) + initTransY);
+		//DUMP("D " << 0 << "\tlnl\t" << lnl << "\tmatrix\t" << previous->getValueAt(k,l));
+	}
+	else{
+		previous = M;
+		k++;
+		l++;
+		lnl += (ptmatrix->getLogPairTransition((*s1)[0], (*s2)[0])+ initTransM);
+		//DUMP("M " << 0 << "\tlnl\t" << lnl << "\tmatrix\t" << previous->getValueAt(k,l));
+	}
+	for(unsigned int i=1; i< s1->size(); i++){
+		if((*s2)[i] == isGap){
+			//Insert
+			k++;
+			if (previous == X)
+				lnl += X->getTransitionProbabilityFromInsert();
+			else if (previous == Y)
+				lnl += X->getTransitionProbabilityFromDelete();
+			else
+				lnl+=X->getTransitionProbabilityFromMatch();
+			lnl += ptmatrix->getLogEquilibriumFreq((*s1)[i]);
+			//DUMP("I " 0 << "\tlnl\t" << lnl << "\tmatrix\t" << previous->getValueAt(i,j));
+			previous = X;
+		}
+		else if((*s1)[i] == isGap){
+			//Delete
+			l++;
+			if (previous == X)
+				lnl += Y->getTransitionProbabilityFromInsert();
+			else if (previous == Y)
+				lnl += Y->getTransitionProbabilityFromDelete();
+			else
+				lnl+=Y->getTransitionProbabilityFromMatch();
+			lnl += ptmatrix->getLogEquilibriumFreq((*s2)[i]);
+			//DUMP("D " 0 << "\tlnl\t" << lnl << "\tmatrix\t" << previous->getValueAt(i,j));
+			previous = Y;
+		}
+		else{
+			//Match
+			k++;
+			l++;
+			if (previous == X)
+				lnl += M->getTransitionProbabilityFromInsert();
+			else if (previous == Y)
+				lnl += M->getTransitionProbabilityFromDelete();
+			else
+				lnl+=M->getTransitionProbabilityFromMatch();
+			lnl += ptmatrix->getLogPairTransition((*s1)[i], (*s2)[i]);
+			//DUMP("M " 0 << "\tlnl\t" << lnl << "\tmatrix\t" << previous->getValueAt(i,j));
+			previous = M;
+		}
+		//DUMP(i << "\tlnl " << lnl);
+	}
+	//cerr << endl;
+	return lnl;
+
+}
 
 double EvolutionaryPairHMM::getAlignmentLikelihood(vector<SequenceElement*>* s1,
 		vector<SequenceElement*>* s2)

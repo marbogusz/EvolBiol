@@ -22,18 +22,18 @@ class SequenceElement
 
 protected:
 	bool isGap;
-	unsigned short matrixIndex;
+	unsigned char matrixIndex;
 	char symbol;
 	//vector<short> alternativeIndexes;
 public:
-	SequenceElement(bool, short, short*, char smbl);
+	SequenceElement(bool, unsigned char, short*, char smbl);
 
 	inline bool isIsGap() const
 	{
 		return isGap;
 	}
 
-	inline unsigned short getMatrixIndex()
+	inline unsigned char getMatrixIndex()
 	{
 		return matrixIndex;
 	}

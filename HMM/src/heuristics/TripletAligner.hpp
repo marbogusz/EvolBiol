@@ -48,6 +48,8 @@ public:
 	//array<vector<SequenceElement>, 3> align(pair<string, string>& p1,pair<string, string>& p2);
 
 	array<vector<SequenceElement*>*, 3>* align(pair<vector<SequenceElement*>*, vector<SequenceElement*>* >* p1, pair<vector<SequenceElement*>*, vector<SequenceElement*>* >* p2);
+
+	array<vector<unsigned char>*, 3>* align(pair<vector<unsigned char>*, vector<unsigned char>* >* p1, pair<vector<unsigned char>*, vector<unsigned char>* >* p2);
 };
 
 } /* namespace EBC */

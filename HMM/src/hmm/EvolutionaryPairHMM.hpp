@@ -148,6 +148,8 @@ public:
 
 	double getAlignmentLikelihood(vector<SequenceElement*>* s1, vector<SequenceElement*>* s2);
 
+	double getAlignmentLikelihood(vector<unsigned char>* s1, vector<unsigned char>* s2, Dictionary* dict);
+
 	double getTotalLikelihood() const {
 		return totalLikelihood;
 	}
