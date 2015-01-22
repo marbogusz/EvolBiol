@@ -61,9 +61,13 @@ void SubstitutionModelEstimator::clean()
 	//	delete entry[2];
 	//}
 
-	for(auto entry : patterns)
+
+	for (auto itp = patterns.begin(); itp != patterns.end(); itp++)
 	{
-		entry.clear();
+		for (auto itMap = itp->begin(); itMap != itp->end(); itMap++)
+		{
+			itMap->second = 0.0;
+		}
 	}
 }
 
@@ -100,7 +104,47 @@ void SubstitutionModelEstimator::optimize()
 
 	bfgs->optimize();
 	INFO("SubstitutionModelEstimator results:");
+
 	modelParams->logParameters();
+/*
+	cerr << "kappa\tlnL" << endl;
+
+	double kappa = 0.5;
+	double result;
+	double partial1;
+	while (kappa < 5.0)
+	{
+		result = 0;
+		substModel->setAlpha(modelParams->getAlpha());
+		substModel->setParameters({kappa});
+		substModel->calculateModel();
+
+		for (unsigned int i = 0; i< ptMatrices.size(); i++)
+		{
+			for(unsigned int j=0;j<Definitions::heuristicsTreeSize;j++)
+			{
+				ptMatrices[i][j]->setTime(modelParams->getDivergenceTime(Definitions::heuristicsTreeSize*i +j));
+				ptMatrices[i][j]->calculate();
+			}
+		}
+
+		for(int al = 0; al < patterns.size(); al++)
+		{
+			for(auto it : patterns[al])
+			{
+				partial1 = 0;
+				for(int rt = 0; rt < dict->getAlphabetSize(); rt++)
+				{
+					partial1 += ptMatrices[al][0]->getTripleSitePattern(rt,it.first, ptMatrices[al][1],ptMatrices[al][2]);
+				}
+				result += log(partial1)* it.second;
+
+			}
+		}
+		cerr << kappa << "\t" << result << endl;
+		kappa += 0.025;
+	}
+*/
 
 }
 
@@ -137,7 +181,11 @@ double SubstitutionModelEstimator::runIteration()
 		}
 	}
 	//DEBUG("lnl result:" << result);
+	//cerr << modelParams->getSubstParameters()[0] << "\t" << result << endl;
+
 	return result * -1.0;
+
+
 
 }
 

@@ -192,7 +192,7 @@ void ModelEstimator::rescoreSamples()
 		auto itPr2=(*alSamplesBranch2)[trpIdx].rbegin();
 		auto itTrp=(*alSamplesTriplet)[trpIdx].rbegin();
 
-		for (unsigned int pos = 0; pos < this->alSamplesTriplet[trpIdx].size(); pos ++)
+		for (unsigned int pos = 0; pos < (*alSamplesTriplet)[trpIdx].size(); pos ++)
 		{
 			lnlB1 = samplingHMMs[trpIdx].first->getAlignmentLikelihood(itPr1->second->first, itPr1->second->second);
 			lnlB2 = samplingHMMs[trpIdx].second->getAlignmentLikelihood(itPr2->second->first, itPr2->second->second);
@@ -203,6 +203,9 @@ void ModelEstimator::rescoreSamples()
 
 			totalSampleLnlB1 = maths->logSum(totalSampleLnlB1, lnlB1);
 			totalSampleLnlB2 = maths->logSum(totalSampleLnlB2, lnlB2);
+			itPr1++;
+			itPr2++;
+			itTrp++;
 		}
 
 		SamplesBranch1Lnls[trpIdx] = totalSampleLnlB1;
@@ -211,6 +214,7 @@ void ModelEstimator::rescoreSamples()
 		(*alSamplesBranch1)[trpIdx].clear();
 		(*alSamplesBranch2)[trpIdx].clear();
 		(*alSamplesTriplet)[trpIdx].clear();
+		//TODO - see if realy clear
 	}
 	//swap pointers
 
