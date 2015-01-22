@@ -30,7 +30,7 @@ protected:
 
 	Maths* maths;
 
-	unsigned char gapCharacter
+	unsigned char gapCharacter;
 
 
 public:

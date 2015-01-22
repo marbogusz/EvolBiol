@@ -31,27 +31,23 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 
 	tripletIdxs = tst.sampleFromTree();
 
+	tripletIdxsSize = tripletIdxs.size();
+
 	//FIXME - release the memory!!!! - delete pair objects and vectors (arrays) of SeqEls
 
-	this->alSamplesBranch1Set1.resize(tripletIdxs.size());
-	this->alSamplesBranch2Set1.resize(tripletIdxs.size());
-	this->alSamplesTripletSet1.resize(tripletIdxs.size());
+	this->alSamplesBranch1.resize(tripletIdxsSize);
+	this->alSamplesBranch2.resize(tripletIdxsSize);
+	this->alSamplesTriplet.resize(tripletIdxsSize);
 
-	this->alSamplesBranch1Set2.resize(tripletIdxs.size());
-	this->alSamplesBranch2Set2.resize(tripletIdxs.size());
-	this->alSamplesTripletSet2.resize(tripletIdxs.size());
+	this->SamplesBranch1Lnls.resize(tripletIdxsSize);
+	this->SamplesBranch2Lnls.resize(tripletIdxsSize);
+	this->SamplesTripletLnls.resize(tripletIdxsSize);
 
-	this->alSamplesBranch1 = &alSamplesBranch1Set1;
-	this->alSamplesBranch2 = &alSamplesBranch2Set1;
-	this->alSamplesTriplet = &alSamplesTripletSet1;
-
-	this->alSamplesBranch1Prev = &alSamplesBranch1Set2;
-	this->alSamplesBranch2Prev = &alSamplesBranch2Set2;
-	this->alSamplesTripletPrev = &alSamplesTripletSet2;
-
-	this->SamplesBranch1Lnls.resize(tripletIdxs.size());
-	this->SamplesBranch2Lnls.resize(tripletIdxs.size());
-	this->SamplesTripletLnls.resize(tripletIdxs.size());
+	for (unsigned int i = 0; i < tripletIdxsSize; i++){
+		alSamplesBranch1[i].reserve(Definitions::pathSampleCount);
+		alSamplesBranch2[i].reserve(Definitions::pathSampleCount);
+		alSamplesTriplet[i].reserve(Definitions::pathInformativeCount);
+	}
 
     chrono::time_point<chrono::system_clock> start, end;
     start = chrono::system_clock::now();
@@ -113,12 +109,12 @@ void ModelEstimator::estimateParameters()
 	DUMP("Model Estimator estimate parameters iteration");
 
 	int cap;
-	cap = Definitions::pathInformativeCount < alSamplesTriplet->size() ? Definitions::pathInformativeCount : alSamplesTriplet->size();
+	//cap = Definitions::pathInformativeCount < alSamplesTriplet->size() ? Definitions::pathInformativeCount : alSamplesTriplet->size();
 
-	for(unsigned int trp = 0; trp < tripletIdxs.size(); trp++)
+	for(unsigned int trp = 0; trp < tripletIdxsSize; trp++)
 	{
-		auto it= (*alSamplesTriplet)[trp].rbegin();
-		cap = Definitions::pathInformativeCount < (*alSamplesTriplet)[trp].size() ? Definitions::pathInformativeCount : (*alSamplesTriplet)[trp].size();
+		auto it= alSamplesTriplet[trp].begin();
+		cap = Definitions::pathInformativeCount < alSamplesTriplet[trp].size() ? Definitions::pathInformativeCount : alSamplesTriplet[trp].size();
 		for (unsigned int i=0; i < cap; i++)
 		{
 			DUMP("About to add triplet with lnl " << it->first << "\ttotal lnl " << (SamplesBranch1Lnls[trp]+SamplesBranch2Lnls[trp]));
@@ -131,7 +127,7 @@ void ModelEstimator::estimateParameters()
 	//INDEL PART
 	double tb1,tb2,tb3;
 
-	for(unsigned int trp = 0; trp < tripletIdxs.size(); trp++)
+	for(unsigned int trp = 0; trp < tripletIdxsSize; trp++)
 	{
 		tb1 = sme->getTripletDivergence(trp,0);
 		tb2 = sme->getTripletDivergence(trp,1);
@@ -140,8 +136,8 @@ void ModelEstimator::estimateParameters()
 		ste->addTime(tb1+tb2,trp,0);
 		ste->addTime(tb3+tb2,trp,1);
 
-		auto itPr1=(*alSamplesBranch1)[trp].rbegin();
-		auto itPr2=(*alSamplesBranch2)[trp].rbegin();
+		auto itPr1=alSamplesBranch1[trp].begin();
+		auto itPr2=alSamplesBranch2[trp].begin();
 
 		cap = min(alSamplesBranch1[trp].size(),alSamplesBranch2[trp].size());
 		cap = Definitions::pathInformativeCount < cap ? Definitions::pathInformativeCount : cap;
@@ -188,18 +184,19 @@ void ModelEstimator::rescoreSamples()
 	{
 		totalSampleLnlB1 = totalSampleLnlB2 = Definitions::minMatrixLikelihood;
 
-		auto itPr1=(*alSamplesBranch1)[trpIdx].rbegin();
-		auto itPr2=(*alSamplesBranch2)[trpIdx].rbegin();
-		auto itTrp=(*alSamplesTriplet)[trpIdx].rbegin();
+		auto itPr1=alSamplesBranch1[trpIdx].begin();
+		auto itPr2=alSamplesBranch2[trpIdx].begin();
+		auto itTrp=alSamplesTriplet[trpIdx].begin();
 
-		for (unsigned int pos = 0; pos < (*alSamplesTriplet)[trpIdx].size(); pos ++)
+		for (unsigned int pos = 0; pos < alSamplesTriplet[trpIdx].size(); pos ++)
 		{
-			lnlB1 = samplingHMMs[trpIdx].first->getAlignmentLikelihood(itPr1->second->first, itPr1->second->second);
-			lnlB2 = samplingHMMs[trpIdx].second->getAlignmentLikelihood(itPr2->second->first, itPr2->second->second);
+			lnlB1 = samplingHMMs[trpIdx].first->getAlignmentLikelihood(itPr1->second->first, itPr1->second->second,dict);
+			lnlB2 = samplingHMMs[trpIdx].second->getAlignmentLikelihood(itPr2->second->first, itPr2->second->second,dict);
 
-			(*alSamplesBranch1Prev)[trpIdx].insert(make_pair(lnlB1, itPr1->second));
-			(*alSamplesBranch2Prev)[trpIdx].insert(make_pair(lnlB2, itPr2->second));
-			(*alSamplesTripletPrev)[trpIdx].insert(make_pair(lnlB1+lnlB2, itTrp->second));
+			itPr1->first = lnlB1;
+			itPr2->first = lnlB2;
+			itTrp->first = lnlB1+lnlB2;
+
 
 			totalSampleLnlB1 = maths->logSum(totalSampleLnlB1, lnlB1);
 			totalSampleLnlB2 = maths->logSum(totalSampleLnlB2, lnlB2);
@@ -211,29 +208,29 @@ void ModelEstimator::rescoreSamples()
 		SamplesBranch1Lnls[trpIdx] = totalSampleLnlB1;
 		SamplesBranch2Lnls[trpIdx] = totalSampleLnlB2;
 
-		(*alSamplesBranch1)[trpIdx].clear();
-		(*alSamplesBranch2)[trpIdx].clear();
-		(*alSamplesTriplet)[trpIdx].clear();
-		//TODO - see if realy clear
+		std::sort(alSamplesBranch1[trpIdx].begin(),alSamplesBranch1[trpIdx].end(),
+				[](const std::pair<double,pair<vector<unsigned char>*, vector<unsigned char>*> > &left,
+					const std::pair<double,pair<vector<unsigned char>*, vector<unsigned char>*> > &right)
+			{
+				return left.first >= right.first;
+			}
+		);
+		std::sort(alSamplesBranch2[trpIdx].begin(),alSamplesBranch2[trpIdx].end(),
+				[](const std::pair<double,pair<vector<unsigned char>*, vector<unsigned char>*> > &left,
+						const std::pair<double,pair<vector<unsigned char>*, vector<unsigned char>*> > &right)
+				{
+					return left.first >= right.first;
+				}
+		);
+
+		std::sort(alSamplesTriplet[trpIdx].begin(),alSamplesTriplet[trpIdx].end(),
+						[](const std::pair<double, array<vector<unsigned char>*,3>* > &left,
+								const std::pair<double, array<vector<unsigned char>*,3>* > &right)
+						{
+							return left.first >= right.first;
+						}
+				);
 	}
-	//swap pointers
-
-	vector<map<double, array<vector<SequenceElement*>*, 3>* > >*  tmpTriplet;
-	vector<map<double, pair<vector<SequenceElement*>*, vector<SequenceElement*>* >* > >* tmpBranch1;
-	vector<map<double, pair<vector<SequenceElement*>*, vector<SequenceElement*>* >* > >* tmpBranch2;
-
-	tmpTriplet = alSamplesTriplet;
-	tmpBranch1 = alSamplesBranch1;
-	tmpBranch2 = alSamplesBranch2;
-
-	alSamplesTriplet = alSamplesTripletPrev;
-	alSamplesBranch1 = alSamplesBranch1Prev;
-	alSamplesBranch2 = alSamplesBranch2Prev;
-
-	alSamplesTripletPrev = tmpTriplet;
-	alSamplesBranch1Prev = tmpBranch1;
-	alSamplesBranch2Prev = tmpBranch2;
-
 }
 
 
@@ -247,11 +244,8 @@ void ModelEstimator::sampleAlignments()
 	int analysisCount = Definitions::pathInformativeCount;
 	double totalSampleLnlB1;
 	double totalSampleLnlB2;
-	double lnl;
+	double lnlB1, lnlB2;
 	int ctr;
-	//pair<string, string> smplPr;
-	//pair<double, pair<vector<SequenceElement>, vector<SequenceElement> > > pr;
-
 
 	//do the first sample
 
@@ -259,25 +253,41 @@ void ModelEstimator::sampleAlignments()
 	{
 		totalSampleLnlB1 = totalSampleLnlB2 = Definitions::minMatrixLikelihood;
 		for(ctr = 1; ctr < sampleCount; ctr++){
-			auto branch1Sample = samplingHMMs[trpIdx].first->sampleAlignment(dict);
-			auto branch2Sample = samplingHMMs[trpIdx].second->sampleAlignment(dict);
+			auto branch1Sample = samplingHMMs[trpIdx].first->sampleAlignment(dict,lnlB1);
+			auto branch2Sample = samplingHMMs[trpIdx].second->sampleAlignment(dict,lnlB2);
 
-			(*alSamplesBranch1)[trpIdx].insert(branch1Sample);
-			(*alSamplesBranch2)[trpIdx].insert(branch2Sample);
+			alSamplesBranch1[trpIdx].push_back(make_pair(lnlB1, branch1Sample));
+			alSamplesBranch2[trpIdx].push_back(make_pair(lnlB2, branch2Sample));
 
-			totalSampleLnlB1 = maths->logSum(totalSampleLnlB1, branch1Sample.first);
-			totalSampleLnlB2 = maths->logSum(totalSampleLnlB2, branch2Sample.first);
+			totalSampleLnlB1 = maths->logSum(totalSampleLnlB1, lnlB1);
+			totalSampleLnlB2 = maths->logSum(totalSampleLnlB2, lnlB2);
 		}
 
 		SamplesBranch1Lnls[trpIdx] = totalSampleLnlB1;
 		SamplesBranch2Lnls[trpIdx] = totalSampleLnlB2;
 
+		std::sort(alSamplesBranch1[trpIdx].begin(),alSamplesBranch1[trpIdx].end(),
+			[](const std::pair<double,pair<vector<unsigned char>*, vector<unsigned char>*> > &left,
+					const std::pair<double,pair<vector<unsigned char>*, vector<unsigned char>*> > &right)
+			{
+				return left.first >= right.first;
+			}
+		);
+		std::sort(alSamplesBranch2[trpIdx].begin(),alSamplesBranch2[trpIdx].end(),
+				[](const std::pair<double,pair<vector<unsigned char>*, vector<unsigned char>*> > &left,
+						const std::pair<double,pair<vector<unsigned char>*, vector<unsigned char>*> > &right)
+				{
+					return left.first >= right.first;
+				}
+		);
+
+
 		DUMP("****** Sampler totalSampleLnlB1\t" << totalSampleLnlB1 << " totalSampleLnlB2\t" << totalSampleLnlB2  );
 
-		auto itPr1=(*alSamplesBranch1)[trpIdx].rbegin();
-		auto itPr2=(*alSamplesBranch2)[trpIdx].rbegin();
+		auto itPr1=alSamplesBranch1[trpIdx].begin();
+		auto itPr2=alSamplesBranch2[trpIdx].begin();
 
-		cap = min((*alSamplesBranch1)[trpIdx].size(),(*alSamplesBranch2)[trpIdx].size());
+		cap = min(alSamplesBranch1[trpIdx].size(),alSamplesBranch2[trpIdx].size());
 		cap = Definitions::pathInformativeCount < cap ? Definitions::pathInformativeCount : cap;
 
 		DUMP("****** Sampler " << cap << " triple alignments will be added"  );
@@ -286,7 +296,7 @@ void ModelEstimator::sampleAlignments()
 		{
 			//auto tripletSample = tal->align(itPr1->second, itPr2->second);
 			DUMP("****** Sampler adding triple alignment with lnl " << (itPr1->first+itPr2->first) );
-			(*alSamplesTriplet)[trpIdx].insert(make_pair((itPr1->first+itPr2->first), tal->align(itPr1->second, itPr2->second)));
+			alSamplesTriplet[trpIdx].push_back(make_pair((itPr1->first+itPr2->first), tal->align(itPr1->second, itPr2->second)));
 			itPr1++;
 			itPr2++;
 		}
@@ -440,11 +450,19 @@ ModelEstimator::~ModelEstimator()
 		delete pr.first;
 		delete pr.second;
 	}
+
+	this->alSamplesBranch1.resize(tripletIdxs.size());
+	this->alSamplesBranch2.resize(tripletIdxs.size());
+	this->alSamplesTriplet.resize(tripletIdxs.size());
+
+//FIXME - clean up!
+
     delete maths;
     delete sme;
     delete ste;
     delete gtree;
     delete tal;
+
 }
 
 vector<double> ModelEstimator::getSubstitutionParameters()
