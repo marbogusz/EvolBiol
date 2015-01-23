@@ -65,7 +65,7 @@ public:
 
 	virtual ~SubstitutionModelEstimator();
 
-	void addTriplet(array<vector<unsigned char*>*, 3>* tripleAlignment, unsigned int tiplet, double weight);
+	void addTriplet(array<vector<unsigned char>*, 3>* tripleAlignment, unsigned int tiplet, double weight);
 
 	double runIteration();
 

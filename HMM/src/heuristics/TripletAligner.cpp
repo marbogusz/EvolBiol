@@ -240,7 +240,10 @@ array<vector<unsigned char>*, 3>* TripletAligner::align(pair<vector<unsigned cha
 	vector<unsigned char>* p2al = p2->second;
 
 	int c;
-	unsigned char isGap = this->inputSeqs->getDictionary()->getGapID();
+
+	Dictionary* dict  = this->inputSeqs->getDictionary();
+
+	unsigned char isGap = dict->getGapID();
 
 	unsigned int alSize = std::max(anch1->size(), anch2->size());
 	alSize *= 1.5;  // make it 50% longer to avoid reallocations
@@ -292,15 +295,15 @@ array<vector<unsigned char>*, 3>* TripletAligner::align(pair<vector<unsigned cha
 	//int c;
 	for (c=0; c < tr1->size(); c++)
 	{
-		sp1 << (*tr1)[c];
+		sp1 << dict->getSymbolAt((*tr1)[c]);
 	}
 	for (c=0; c < tr2->size(); c++)
 	{
-		sp2 << (*tr2)[c];
+		sp2 << dict->getSymbolAt((*tr2)[c]);
 	}
 	for (c=0; c < tr3->size(); c++)
 	{
-		sp3 << (*tr3)[c];
+		sp3 << dict->getSymbolAt((*tr3)[c]);
 	}
 /*
 	cerr << sp1.str() <<endl;

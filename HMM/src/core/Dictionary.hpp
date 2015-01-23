@@ -39,7 +39,7 @@ namespace EBC
 
 		SequenceElement* getSequenceElement(char symbol);
 
-		virtual char getSymbolAt(unsigned short i);
+		virtual char getSymbolAt(unsigned char i);
 
 		virtual void outputAlphabet();
 

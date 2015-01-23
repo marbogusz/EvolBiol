@@ -37,7 +37,7 @@ void Dictionary::outputAlphabet()
 	cout << alphabet << endl;
 }
 
-char Dictionary::getSymbolAt(unsigned short index)
+char Dictionary::getSymbolAt(unsigned char index)
 {
 	return alphabet[index];
 }

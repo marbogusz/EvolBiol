@@ -37,7 +37,7 @@ void PMatrixTriple::calculate()
 
 
 double PMatrixTriple::getTripleSitePattern(unsigned int root,
-		const array<short, 3>& nodes, PMatrixTriple* pm2, PMatrixTriple* pm3)
+		const array<unsigned char, 3>& nodes, PMatrixTriple* pm2, PMatrixTriple* pm3)
 {
 	PMatrixTriple* pm1 = this;
 	double prob = 0;

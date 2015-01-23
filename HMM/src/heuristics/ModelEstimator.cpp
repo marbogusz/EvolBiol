@@ -209,15 +209,15 @@ void ModelEstimator::rescoreSamples()
 		SamplesBranch2Lnls[trpIdx] = totalSampleLnlB2;
 
 		std::sort(alSamplesBranch1[trpIdx].begin(),alSamplesBranch1[trpIdx].end(),
-				[](const std::pair<double,pair<vector<unsigned char>*, vector<unsigned char>*> > &left,
-					const std::pair<double,pair<vector<unsigned char>*, vector<unsigned char>*> > &right)
+				[](const std::pair<double,pair<vector<unsigned char>*, vector<unsigned char>*>* > &left,
+						const std::pair<double,pair<vector<unsigned char>*, vector<unsigned char>*>* > &right)
 			{
 				return left.first >= right.first;
 			}
 		);
 		std::sort(alSamplesBranch2[trpIdx].begin(),alSamplesBranch2[trpIdx].end(),
-				[](const std::pair<double,pair<vector<unsigned char>*, vector<unsigned char>*> > &left,
-						const std::pair<double,pair<vector<unsigned char>*, vector<unsigned char>*> > &right)
+				[](const std::pair<double,pair<vector<unsigned char>*, vector<unsigned char>*>* > &left,
+						const std::pair<double,pair<vector<unsigned char>*, vector<unsigned char>*>* > &right)
 				{
 					return left.first >= right.first;
 				}
@@ -267,17 +267,17 @@ void ModelEstimator::sampleAlignments()
 		SamplesBranch2Lnls[trpIdx] = totalSampleLnlB2;
 
 		std::sort(alSamplesBranch1[trpIdx].begin(),alSamplesBranch1[trpIdx].end(),
-			[](const std::pair<double,pair<vector<unsigned char>*, vector<unsigned char>*> > &left,
-					const std::pair<double,pair<vector<unsigned char>*, vector<unsigned char>*> > &right)
+			[](const std::pair<double,pair<vector<unsigned char>*, vector<unsigned char>*>* > &left,
+					const std::pair<double,pair<vector<unsigned char>*, vector<unsigned char>*>* > &right)
 			{
-				return left.first >= right.first;
+				return (left.first >= right.first);
 			}
 		);
 		std::sort(alSamplesBranch2[trpIdx].begin(),alSamplesBranch2[trpIdx].end(),
-				[](const std::pair<double,pair<vector<unsigned char>*, vector<unsigned char>*> > &left,
-						const std::pair<double,pair<vector<unsigned char>*, vector<unsigned char>*> > &right)
+				[](const std::pair<double,pair<vector<unsigned char>*, vector<unsigned char>*>* > &left,
+						const std::pair<double,pair<vector<unsigned char>*, vector<unsigned char>*>* > &right)
 				{
-					return left.first >= right.first;
+					return (left.first >= right.first);
 				}
 		);
 
@@ -295,7 +295,9 @@ void ModelEstimator::sampleAlignments()
 		for (unsigned int i=0; i < cap; i++)
 		{
 			//auto tripletSample = tal->align(itPr1->second, itPr2->second);
-			DUMP("****** Sampler adding triple alignment with lnl " << (itPr1->first+itPr2->first) );
+			DUMP("****** Sampler adding triple alignment with lnl " << (itPr1->first+itPr2->first)
+					<< "\tBranch 1 wt " << exp(itPr1->first - SamplesBranch1Lnls[trpIdx] ) << "\tBranch 2 wt " << exp(itPr2->first - SamplesBranch2Lnls[trpIdx])
+					<< "\tTotal wt " << exp(itPr1->first+itPr2->first-SamplesBranch1Lnls[trpIdx]-SamplesBranch2Lnls[trpIdx]));
 			alSamplesTriplet[trpIdx].push_back(make_pair((itPr1->first+itPr2->first), tal->align(itPr1->second, itPr2->second)));
 			itPr1++;
 			itPr2++;

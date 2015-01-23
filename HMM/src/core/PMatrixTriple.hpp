@@ -32,7 +32,7 @@ public:
 
 	double getTransitionProb(unsigned int xi, unsigned int yi, unsigned int rateCat = 0);
 
-	double getTripleSitePattern(unsigned int root,const array<short, 3>& nodes, PMatrixTriple* pm2, PMatrixTriple* pm3);
+	double getTripleSitePattern(unsigned int root,const array<unsigned char, 3>& nodes, PMatrixTriple* pm2, PMatrixTriple* pm3);
 
 	void summarize();
 
