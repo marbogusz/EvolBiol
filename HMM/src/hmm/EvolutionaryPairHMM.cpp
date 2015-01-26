@@ -61,6 +61,7 @@ void EvolutionaryPairHMM::getStateEquilibriums()
 {
 	double minPi = exp(Definitions::minMatrixLikelihood);
 
+	//TODO - change indices to state ids from the enum!!!
 	md[0][0] = 1.0-2*g;
 	md[1][1] = e+((1.0-e)*g);
 	md[2][2] = e+((1.0-e)*g);
@@ -86,6 +87,18 @@ void EvolutionaryPairHMM::getStateEquilibriums()
 	initTransX = max(max(X->getTransitionProbabilityFromInsert() + piI, X->getTransitionProbabilityFromDelete() + piD), X->getTransitionProbabilityFromMatch() + piM);
 	initTransY = max(max(Y->getTransitionProbabilityFromInsert() + piI, Y->getTransitionProbabilityFromDelete() + piD), Y->getTransitionProbabilityFromMatch() + piM);
 	initTransM = max(max(M->getTransitionProbabilityFromInsert() + piI, M->getTransitionProbabilityFromDelete() + piD), M->getTransitionProbabilityFromMatch() + piM);
+
+	md[0][0] = log(md[0][0]);
+	md[1][1] = log(md[1][1]);
+	md[2][2] = log(md[2][2]);
+	md[0][1] = log(md[0][1]);
+	md[0][2] = log(md[0][2]);
+
+	md[1][0] = log(md[1][0]);
+	md[2][0] = log(md[2][0]);
+
+	md[2][1] = log(md[2][1]);
+	md[1][2] = log(md[1][2]);
 
 	DUMP("Initial transition likelihood component : M\t" << initTransM << "\tI\t" << initTransX << "\tD\t" << initTransY);
 }
@@ -186,7 +199,7 @@ double EvolutionaryPairHMM::getAlignmentLikelihood(vector<unsigned char>* s1,
 	double lnl = 0;
 
 	//cerr << endl;
-	unsigned char isGap = dict->getGapID();
+	unsigned char isGap = this->substModel->getMatrixSize();
 
 	int k =0;
 	int l =0;

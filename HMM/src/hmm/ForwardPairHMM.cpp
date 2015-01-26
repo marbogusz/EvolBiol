@@ -110,6 +110,191 @@ pair<string, string> ForwardPairHMM::getBestAlignment(string&seq_a, string& seq_
 	return alignment;
 }
 
+double ForwardPairHMM::calculateSampleLnL(HMMPathSample& sample)
+{
+	unsigned int gapId = this->substModel->getMatrixSize();
+	double lnl = 0.0;
+	double tmp;
+
+	for (unsigned int i = 0; i < gapId; i++)
+		for (unsigned int j = 0; j < gapId; j++)
+			lnl += (this->ptmatrix->getPairSitePattern(i,j) * sample.getSitePattern(i,j));
+
+	for (unsigned int i = 0; i < Definitions::StateId::Delete; i++)
+		for (unsigned int j = 0; j < Definitions::StateId::Delete; j++)
+			lnl += (this->md[i][j] * sample.getTransition(i,j));
+
+	//add the last transition lnl!
+	if (sample.getFirstState() == this->M)
+		lnl += this->initTransM;
+	else if (sample.getFirstState() == this->X)
+		lnl += this->initTransX;
+	else
+		lnl += this->initTransY;
+
+	return lnl;
+}
+
+double ForwardPairHMM::sampleAlignment(HMMPathSample& sample)
+{
+	pair<vector<unsigned char>*, vector<unsigned char>* >* alignment =
+				new pair<vector<unsigned char>*, vector<unsigned char>* >(new vector<unsigned char>(), new vector<unsigned char>());
+
+	int worstCaseLen = (int)(max(xSize-1,ySize-1) * (1.0+(2*g*(1.0/1.0-e))));
+
+	//reserve memory for out strings (20% of gaps should be ok)
+	alignment->first->reserve(worstCaseLen);
+	alignment->second->reserve(worstCaseLen);
+
+	//testing
+	unsigned char gapElem = this->substModel->getMatrixSize(); // last matrix element is the gap ID!
+
+
+	std::random_device rd;
+	std::mt19937_64 gen(rd());
+	std::uniform_real_distribution<double> dis(0, 1.0);
+
+	unsigned int i = xSize-1;
+	unsigned int j = ySize-1;
+
+	double mtProb,inProb,currProb, rnbr,tmp;
+	double emission = 0.0;
+
+	//choose initial state
+	PairwiseHmmStateBase* currentState;
+	PairwiseHmmStateBase* previousState;
+
+	mtProb = M->getValueAt(xSize-1, ySize-1) - this->getTotalLikelihood();
+	inProb = X->getValueAt(xSize-1, ySize-1) - this->getTotalLikelihood();
+
+	//Establish which state is first!
+	//TODO - remove the mess after testing!
+
+	previousState = NULL;
+
+	rnbr = dis(gen);
+	tmp  = exp(mtProb);
+	if(rnbr < tmp)
+		previousState = M;
+	else if (rnbr < (tmp + exp(inProb)))
+		currentState = X;
+	else currentState = Y;
+
+	currProb = currentState->getValueAt(i,j);
+	if (currentState->stateId == Definitions::StateId::Match)
+	{
+		emission = ptmatrix->getLogPairTransition((*seq1)[i-1]->getMatrixIndex(), (*seq2)[j-1]->getMatrixIndex());
+		alignment->first->push_back((*seq1)[i-1]->getMatrixIndex());
+		alignment->second->push_back((*seq2)[j-1]->getMatrixIndex());
+		sample.addSitePattern((*seq1)[i-1]->getMatrixIndex(),(*seq2)[j-1]->getMatrixIndex());
+		i--;
+		j--;
+	}
+	else if (currentState->stateId == Definitions::StateId::Delete)
+	{
+		ptmatrix->getLogEquilibriumFreq((*seq2)[j-1]->getMatrixIndex());
+		alignment->second->push_back((*seq2)[j-1]->getMatrixIndex());
+		alignment->first->push_back(gapElem);
+		sample.addSitePattern(gapElem,(*seq2)[j-1]->getMatrixIndex());
+		j--;
+	}
+	else //Insert
+	{
+		emission = ptmatrix->getLogEquilibriumFreq((*seq1)[i-1]->getMatrixIndex());
+		alignment->first->push_back((*seq1)[i-1]->getMatrixIndex());
+		alignment->second->push_back(gapElem);
+		sample.addSitePattern((*seq1)[i-1]->getMatrixIndex(),gapElem);
+		i--;
+	}
+	mtProb = emission + currentState->getTransitionProbabilityFromMatch() + M->getValueAt(i,j) - currProb;
+	inProb = emission + currentState->getTransitionProbabilityFromInsert() + X->getValueAt(i,j) - currProb;
+
+	previousState = currentState;
+
+	//Calculate the rest;
+
+	while(i > 0 && j > 0)
+	{
+		rnbr = dis(gen);
+		tmp  = exp(mtProb);
+		if(rnbr < tmp)
+			currentState = M;
+		else if (rnbr < (tmp + exp(inProb)))
+			currentState = X;
+		else currentState = Y;
+
+		currProb = currentState->getValueAt(i,j);
+		if (currentState->stateId == Definitions::StateId::Match)
+		{
+			emission = ptmatrix->getLogPairTransition((*seq1)[i-1]->getMatrixIndex(), (*seq2)[j-1]->getMatrixIndex());
+			alignment->first->push_back((*seq1)[i-1]->getMatrixIndex());
+			alignment->second->push_back((*seq2)[j-1]->getMatrixIndex());
+			sample.addSitePattern((*seq1)[i-1]->getMatrixIndex(),(*seq2)[j-1]->getMatrixIndex());
+			i--;
+			j--;
+		}
+		else if (currentState->stateId == Definitions::StateId::Delete)
+		{
+			ptmatrix->getLogEquilibriumFreq((*seq2)[j-1]->getMatrixIndex());
+			alignment->second->push_back((*seq2)[j-1]->getMatrixIndex());
+			alignment->first->push_back(gapElem);
+			sample.addSitePattern(gapElem,(*seq2)[j-1]->getMatrixIndex());
+			j--;
+		}
+		else //Insert
+		{
+			emission = ptmatrix->getLogEquilibriumFreq((*seq1)[i-1]->getMatrixIndex());
+			alignment->first->push_back((*seq1)[i-1]->getMatrixIndex());
+			alignment->second->push_back(gapElem);
+			sample.addSitePattern((*seq1)[i-1]->getMatrixIndex(),gapElem);
+			i--;
+		}
+		mtProb = emission + currentState->getTransitionProbabilityFromMatch() + M->getValueAt(i,j) - currProb;
+		inProb = emission + currentState->getTransitionProbabilityFromInsert() + X->getValueAt(i,j) - currProb;
+		//dlProb = emission + currentState->getTransitionProbabilityFromDelete() + Y->getValueAt(i,j) - currProb;
+
+		sample.addTransition(currentState->stateId, previousState->stateId );
+
+		previousState = currentState;
+
+	}
+
+	if (j==0)
+	{
+		while(i > 0){
+			currentState = X;
+			alignment->first->push_back((*seq1)[i-1]->getMatrixIndex());
+			alignment->second->push_back(gapElem);
+			sample.addSitePattern((*seq1)[i-1]->getMatrixIndex(),gapElem);
+			sample.addTransition(currentState->stateId, previousState->stateId );
+			previousState = currentState;
+			i--;
+		}
+	}
+	else if (i==0)
+	{
+		while(j > 0){
+			currentState = Y;
+			alignment->second->push_back((*seq2)[j-1]->getMatrixIndex());
+			alignment->first->push_back(gapElem);
+			sample.addSitePattern(gapElem,(*seq2)[j-1]->getMatrixIndex());
+			sample.addTransition(currentState->stateId, previousState->stateId );
+			previousState = currentState;
+			j--;
+		}
+	}
+	//deal with the last row or column
+	sample.setLastState(currentState);
+	//the initial transition lnl component;
+
+	reverse(alignment->first->begin(), alignment->first->end());
+	reverse(alignment->second->begin(), alignment->second->end());
+
+	double lnl = this->getAlignmentLikelihood(alignment->first,alignment->second, nullptr);
+
+}
+
+
 pair<vector<unsigned char>*, vector<unsigned char>* >* ForwardPairHMM::sampleAlignment(Dictionary* dictionary, double& lnl)
 {
 
@@ -564,6 +749,7 @@ double ForwardPairHMM::runAlgorithm()
 
 	return sS* -1.0;
 }
+
 
 
 } /* namespace EBC */

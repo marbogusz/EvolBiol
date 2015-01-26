@@ -53,7 +53,15 @@ public:
 	constexpr static const unsigned int heuristicsTreeSize = 3;
 
 	constexpr static const unsigned int pathSampleCount = 10000;
-	constexpr static const unsigned int pathInformativeCount = 100;
+	constexpr static const unsigned int pathInformativeCount = 500;
+
+
+	//NEW sampling
+	constexpr static const unsigned int samplingPathMaxCount = 1000000;
+	constexpr static const unsigned int samplingPathMinCount = 10000;
+	constexpr static const unsigned int samplingPathCount = 500;
+	constexpr static const double samplingPathLnLDelta = 10.0;
+
 
 	//FIXME
 	constexpr static const double divergenceBound = 3.5;
@@ -65,6 +73,17 @@ public:
 	constexpr static const double minMatrixLikelihood = -1000000.0;
 
 
+	constexpr static const unsigned int HKY85ParamCount = 1;
+
+	constexpr static const unsigned int GTRParamCount = 5;
+
+	constexpr static const unsigned int AAParamCount = 0;
+
+	constexpr static const unsigned int NBIndelParamCount = 2;
+
+	constexpr static const unsigned int nucleotideCount = 4;
+
+	constexpr static const unsigned int aminoacidCount = 20;
 
 	struct aaModelDefinition
 	{
@@ -85,23 +104,7 @@ public:
 
 	enum StateId {Match, Insert , Delete};
 
-	static const unsigned int HKY85ParamCount;
 
-	static const unsigned int GTRParamCount;
-
-	static const unsigned int AAParamCount;
-
-	static const unsigned int NBIndelParamCount;
-
-	static const unsigned int nucleotideCount;
-
-	static const unsigned int aminoacidCount;
-
-	static const double blosum62[20][20];
-
-	static const double blosum62gapOpening;
-
-	static const double blosum62gapExtension;
 
 	static aaModelDefinition aaLgModel;
 

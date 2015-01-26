@@ -17,6 +17,8 @@ namespace EBC
 {
 
 //Various FUNCTIONS
+
+//FIXME - this class should be static!
 class Maths
 {
 private:
