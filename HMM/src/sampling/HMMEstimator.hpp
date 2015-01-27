@@ -68,8 +68,8 @@ protected:
 	TripletAligner* tal;
 	ViterbiPairHMM* vphmm;
 
-	OptimizedModelParameters modelParams;
-	Optimizer bfgs;
+	OptimizedModelParameters* modelParams;
+	Optimizer* bfgs;
 
 	vector<array<unsigned int, 3> > tripletIdxs;
 
@@ -81,13 +81,7 @@ protected:
 
 	bool estimateAlpha;
 
-	void calculateInitialHMMs(Definitions::ModelType model);
-
-	void sampleAlignments();
-
-	void estimateParameters();
-
-	void rescoreSamples();
+	void calculateInitialPairs(Definitions::ModelType model);
 
 	double runIteration();
 

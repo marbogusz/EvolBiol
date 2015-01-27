@@ -116,8 +116,8 @@ double ForwardPairHMM::calculateSampleLnL(HMMPathSample& sample)
 	double lnl = 0.0;
 	double tmp;
 
-	for (unsigned int i = 0; i < gapId; i++)
-		for (unsigned int j = 0; j < gapId; j++)
+	for (unsigned int i = 0; i <= gapId; i++)
+		for (unsigned int j = 0; j <= gapId; j++)
 			lnl += (this->ptmatrix->getPairSitePattern(i,j) * sample.getSitePattern(i,j));
 
 	for (unsigned int i = 0; i < Definitions::StateId::Delete; i++)
@@ -175,7 +175,7 @@ double ForwardPairHMM::sampleAlignment(HMMPathSample& sample)
 	rnbr = dis(gen);
 	tmp  = exp(mtProb);
 	if(rnbr < tmp)
-		previousState = M;
+		currentState = M;
 	else if (rnbr < (tmp + exp(inProb)))
 		currentState = X;
 	else currentState = Y;
@@ -291,7 +291,7 @@ double ForwardPairHMM::sampleAlignment(HMMPathSample& sample)
 	reverse(alignment->second->begin(), alignment->second->end());
 
 	double lnl = this->getAlignmentLikelihood(alignment->first,alignment->second, nullptr);
-
+	return lnl;
 }
 
 

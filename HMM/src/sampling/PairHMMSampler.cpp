@@ -46,11 +46,13 @@ void PairHMMSampler::sampleInitialSet()
 	double lnlDelta;
 	double tmpLnL;
 	HMMPathSample dummy;
-	pair<double, HMMPathSample> tmpPair = make_pair(Definitions::minMatrixLikelihood, dummy);
+	pair<double, HMMPathSample> tmpPair = make_pair(bestLnL, dummy);
 
 	list<pair<double, HMMPathSample> >::iterator up;
 
 	unsigned int sampledCount = 0;
+
+	fwdHmm.summarize();
 
 	//initialize
 	while(sampledCount < sampleCount){
@@ -129,17 +131,24 @@ void PairHMMSampler::reSample()
 
 double PairHMMSampler::runIteration()
 {
+	double sumLnl = totalSampleLnL;
+	totalSampleLnL = Definitions::minMatrixLikelihood;
 	double result = 0;
 	fwdHmm.setDivergenceTimeAndCalculateModels(modelParams.getDivergenceTime(0));
-	for (auto entry : samples)
-		result += fwdHmm.calculateSampleLnL(entry.second);
+	for (auto entry : samples){
+		entry.first = fwdHmm.calculateSampleLnL(entry.second);
+		totalSampleLnL = maths->logSum(totalSampleLnL, entry.first);
+		result += (entry.first * exp(entry.first - sumLnl));
+	}
 	return result;
 }
 
 double PairHMMSampler::optimiseDivergenceTime()
 {
-	bfgs.optimize();
-	return modelParams.getDivergenceTime(0);
+	double lnl;
+	lnl = bfgs.optimize();
+	this->divergenceT = modelParams.getDivergenceTime(0);
+	return lnl;
 }
 
 } /* namespace EBC */

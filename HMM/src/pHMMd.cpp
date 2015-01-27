@@ -25,6 +25,8 @@
 #include "hmm/ForwardPairHMM.hpp"
 #include "hmm/ViterbiPairHMM.hpp"
 
+#include "sampling/HMMEstimator.hpp";
+
 using namespace std;
 using namespace EBC;
 
@@ -158,7 +160,7 @@ int main(int argc, char ** argv) {
 
 			//tme->getModelParameters();
 			INFO("Creating Model Parameters heuristics...");
-			ModelEstimator* tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),
+			HMMEstimator* tme = new HMMEstimator(inputSeqs, cmdReader->getModelType(),
 					cmdReader->getOptimizationType(), cmdReader->getCategories(), alpha,
 					cmdReader->estimateAlpha());
 
