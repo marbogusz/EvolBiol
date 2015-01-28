@@ -87,9 +87,10 @@ void GuideTree::extractKmers(string& seq, unordered_map<string, short>* umap)
 {
 	string kmer;
 
+	if(seq.size() < kmerSize)
+		return;
 
-
-	for(unsigned int i = 0; i< seq.size() - kmerSize; i++)
+	for(unsigned int i = 0; i< (seq.size() - kmerSize); i++)
 	{
 		kmer = seq.substr(i, kmerSize);
 		++((*umap)[kmer]);

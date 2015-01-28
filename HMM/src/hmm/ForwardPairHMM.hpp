@@ -39,7 +39,7 @@ public:
 
 	pair<vector<unsigned char>*, vector<unsigned char>* >* sampleAlignment(Dictionary* dictionary, double& lnl);
 
-	double sampleAlignment(HMMPathSample& sample);
+	void sampleAlignment(HMMPathSample& sample);
 
 	double calculateSampleLnL(HMMPathSample& sample);
 

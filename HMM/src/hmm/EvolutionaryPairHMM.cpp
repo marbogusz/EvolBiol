@@ -198,7 +198,19 @@ double EvolutionaryPairHMM::getAlignmentLikelihood(vector<unsigned char>* s1,
 {
 	double lnl = 0;
 
-	//cerr << endl;
+	cerr << endl;
+	for (auto sq1 : *s1)
+	{
+		cerr << (unsigned int) sq1;
+	}
+	cerr << endl;
+
+	for (auto sq2 : *s2)
+	{
+		cerr << (unsigned int) sq2;
+	}
+	cerr << endl;
+
 	unsigned char isGap = this->substModel->getMatrixSize();
 
 	int k =0;

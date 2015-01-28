@@ -115,14 +115,20 @@ double ForwardPairHMM::calculateSampleLnL(HMMPathSample& sample)
 	unsigned int gapId = this->substModel->getMatrixSize();
 	double lnl = 0.0;
 	double tmp;
+	unsigned int  cnt;
 
 	for (unsigned int i = 0; i <= gapId; i++)
-		for (unsigned int j = 0; j <= gapId; j++)
-			lnl += (this->ptmatrix->getPairSitePattern(i,j) * sample.getSitePattern(i,j));
-
-	for (unsigned int i = 0; i < Definitions::StateId::Delete; i++)
-		for (unsigned int j = 0; j < Definitions::StateId::Delete; j++)
-			lnl += (this->md[i][j] * sample.getTransition(i,j));
+		for (unsigned int j = 0; j <= gapId; j++){
+			cnt = sample.getSitePattern(i,j);
+			if (cnt != 0)
+				lnl += cnt * this->ptmatrix->getPairSitePattern(i,j);
+		}
+	for (unsigned int i = 0; i <= Definitions::StateId::Delete; i++)
+		for (unsigned int j = 0; j <= Definitions::StateId::Delete; j++){
+			cnt = sample.getTransition(i,j);
+			if (cnt != 0)
+				lnl += cnt * this->md[i][j];
+		}
 
 	//add the last transition lnl!
 	if (sample.getFirstState() == this->M)
@@ -135,8 +141,9 @@ double ForwardPairHMM::calculateSampleLnL(HMMPathSample& sample)
 	return lnl;
 }
 
-double ForwardPairHMM::sampleAlignment(HMMPathSample& sample)
+void ForwardPairHMM::sampleAlignment(HMMPathSample& sample)
 {
+	/*
 	pair<vector<unsigned char>*, vector<unsigned char>* >* alignment =
 				new pair<vector<unsigned char>*, vector<unsigned char>* >(new vector<unsigned char>(), new vector<unsigned char>());
 
@@ -145,7 +152,7 @@ double ForwardPairHMM::sampleAlignment(HMMPathSample& sample)
 	//reserve memory for out strings (20% of gaps should be ok)
 	alignment->first->reserve(worstCaseLen);
 	alignment->second->reserve(worstCaseLen);
-
+	 */
 	//testing
 	unsigned char gapElem = this->substModel->getMatrixSize(); // last matrix element is the gap ID!
 
@@ -184,8 +191,10 @@ double ForwardPairHMM::sampleAlignment(HMMPathSample& sample)
 	if (currentState->stateId == Definitions::StateId::Match)
 	{
 		emission = ptmatrix->getLogPairTransition((*seq1)[i-1]->getMatrixIndex(), (*seq2)[j-1]->getMatrixIndex());
+		/*
 		alignment->first->push_back((*seq1)[i-1]->getMatrixIndex());
 		alignment->second->push_back((*seq2)[j-1]->getMatrixIndex());
+		*/
 		sample.addSitePattern((*seq1)[i-1]->getMatrixIndex(),(*seq2)[j-1]->getMatrixIndex());
 		i--;
 		j--;
@@ -193,16 +202,20 @@ double ForwardPairHMM::sampleAlignment(HMMPathSample& sample)
 	else if (currentState->stateId == Definitions::StateId::Delete)
 	{
 		ptmatrix->getLogEquilibriumFreq((*seq2)[j-1]->getMatrixIndex());
+		/*
 		alignment->second->push_back((*seq2)[j-1]->getMatrixIndex());
 		alignment->first->push_back(gapElem);
+		*/
 		sample.addSitePattern(gapElem,(*seq2)[j-1]->getMatrixIndex());
 		j--;
 	}
 	else //Insert
 	{
 		emission = ptmatrix->getLogEquilibriumFreq((*seq1)[i-1]->getMatrixIndex());
+		/*
 		alignment->first->push_back((*seq1)[i-1]->getMatrixIndex());
 		alignment->second->push_back(gapElem);
+		*/
 		sample.addSitePattern((*seq1)[i-1]->getMatrixIndex(),gapElem);
 		i--;
 	}
@@ -227,8 +240,10 @@ double ForwardPairHMM::sampleAlignment(HMMPathSample& sample)
 		if (currentState->stateId == Definitions::StateId::Match)
 		{
 			emission = ptmatrix->getLogPairTransition((*seq1)[i-1]->getMatrixIndex(), (*seq2)[j-1]->getMatrixIndex());
+			/*
 			alignment->first->push_back((*seq1)[i-1]->getMatrixIndex());
 			alignment->second->push_back((*seq2)[j-1]->getMatrixIndex());
+			*/
 			sample.addSitePattern((*seq1)[i-1]->getMatrixIndex(),(*seq2)[j-1]->getMatrixIndex());
 			i--;
 			j--;
@@ -236,16 +251,20 @@ double ForwardPairHMM::sampleAlignment(HMMPathSample& sample)
 		else if (currentState->stateId == Definitions::StateId::Delete)
 		{
 			ptmatrix->getLogEquilibriumFreq((*seq2)[j-1]->getMatrixIndex());
+			/*
 			alignment->second->push_back((*seq2)[j-1]->getMatrixIndex());
 			alignment->first->push_back(gapElem);
+			*/
 			sample.addSitePattern(gapElem,(*seq2)[j-1]->getMatrixIndex());
 			j--;
 		}
 		else //Insert
 		{
 			emission = ptmatrix->getLogEquilibriumFreq((*seq1)[i-1]->getMatrixIndex());
+			/*
 			alignment->first->push_back((*seq1)[i-1]->getMatrixIndex());
 			alignment->second->push_back(gapElem);
+			*/
 			sample.addSitePattern((*seq1)[i-1]->getMatrixIndex(),gapElem);
 			i--;
 		}
@@ -263,8 +282,10 @@ double ForwardPairHMM::sampleAlignment(HMMPathSample& sample)
 	{
 		while(i > 0){
 			currentState = X;
+			/*
 			alignment->first->push_back((*seq1)[i-1]->getMatrixIndex());
 			alignment->second->push_back(gapElem);
+			*/
 			sample.addSitePattern((*seq1)[i-1]->getMatrixIndex(),gapElem);
 			sample.addTransition(currentState->stateId, previousState->stateId );
 			previousState = currentState;
@@ -275,8 +296,10 @@ double ForwardPairHMM::sampleAlignment(HMMPathSample& sample)
 	{
 		while(j > 0){
 			currentState = Y;
+			/*
 			alignment->second->push_back((*seq2)[j-1]->getMatrixIndex());
 			alignment->first->push_back(gapElem);
+			*/
 			sample.addSitePattern(gapElem,(*seq2)[j-1]->getMatrixIndex());
 			sample.addTransition(currentState->stateId, previousState->stateId );
 			previousState = currentState;
@@ -286,12 +309,13 @@ double ForwardPairHMM::sampleAlignment(HMMPathSample& sample)
 	//deal with the last row or column
 	sample.setLastState(currentState);
 	//the initial transition lnl component;
-
+/*
 	reverse(alignment->first->begin(), alignment->first->end());
 	reverse(alignment->second->begin(), alignment->second->end());
 
 	double lnl = this->getAlignmentLikelihood(alignment->first,alignment->second, nullptr);
 	return lnl;
+*/
 }
 
 

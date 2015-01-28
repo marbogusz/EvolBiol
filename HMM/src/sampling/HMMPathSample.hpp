@@ -20,7 +20,7 @@ protected:
 	//state transition count matrix
 	unsigned int stateTrans[Definitions::stateCount][Definitions::stateCount];
 	//perfrmance friendly constant size array for both AA and nucleotides
-	unsigned int sitePatterns[Definitions::aminoacidCount][Definitions::aminoacidCount];
+	unsigned int sitePatterns[Definitions::aminoacidCount+1][Definitions::aminoacidCount+1];
 	//ised to calculate lnl of the sequence
 	PairwiseHmmStateBase* firstState;
 

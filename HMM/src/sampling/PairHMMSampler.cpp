@@ -57,7 +57,7 @@ void PairHMMSampler::sampleInitialSet()
 	//initialize
 	while(sampledCount < sampleCount){
 		HMMPathSample smpl;
-		cerr << "old method lnl " << fwdHmm.sampleAlignment(smpl) << endl;
+		fwdHmm.sampleAlignment(smpl);
 		tmpLnL = fwdHmm.calculateSampleLnL(smpl);
 
 		totalSampleLnL = maths->logSum(totalSampleLnL, tmpLnL);
@@ -67,7 +67,6 @@ void PairHMMSampler::sampleInitialSet()
 		if (worstLnL > tmpLnL)
 			worstLnL = tmpLnL;
 
-		cerr << "New method lnl " << tmpLnL << endl;
 		samples.push_front(make_pair(tmpLnL, smpl));
 		sampledCount++;
 	}
