@@ -37,7 +37,7 @@ Optimizer::~Optimizer()
 
 double Optimizer::objectiveFunction(const column_vector& bfgsParameters)
 {
-	//FIXME - address an issue of vector copying!
+	//FIXME - address a potential issue of vector copying!
 	omp->fromDlibVector(bfgsParameters);
 	return target->runIteration();
 }

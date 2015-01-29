@@ -158,7 +158,8 @@ void ForwardPairHMM::sampleAlignment(HMMPathSample& sample)
 
 
 	std::random_device rd;
-	std::mt19937_64 gen(rd());
+	//std::mt19937_64 gen(rd());
+	std::default_random_engine gen(rd());
 	std::uniform_real_distribution<double> dis(0, 1.0);
 
 	unsigned int i = xSize-1;

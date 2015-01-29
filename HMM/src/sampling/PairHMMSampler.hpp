@@ -42,7 +42,7 @@ protected:
 	IndelModel* indelModel;
 
 	OptimizedModelParameters modelParams;
-	Optimizer bfgs;
+	Optimizer* bfgs;
 
 	ForwardPairHMM fwdHmm;
 

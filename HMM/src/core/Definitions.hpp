@@ -53,7 +53,7 @@ public:
 	constexpr static const unsigned int heuristicsTreeSize = 3;
 
 	constexpr static const unsigned int pathSampleCount = 10000;
-	constexpr static const unsigned int pathInformativeCount = 500;
+	constexpr static const unsigned int pathInformativeCount = 50;
 
 
 	//NEW sampling

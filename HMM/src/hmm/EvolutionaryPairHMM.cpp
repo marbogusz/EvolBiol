@@ -25,7 +25,7 @@ EvolutionaryPairHMM::EvolutionaryPairHMM(vector<SequenceElement*>* s1, vector<Se
 	this->xSize = seq1->size() +1;
 	this->ySize = seq2->size() +1;
 
-	DUMP("Evolutionary Pair HMM for seqence 1 with size " << xSize << " and sequence 2 with size " << ySize);
+	DEBUG("#######Evolutionary Pair HMM constructor for seqence 1 with size " << xSize << " and sequence 2 with size " << ySize);
 
 	ptmatrix = new PMatrixDouble(substModel);
 
@@ -78,7 +78,7 @@ void EvolutionaryPairHMM::getStateEquilibriums()
 	piI = ((piD*(md[0][1]-md[2][1]))-md[0][1])/(md[1][1]-1.0-md[0][1]);
 	piM = 1.0 -piI - piD;
 
-	DUMP("Decimal equilibriums : PiM\t" << piM << "\tPiI\t" << piI << "\tPiD\t" << piD);
+	//DUMP("Decimal equilibriums : PiM\t" << piM << "\tPiI\t" << piI << "\tPiD\t" << piD);
 
 	piD = piD < minPi ? Definitions::minMatrixLikelihood : log(piD);
 	piI = piI < minPi ? Definitions::minMatrixLikelihood : log(piI);
@@ -100,7 +100,7 @@ void EvolutionaryPairHMM::getStateEquilibriums()
 	md[2][1] = log(md[2][1]);
 	md[1][2] = log(md[1][2]);
 
-	DUMP("Initial transition likelihood component : M\t" << initTransM << "\tI\t" << initTransX << "\tD\t" << initTransY);
+	//DUMP("Initial transition likelihood component : M\t" << initTransM << "\tI\t" << initTransX << "\tD\t" << initTransY);
 }
 
 void EvolutionaryPairHMM::setTransitionProbabilities()
@@ -121,12 +121,12 @@ void EvolutionaryPairHMM::setTransitionProbabilities()
 	X->setTransitionProbabilityFromMatch(log(g));
 	Y->setTransitionProbabilityFromMatch(log(g));
 
-	DUMP(" Transition probabilities: ");
-	DUMP("M->M : " << log(1-2*g));
-	DUMP("I->I : " << log(e+((1-e)*g)));
-	DUMP("M->I : " << log(g));
-	DUMP("I->M : " << log((1-2*g)*(1-e)));
-	DUMP("I->D : " << log((1-e)*g));
+	//DUMP(" Transition probabilities: ");
+	//DUMP("M->M : " << log(1-2*g));
+	//DUMP("I->I : " << log(e+((1-e)*g)));
+	//DUMP("M->I : " << log(g));
+	//DUMP("I->M : " << log((1-2*g)*(1-e)));
+	//DUMP("I->D : " << log((1-e)*g));
 
 
 }
@@ -136,12 +136,12 @@ void EvolutionaryPairHMM::summarize()
 	e = tpb->getGapExtension();
 	g = tpb->getGapOpening();
 
-	cout << " Transition probabilities: " << endl;
-	cout << "M->M : " << 1-2*g << endl;
-	cout << "I->I : " << e+((1-e)*g) << endl;
-	cout << "M->I : " << g << endl;
-	cout << "I->M : " << (1-2*g)*(1-e) << endl;
-	cout << "I->D : " << (1-e)*g << endl << endl;
+	DUMP(" Transition probabilities: ");
+	DUMP("M->M : " << log(1-2*g));
+	DUMP("I->I : " << log(e+((1-e)*g)));
+	DUMP("M->I : " << log(g));
+	DUMP("I->M : " << log((1-2*g)*(1-e)));
+	DUMP("I->D : " << log((1-e)*g));
 
 	indelModel->summarize();
 	substModel->summarize();
@@ -186,18 +186,20 @@ void EvolutionaryPairHMM::calculateModels()
 EvolutionaryPairHMM::~EvolutionaryPairHMM()
 {
 
-	DUMP("Evolutionary pair HMM destructor");
+	DUMP("~~~~~~~Evolutionary pair HMM destructor");
 	delete Y;
 	delete X;
 	delete M;
     delete ptmatrix;
     delete tpb;
 }
+
+//FIXME OBSOLETE
 double EvolutionaryPairHMM::getAlignmentLikelihood(vector<unsigned char>* s1,
 		vector<unsigned char>* s2, Dictionary* dict)
 {
 	double lnl = 0;
-
+/*
 	cerr << endl;
 	for (auto sq1 : *s1)
 	{
@@ -279,6 +281,8 @@ double EvolutionaryPairHMM::getAlignmentLikelihood(vector<unsigned char>* s1,
 		//DUMP(i << "\tlnl " << lnl);
 	}
 	//cerr << endl;
+
+	 */
 	return lnl;
 
 }
