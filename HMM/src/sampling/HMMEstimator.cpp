@@ -6,6 +6,7 @@
  */
 
 #include "sampling/HMMEstimator.hpp"
+#include "sampling/ExpTester.hpp"
 
 #include <chrono>
 #include <array>
@@ -38,11 +39,8 @@ HMMEstimator::HMMEstimator(Sequences* inputSeqs, Definitions::ModelType model ,
 
 	//FIXME - release the memory!!!! - delete pair objects and vectors (arrays) of SeqEls
 
-
-    chrono::time_point<chrono::system_clock> start, end;
-    start = chrono::system_clock::now();
-
-
+    //chrono::time_point<chrono::system_clock> start, end;
+    //start = chrono::system_clock::now();
 
 	if (model == Definitions::ModelType::GTR)
 	{
@@ -68,14 +66,31 @@ HMMEstimator::HMMEstimator(Sequences* inputSeqs, Definitions::ModelType model ,
 
 	bfgs = new Optimizer(modelParams, this, Definitions::OptimizationType::BFGS);
 
-	this->calculateInitialPairs(model);
-	this->optimise();
+	//this->calculateInitialPairs(model);
+	//this->optimise();
 	//this->runIteration();
 
-	end = chrono::system_clock::now();
-    chrono::duration<double> elapsed_seconds = end-start;
+    ExpTester tstr;
 
-    INFO("Model Estimator elapsed time: " << elapsed_seconds.count() << " seconds");
+    chrono::time_point<chrono::system_clock> start, end, endD;
+    start = chrono::system_clock::now();
+
+    cerr << tstr.testExpFloat(100000000) << endl;
+
+	end = chrono::system_clock::now();
+
+    cerr << tstr.testExpDouble(100000000) << endl;
+
+    endD = chrono::system_clock::now();
+
+
+    chrono::duration<double> elapsed_seconds = end-start;
+    chrono::duration<double> elapsed_secondsD = endD-end;
+
+    cerr << "Exp tester seconds float : " << elapsed_seconds.count() << endl;
+    cerr << "Exp tester seconds double : " << elapsed_secondsD.count() << endl;
+
+    //INFO("Model Estimator elapsed time: " << elapsed_seconds.count() << " seconds");
 
 	//substModel->summarize();
 

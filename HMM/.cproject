@@ -95,7 +95,8 @@
 									<listOptionValue builtIn="false" value="/home/marcin/dlib-18.6"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HMM/src}&quot;"/>
 								</option>
-								<option id="gnu.cpp.compiler.option.other.other.749203136" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0 -std=c++11" valueType="string"/>
+								<option id="gnu.cpp.compiler.option.other.other.749203136" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0 -std=c++11 -msse2 -mfpmath=sse" valueType="string"/>
+								<option id="gnu.cpp.compiler.option.dialect.std.2019892073" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.286967237" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.cross.c.linker.2122787315" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker"/>
