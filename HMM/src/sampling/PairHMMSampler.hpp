@@ -21,6 +21,7 @@
 #include "models/NegativeBinomialGapModel.hpp"
 
 #include "hmm/ForwardPairHMM.hpp"
+#include "hmm/ViterbiPairHMM.hpp"
 
 #include "sampling/HMMPathSample.hpp"
 
@@ -30,6 +31,11 @@
 namespace EBC {
 
 class PairHMMSampler : public IOptimizable{
+
+	struct is_near {
+		bool operator() (pair<double, HMMPathSample>& a, pair<double, HMMPathSample>& b)
+		{ return (fabs(b.first - a.first) < 0.000001); }
+	};
 
 protected:
 	Maths* maths;
@@ -45,6 +51,7 @@ protected:
 	Optimizer* bfgs;
 
 	ForwardPairHMM fwdHmm;
+	ViterbiPairHMM vitHmm;
 
 	double forwardLnL;
 
@@ -72,6 +79,11 @@ public:
 	double runIteration();
 
 	double optimiseDivergenceTime();
+
+	double getDivergence()
+	{
+		return divergenceT;
+	}
 };
 
 } /* namespace EBC */

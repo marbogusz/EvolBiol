@@ -13,19 +13,23 @@ PairHMMSampler::PairHMMSampler(vector<SequenceElement*>* s1, vector<SequenceElem
 		SubstitutionModelBase* smdl, IndelModel* imdl, double initialDivergence) :
 				maths(new Maths()), seq1(s1), seq2(s2), substModel(smdl), indelModel(imdl),
 				divergenceT(initialDivergence), modelParams(nullptr,nullptr, 2, 1, false, false, false, true, maths),
-				fwdHmm(seq1,seq2, substModel, indelModel, Definitions::DpMatrixType::Full, nullptr,true)
-
+				fwdHmm(seq1,seq2, substModel, indelModel, Definitions::DpMatrixType::Full, nullptr,true),
+				vitHmm(seq1,seq2, substModel, indelModel, Definitions::DpMatrixType::Full, nullptr,true)
 {
 	fwdHmm.setDivergenceTimeAndCalculateModels(divergenceT);
+	vitHmm.setDivergenceTimeAndCalculateModels(divergenceT);
+
+
 	forwardLnL = fwdHmm.runAlgorithm();
+	vitHmm.runAlgorithm();
 
 	modelParams.setUserDivergenceParams({divergenceT});
 
-	substModel->summarize();
+	//substModel->summarize();
 
 	bfgs = new Optimizer(&modelParams,this,Definitions::OptimizationType::BFGS);
 
-	sampleCount = 50;//Definitions::samplingPathCount;
+	sampleCount = Definitions::samplingPathCount;
 	sampleMinCount = Definitions::samplingPathMinCount;
 	sampleMaxCount = Definitions::samplingPathMaxCount;
 
@@ -79,6 +83,8 @@ void PairHMMSampler::sampleInitialSet()
 	//DUMP(bestLnL << "\t" << worstLnL);
 	//sort
 	samples.sort();
+	samples.unique(is_near());
+
 	//now the head points to the lowest lnl element
 	DUMP("!!!!!!SampleInitialSet sample count R1: " << sampledCount << "\tBest lnl " << bestLnL << "\tworst lnl " << worstLnL << "\ttotal lnl " << totalSampleLnL << "\tdesired lnl delta " << sampleDeltaLnL);
 
@@ -89,22 +95,37 @@ void PairHMMSampler::sampleInitialSet()
 		fwdHmm.sampleAlignment(smpl);
 		tmpLnL = fwdHmm.calculateSampleLnL(smpl);
 
-		totalSampleLnL = maths->logSum(totalSampleLnL, tmpLnL);
-
 		if(tmpLnL > worstLnL){
-			samples.pop_front();
-			worstLnL = samples.front().first;
-			//insert the element properly!
 			tmpPair.first = tmpLnL;
-			up = std::upper_bound(samples.begin(),samples.end(), tmpPair);
-			samples.insert(up,make_pair(tmpLnL,smpl));
+			up = std::upper_bound(samples.begin(),samples.end(), tmpPair, [](const pair<double, HMMPathSample> &val,
+					const pair<double, HMMPathSample> &itp)
+					{
+						return ((itp.first - val.first) > 0.000001);
+					});
+			//move one step back
+			up--;
+			if (fabs(up->first - tmpLnL) > 0.000001){
+				totalSampleLnL = maths->logSum(totalSampleLnL, tmpLnL);
+				double tm = up->first;
+				up++;
+				double tu = up->first;
+				samples.insert(up,make_pair(tmpLnL,smpl));
+				samples.pop_front();
+				worstLnL = samples.front().first;
+				//cerr << "worst changes to " << worstLnL << "\t" << tm << "\t is left of upper_bound, " << tu << "\tis the bound, will insert " << tmpLnL << " left of the bound " << endl;
+				//insert the element properly!
+
+			}
+			//otherwise skip!!
 		}
 		if(tmpLnL > bestLnL){
 			bestLnL = tmpLnL;
+			//cerr << "best changes to " << bestLnL << endl;
 		}
 		sampledCount++;
 	}
 	lnlDelta = bestLnL - worstLnL;
+
 	DUMP("!!!!!!SampleInitialSet sample count R2: " << sampledCount << "\tBest lnl " << bestLnL << "\tworst lnl " << worstLnL << "\ttotal lnl " << totalSampleLnL << "\tdelta " << lnlDelta );
 	//proper sampling
 	while(sampledCount < sampleMaxCount && lnlDelta > sampleDeltaLnL)
@@ -114,28 +135,43 @@ void PairHMMSampler::sampleInitialSet()
 		fwdHmm.sampleAlignment(smpl);
 		tmpLnL = fwdHmm.calculateSampleLnL(smpl);
 
-		totalSampleLnL = maths->logSum(totalSampleLnL, tmpLnL);
+
 
 		if(tmpLnL > worstLnL){
-			samples.pop_front();
-			worstLnL = samples.front().first;
-			//insert the element properly!
 			tmpPair.first = tmpLnL;
-			up = std::upper_bound(samples.begin(),samples.end(), tmpPair);
-			samples.insert(up,make_pair(tmpLnL,smpl));
+			up = std::upper_bound(samples.begin(),samples.end(), tmpPair, [](const pair<double, HMMPathSample> &val,
+					const pair<double, HMMPathSample> &itp)
+					{
+						return ((itp.first - val.first) > 0.000001);
+					});
+			//move one step back
+			up--;
+			if (fabs(up->first - tmpLnL) > 0.000001){
+				totalSampleLnL = maths->logSum(totalSampleLnL, tmpLnL);
+				double tm = up->first;
+				samples.insert(++up,make_pair(tmpLnL,smpl));
+				samples.pop_front();
+				worstLnL = samples.front().first;
+				//cerr << "worst changes to " << worstLnL << endl;
+				//cerr << "worst changes to " << worstLnL << "\t" << tm << "\t is different to " << tmpLnL <<  endl;
+				//insert the element properly!
+			}
+			//otherwise skip!!
 		}
 		if(tmpLnL > bestLnL){
 			bestLnL = tmpLnL;
+			//cerr << "best changes to " << bestLnL << endl;
 		}
 		sampledCount++;
 		lnlDelta = bestLnL - worstLnL;
 	}
 	DUMP("!!!!!!SampleInitialSet sample count R3: " << sampledCount << "\tBest lnl " << bestLnL << "\tworst lnl " << worstLnL << "\ttotal lnl " << totalSampleLnL << "\tdelta " << lnlDelta );
-	//for (auto& ent : samples)
-	//{
-	//	DUMP(ent.first);
-	//}
-	cerr << "Done generating samples" << endl;
+
+	DUMP ("SCORED samples");
+	for (auto& ent : samples){
+		DUMP(ent.first << "\twith weight " << exp(ent.first - totalSampleLnL));
+	}
+
 }
 
 void PairHMMSampler::reSample()
@@ -150,6 +186,7 @@ double PairHMMSampler::runIteration()
 	double result = 0;
 	double time = modelParams.getDivergenceTime(0);
 	fwdHmm.setDivergenceTimeAndCalculateModels(time);
+	/*
 	for (auto &entry : samples){
 		entry.first = fwdHmm.calculateSampleLnL(entry.second);
 		totalSampleLnL = maths->logSum(totalSampleLnL, entry.first);
@@ -157,11 +194,12 @@ double PairHMMSampler::runIteration()
 	for (auto &entry : samples){
 		result += (entry.first * exp(entry.first - totalSampleLnL));
 	}
-
+	 */
 
 	//cerr << "Time " << time << "\tlnL " << result << endl;
 
-	return result * -1.0;
+	return fwdHmm.calculateSampleLnL(samples.back().second) * -1.0;
+	//return result * -1.0;
 }
 
 double PairHMMSampler::optimiseDivergenceTime()
@@ -170,6 +208,7 @@ double PairHMMSampler::optimiseDivergenceTime()
 	lnl = bfgs->optimize();
 	this->divergenceT = modelParams.getDivergenceTime(0);
 	return lnl;
+	//return runIteration();
 }
 
 } /* namespace EBC */

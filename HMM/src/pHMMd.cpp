@@ -169,10 +169,10 @@ int main(int argc, char ** argv) {
 			//if(cmdReader->estimateAlpha())
 			//	alpha = tme->getAlpha();
 
-			cout << "Final indel params" << endl;
+			//cout << "Final indel params" << endl;
 			cout << indelParams[0] << "\t" << indelParams[1] << "\n";
-			cout << "Final subst params" << endl;
-			cout << substParams[0] << endl;
+			//cout << "Final subst params" << endl;
+			//cout << substParams[0] << endl;
 
 			delete tme;
 

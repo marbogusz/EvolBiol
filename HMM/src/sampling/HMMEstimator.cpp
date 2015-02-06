@@ -6,7 +6,7 @@
  */
 
 #include "sampling/HMMEstimator.hpp"
-#include "sampling/ExpTester.hpp"
+//#include "sampling/ExpTester.hpp"
 
 #include <chrono>
 #include <array>
@@ -66,10 +66,17 @@ HMMEstimator::HMMEstimator(Sequences* inputSeqs, Definitions::ModelType model ,
 
 	bfgs = new Optimizer(modelParams, this, Definitions::OptimizationType::BFGS);
 
-	//this->calculateInitialPairs(model);
-	//this->optimise();
-	//this->runIteration();
+	this->calculateInitialPairs(model);
+	this->optimise();
 
+	//cout << "Times : " << endl;
+	//for (auto &worker : sampleWorkers)
+	//{
+	//	cout << worker.getDivergence() << endl;
+//	}
+
+	//this->runIteration();
+/*
     ExpTester tstr;
 
     chrono::time_point<chrono::system_clock> start, end, endD;
@@ -89,7 +96,7 @@ HMMEstimator::HMMEstimator(Sequences* inputSeqs, Definitions::ModelType model ,
 
     cerr << "Exp tester seconds float : " << elapsed_seconds.count() << endl;
     cerr << "Exp tester seconds double : " << elapsed_secondsD.count() << endl;
-
+*/
     //INFO("Model Estimator elapsed time: " << elapsed_seconds.count() << " seconds");
 
 	//substModel->summarize();
@@ -136,8 +143,8 @@ void HMMEstimator::calculateInitialPairs(Definitions::ModelType model)
 	{
 		sampleWorkers.emplace_back(inputSequences->getSequencesAt(tripletIdxs[i][0]), inputSequences->getSequencesAt(tripletIdxs[i][1]),
 				substModel, indelModel, gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][0],tripletIdxs[i][1]) * initTimeModifier);
-		sampleWorkers.emplace_back(inputSequences->getSequencesAt(tripletIdxs[i][1]), inputSequences->getSequencesAt(tripletIdxs[i][2]),
-				substModel, indelModel, gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][1],tripletIdxs[i][2]) * initTimeModifier);
+		//sampleWorkers.emplace_back(inputSequences->getSequencesAt(tripletIdxs[i][1]), inputSequences->getSequencesAt(tripletIdxs[i][2]),
+		//	substModel, indelModel, gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][1],tripletIdxs[i][2]) * initTimeModifier);
 	}
 }
 
