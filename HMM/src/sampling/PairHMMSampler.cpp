@@ -12,7 +12,7 @@ namespace EBC {
 PairHMMSampler::PairHMMSampler(vector<SequenceElement*>* s1, vector<SequenceElement*>* s2,
 		SubstitutionModelBase* smdl, IndelModel* imdl, double initialDivergence) :
 				maths(new Maths()), seq1(s1), seq2(s2), substModel(smdl), indelModel(imdl),
-				divergenceT(initialDivergence), modelParams(nullptr,nullptr, 2, 1, false, false, false, true, maths),
+				divergenceT(0.5/*initialDivergence*/), modelParams(nullptr,nullptr, 2, 1, false, false, false, true, maths),
 				fwdHmm(seq1,seq2, substModel, indelModel, Definitions::DpMatrixType::Full, nullptr,true),
 				vitHmm(seq1,seq2, substModel, indelModel, Definitions::DpMatrixType::Full, nullptr,true)
 {
@@ -198,17 +198,18 @@ double PairHMMSampler::runIteration()
 
 	//cerr << "Time " << time << "\tlnL " << result << endl;
 
-	return fwdHmm.calculateSampleLnL(samples.back().second) * -1.0;
+	//return fwdHmm.calculateSampleLnL(samples.back().second) * -1.0;
+	return fwdHmm.runAlgorithm();
 	//return result * -1.0;
 }
 
 double PairHMMSampler::optimiseDivergenceTime()
 {
 	double lnl;
-	lnl = bfgs->optimize();
-	this->divergenceT = modelParams.getDivergenceTime(0);
-	return lnl;
-	//return runIteration();
+	//lnl = bfgs->optimize();
+	//this->divergenceT = modelParams.getDivergenceTime(0);
+	//return lnl;
+	return runIteration();
 }
 
 } /* namespace EBC */

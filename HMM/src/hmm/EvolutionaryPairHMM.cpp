@@ -121,12 +121,12 @@ void EvolutionaryPairHMM::setTransitionProbabilities()
 	X->setTransitionProbabilityFromMatch(log(g));
 	Y->setTransitionProbabilityFromMatch(log(g));
 
-	//DUMP(" Transition probabilities: ");
-	//DUMP("M->M : " << log(1-2*g));
-	//DUMP("I->I : " << log(e+((1-e)*g)));
-	//DUMP("M->I : " << log(g));
-	//DUMP("I->M : " << log((1-2*g)*(1-e)));
-	//DUMP("I->D : " << log((1-e)*g));
+	DUMP(" Transition probabilities: ");
+	DUMP("M->M : " << log(1-2*g));
+	DUMP("I->I : " << log(e+((1-e)*g)));
+	DUMP("M->I : " << log(g));
+	DUMP("I->M : " << log((1-2*g)*(1-e)));
+	DUMP("I->D : " << log((1-e)*g));
 
 
 }

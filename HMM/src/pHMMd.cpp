@@ -172,7 +172,7 @@ int main(int argc, char ** argv) {
 			//cout << "Final indel params" << endl;
 			cout << indelParams[0] << "\t" << indelParams[1] << "\n";
 			//cout << "Final subst params" << endl;
-			//cout << substParams[0] << endl;
+			cout << substParams[0] << endl;
 
 			delete tme;
 

@@ -111,9 +111,9 @@ void HMMEstimator::calculateInitialPairs(Definitions::ModelType model)
 	double tmpd;
 
 	double initAlpha = 0.75;
-	double initKappa = 2.0;
+	double initKappa = 2.5;
 	double initLambda = 0.02;
-	double initEpsilon = 0.6;
+	double initEpsilon = 0.5;
 	//k-mers tend to underestimate the distances;
 	double initTimeModifier = 1.5;
 
@@ -143,8 +143,8 @@ void HMMEstimator::calculateInitialPairs(Definitions::ModelType model)
 	{
 		sampleWorkers.emplace_back(inputSequences->getSequencesAt(tripletIdxs[i][0]), inputSequences->getSequencesAt(tripletIdxs[i][1]),
 				substModel, indelModel, gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][0],tripletIdxs[i][1]) * initTimeModifier);
-		//sampleWorkers.emplace_back(inputSequences->getSequencesAt(tripletIdxs[i][1]), inputSequences->getSequencesAt(tripletIdxs[i][2]),
-		//	substModel, indelModel, gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][1],tripletIdxs[i][2]) * initTimeModifier);
+		sampleWorkers.emplace_back(inputSequences->getSequencesAt(tripletIdxs[i][1]), inputSequences->getSequencesAt(tripletIdxs[i][2]),
+			substModel, indelModel, gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][1],tripletIdxs[i][2]) * initTimeModifier);
 	}
 }
 
@@ -166,6 +166,7 @@ double EBC::HMMEstimator::runIteration() {
 
 void EBC::HMMEstimator::optimise() {
 	bfgs->optimize();
+	cout << "Divergence begin " << sampleWorkers.begin()->getDivergence() << endl;
 }
 
 
