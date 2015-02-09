@@ -9,7 +9,7 @@
 #define FORWARDPAIRHMM_HPP_
 
 #include "hmm/EvolutionaryPairHMM.hpp"
-#include "sampling/HMMPathSample.hpp"
+
 
 namespace EBC
 {
@@ -40,9 +40,6 @@ public:
 	pair<vector<unsigned char>*, vector<unsigned char>* >* sampleAlignment(Dictionary* dictionary, double& lnl);
 
 	void sampleAlignment(HMMPathSample& sample);
-
-	double calculateSampleLnL(HMMPathSample& sample);
-
 
 };
 

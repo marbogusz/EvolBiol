@@ -9,6 +9,7 @@
 #define VITERBIFULLPAIRHMM_HPP_
 
 #include "hmm/EvolutionaryPairHMM.hpp"
+#include "sampling/HMMPathSample.hpp"
 
 namespace EBC
 {
@@ -35,6 +36,8 @@ public:
 	double runAlgorithm();
 
 	pair<string, string> getAlignment(string&a, string& b);
+
+	void getAlignment(HMMPathSample& sample);
 
 	double getViterbiSubstitutionLikelihood();
 

@@ -24,6 +24,129 @@ ViterbiPairHMM::~ViterbiPairHMM()
 {
 }
 
+void ViterbiPairHMM::getAlignment(HMMPathSample& sample)
+{
+
+	unsigned char gapElem = this->substModel->getMatrixSize(); // last matrix element is the gap ID!
+
+	unsigned int i = xSize-1;
+	unsigned int j = ySize-1;
+
+	double mtProb, inProb, dlProb, currProb, rnbr, tmp;
+	double emission = 0.0;
+
+	//choose initial state
+	PairwiseHmmStateBase* currentState;
+	PairwiseHmmStateBase* previousState;
+
+	mtProb = M->getValueAt(xSize-1, ySize-1);
+	inProb = X->getValueAt(xSize-1, ySize-1);
+	dlProb = Y->getValueAt(xSize-1, ySize-1);
+
+
+
+	//Establish which state is first!
+	//TODO - remove the mess after testing!
+
+	previousState = NULL;
+
+	if(mtProb >= inProb && mtProb >= dlProb )
+		currentState = M;
+	else if (inProb >= dlProb)
+		currentState = X;
+	else currentState = Y;
+
+	currProb = currentState->getValueAt(i,j);
+
+	if (currentState->stateId == Definitions::StateId::Match)
+	{
+		emission = ptmatrix->getLogPairTransition((*seq1)[i-1]->getMatrixIndex(), (*seq2)[j-1]->getMatrixIndex());
+		sample.addSitePattern((*seq1)[i-1]->getMatrixIndex(),(*seq2)[j-1]->getMatrixIndex());
+		i--;
+		j--;
+	}
+	else if (currentState->stateId == Definitions::StateId::Delete)
+	{
+		ptmatrix->getLogEquilibriumFreq((*seq2)[j-1]->getMatrixIndex());
+		sample.addSitePattern(gapElem,(*seq2)[j-1]->getMatrixIndex());
+		j--;
+	}
+	else //Insert
+	{
+		emission = ptmatrix->getLogEquilibriumFreq((*seq1)[i-1]->getMatrixIndex());
+		sample.addSitePattern((*seq1)[i-1]->getMatrixIndex(),gapElem);
+		i--;
+	}
+	mtProb = currentState->getTransitionProbabilityFromMatch() + M->getValueAt(i,j);
+	inProb = currentState->getTransitionProbabilityFromInsert() + X->getValueAt(i,j);
+	dlProb = currentState->getTransitionProbabilityFromDelete() + Y->getValueAt(i,j);
+
+	previousState = currentState;
+
+	//Calculate the rest;
+
+	while(i > 0 && j > 0)
+	{
+		if(mtProb >= inProb && mtProb >= dlProb )
+				currentState = M;
+			else if (inProb >= dlProb)
+				currentState = X;
+			else currentState = Y;
+
+		currProb = currentState->getValueAt(i,j);
+
+		if (currentState->stateId == Definitions::StateId::Match)
+		{
+			emission = ptmatrix->getLogPairTransition((*seq1)[i-1]->getMatrixIndex(), (*seq2)[j-1]->getMatrixIndex());
+			sample.addSitePattern((*seq1)[i-1]->getMatrixIndex(),(*seq2)[j-1]->getMatrixIndex());
+			i--;
+			j--;
+		}
+		else if (currentState->stateId == Definitions::StateId::Delete)
+		{
+			ptmatrix->getLogEquilibriumFreq((*seq2)[j-1]->getMatrixIndex());
+			sample.addSitePattern(gapElem,(*seq2)[j-1]->getMatrixIndex());
+			j--;
+		}
+		else //Insert
+		{
+			emission = ptmatrix->getLogEquilibriumFreq((*seq1)[i-1]->getMatrixIndex());
+			sample.addSitePattern((*seq1)[i-1]->getMatrixIndex(),gapElem);
+			i--;
+		}
+		mtProb = currentState->getTransitionProbabilityFromMatch() + M->getValueAt(i,j);
+		inProb = currentState->getTransitionProbabilityFromInsert() + X->getValueAt(i,j);
+		dlProb = currentState->getTransitionProbabilityFromDelete() + Y->getValueAt(i,j);
+
+		sample.addTransition(currentState->stateId, previousState->stateId );
+
+		previousState = currentState;
+
+	}
+
+	if (j==0)
+	{
+		while(i > 0){
+			currentState = X;
+			sample.addSitePattern((*seq1)[i-1]->getMatrixIndex(),gapElem);
+			sample.addTransition(currentState->stateId, previousState->stateId );
+			previousState = currentState;
+			i--;
+		}
+	}
+	else if (i==0)
+	{
+		while(j > 0){
+			currentState = Y;
+			sample.addSitePattern(gapElem,(*seq2)[j-1]->getMatrixIndex());
+			sample.addTransition(currentState->stateId, previousState->stateId );
+			previousState = currentState;
+			j--;
+		}
+	}
+	sample.setLastState(currentState);
+}
+
 pair<string, string> ViterbiPairHMM::getBestAlignment(string&seq_a, string& seq_b)
 {
 	DUMP("Viterbi HMM get alignment");

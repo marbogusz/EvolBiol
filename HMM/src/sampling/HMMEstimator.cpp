@@ -166,7 +166,7 @@ double EBC::HMMEstimator::runIteration() {
 
 void EBC::HMMEstimator::optimise() {
 	bfgs->optimize();
-	cout << "Divergence begin " << sampleWorkers.begin()->getDivergence() << endl;
+	//cout << "Divergence begin " << sampleWorkers.begin()->getDivergence() << endl;
 }
 
 

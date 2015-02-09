@@ -31,6 +31,8 @@
 
 #include "heuristics/Band.hpp"
 
+#include "sampling/HMMPathSample.hpp"
+
 namespace EBC
 {
 
@@ -145,6 +147,8 @@ public:
 	{
 		return Y;
 	}
+
+	double calculateSampleLnL(HMMPathSample& sample);
 
 	double getAlignmentLikelihood(vector<SequenceElement*>* s1, vector<SequenceElement*>* s2);
 

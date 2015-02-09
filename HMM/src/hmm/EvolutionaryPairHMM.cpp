@@ -121,13 +121,14 @@ void EvolutionaryPairHMM::setTransitionProbabilities()
 	X->setTransitionProbabilityFromMatch(log(g));
 	Y->setTransitionProbabilityFromMatch(log(g));
 
+	/*
 	DUMP(" Transition probabilities: ");
 	DUMP("M->M : " << log(1-2*g));
 	DUMP("I->I : " << log(e+((1-e)*g)));
 	DUMP("M->I : " << log(g));
 	DUMP("I->M : " << log((1-2*g)*(1-e)));
 	DUMP("I->D : " << log((1-e)*g));
-
+*/
 
 }
 
@@ -192,6 +193,37 @@ EvolutionaryPairHMM::~EvolutionaryPairHMM()
 	delete M;
     delete ptmatrix;
     delete tpb;
+}
+
+double EvolutionaryPairHMM::calculateSampleLnL(HMMPathSample& sample)
+{
+	unsigned int gapId = this->substModel->getMatrixSize();
+	double lnl = 0.0;
+	double tmp;
+	unsigned int  cnt;
+
+	for (unsigned int i = 0; i <= gapId; i++)
+		for (unsigned int j = 0; j <= gapId; j++){
+			cnt = sample.getSitePattern(i,j);
+			if (cnt != 0)
+				lnl += cnt * this->ptmatrix->getPairSitePattern(i,j);
+		}
+	for (unsigned int i = 0; i <= Definitions::StateId::Delete; i++)
+		for (unsigned int j = 0; j <= Definitions::StateId::Delete; j++){
+			cnt = sample.getTransition(i,j);
+			if (cnt != 0)
+				lnl += cnt * this->md[i][j];
+		}
+
+	//add the last transition lnl!
+	if (sample.getFirstState() == this->M)
+		lnl += this->initTransM;
+	else if (sample.getFirstState() == this->X)
+		lnl += this->initTransX;
+	else
+		lnl += this->initTransY;
+
+	return lnl;
 }
 
 //FIXME OBSOLETE

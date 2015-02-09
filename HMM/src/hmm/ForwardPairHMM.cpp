@@ -110,37 +110,6 @@ pair<string, string> ForwardPairHMM::getBestAlignment(string&seq_a, string& seq_
 	return alignment;
 }
 
-double ForwardPairHMM::calculateSampleLnL(HMMPathSample& sample)
-{
-	unsigned int gapId = this->substModel->getMatrixSize();
-	double lnl = 0.0;
-	double tmp;
-	unsigned int  cnt;
-
-	for (unsigned int i = 0; i <= gapId; i++)
-		for (unsigned int j = 0; j <= gapId; j++){
-			cnt = sample.getSitePattern(i,j);
-			if (cnt != 0)
-				lnl += cnt * this->ptmatrix->getPairSitePattern(i,j);
-		}
-	for (unsigned int i = 0; i <= Definitions::StateId::Delete; i++)
-		for (unsigned int j = 0; j <= Definitions::StateId::Delete; j++){
-			cnt = sample.getTransition(i,j);
-			if (cnt != 0)
-				lnl += cnt * this->md[i][j];
-		}
-
-	//add the last transition lnl!
-	if (sample.getFirstState() == this->M)
-		lnl += this->initTransM;
-	else if (sample.getFirstState() == this->X)
-		lnl += this->initTransX;
-	else
-		lnl += this->initTransY;
-
-	return lnl;
-}
-
 void ForwardPairHMM::sampleAlignment(HMMPathSample& sample)
 {
 	/*

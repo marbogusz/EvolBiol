@@ -61,6 +61,8 @@ protected:
 	double sampleDeltaLnL;
 	double totalSampleLnL;
 
+	HMMPathSample vitSmpl;
+
 	//log likelihood difference between the best and the worst sample;
 	double sampleDelta;
 
