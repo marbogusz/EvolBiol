@@ -70,8 +70,6 @@ protected:
 
 	void sampleInitialSet();
 
-	void reSample();
-
 public:
 	PairHMMSampler(vector<SequenceElement*>* s1, vector<SequenceElement*>* s2, SubstitutionModelBase* smdl,
 			IndelModel* imdl, double initialDivergence);
@@ -86,6 +84,8 @@ public:
 	{
 		return divergenceT;
 	}
+
+	void reSample();
 };
 
 } /* namespace EBC */
