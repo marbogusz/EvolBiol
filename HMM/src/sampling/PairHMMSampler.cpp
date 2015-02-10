@@ -17,11 +17,11 @@ PairHMMSampler::PairHMMSampler(vector<SequenceElement*>* s1, vector<SequenceElem
 				vitHmm(seq1,seq2, substModel, indelModel, Definitions::DpMatrixType::Full, nullptr,true)
 {
 	fwdHmm.setDivergenceTimeAndCalculateModels(divergenceT);
-	vitHmm.setDivergenceTimeAndCalculateModels(divergenceT);
+	//vitHmm.setDivergenceTimeAndCalculateModels(divergenceT);
 
 
 	forwardLnL = fwdHmm.runAlgorithm();
-	vitHmm.runAlgorithm();
+	//vitHmm.runAlgorithm();
 
 	modelParams.setUserDivergenceParams({divergenceT});
 
@@ -29,7 +29,7 @@ PairHMMSampler::PairHMMSampler(vector<SequenceElement*>* s1, vector<SequenceElem
 
 	bfgs = new Optimizer(&modelParams,this,Definitions::OptimizationType::BFGS);
 
-	sampleCount = Definitions::samplingPathCount;
+	sampleCount = 1000000;//Definitions::samplingPathCount;
 	sampleMinCount = Definitions::samplingPathMinCount;
 	sampleMaxCount = Definitions::samplingPathMaxCount;
 
@@ -88,7 +88,7 @@ void PairHMMSampler::sampleInitialSet()
 	//sort
 	samples.sort();
 	samples.unique(is_near());
-
+/*
 	//now the head points to the lowest lnl element
 	DUMP("!!!!!!SampleInitialSet sample count R1: " << sampledCount << "\tBest lnl " << bestLnL << "\tworst lnl " << worstLnL << "\ttotal lnl " << totalSampleLnL << "\tdesired lnl delta " << sampleDeltaLnL);
 
@@ -181,13 +181,13 @@ void PairHMMSampler::sampleInitialSet()
 	//	for (auto& ent : samples){
 	//		DUMP(ent.first << "\twith weight " << exp(ent.first - totalSampleLnL));
 	//	}
-
+*/
 }
 
 void PairHMMSampler::reSample()
 {
-	fwdHmm.setDivergenceTimeAndCalculateModels(divergenceT);
-	fwdHmm.runAlgorithm();
+	//fwdHmm.setDivergenceTimeAndCalculateModels(divergenceT);
+	//fwdHmm.runAlgorithm();
 
 	//FIXME - delete the 2 below
 	//vitHmm.setDivergenceTimeAndCalculateModels(divergenceT);
@@ -207,15 +207,20 @@ double PairHMMSampler::runIteration()
 	double result = Definitions::minMatrixLikelihood;;
 	double time = modelParams.getDivergenceTime(0);
 	fwdHmm.setDivergenceTimeAndCalculateModels(time);
+	//vitHmm.setDivergenceTimeAndCalculateModels(time);
 
-	//for (auto &entry : samples){
-	//	entry.first = fwdHmm.calculateSampleLnL(entry.second);
-	//	totalSampleLnL = maths->logSum(totalSampleLnL, entry.first);
-	//}
+	//vitHmm.setDivergenceTimeAndCalculateModels(divergenceT);
+	//vitHmm.runAlgorithm();
+
+	for (auto &entry : samples){
+		entry.first = fwdHmm.calculateSampleLnL(entry.second);
+		totalSampleLnL = maths->logSum(totalSampleLnL, entry.first);
+	}
+
 	for (auto &entry : samples){
 		//result = maths->logSum(result, (entry.first + entry.first - totalSampleLnL));
-		//result = maths->logSum(result, (entry.first));
-		result = maths->logSum(result, (fwdHmm.calculateSampleLnL(entry.second)));
+		result = maths->logSum(result, (entry.first));
+		//result = maths->logSum(result, (fwdHmm.calculateSampleLnL(entry.second)));
 	}
 
 	//cerr << "Time " << time << "\tlnL " << result << endl;

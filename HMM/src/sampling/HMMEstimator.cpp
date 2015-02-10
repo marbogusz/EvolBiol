@@ -62,7 +62,7 @@ HMMEstimator::HMMEstimator(Sequences* inputSeqs, Definitions::ModelType model ,
 
 	indelModel = new NegativeBinomialGapModel();
 
-	modelParams = new OptimizedModelParameters(substModel, indelModel, 0, 0, true, true, estimateAlpha, false, maths);
+	modelParams = new OptimizedModelParameters(substModel, indelModel, 0, 0, false, true, estimateAlpha, false, maths);
 
 	bfgs = new Optimizer(modelParams, this, Definitions::OptimizationType::BFGS);
 
@@ -112,7 +112,7 @@ void HMMEstimator::calculateInitialPairs(Definitions::ModelType model)
 
 	double initAlpha = 0.75;
 	double initKappa = 2.5;
-	double initLambda = 0.02;
+	double initLambda = 0.05;
 	double initEpsilon = 0.5;
 	//k-mers tend to underestimate the distances;
 	double initTimeModifier = 1.5;
@@ -171,6 +171,7 @@ void EBC::HMMEstimator::optimise() {
 	bfgs->optimize();
 	//run again!
 
+	/*
 	cerr << modelParams->getIndelParameters()[0] << "\t" << modelParams->getIndelParameters()[1] << endl;
 
 	substModel->setAlpha(modelParams->getAlpha());
@@ -185,6 +186,7 @@ void EBC::HMMEstimator::optimise() {
 	//DUMP("HMM estimator Second Pass ^^^^");
 	bfgs->optimize();
 	//cout << "Divergence begin " << sampleWorkers.begin()->getDivergence() << endl;
+*/
 }
 
 
