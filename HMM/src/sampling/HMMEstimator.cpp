@@ -160,6 +160,9 @@ double EBC::HMMEstimator::runIteration() {
 	{
 		lnl += worker.optimiseDivergenceTime();
 	}
+
+	//cerr << "lnL HMMEST " <<  lnl << "\t" << modelParams->getIndelParameters()[0] << "\t" << modelParams->getIndelParameters()[1] << endl;
+
 	return lnl;
 
 }
@@ -167,10 +170,20 @@ double EBC::HMMEstimator::runIteration() {
 void EBC::HMMEstimator::optimise() {
 	bfgs->optimize();
 	//run again!
-	//for (auto& sw : sampleWorkers){
-	//	sw.reSample();
-	//}
 
+	cerr << modelParams->getIndelParameters()[0] << "\t" << modelParams->getIndelParameters()[1] << endl;
+
+	substModel->setAlpha(modelParams->getAlpha());
+	substModel->setParameters(modelParams->getSubstParameters());
+	substModel->calculateModel();
+	indelModel->setParameters(modelParams->getIndelParameters());
+
+	for (auto& sw : sampleWorkers){
+		//cerr << "Divergence " << sw.getDivergence() << endl;
+		sw.reSample();
+	}
+	//DUMP("HMM estimator Second Pass ^^^^");
+	bfgs->optimize();
 	//cout << "Divergence begin " << sampleWorkers.begin()->getDivergence() << endl;
 }
 

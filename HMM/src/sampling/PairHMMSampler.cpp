@@ -42,7 +42,7 @@ PairHMMSampler::PairHMMSampler(vector<SequenceElement*>* s1, vector<SequenceElem
 	sampleInitialSet();
 	//remove
 
-	vitHmm.getAlignment(vitSmpl);
+	//vitHmm.getAlignment(vitSmpl);
 	//cerr << vitHmm.calculateSampleLnL(vitSmpl) << endl;
 
 }
@@ -176,10 +176,23 @@ void PairHMMSampler::sampleInitialSet()
 		DUMP(ent.first << "\twith weight " << exp(ent.first - totalSampleLnL));
 	}
 
+
+	//DUMP ("SCORED samples");
+	//	for (auto& ent : samples){
+	//		DUMP(ent.first << "\twith weight " << exp(ent.first - totalSampleLnL));
+	//	}
+
 }
 
 void PairHMMSampler::reSample()
 {
+	fwdHmm.setDivergenceTimeAndCalculateModels(divergenceT);
+	fwdHmm.runAlgorithm();
+
+	//FIXME - delete the 2 below
+	//vitHmm.setDivergenceTimeAndCalculateModels(divergenceT);
+	//vitHmm.runAlgorithm();
+
 	samples.clear();
 	this->sampleInitialSet();
 	//vitSmpl
@@ -195,13 +208,14 @@ double PairHMMSampler::runIteration()
 	double time = modelParams.getDivergenceTime(0);
 	fwdHmm.setDivergenceTimeAndCalculateModels(time);
 
-	for (auto &entry : samples){
-		entry.first = fwdHmm.calculateSampleLnL(entry.second);
-		totalSampleLnL = maths->logSum(totalSampleLnL, entry.first);
-	}
+	//for (auto &entry : samples){
+	//	entry.first = fwdHmm.calculateSampleLnL(entry.second);
+	//	totalSampleLnL = maths->logSum(totalSampleLnL, entry.first);
+	//}
 	for (auto &entry : samples){
 		//result = maths->logSum(result, (entry.first + entry.first - totalSampleLnL));
-		result = maths->logSum(result, (entry.first));
+		//result = maths->logSum(result, (entry.first));
+		result = maths->logSum(result, (fwdHmm.calculateSampleLnL(entry.second)));
 	}
 
 	//cerr << "Time " << time << "\tlnL " << result << endl;
@@ -216,10 +230,10 @@ double PairHMMSampler::runIteration()
 double PairHMMSampler::optimiseDivergenceTime()
 {
 	double lnl;
-	/*lnl = bfgs->optimize();
-	this->divergenceT = modelParams.getDivergenceTime(0);
-	return lnl;
-	*/
+	//lnl = bfgs->optimize();
+	//this->divergenceT = modelParams.getDivergenceTime(0);
+	//return lnl;
+
 	return runIteration();
 }
 
