@@ -18,7 +18,6 @@ EvolutionaryPairHMM::EvolutionaryPairHMM(vector<SequenceElement*>* s1, vector<Se
 					substModel(smdl), indelModel(imdl), band(bandObj), equilibriumFreqs(useEquilibriumFreqs)
 {
 	M = X = Y = NULL;
-    equilibriumFreqs = true;
 	this->seq1 = s1;
 	this->seq2 = s2;
 
@@ -182,6 +181,92 @@ void EvolutionaryPairHMM::calculateModels()
 {
 	ptmatrix->calculate();
 	tpb->calculate();
+}
+
+void EvolutionaryPairHMM::getSample(vector<SequenceElement*>* s1, vector<SequenceElement*>* s2, HMMPathSample& sample)
+{
+	unsigned char gapElem = this->substModel->getMatrixSize(); // last matrix element is the gap ID!
+
+	unsigned int i = s1->size();
+	unsigned int j = s2->size();
+	//2 should be equal
+
+
+	PairwiseHmmStateBase* currentState;
+	PairwiseHmmStateBase* previousState;
+
+
+
+	//Establish which state is first!
+	//TODO - remove the mess after testing!
+
+	previousState = NULL;
+
+	if(((*s1)[i-1])->isIsGap())
+		currentState = Y;
+	else if (((*s2)[j-1])->isIsGap())
+		currentState = X;
+	else currentState = M;
+
+	if (currentState->stateId == Definitions::StateId::Match)
+	{
+		sample.addSitePattern((*s1)[i-1]->getMatrixIndex(),(*s2)[j-1]->getMatrixIndex());
+		i--;
+		j--;
+	}
+	else if (currentState->stateId == Definitions::StateId::Delete)
+	{
+		sample.addSitePattern(gapElem,(*seq2)[j-1]->getMatrixIndex());
+		i--;
+		j--;
+	}
+	else //Insert
+	{
+		sample.addSitePattern((*s1)[i-1]->getMatrixIndex(),gapElem);
+		i--;
+		j--;
+	}
+
+	previousState = currentState;
+
+	//Calculate the rest;
+
+	while(i > 0 && j > 0)
+	{
+		if(((*s1)[i-1])->isIsGap())
+			currentState = Y;
+		else if (((*s2)[j-1])->isIsGap())
+			currentState = X;
+		else currentState = M;
+
+
+		if (currentState->stateId == Definitions::StateId::Match)
+		{
+
+			sample.addSitePattern((*s1)[i-1]->getMatrixIndex(),(*s2)[j-1]->getMatrixIndex());
+			i--;
+			j--;
+		}
+		else if (currentState->stateId == Definitions::StateId::Delete)
+		{
+			sample.addSitePattern(gapElem,(*s2)[j-1]->getMatrixIndex());
+			j--;
+			i--;
+		}
+		else //Insert
+		{
+
+			sample.addSitePattern((*s1)[i-1]->getMatrixIndex(),gapElem);
+			i--;
+			j--;
+		}
+		sample.addTransition(currentState->stateId, previousState->stateId );
+
+		previousState = currentState;
+
+	}
+
+	sample.setLastState(currentState);
 }
 
 EvolutionaryPairHMM::~EvolutionaryPairHMM()

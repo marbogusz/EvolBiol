@@ -39,10 +39,11 @@ PairHMMSampler::PairHMMSampler(vector<SequenceElement*>* s1, vector<SequenceElem
 
 	totalSampleLnL = Definitions::minMatrixLikelihood;
 
-	sampleInitialSet();
+	//sampleInitialSet();
 	//remove
 
 	//vitHmm.getAlignment(vitSmpl);
+	//vitHmm.getSample(seq1, seq2, vitSmpl);
 	//cerr << vitHmm.calculateSampleLnL(vitSmpl) << endl;
 
 }
@@ -211,7 +212,7 @@ double PairHMMSampler::runIteration()
 
 	//vitHmm.setDivergenceTimeAndCalculateModels(divergenceT);
 	//vitHmm.runAlgorithm();
-
+/*
 	for (auto &entry : samples){
 		entry.first = fwdHmm.calculateSampleLnL(entry.second);
 		totalSampleLnL = maths->logSum(totalSampleLnL, entry.first);
@@ -222,14 +223,14 @@ double PairHMMSampler::runIteration()
 		result = maths->logSum(result, (entry.first));
 		//result = maths->logSum(result, (fwdHmm.calculateSampleLnL(entry.second)));
 	}
-
+*/
 	//cerr << "Time " << time << "\tlnL " << result << endl;
 
 	//return fwdHmm.calculateSampleLnL(samples.back().second) * -1.0;
 	//vitHmm.setDivergenceTimeAndCalculateModels(time);
 	//return (vitHmm.calculateSampleLnL(vitSmpl) * -1.0);
-	//return fwdHmm.runAlgorithm();
-	return result * -1.0;
+	return fwdHmm.runAlgorithm();
+	//return result * -1.0;
 }
 
 double PairHMMSampler::optimiseDivergenceTime()

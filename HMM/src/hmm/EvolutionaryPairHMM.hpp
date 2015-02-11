@@ -148,6 +148,8 @@ public:
 		return Y;
 	}
 
+	void getSample(vector<SequenceElement*>* s1, vector<SequenceElement*>* s2, HMMPathSample& sample);
+
 	double calculateSampleLnL(HMMPathSample& sample);
 
 	double getAlignmentLikelihood(vector<SequenceElement*>* s1, vector<SequenceElement*>* s2);

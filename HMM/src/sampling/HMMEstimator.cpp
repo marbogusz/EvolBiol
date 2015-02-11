@@ -6,6 +6,7 @@
  */
 
 #include "sampling/HMMEstimator.hpp"
+#include "sampling/PathExtractor.hpp"
 //#include "sampling/ExpTester.hpp"
 
 #include <chrono>
@@ -69,6 +70,32 @@ HMMEstimator::HMMEstimator(Sequences* inputSeqs, Definitions::ModelType model ,
 	this->calculateInitialPairs(model);
 	this->optimise();
 
+	//FIXME - case study start;
+	/*
+	this->calculateInitialPairs(model);
+
+	ForwardPairHMM phmm(inputSequences->getSequencesAt(0), inputSequences->getSequencesAt(1),
+			substModel, indelModel, Definitions::DpMatrixType::Full, nullptr,true);
+	phmm.setDivergenceTimeAndCalculateModels(0.5);
+
+	double fws, vts;
+
+	fws = phmm.runAlgorithm();
+
+	cerr << "FWD lnl " << fws << endl;
+
+	PathExtractor ex(inputSequences->getRawSequenceAt(0), inputSequences->getRawSequenceAt(1), inputSequences->getSequencesAt(0), inputSequences->getSequencesAt(1));
+	ex.genAllSeqs(vector<SequenceElement*>(),vector<SequenceElement*>(),dict->getSequenceElement('-'),0,0,3);
+
+	vts = ex.getSumLnl(&phmm, maths) * -1.0;
+
+	cerr << "SUM lnl " << vts << endl;
+
+	cerr << "Difference " << fws-vts << endl;
+
+
+	//FIXME - case study end
+*/
 	//cout << "Times : " << endl;
 	//for (auto &worker : sampleWorkers)
 	//{
@@ -146,6 +173,7 @@ void HMMEstimator::calculateInitialPairs(Definitions::ModelType model)
 		sampleWorkers.emplace_back(inputSequences->getSequencesAt(tripletIdxs[i][1]), inputSequences->getSequencesAt(tripletIdxs[i][2]),
 			substModel, indelModel, gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][1],tripletIdxs[i][2]) * initTimeModifier);
 	}
+
 }
 
 double EBC::HMMEstimator::runIteration() {
