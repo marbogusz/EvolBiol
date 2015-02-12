@@ -16,12 +16,12 @@ PairHMMSampler::PairHMMSampler(vector<SequenceElement*>* s1, vector<SequenceElem
 				fwdHmm(seq1,seq2, substModel, indelModel, Definitions::DpMatrixType::Full, nullptr,true),
 				vitHmm(seq1,seq2, substModel, indelModel, Definitions::DpMatrixType::Full, nullptr,true)
 {
-	fwdHmm.setDivergenceTimeAndCalculateModels(divergenceT);
-	//vitHmm.setDivergenceTimeAndCalculateModels(divergenceT);
+	//fwdHmm.setDivergenceTimeAndCalculateModels(divergenceT);
+	vitHmm.setDivergenceTimeAndCalculateModels(divergenceT);
 
 
-	forwardLnL = fwdHmm.runAlgorithm();
-	//vitHmm.runAlgorithm();
+	//forwardLnL = fwdHmm.runAlgorithm();
+	vitHmm.runAlgorithm();
 
 	modelParams.setUserDivergenceParams({divergenceT});
 
@@ -42,7 +42,15 @@ PairHMMSampler::PairHMMSampler(vector<SequenceElement*>* s1, vector<SequenceElem
 	//sampleInitialSet();
 	//remove
 
-	//vitHmm.getAlignment(vitSmpl);
+	//output the alignment!!!
+
+	auto val = vitHmm.getStringAlignment();
+
+	INFO("VITERBI ALIGNMENT INITIAL");
+	INFO(val.first);
+	INFO(val.second);
+
+	vitHmm.getAlignment(vitSmpl);
 	//vitHmm.getSample(seq1, seq2, vitSmpl);
 	//cerr << vitHmm.calculateSampleLnL(vitSmpl) << endl;
 
@@ -200,6 +208,15 @@ void PairHMMSampler::reSample()
 	//vitHmm.getAlignment(vitSmpl);
 }
 
+void PairHMMSampler::doExtraStuff(){
+	vitHmm.runAlgorithm();
+	auto val = vitHmm.getStringAlignment();
+
+	INFO("VITERBI ALIGNMENT Final");
+	INFO(val.first);
+	INFO(val.second);
+}
+
 double PairHMMSampler::runIteration()
 {
 
@@ -207,8 +224,8 @@ double PairHMMSampler::runIteration()
 	totalSampleLnL = Definitions::minMatrixLikelihood;
 	double result = Definitions::minMatrixLikelihood;;
 	double time = modelParams.getDivergenceTime(0);
-	fwdHmm.setDivergenceTimeAndCalculateModels(time);
-	//vitHmm.setDivergenceTimeAndCalculateModels(time);
+	//fwdHmm.setDivergenceTimeAndCalculateModels(time);
+	vitHmm.setDivergenceTimeAndCalculateModels(time);
 
 	//vitHmm.setDivergenceTimeAndCalculateModels(divergenceT);
 	//vitHmm.runAlgorithm();
@@ -228,8 +245,8 @@ double PairHMMSampler::runIteration()
 
 	//return fwdHmm.calculateSampleLnL(samples.back().second) * -1.0;
 	//vitHmm.setDivergenceTimeAndCalculateModels(time);
-	//return (vitHmm.calculateSampleLnL(vitSmpl) * -1.0);
-	return fwdHmm.runAlgorithm();
+	return (vitHmm.calculateSampleLnL(vitSmpl) * -1.0);
+	//return fwdHmm.runAlgorithm();
 	//return result * -1.0;
 }
 
@@ -240,7 +257,9 @@ double PairHMMSampler::optimiseDivergenceTime()
 	//this->divergenceT = modelParams.getDivergenceTime(0);
 	//return lnl;
 
-	return runIteration();
+	lnl =  runIteration();
+
+	return lnl;
 }
 
 } /* namespace EBC */

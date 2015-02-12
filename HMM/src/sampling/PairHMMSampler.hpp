@@ -74,6 +74,8 @@ public:
 	PairHMMSampler(vector<SequenceElement*>* s1, vector<SequenceElement*>* s2, SubstitutionModelBase* smdl,
 			IndelModel* imdl, double initialDivergence);
 
+	void doExtraStuff();
+
 	virtual ~PairHMMSampler();
 
 	double runIteration();

@@ -69,7 +69,12 @@ HMMEstimator::HMMEstimator(Sequences* inputSeqs, Definitions::ModelType model ,
 
 	this->calculateInitialPairs(model);
 	this->optimise();
-
+/*
+	for (auto &worker : sampleWorkers)
+	{
+		worker.doExtraStuff();
+	}
+*/
 	//FIXME - case study start;
 	/*
 	this->calculateInitialPairs(model);
@@ -168,9 +173,15 @@ void HMMEstimator::calculateInitialPairs(Definitions::ModelType model)
 
 	for (int i = 0; i < tripletIdxs.size(); i++)
 	{
+		/*
 		sampleWorkers.emplace_back(inputSequences->getSequencesAt(tripletIdxs[i][0]), inputSequences->getSequencesAt(tripletIdxs[i][1]),
 				substModel, indelModel, gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][0],tripletIdxs[i][1]) * initTimeModifier);
 		sampleWorkers.emplace_back(inputSequences->getSequencesAt(tripletIdxs[i][1]), inputSequences->getSequencesAt(tripletIdxs[i][2]),
+			substModel, indelModel, gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][1],tripletIdxs[i][2]) * initTimeModifier);
+		*/
+		//sampleWorkers.emplace_back(inputSequences->getSequencesAt(0), inputSequences->getSequencesAt(1),
+		//				substModel, indelModel, gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][0],tripletIdxs[i][1]) * initTimeModifier);
+		sampleWorkers.emplace_back(inputSequences->getSequencesAt(1), inputSequences->getSequencesAt(2),
 			substModel, indelModel, gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][1],tripletIdxs[i][2]) * initTimeModifier);
 	}
 
