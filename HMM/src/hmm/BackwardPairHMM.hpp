@@ -19,6 +19,9 @@ class BackwardPairHMM: public EBC::EvolutionaryPairHMM
 
 protected:
 
+	//maximum posterior state;
+	PairwiseHmmStateBase* MPstate;
+
 	void getBandWidth()
 	{
 		this->bandSpan = ySize/(bandFactor);
@@ -45,6 +48,11 @@ public:
 	void calculatePosteriors(ForwardPairHMM* fwd);
 
 	double getAlignmentLikelihood(vector<SequenceElement*>* s1, vector<SequenceElement*>* s2, bool post, vector<vector<double> >& posteriors);
+
+	void calculateMaximumPosteriorMatrix();
+
+	//maximum posteriori alignment
+	pair<string, string> getMPAlignment();
 
 };
 

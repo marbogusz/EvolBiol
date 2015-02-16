@@ -22,6 +22,7 @@
 
 #include "hmm/ForwardPairHMM.hpp"
 #include "hmm/ViterbiPairHMM.hpp"
+#include "hmm/BackwardPairHMM.hpp"
 
 #include "sampling/HMMPathSample.hpp"
 
@@ -52,6 +53,7 @@ protected:
 
 	ForwardPairHMM fwdHmm;
 	ViterbiPairHMM vitHmm;
+	BackwardPairHMM bacHmm;
 
 	double forwardLnL;
 

@@ -14,11 +14,20 @@ PairHMMSampler::PairHMMSampler(vector<SequenceElement*>* s1, vector<SequenceElem
 				maths(new Maths()), seq1(s1), seq2(s2), substModel(smdl), indelModel(imdl),
 				divergenceT(0.5/*initialDivergence*/), modelParams(nullptr,nullptr, 2, 1, false, false, false, true, maths),
 				fwdHmm(seq1,seq2, substModel, indelModel, Definitions::DpMatrixType::Full, nullptr,true),
-				vitHmm(seq1,seq2, substModel, indelModel, Definitions::DpMatrixType::Full, nullptr,true)
+				vitHmm(seq1,seq2, substModel, indelModel, Definitions::DpMatrixType::Full, nullptr,true),
+				bacHmm(seq1,seq2, substModel, indelModel, Definitions::DpMatrixType::Full, nullptr)
 {
-	//fwdHmm.setDivergenceTimeAndCalculateModels(divergenceT);
+	fwdHmm.setDivergenceTimeAndCalculateModels(divergenceT);
+	bacHmm.setDivergenceTimeAndCalculateModels(divergenceT);
 	vitHmm.setDivergenceTimeAndCalculateModels(divergenceT);
 
+	fwdHmm.runAlgorithm();
+	bacHmm.runAlgorithm();
+
+	bacHmm.calculatePosteriors(&fwdHmm);
+
+	//now we have posteriors!!!
+	//Calculate MP path - requires a new type of HMM - MP hmm, right ?
 
 	//forwardLnL = fwdHmm.runAlgorithm();
 	vitHmm.runAlgorithm();
@@ -50,7 +59,14 @@ PairHMMSampler::PairHMMSampler(vector<SequenceElement*>* s1, vector<SequenceElem
 	INFO(val.first);
 	INFO(val.second);
 
-	vitHmm.getAlignment(vitSmpl);
+	bacHmm.calculateMaximumPosteriorMatrix();
+	auto vb = bacHmm.getMPAlignment();
+
+	INFO("MP ALIGNMENT INITIAL");
+	INFO(vb.first);
+	INFO(vb.second);
+
+	//vitHmm.getAlignment(vitSmpl);
 	//vitHmm.getSample(seq1, seq2, vitSmpl);
 	//cerr << vitHmm.calculateSampleLnL(vitSmpl) << endl;
 

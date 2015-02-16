@@ -21,10 +21,13 @@ BackwardPairHMM::BackwardPairHMM(vector<SequenceElement*>* s1, vector<SequenceEl
 		IndelModel* imdl,  Definitions::DpMatrixType mt ,Band* bandObj) :
 		EvolutionaryPairHMM(s1,s2, smdl, imdl, mt, bandObj, true)
 {
+	this->MPstate = NULL;
 }
 
 BackwardPairHMM::~BackwardPairHMM()
 {
+	if (MPstate != NULL)
+		delete MPstate;
 }
 
 void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
@@ -38,6 +41,34 @@ void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 
 	fwdT = fwd->getTotalLikelihood();
 
+/*
+	DUMP("MATCH");
+	//DUMP("FORWARD MATRICES");
+	//dynamic_cast<DpMatrixFull*>(fwd->M->getDpMatrix())->outputValues(0);
+	DUMP("BACKWARD MATRICES");
+	dynamic_cast<DpMatrixFull*>(M->getDpMatrix())->outputValues(0);
+	DUMP("\nINSERT");
+	//DUMP("FORWARD MATRICES");
+	//dynamic_cast<DpMatrixFull*>(fwd->X->getDpMatrix())->outputValues(0);
+	DUMP("BACKWARD MATRICES");
+	dynamic_cast<DpMatrixFull*>(X->getDpMatrix())->outputValues(0);
+
+	DUMP("\nDELETE");
+	//DUMP("FORWARD MATRICES");
+	//dynamic_cast<DpMatrixFull*>(fwd->Y->getDpMatrix())->outputValues(0);
+	DUMP("BACKWARD MATRICES");
+	dynamic_cast<DpMatrixFull*>(Y->getDpMatrix())->outputValues(0);
+	//DUMP("#####Match posteriors########");
+
+	//DUMP("#####Insert posteriors########");
+
+	//dynamic_cast<DpMatrixFull*>(X->getDpMatrix())->outputValues(0);
+	//DUMP("#####Delete posteriors########");
+
+	//dynamic_cast<DpMatrixFull*>(Y->getDpMatrix())->outputValues(0);
+
+	DUMP("BACKWARD MATRICES");
+*/
 	for (i = 0; i<xSize-1; i++)
 	{
 		for (j = 0; j<ySize-1; j++)
@@ -52,12 +83,12 @@ void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 		}
 	}
 
-	//DUMP("#####Match posteriors########");
-	//dynamic_cast<DpMatrixFull*>(M->getDpMatrix())->outputValues(0);
-	//DUMP("#####Insert posteriors########");
-	//dynamic_cast<DpMatrixFull*>(X->getDpMatrix())->outputValues(0);
-	//DUMP("#####Delete posteriors########");
-	//dynamic_cast<DpMatrixFull*>(Y->getDpMatrix())->outputValues(0);
+	DUMP("#####Match posteriors########");
+	dynamic_cast<DpMatrixFull*>(M->getDpMatrix())->outputValues(0);
+	DUMP("#####Insert posteriors########");
+	dynamic_cast<DpMatrixFull*>(X->getDpMatrix())->outputValues(0);
+	DUMP("#####Delete posteriors########");
+	dynamic_cast<DpMatrixFull*>(Y->getDpMatrix())->outputValues(0);
 
 }
 
@@ -141,8 +172,15 @@ double BackwardPairHMM::getAlignmentLikelihood(vector<SequenceElement*>* s1,
 
 double BackwardPairHMM::runAlgorithm()
 {
-	unsigned int i;
-	unsigned int j;
+	int i;
+	int j;
+
+	//initial
+	double mL = Definitions::minMatrixLikelihood;
+	//initial insert likelihood
+	double xL = Definitions::minMatrixLikelihood;
+	//initial delete likelihood
+	double yL = Definitions::minMatrixLikelihood;
 
 	double sX,sY,sM, sS;
 
@@ -156,9 +194,9 @@ double BackwardPairHMM::runAlgorithm()
 
 	for (j = ySize-1, i=xSize-1; j >= 0; j--)
 	{
-		bxp = (i==xSize-1) ? -100000 : X->getValueAt(i+1,j) + ptmatrix->getLogEquilibriumFreq((*seq1)[i]->getMatrixIndex());
-		byp = (j==ySize-1) ? -100000 : Y->getValueAt(i,j+1) + ptmatrix->getLogEquilibriumFreq((*seq2)[j]->getMatrixIndex());
-		bmp = (i==xSize-1 ||j==ySize-1) ? -100000 : M->getValueAt(i+1,j+1) + ptmatrix->getLogPairTransition((*seq1)[i]->getMatrixIndex(), (*seq2)[j]->getMatrixIndex());
+		bxp = (i==xSize-1) ? xL : X->getValueAt(i+1,j) + ptmatrix->getLogEquilibriumFreq((*seq1)[i]->getMatrixIndex());
+		byp = (j==ySize-1) ? yL : Y->getValueAt(i,j+1) + ptmatrix->getLogEquilibriumFreq((*seq2)[j]->getMatrixIndex());
+		bmp = (i==xSize-1 ||j==ySize-1) ? mL : M->getValueAt(i+1,j+1) + ptmatrix->getLogPairTransition((*seq1)[i]->getMatrixIndex(), (*seq2)[j]->getMatrixIndex());
 
 		bx = maths->logSum(M->getTransitionProbabilityFromInsert() +  bmp,
 				X->getTransitionProbabilityFromInsert() + bxp,
@@ -174,9 +212,16 @@ double BackwardPairHMM::runAlgorithm()
 
 		if (i==xSize-1  && j==ySize-1)
 		{
+
+			X->setValueAt(i, j, this->piI);
+			Y->setValueAt(i, j, this->piD);
+			M->setValueAt(i, j, this->piM);
+
+/*
 			X->setValueAt(i, j, 0);
 			Y->setValueAt(i, j, 0);
 			M->setValueAt(i, j, 0);
+*/
 		}
 		else
 		{
@@ -187,9 +232,9 @@ double BackwardPairHMM::runAlgorithm()
 	}
 	for (i = xSize-1, j=ySize-1; i >= 0; i--)
 	{
-		bxp = (i==xSize-1) ? -100000 : X->getValueAt(i+1,j) + ptmatrix->getLogEquilibriumFreq((*seq1)[i]->getMatrixIndex());
-		byp = (j==ySize-1) ? -100000 : Y->getValueAt(i,j+1) + ptmatrix->getLogEquilibriumFreq((*seq2)[j]->getMatrixIndex());
-		bmp = (i==xSize-1 ||j==ySize-1) ? -100000 : M->getValueAt(i+1,j+1) + ptmatrix->getLogPairTransition((*seq1)[i]->getMatrixIndex(), (*seq2)[j]->getMatrixIndex());
+		bxp = (i==xSize-1) ? xL : X->getValueAt(i+1,j) + ptmatrix->getLogEquilibriumFreq((*seq1)[i]->getMatrixIndex());
+		byp = (j==ySize-1) ? yL : Y->getValueAt(i,j+1) + ptmatrix->getLogEquilibriumFreq((*seq2)[j]->getMatrixIndex());
+		bmp = (i==xSize-1 ||j==ySize-1) ? mL : M->getValueAt(i+1,j+1) + ptmatrix->getLogPairTransition((*seq1)[i]->getMatrixIndex(), (*seq2)[j]->getMatrixIndex());
 
 		bx = maths->logSum(M->getTransitionProbabilityFromInsert() + bmp,
 				X->getTransitionProbabilityFromInsert() + bxp,
@@ -205,9 +250,17 @@ double BackwardPairHMM::runAlgorithm()
 
 		if (i==xSize-1  && j==ySize-1)
 		{
+
+
+			X->setValueAt(i, j, this->piI);
+			Y->setValueAt(i, j, this->piD);
+			M->setValueAt(i, j, this->piM);
+
+/*
 			X->setValueAt(i, j, 0);
 			Y->setValueAt(i, j, 0);
 			M->setValueAt(i, j, 0);
+*/
 		}
 		else
 		{
@@ -246,6 +299,7 @@ double BackwardPairHMM::runAlgorithm()
 		}
 	}
 
+	//FIXME - set to zero or ml, xl etc..
 	sM = M->getValueAt(0, 0);
 	sX = X->getValueAt(0, 0);
 	sY = Y->getValueAt(0, 0);
@@ -257,5 +311,100 @@ double BackwardPairHMM::runAlgorithm()
 	return sS* -1.0;
 }
 
+void BackwardPairHMM::calculateMaximumPosteriorMatrix() {
+	//any state type will do
+	this->MPstate = new PairwiseHmmMatchState(xSize,ySize);
+
+	double tmpMax;
+	unsigned int k,l;
+	//no need to initialize data
+	//set the P00 to 1 (ln(1) = 0)
+	MPstate->setValueAt(0,0,0);
+	for (unsigned int i = 1 ; i < xSize; i++)
+		for (unsigned int j = 1; j < ySize; j++){
+			k = i-1;
+			l = j-1;
+			tmpMax = std::max(MPstate->getValueAt(k,l)+M->getValueAt(i,j), std::max(MPstate->getValueAt(k,j)+X->getValueAt(i,j), MPstate->getValueAt(i,l)+Y->getValueAt(i,j)));
+			MPstate->setValueAt(i,j,tmpMax);
+		}
+
+	DUMP("MPSTATE matrix ");
+	dynamic_cast<DpMatrixFull*>(MPstate->getDpMatrix())->outputValues(0);
+
+
+}
+
+pair<string, string> BackwardPairHMM::getMPAlignment() {
+	//tarceback through MPstate matrix
+	//similar to viterbi traceback !
+	DUMP("Backward HMM get MP alignment");
+	pair<string, string> alignment;
+
+	//unsigned char gapElem = this->substModel->getMatrixSize();
+
+	//reserve memory for out strings (20% of gaps should be ok)
+	alignment.first.reserve(max(xSize,ySize)*1.2);
+	alignment.second.reserve(max(xSize,ySize)*1.2);
+
+
+	double tm, ti, td;
+
+	unsigned int i = xSize-1;
+	unsigned int j = ySize-1;
+
+	while(i > 0 && j > 0)
+	{
+		tm = MPstate->getValueAt(i-1,j-1);
+		ti = MPstate->getValueAt(i-1,j);
+		td = MPstate->getValueAt(i,j-1);
+
+		if (tm >= ti && td <= ti){
+			//MATCH
+			alignment.first += (*seq1)[i-1]->getSymbol();
+			alignment.second += (*seq2)[j-1]->getSymbol();
+			i--;
+			j--;
+		}
+		else if (ti >= td){
+			//INSERT
+			alignment.first += (*seq1)[i-1]->getSymbol();
+			alignment.second += '-';//gapElem;
+			i--;
+		}
+		else{
+			//DELETE
+			alignment.first += '-';//gapElem;
+			alignment.second += (*seq2)[j-1]->getSymbol();
+			j--;
+		}
+	}
+
+
+	if (j==0)
+	{
+		while(i > 0){
+			alignment.first += (*seq1)[i-1]->getSymbol();
+			alignment.second += '-';
+			i--;
+		}
+	}
+	else if (i==0)
+	{
+		while(j > 0){
+			alignment.second += (*seq2)[j-1]->getSymbol();
+			alignment.first += '-';
+			j--;
+		}
+	}
+	//deal with the last row or column
+
+	reverse(alignment.first.begin(), alignment.first.end());
+	reverse(alignment.second.begin(), alignment.second.end());
+	return alignment;
+
+}
+
 
 } /* namespace EBC */
+
+
