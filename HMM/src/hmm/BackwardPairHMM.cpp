@@ -30,6 +30,102 @@ BackwardPairHMM::~BackwardPairHMM()
 		delete MPstate;
 }
 
+void BackwardPairHMM::getAlignment(HMMPathSample& sample)
+{
+
+	unsigned char gapElem = this->substModel->getMatrixSize(); // last matrix element is the gap ID!
+
+	unsigned int i = xSize-1;
+	unsigned int j = ySize-1;
+
+	//choose initial state
+	PairwiseHmmStateBase* currentState = NULL;
+	PairwiseHmmStateBase* previousState = NULL;
+
+
+	double tm, ti, td;
+
+	tm = MPstate->getValueAt(i-1,j-1);
+	ti = MPstate->getValueAt(i-1,j);
+	td = MPstate->getValueAt(i,j-1);
+
+	if (tm >= ti && tm >= td){
+		previousState = M;
+		sample.addSitePattern((*seq1)[i-1]->getMatrixIndex(),(*seq2)[j-1]->getMatrixIndex());
+		i--;
+		j--;
+	}
+	else if (ti >= td){
+		//INSERT
+		//DUMP("I");
+		previousState = X;
+		sample.addSitePattern((*seq1)[i-1]->getMatrixIndex(),gapElem);
+		i--;
+	}
+	else{
+		//DELETE
+		//DUMP("D");
+		previousState = Y;
+		sample.addSitePattern(gapElem,(*seq2)[j-1]->getMatrixIndex());
+		j--;
+	}
+
+	while(i > 0 && j > 0)
+	{
+		tm = MPstate->getValueAt(i-1,j-1);
+		ti = MPstate->getValueAt(i-1,j);
+		td = MPstate->getValueAt(i,j-1);
+
+		//DUMP(tm << "\t" << ti << "\t" << td);
+
+		if (tm >= ti && tm >= td){
+			currentState = M;
+			sample.addSitePattern((*seq1)[i-1]->getMatrixIndex(),(*seq2)[j-1]->getMatrixIndex());
+			i--;
+			j--;
+		}
+		else if (ti >= td){
+			//INSERT
+			//DUMP("I");
+			currentState = X;
+			sample.addSitePattern((*seq1)[i-1]->getMatrixIndex(),gapElem);
+			i--;
+		}
+		else{
+			//DELETE
+			//DUMP("D");
+			currentState = Y;
+			sample.addSitePattern(gapElem,(*seq2)[j-1]->getMatrixIndex());
+			j--;
+		}
+		sample.addTransition(currentState->stateId, previousState->stateId );
+		previousState = currentState;
+	}
+
+
+	if (j==0)
+	{
+		while(i > 0){
+			currentState = X;
+			sample.addSitePattern((*seq1)[i-1]->getMatrixIndex(),gapElem);
+			sample.addTransition(currentState->stateId, previousState->stateId );
+			previousState = currentState;
+			i--;
+		}
+	}
+	else if (i==0)
+		{
+		while(j > 0){
+			currentState = Y;
+			sample.addSitePattern(gapElem,(*seq2)[j-1]->getMatrixIndex());
+			sample.addTransition(currentState->stateId, previousState->stateId );
+			previousState = currentState;
+			j--;
+		}
+	}
+	sample.setLastState(currentState);
+}
+
 void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 {
 	DEBUG("Calculating posterior probabilities");
@@ -82,14 +178,14 @@ void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 			M->setValueAt(i,j,mval);
 		}
 	}
-
+/*
 	DUMP("#####Match posteriors########");
 	dynamic_cast<DpMatrixFull*>(M->getDpMatrix())->outputValues(0);
 	DUMP("#####Insert posteriors########");
 	dynamic_cast<DpMatrixFull*>(X->getDpMatrix())->outputValues(0);
 	DUMP("#####Delete posteriors########");
 	dynamic_cast<DpMatrixFull*>(Y->getDpMatrix())->outputValues(0);
-
+*/
 }
 
 
@@ -305,8 +401,8 @@ double BackwardPairHMM::runAlgorithm()
 	sY = Y->getValueAt(0, 0);
 	sS = maths->logSum(sM,sX,sY);
 
-	DUMP("Backward results:");
-	DUMP(" sX, sY, sM, sS " << sX << "\t" << sY << "\t" << sM << "\t" << sS);
+	//DUMP("Backward results:");
+	//DUMP(" sX, sY, sM, sS " << sX << "\t" << sY << "\t" << sM << "\t" << sS);
 
 	return sS* -1.0;
 }
@@ -328,8 +424,8 @@ void BackwardPairHMM::calculateMaximumPosteriorMatrix() {
 			MPstate->setValueAt(i,j,tmpMax);
 		}
 
-	DUMP("MPSTATE matrix ");
-	dynamic_cast<DpMatrixFull*>(MPstate->getDpMatrix())->outputValues(0);
+	//DUMP("MPSTATE matrix ");
+	//dynamic_cast<DpMatrixFull*>(MPstate->getDpMatrix())->outputValues(0);
 
 
 }
@@ -358,8 +454,11 @@ pair<string, string> BackwardPairHMM::getMPAlignment() {
 		ti = MPstate->getValueAt(i-1,j);
 		td = MPstate->getValueAt(i,j-1);
 
-		if (tm >= ti && td <= ti){
+		//DUMP(tm << "\t" << ti << "\t" << td);
+
+		if (tm >= ti && tm >= td){
 			//MATCH
+			//DUMP("M");
 			alignment.first += (*seq1)[i-1]->getSymbol();
 			alignment.second += (*seq2)[j-1]->getSymbol();
 			i--;
@@ -367,12 +466,14 @@ pair<string, string> BackwardPairHMM::getMPAlignment() {
 		}
 		else if (ti >= td){
 			//INSERT
+			//DUMP("I");
 			alignment.first += (*seq1)[i-1]->getSymbol();
 			alignment.second += '-';//gapElem;
 			i--;
 		}
 		else{
 			//DELETE
+			//DUMP("D");
 			alignment.first += '-';//gapElem;
 			alignment.second += (*seq2)[j-1]->getSymbol();
 			j--;

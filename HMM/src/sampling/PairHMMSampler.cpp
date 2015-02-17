@@ -12,25 +12,25 @@ namespace EBC {
 PairHMMSampler::PairHMMSampler(vector<SequenceElement*>* s1, vector<SequenceElement*>* s2,
 		SubstitutionModelBase* smdl, IndelModel* imdl, double initialDivergence) :
 				maths(new Maths()), seq1(s1), seq2(s2), substModel(smdl), indelModel(imdl),
-				divergenceT(0.5/*initialDivergence*/), modelParams(nullptr,nullptr, 2, 1, false, false, false, true, maths),
+				divergenceT(initialDivergence), modelParams(nullptr,nullptr, 2, 1, false, false, false, true, maths),
 				fwdHmm(seq1,seq2, substModel, indelModel, Definitions::DpMatrixType::Full, nullptr,true),
 				vitHmm(seq1,seq2, substModel, indelModel, Definitions::DpMatrixType::Full, nullptr,true),
 				bacHmm(seq1,seq2, substModel, indelModel, Definitions::DpMatrixType::Full, nullptr)
 {
 	fwdHmm.setDivergenceTimeAndCalculateModels(divergenceT);
-	bacHmm.setDivergenceTimeAndCalculateModels(divergenceT);
-	vitHmm.setDivergenceTimeAndCalculateModels(divergenceT);
+//	bacHmm.setDivergenceTimeAndCalculateModels(divergenceT);
+	//vitHmm.setDivergenceTimeAndCalculateModels(divergenceT);
 
-	fwdHmm.runAlgorithm();
-	bacHmm.runAlgorithm();
+	//fwdHmm.runAlgorithm();
+	//bacHmm.runAlgorithm();
 
-	bacHmm.calculatePosteriors(&fwdHmm);
+	//bacHmm.calculatePosteriors(&fwdHmm);
 
 	//now we have posteriors!!!
 	//Calculate MP path - requires a new type of HMM - MP hmm, right ?
 
 	//forwardLnL = fwdHmm.runAlgorithm();
-	vitHmm.runAlgorithm();
+	//vitHmm.runAlgorithm();
 
 	modelParams.setUserDivergenceParams({divergenceT});
 
@@ -53,20 +53,21 @@ PairHMMSampler::PairHMMSampler(vector<SequenceElement*>* s1, vector<SequenceElem
 
 	//output the alignment!!!
 
-	auto val = vitHmm.getStringAlignment();
+	//auto val = vitHmm.getStringAlignment();
 
-	INFO("VITERBI ALIGNMENT INITIAL");
-	INFO(val.first);
-	INFO(val.second);
-
+	//INFO("VITERBI ALIGNMENT INITIAL");
+	//INFO(val.first);
+	//INFO(val.second);
+/*
 	bacHmm.calculateMaximumPosteriorMatrix();
 	auto vb = bacHmm.getMPAlignment();
 
 	INFO("MP ALIGNMENT INITIAL");
 	INFO(vb.first);
 	INFO(vb.second);
-
+*/
 	//vitHmm.getAlignment(vitSmpl);
+	//bacHmm.getAlignment(vitSmpl);
 	//vitHmm.getSample(seq1, seq2, vitSmpl);
 	//cerr << vitHmm.calculateSampleLnL(vitSmpl) << endl;
 
@@ -225,10 +226,19 @@ void PairHMMSampler::reSample()
 }
 
 void PairHMMSampler::doExtraStuff(){
-	vitHmm.runAlgorithm();
-	auto val = vitHmm.getStringAlignment();
+	fwdHmm.setDivergenceTimeAndCalculateModels(divergenceT);
+	bacHmm.setDivergenceTimeAndCalculateModels(divergenceT);
+	//vitHmm.setDivergenceTimeAndCalculateModels(divergenceT);
 
-	INFO("VITERBI ALIGNMENT Final");
+	fwdHmm.runAlgorithm();
+	bacHmm.runAlgorithm();
+
+	bacHmm.calculatePosteriors(&fwdHmm);
+	bacHmm.calculateMaximumPosteriorMatrix();
+
+	auto val = bacHmm.getMPAlignment();
+
+	INFO("MP ALIGNMENT Final");
 	INFO(val.first);
 	INFO(val.second);
 }
@@ -241,9 +251,9 @@ double PairHMMSampler::runIteration()
 	double result = Definitions::minMatrixLikelihood;;
 	double time = modelParams.getDivergenceTime(0);
 	//fwdHmm.setDivergenceTimeAndCalculateModels(time);
-	vitHmm.setDivergenceTimeAndCalculateModels(time);
+	fwdHmm.setDivergenceTimeAndCalculateModels(time);
 
-	//vitHmm.setDivergenceTimeAndCalculateModels(divergenceT);
+	//vitHmm.setDivergenceTimeAndCalculateModels(time);
 	//vitHmm.runAlgorithm();
 /*
 	for (auto &entry : samples){
@@ -261,19 +271,19 @@ double PairHMMSampler::runIteration()
 
 	//return fwdHmm.calculateSampleLnL(samples.back().second) * -1.0;
 	//vitHmm.setDivergenceTimeAndCalculateModels(time);
-	return (vitHmm.calculateSampleLnL(vitSmpl) * -1.0);
-	//return fwdHmm.runAlgorithm();
+	//return (vitHmm.calculateSampleLnL(vitSmpl) * -1.0);
+	return fwdHmm.runAlgorithm();
 	//return result * -1.0;
 }
 
 double PairHMMSampler::optimiseDivergenceTime()
 {
 	double lnl;
-	//lnl = bfgs->optimize();
-	//this->divergenceT = modelParams.getDivergenceTime(0);
+	lnl = bfgs->optimize();
+	this->divergenceT = modelParams.getDivergenceTime(0);
 	//return lnl;
 
-	lnl =  runIteration();
+	//lnl =  runIteration();
 
 	return lnl;
 }

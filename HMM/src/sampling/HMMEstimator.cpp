@@ -63,7 +63,7 @@ HMMEstimator::HMMEstimator(Sequences* inputSeqs, Definitions::ModelType model ,
 
 	indelModel = new NegativeBinomialGapModel();
 
-	modelParams = new OptimizedModelParameters(substModel, indelModel, 0, 0, false, true, estimateAlpha, false, maths);
+	modelParams = new OptimizedModelParameters(substModel, indelModel, 0, 0, true, true, estimateAlpha, false, maths);
 
 	bfgs = new Optimizer(modelParams, this, Definitions::OptimizationType::BFGS);
 
@@ -145,7 +145,7 @@ void HMMEstimator::calculateInitialPairs(Definitions::ModelType model)
 	double initAlpha = 0.75;
 	double initKappa = 2.5;
 	double initLambda = 0.05;
-	double initEpsilon = 0.5;
+	double initEpsilon = 0.4;
 	//k-mers tend to underestimate the distances;
 	double initTimeModifier = 1.5;
 
@@ -173,14 +173,14 @@ void HMMEstimator::calculateInitialPairs(Definitions::ModelType model)
 
 	for (int i = 0; i < tripletIdxs.size(); i++)
 	{
-		/*
+
 		sampleWorkers.emplace_back(inputSequences->getSequencesAt(tripletIdxs[i][0]), inputSequences->getSequencesAt(tripletIdxs[i][1]),
 				substModel, indelModel, gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][0],tripletIdxs[i][1]) * initTimeModifier);
 		sampleWorkers.emplace_back(inputSequences->getSequencesAt(tripletIdxs[i][1]), inputSequences->getSequencesAt(tripletIdxs[i][2]),
 			substModel, indelModel, gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][1],tripletIdxs[i][2]) * initTimeModifier);
-		*/
-		sampleWorkers.emplace_back(inputSequences->getSequencesAt(0), inputSequences->getSequencesAt(1),
-						substModel, indelModel, gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][0],tripletIdxs[i][1]) * initTimeModifier);
+
+		//sampleWorkers.emplace_back(inputSequences->getSequencesAt(0), inputSequences->getSequencesAt(1),
+		//				substModel, indelModel, gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][0],tripletIdxs[i][1]) * initTimeModifier);
 		//sampleWorkers.emplace_back(inputSequences->getSequencesAt(1), inputSequences->getSequencesAt(2),
 		//	substModel, indelModel, gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][1],tripletIdxs[i][2]) * initTimeModifier);
 	}
