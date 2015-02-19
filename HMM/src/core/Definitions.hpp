@@ -59,7 +59,7 @@ public:
 	//NEW sampling
 	constexpr static const unsigned int samplingPathMaxCount = 1000000;
 	constexpr static const unsigned int samplingPathMinCount = 50000;
-	constexpr static const unsigned int samplingPathCount = 100;
+	constexpr static const unsigned int samplingPathCount = 1000;
 	constexpr static const double samplingPathLnLDelta = 10.0;
 
 

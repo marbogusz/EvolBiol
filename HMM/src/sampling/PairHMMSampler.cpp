@@ -18,13 +18,13 @@ PairHMMSampler::PairHMMSampler(vector<SequenceElement*>* s1, vector<SequenceElem
 				bacHmm(seq1,seq2, substModel, indelModel, Definitions::DpMatrixType::Full, nullptr)
 {
 	fwdHmm.setDivergenceTimeAndCalculateModels(divergenceT);
-//	bacHmm.setDivergenceTimeAndCalculateModels(divergenceT);
+	bacHmm.setDivergenceTimeAndCalculateModels(divergenceT);
 	//vitHmm.setDivergenceTimeAndCalculateModels(divergenceT);
 
-	//fwdHmm.runAlgorithm();
-	//bacHmm.runAlgorithm();
+	fwdHmm.runAlgorithm();
+	bacHmm.runAlgorithm();
 
-	//bacHmm.calculatePosteriors(&fwdHmm);
+	bacHmm.calculatePosteriors(&fwdHmm);
 
 	//now we have posteriors!!!
 	//Calculate MP path - requires a new type of HMM - MP hmm, right ?
@@ -38,7 +38,7 @@ PairHMMSampler::PairHMMSampler(vector<SequenceElement*>* s1, vector<SequenceElem
 
 	bfgs = new Optimizer(&modelParams,this,Definitions::OptimizationType::BFGS);
 
-	sampleCount = 1000000;//Definitions::samplingPathCount;
+	sampleCount = 10000;//Definitions::samplingPathCount;
 	sampleMinCount = Definitions::samplingPathMinCount;
 	sampleMaxCount = Definitions::samplingPathMaxCount;
 
@@ -58,16 +58,16 @@ PairHMMSampler::PairHMMSampler(vector<SequenceElement*>* s1, vector<SequenceElem
 	//INFO("VITERBI ALIGNMENT INITIAL");
 	//INFO(val.first);
 	//INFO(val.second);
-/*
+
 	bacHmm.calculateMaximumPosteriorMatrix();
 	auto vb = bacHmm.getMPAlignment();
 
 	INFO("MP ALIGNMENT INITIAL");
 	INFO(vb.first);
 	INFO(vb.second);
-*/
+
 	//vitHmm.getAlignment(vitSmpl);
-	//bacHmm.getAlignment(vitSmpl);
+	bacHmm.getAlignment(vitSmpl);
 	//vitHmm.getSample(seq1, seq2, vitSmpl);
 	//cerr << vitHmm.calculateSampleLnL(vitSmpl) << endl;
 
@@ -261,6 +261,9 @@ double PairHMMSampler::runIteration()
 		totalSampleLnL = maths->logSum(totalSampleLnL, entry.first);
 	}
 
+	result = totalSampleLnL;
+*/
+/*
 	for (auto &entry : samples){
 		//result = maths->logSum(result, (entry.first + entry.first - totalSampleLnL));
 		result = maths->logSum(result, (entry.first));
@@ -271,9 +274,9 @@ double PairHMMSampler::runIteration()
 
 	//return fwdHmm.calculateSampleLnL(samples.back().second) * -1.0;
 	//vitHmm.setDivergenceTimeAndCalculateModels(time);
-	//return (vitHmm.calculateSampleLnL(vitSmpl) * -1.0);
-	return fwdHmm.runAlgorithm();
-	//return result * -1.0;
+	return (fwdHmm.calculateSampleLnL(vitSmpl) * -1.0);
+	//return fwdHmm.runAlgorithm();
+	return result * -1.0;
 }
 
 double PairHMMSampler::optimiseDivergenceTime()
