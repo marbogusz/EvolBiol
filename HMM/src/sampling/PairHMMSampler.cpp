@@ -52,13 +52,15 @@ PairHMMSampler::PairHMMSampler(vector<SequenceElement*>* s1, vector<SequenceElem
 	//remove
 
 	//output the alignment!!!
+/*
+	auto val = vitHmm.getStringAlignment();
 
-	//auto val = vitHmm.getStringAlignment();
+	INFO("VITERBI ALIGNMENT INITIAL");
+	INFO(val.first);
+	INFO(val.second);
 
-	//INFO("VITERBI ALIGNMENT INITIAL");
-	//INFO(val.first);
-	//INFO(val.second);
-
+	exit(0);
+	*/
 	bacHmm.calculateMaximumPosteriorMatrix();
 	auto vb = bacHmm.getMPAlignment();
 
@@ -66,8 +68,11 @@ PairHMMSampler::PairHMMSampler(vector<SequenceElement*>* s1, vector<SequenceElem
 	INFO(vb.first);
 	INFO(vb.second);
 
+
+	exit(0);
+
 	//vitHmm.getAlignment(vitSmpl);
-	bacHmm.getAlignment(vitSmpl);
+	//bacHmm.getAlignment(vitSmpl);
 	//vitHmm.getSample(seq1, seq2, vitSmpl);
 	//cerr << vitHmm.calculateSampleLnL(vitSmpl) << endl;
 
@@ -251,9 +256,9 @@ double PairHMMSampler::runIteration()
 	double result = Definitions::minMatrixLikelihood;;
 	double time = modelParams.getDivergenceTime(0);
 	//fwdHmm.setDivergenceTimeAndCalculateModels(time);
-	fwdHmm.setDivergenceTimeAndCalculateModels(time);
+	//fwdHmm.setDivergenceTimeAndCalculateModels(time);
 
-	//vitHmm.setDivergenceTimeAndCalculateModels(time);
+	vitHmm.setDivergenceTimeAndCalculateModels(time);
 	//vitHmm.runAlgorithm();
 /*
 	for (auto &entry : samples){
@@ -274,7 +279,7 @@ double PairHMMSampler::runIteration()
 
 	//return fwdHmm.calculateSampleLnL(samples.back().second) * -1.0;
 	//vitHmm.setDivergenceTimeAndCalculateModels(time);
-	return (fwdHmm.calculateSampleLnL(vitSmpl) * -1.0);
+	return (vitHmm.calculateSampleLnL(vitSmpl) * -1.0);
 	//return fwdHmm.runAlgorithm();
 	return result * -1.0;
 }
@@ -282,11 +287,11 @@ double PairHMMSampler::runIteration()
 double PairHMMSampler::optimiseDivergenceTime()
 {
 	double lnl;
-	lnl = bfgs->optimize();
-	this->divergenceT = modelParams.getDivergenceTime(0);
+	//lnl = bfgs->optimize();
+	//this->divergenceT = modelParams.getDivergenceTime(0);
 	//return lnl;
 
-	//lnl =  runIteration();
+	lnl =  runIteration();
 
 	return lnl;
 }

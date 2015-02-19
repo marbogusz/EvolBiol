@@ -19,7 +19,8 @@ namespace EBC
 {
 
 HMMEstimator::HMMEstimator(Sequences* inputSeqs, Definitions::ModelType model ,
-		Definitions::OptimizationType ot, unsigned int rateCategories, double alpha, bool estimateAlpha) :
+		Definitions::OptimizationType ot, unsigned int rateCategories, double alpha, bool estimateAlpha,
+		vector<double> substP, vector<double> indelP, double dist) :
 				inputSequences(inputSeqs), gammaRateCategories(rateCategories),
 				gtree(new GuideTree(inputSeqs)), tst(*gtree)
 {
@@ -67,7 +68,7 @@ HMMEstimator::HMMEstimator(Sequences* inputSeqs, Definitions::ModelType model ,
 
 	bfgs = new Optimizer(modelParams, this, Definitions::OptimizationType::BFGS);
 
-	this->calculateInitialPairs(model);
+	this->calculateInitialPairs(model,substP, indelP,dist);
 	this->optimise();
 
 	//for (auto &worker : sampleWorkers)
@@ -135,7 +136,7 @@ HMMEstimator::HMMEstimator(Sequences* inputSeqs, Definitions::ModelType model ,
 
 }
 
-void HMMEstimator::calculateInitialPairs(Definitions::ModelType model)
+void HMMEstimator::calculateInitialPairs(Definitions::ModelType model,vector<double> substP, vector<double> indelP, double dist)
 {
 	DEBUG("HMM Estimator - create initial pairs");
 	//amino acid mode
@@ -153,6 +154,7 @@ void HMMEstimator::calculateInitialPairs(Definitions::ModelType model)
 	substModel->setAlpha(initAlpha);
 	modelParams->setAlpha(initAlpha);
 
+	/*
 	if (model == Definitions::ModelType::GTR)
 	{
 		substModel->setParameters({1.0,1.0/initKappa,1.0/initKappa,1.0/initKappa,1.0/initKappa});
@@ -164,23 +166,26 @@ void HMMEstimator::calculateInitialPairs(Definitions::ModelType model)
 		modelParams->setUserSubstParams({initKappa});
 	}
 	//no else - no need to set anything for AAs
+*/
+	substModel->setParameters(substP);
+	modelParams->setUserSubstParams(substP);
 
-	modelParams->setUserIndelParams({initLambda, initEpsilon});
+	modelParams->setUserIndelParams(indelP);
 
 	substModel->calculateModel();
 
-	indelModel->setParameters({initLambda,initEpsilon});
+	indelModel->setParameters(indelP);
 
 	for (int i = 0; i < tripletIdxs.size(); i++)
 	{
 
-		sampleWorkers.emplace_back(inputSequences->getSequencesAt(tripletIdxs[i][0]), inputSequences->getSequencesAt(tripletIdxs[i][1]),
-				substModel, indelModel, gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][0],tripletIdxs[i][1]) * initTimeModifier);
-		sampleWorkers.emplace_back(inputSequences->getSequencesAt(tripletIdxs[i][1]), inputSequences->getSequencesAt(tripletIdxs[i][2]),
-			substModel, indelModel, gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][1],tripletIdxs[i][2]) * initTimeModifier);
+		//sampleWorkers.emplace_back(inputSequences->getSequencesAt(tripletIdxs[i][0]), inputSequences->getSequencesAt(tripletIdxs[i][1]),
+		//		substModel, indelModel, gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][0],tripletIdxs[i][1]) * initTimeModifier);
+		//sampleWorkers.emplace_back(inputSequences->getSequencesAt(tripletIdxs[i][1]), inputSequences->getSequencesAt(tripletIdxs[i][2]),
+		//	substModel, indelModel, gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][1],tripletIdxs[i][2]) * initTimeModifier);
 
-		//sampleWorkers.emplace_back(inputSequences->getSequencesAt(0), inputSequences->getSequencesAt(1),
-		//				substModel, indelModel, gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][0],tripletIdxs[i][1]) * initTimeModifier);
+		sampleWorkers.emplace_back(inputSequences->getSequencesAt(0), inputSequences->getSequencesAt(1),
+						substModel, indelModel, dist);
 		//sampleWorkers.emplace_back(inputSequences->getSequencesAt(1), inputSequences->getSequencesAt(2),
 		//	substModel, indelModel, gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][1],tripletIdxs[i][2]) * initTimeModifier);
 	}

@@ -81,7 +81,7 @@ protected:
 
 	bool estimateAlpha;
 
-	void calculateInitialPairs(Definitions::ModelType model);
+	void calculateInitialPairs(Definitions::ModelType model, vector<double> substP, vector<double> indelP, double dist);
 
 	double runIteration();
 
@@ -90,7 +90,8 @@ protected:
 public:
 	HMMEstimator(Sequences* inputSeqs, Definitions::ModelType model,
 			Definitions::OptimizationType ot,
-			unsigned int rateCategories, double alpha, bool estimateAlpha) ;
+			unsigned int rateCategories, double alpha, bool estimateAlpha,
+			vector<double> substP, vector<double> indelP, double dist) ;
 
 	virtual ~HMMEstimator();
 
