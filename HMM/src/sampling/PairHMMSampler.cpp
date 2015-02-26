@@ -13,18 +13,18 @@ PairHMMSampler::PairHMMSampler(vector<SequenceElement*>* s1, vector<SequenceElem
 		SubstitutionModelBase* smdl, IndelModel* imdl, double initialDivergence) :
 				maths(new Maths()), seq1(s1), seq2(s2), substModel(smdl), indelModel(imdl),
 				divergenceT(initialDivergence), modelParams(nullptr,nullptr, 2, 1, false, false, false, true, maths),
-				fwdHmm(seq1,seq2, substModel, indelModel, Definitions::DpMatrixType::Full, nullptr,true),
-				vitHmm(seq1,seq2, substModel, indelModel, Definitions::DpMatrixType::Full, nullptr,true),
-				bacHmm(seq1,seq2, substModel, indelModel, Definitions::DpMatrixType::Full, nullptr)
+				fwdHmm(seq1,seq2, substModel, indelModel, Definitions::DpMatrixType::Full, nullptr,true)
+				//vitHmm(seq1,seq2, substModel, indelModel, Definitions::DpMatrixType::Full, nullptr,true)//,
+				//bacHmm(seq1,seq2, substModel, indelModel, Definitions::DpMatrixType::Full, nullptr)
 {
-	fwdHmm.setDivergenceTimeAndCalculateModels(divergenceT);
-	bacHmm.setDivergenceTimeAndCalculateModels(divergenceT);
+	//fwdHmm.setDivergenceTimeAndCalculateModels(divergenceT);
+	//bacHmm.setDivergenceTimeAndCalculateModels(divergenceT);
 	//vitHmm.setDivergenceTimeAndCalculateModels(divergenceT);
 
-	fwdHmm.runAlgorithm();
-	bacHmm.runAlgorithm();
+	//fwdHmm.runAlgorithm();
+	//bacHmm.runAlgorithm();
 
-	bacHmm.calculatePosteriors(&fwdHmm);
+	//bacHmm.calculatePosteriors(&fwdHmm);
 
 	//now we have posteriors!!!
 	//Calculate MP path - requires a new type of HMM - MP hmm, right ?
@@ -61,15 +61,15 @@ PairHMMSampler::PairHMMSampler(vector<SequenceElement*>* s1, vector<SequenceElem
 
 	exit(0);
 	*/
-	bacHmm.calculateMaximumPosteriorMatrix();
-	auto vb = bacHmm.getMPAlignment();
+	//bacHmm.calculateMaximumPosteriorMatrix();
+	//auto vb = bacHmm.getMPAlignment();
 
-	INFO("MP ALIGNMENT INITIAL");
-	INFO(vb.first);
-	INFO(vb.second);
+	//INFO("MP ALIGNMENT INITIAL");
+	//INFO(vb.first);
+	//INFO(vb.second);
 
 
-	exit(0);
+	//exit(0);
 
 	//vitHmm.getAlignment(vitSmpl);
 	//bacHmm.getAlignment(vitSmpl);
@@ -85,6 +85,7 @@ PairHMMSampler::~PairHMMSampler()
 
 void PairHMMSampler::sampleInitialSet()
 {
+	/*
 	double bestLnL = Definitions::minMatrixLikelihood;
 	double worstLnL = 0;
 	double lnlDelta;
@@ -119,6 +120,7 @@ void PairHMMSampler::sampleInitialSet()
 	//sort
 	samples.sort();
 	samples.unique(is_near());
+*/
 /*
 	//now the head points to the lowest lnl element
 	DUMP("!!!!!!SampleInitialSet sample count R1: " << sampledCount << "\tBest lnl " << bestLnL << "\tworst lnl " << worstLnL << "\ttotal lnl " << totalSampleLnL << "\tdesired lnl delta " << sampleDeltaLnL);
@@ -231,6 +233,7 @@ void PairHMMSampler::reSample()
 }
 
 void PairHMMSampler::doExtraStuff(){
+	/*
 	fwdHmm.setDivergenceTimeAndCalculateModels(divergenceT);
 	bacHmm.setDivergenceTimeAndCalculateModels(divergenceT);
 	//vitHmm.setDivergenceTimeAndCalculateModels(divergenceT);
@@ -246,6 +249,7 @@ void PairHMMSampler::doExtraStuff(){
 	INFO("MP ALIGNMENT Final");
 	INFO(val.first);
 	INFO(val.second);
+	*/
 }
 
 double PairHMMSampler::runIteration()
@@ -254,12 +258,13 @@ double PairHMMSampler::runIteration()
 	double sumLnl = totalSampleLnL;
 	totalSampleLnL = Definitions::minMatrixLikelihood;
 	double result = Definitions::minMatrixLikelihood;;
+
 	double time = modelParams.getDivergenceTime(0);
 	//fwdHmm.setDivergenceTimeAndCalculateModels(time);
-	//fwdHmm.setDivergenceTimeAndCalculateModels(time);
+	fwdHmm.setDivergenceTimeAndCalculateModels(time);
 
-	vitHmm.setDivergenceTimeAndCalculateModels(time);
-	//vitHmm.runAlgorithm();
+	//vitHmm.setDivergenceTimeAndCalculateModels(time);
+	return fwdHmm.runAlgorithm();
 /*
 	for (auto &entry : samples){
 		entry.first = fwdHmm.calculateSampleLnL(entry.second);
@@ -279,19 +284,21 @@ double PairHMMSampler::runIteration()
 
 	//return fwdHmm.calculateSampleLnL(samples.back().second) * -1.0;
 	//vitHmm.setDivergenceTimeAndCalculateModels(time);
-	return (vitHmm.calculateSampleLnL(vitSmpl) * -1.0);
+	//return (vitHmm.calculateSampleLnL(vitSmpl) * -1.0);
 	//return fwdHmm.runAlgorithm();
-	return result * -1.0;
+	//return result * -1.0;
 }
 
 double PairHMMSampler::optimiseDivergenceTime()
 {
 	double lnl;
-	//lnl = bfgs->optimize();
-	//this->divergenceT = modelParams.getDivergenceTime(0);
+	lnl = bfgs->optimize();
+	this->divergenceT = modelParams.getDivergenceTime(0);
+	//cout << "AASDFASDGASDGA\n";
+	cout << divergenceT;
 	//return lnl;
 
-	lnl =  runIteration();
+	//lnl =  runIteration();
 
 	return lnl;
 }

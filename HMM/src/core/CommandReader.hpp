@@ -10,6 +10,7 @@
 
 #include "core/IParser.hpp"
 #include "core/HmmException.hpp"
+#include "core/Definitions.hpp"
 #include <dlib/cmd_line_parser.h>
 
 namespace EBC

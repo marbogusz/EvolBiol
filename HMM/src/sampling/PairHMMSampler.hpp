@@ -52,8 +52,8 @@ protected:
 	Optimizer* bfgs;
 
 	ForwardPairHMM fwdHmm;
-	ViterbiPairHMM vitHmm;
-	BackwardPairHMM bacHmm;
+	//ViterbiPairHMM vitHmm;
+	//BackwardPairHMM bacHmm;
 
 	double forwardLnL;
 

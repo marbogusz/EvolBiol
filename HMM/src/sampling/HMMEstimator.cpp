@@ -22,22 +22,22 @@ HMMEstimator::HMMEstimator(Sequences* inputSeqs, Definitions::ModelType model ,
 		Definitions::OptimizationType ot, unsigned int rateCategories, double alpha, bool estimateAlpha,
 		vector<double> substP, vector<double> indelP, double dist) :
 				inputSequences(inputSeqs), gammaRateCategories(rateCategories),
-				gtree(new GuideTree(inputSeqs)), tst(*gtree)
+				/*gtree(new GuideTree(inputSeqs)),*/ userAlpha(alpha)//, tst(*gtree)
 {
 	DEBUG("HMM Estimator starting");
-	DEBUG("About to sample some triplets");
-	DEBUG("Sampling triplets of sequences for gamma shape parameter estimation");
+	//DEBUG("About to sample some triplets");
+	//DEBUG("Sampling triplets of sequences for gamma shape parameter estimation");
 	
 	maths = new Maths();
 	dict = inputSequences->getDictionary();
-	tal = new TripletAligner (inputSequences, gtree->getDistanceMatrix());
+	//tal = new TripletAligner (inputSequences, gtree->getDistanceMatrix());
 
-	tripletIdxs = tst.sampleFromTree();
+	//tripletIdxs = tst.sampleFromTree();
 
-	tripletIdxsSize = tripletIdxs.size();
+	//tripletIdxsSize = tripletIdxs.size();
 
 	//2 pairs for every triplet!
-	sampleWorkers.reserve(tripletIdxsSize*2);
+	sampleWorkers.reserve(1);
 
 	//FIXME - release the memory!!!! - delete pair objects and vectors (arrays) of SeqEls
 
@@ -64,13 +64,14 @@ HMMEstimator::HMMEstimator(Sequences* inputSeqs, Definitions::ModelType model ,
 
 	indelModel = new NegativeBinomialGapModel();
 
-	modelParams = new OptimizedModelParameters(substModel, indelModel, 0, 0, false, true, estimateAlpha, false, maths);
+	modelParams = new OptimizedModelParameters(substModel, indelModel, 0, 0, false, false, false, false, maths);
 
-	bfgs = new Optimizer(modelParams, this, Definitions::OptimizationType::BFGS);
+	//bfgs = new Optimizer(modelParams, this, Definitions::OptimizationType::BFGS);
 
 	this->calculateInitialPairs(model,substP, indelP,dist);
-	this->optimise();
+	//this->optimise();
 
+	this->runIteration();
 	//for (auto &worker : sampleWorkers)
 	//{
 	//	worker.doExtraStuff();
@@ -151,8 +152,8 @@ void HMMEstimator::calculateInitialPairs(Definitions::ModelType model,vector<dou
 	double initTimeModifier = 1.5;
 
 	//if rateCat =  1 alpha does not matter.
-	substModel->setAlpha(initAlpha);
-	modelParams->setAlpha(initAlpha);
+	substModel->setAlpha(userAlpha);
+	modelParams->setAlpha(userAlpha);
 
 	/*
 	if (model == Definitions::ModelType::GTR)
@@ -176,6 +177,9 @@ void HMMEstimator::calculateInitialPairs(Definitions::ModelType model,vector<dou
 
 	indelModel->setParameters(indelP);
 
+	sampleWorkers.emplace_back(inputSequences->getSequencesAt(0), inputSequences->getSequencesAt(1),
+							substModel, indelModel, dist);
+	/*
 	for (int i = 0; i < tripletIdxs.size(); i++)
 	{
 
@@ -189,16 +193,17 @@ void HMMEstimator::calculateInitialPairs(Definitions::ModelType model,vector<dou
 		//sampleWorkers.emplace_back(inputSequences->getSequencesAt(1), inputSequences->getSequencesAt(2),
 		//	substModel, indelModel, gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][1],tripletIdxs[i][2]) * initTimeModifier);
 	}
+	*/
 
 }
 
 double EBC::HMMEstimator::runIteration() {
 	double lnl = 0;
 
-	substModel->setAlpha(modelParams->getAlpha());
-	substModel->setParameters(modelParams->getSubstParameters());
-	substModel->calculateModel();
-	indelModel->setParameters(modelParams->getIndelParameters());
+	//substModel->setAlpha(modelParams->getAlpha());
+	//substModel->setParameters(modelParams->getSubstParameters());
+	//substModel->calculateModel();
+	//indelModel->setParameters(modelParams->getIndelParameters());
 
 	for (auto &worker : sampleWorkers)
 	{
@@ -237,8 +242,8 @@ void EBC::HMMEstimator::optimise() {
 HMMEstimator::~HMMEstimator()
 {
     delete maths;
-    delete gtree;
-    delete tal;
+    //delete gtree;
+    //delete tal;
 }
 
 vector<double> HMMEstimator::getSubstitutionParameters()

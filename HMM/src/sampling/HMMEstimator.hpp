@@ -62,10 +62,10 @@ protected:
 	Sequences* inputSequences;
 	Maths* maths;
 
-	GuideTree* gtree;
-	TripletSamplingTree tst;
+	//GuideTree* gtree;
+	//TripletSamplingTree tst;
 
-	TripletAligner* tal;
+	//TripletAligner* tal;
 	ViterbiPairHMM* vphmm;
 
 	OptimizedModelParameters* modelParams;
@@ -80,6 +80,8 @@ protected:
 	unsigned int tripletIdxsSize;
 
 	bool estimateAlpha;
+
+	double userAlpha;
 
 	void calculateInitialPairs(Definitions::ModelType model, vector<double> substP, vector<double> indelP, double dist);
 
@@ -100,11 +102,12 @@ public:
 	vector<double> getIndelParameters();
 
 	double getAlpha();
-
+/*
 	GuideTree* getGuideTree()
 	{
 		return gtree;
 	}
+*/
 };
 
 } /* namespace EBC */

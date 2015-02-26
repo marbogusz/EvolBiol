@@ -147,7 +147,7 @@ int main(int argc, char ** argv) {
 
 			vector<double> indelParams;
 			vector<double> substParams;
-			double alpha = 100;
+			double alpha = alpha = cmdReader->getAlpha();
 
 			double dist =  cmdReader->getDistance();
 			if (dist < 0)
@@ -155,10 +155,11 @@ int main(int argc, char ** argv) {
 
 			substParams = cmdReader->getSubstParams();
 			indelParams = cmdReader->getIndelParams();
-			if(cmdReader->estimateAlpha())
-				alpha = cmdReader->getAlpha();
 
 			//tme->getModelParameters();
+
+			//cerr << "Alpha " << alpha << endl;
+			//cerr << "Rate cat " << cmdReader->getCategories() << endl;
 			INFO("Creating Model Parameters heuristics...");
 			HMMEstimator* tme = new HMMEstimator(inputSeqs, cmdReader->getModelType(),
 					cmdReader->getOptimizationType(), cmdReader->getCategories(), alpha,
@@ -170,7 +171,7 @@ int main(int argc, char ** argv) {
 			//	alpha = tme->getAlpha();
 
 			//cout << "Final indel params" << endl;
-			cout << (1.0-exp(indelParams[0]*-1.0*dist)) << "\t" << indelParams[1] << "\n";
+			//cout << (1.0-exp(indelParams[0]*-1.0*dist)) << "\t" << indelParams[1] << "\n";
 			//cout << "Final subst params" << endl;
 			//cout << substParams[0] << endl;
 
