@@ -64,14 +64,16 @@ HMMEstimator::HMMEstimator(Sequences* inputSeqs, Definitions::ModelType model ,
 
 	indelModel = new NegativeBinomialGapModel();
 
-	modelParams = new OptimizedModelParameters(substModel, indelModel, 0, 0, false, false, false, false, maths);
+	modelParams = new OptimizedModelParameters(substModel, indelModel, 0, 0, false, true, false, false, maths);
 
-	//bfgs = new Optimizer(modelParams, this, Definitions::OptimizationType::BFGS);
+	bfgs = new Optimizer(modelParams, this, Definitions::OptimizationType::BFGS);
 
 	this->calculateInitialPairs(model,substP, indelP,dist);
-	//this->optimise();
+	this->optimise();
 
-	this->runIteration();
+	cout << modelParams->getIndelParameters()[0] << endl;
+
+	//this->runIteration();
 	//for (auto &worker : sampleWorkers)
 	//{
 	//	worker.doExtraStuff();
@@ -203,7 +205,7 @@ double EBC::HMMEstimator::runIteration() {
 	//substModel->setAlpha(modelParams->getAlpha());
 	//substModel->setParameters(modelParams->getSubstParameters());
 	//substModel->calculateModel();
-	//indelModel->setParameters(modelParams->getIndelParameters());
+	indelModel->setParameters(modelParams->getIndelParameters());
 
 	for (auto &worker : sampleWorkers)
 	{

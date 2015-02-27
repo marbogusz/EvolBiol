@@ -259,9 +259,9 @@ double PairHMMSampler::runIteration()
 	totalSampleLnL = Definitions::minMatrixLikelihood;
 	double result = Definitions::minMatrixLikelihood;;
 
-	double time = modelParams.getDivergenceTime(0);
+	//double time = modelParams.getDivergenceTime(0);
 	//fwdHmm.setDivergenceTimeAndCalculateModels(time);
-	fwdHmm.setDivergenceTimeAndCalculateModels(time);
+	fwdHmm.setDivergenceTimeAndCalculateModels(divergenceT);
 
 	//vitHmm.setDivergenceTimeAndCalculateModels(time);
 	return fwdHmm.runAlgorithm();
@@ -292,13 +292,13 @@ double PairHMMSampler::runIteration()
 double PairHMMSampler::optimiseDivergenceTime()
 {
 	double lnl;
-	lnl = bfgs->optimize();
-	this->divergenceT = modelParams.getDivergenceTime(0);
+	//lnl = bfgs->optimize();
+	//this->divergenceT = modelParams.getDivergenceTime(0);
 	//cout << "AASDFASDGASDGA\n";
-	cout << divergenceT;
+	//cout << divergenceT;
 	//return lnl;
 
-	//lnl =  runIteration();
+	lnl =  runIteration();
 
 	return lnl;
 }
