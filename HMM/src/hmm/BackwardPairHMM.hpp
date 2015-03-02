@@ -57,6 +57,9 @@ public:
 	//maximum posteriori alignment
 	pair<string, string> getMPAlignment();
 
+	pair<pair<vector<double>*,vector<double>*>, pair<vector<SequenceElement*>*, vector<SequenceElement*>*> >
+	getMPDWithPosteriors();
+
 };
 
 } /* namespace EBC */

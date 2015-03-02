@@ -429,6 +429,21 @@ void BackwardPairHMM::calculateMaximumPosteriorMatrix() {
 
 
 }
+pair<pair<vector<double>*,vector<double>*>, pair<vector<SequenceElement*>*, vector<SequenceElement*>*> >
+getMPDWithPosteriors(){
+	DUMP("Backward HMM get MPD alignment with posteriors");
+
+
+
+
+
+
+
+
+
+
+
+}
 
 pair<string, string> BackwardPairHMM::getMPAlignment() {
 	//tarceback through MPstate matrix

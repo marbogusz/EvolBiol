@@ -19,7 +19,7 @@ namespace EBC
 ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType model ,
 		Definitions::OptimizationType ot, unsigned int rateCategories, double alpha, bool estimateAlpha) :
 				inputSequences(inputSeqs), gammaRateCategories(rateCategories),
-				gtree(new GuideTree(inputSeqs)), tst(*gtree)
+				gtree(new GuideTree(inputSeqs)), tst(*gtree), estAlpha(estimateAlpha), estIndel(true), estSubst(true)
 {
 
 	DEBUG("About to sample some triplets");
@@ -35,25 +35,10 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 
 	//FIXME - release the memory!!!! - delete pair objects and vectors (arrays) of SeqEls
 
-	this->alSamplesBranch1.resize(tripletIdxsSize);
-	this->alSamplesBranch2.resize(tripletIdxsSize);
-	this->alSamplesTriplet.resize(tripletIdxsSize);
-
-	this->SamplesBranch1Lnls.resize(tripletIdxsSize);
-	this->SamplesBranch2Lnls.resize(tripletIdxsSize);
-	this->SamplesTripletLnls.resize(tripletIdxsSize);
-
-	for (unsigned int i = 0; i < tripletIdxsSize; i++){
-		alSamplesBranch1[i].reserve(Definitions::pathSampleCount);
-		alSamplesBranch2[i].reserve(Definitions::pathSampleCount);
-		alSamplesTriplet[i].reserve(Definitions::pathInformativeCount);
-	}
-
     chrono::time_point<chrono::system_clock> start, end;
     start = chrono::system_clock::now();
 
 	this->calculateInitialHMMs(model);
-	this->sampleAlignments();
 
 	//delete initial simplified model
 	delete substModel;
@@ -78,21 +63,6 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 
 	sme = new SubstitutionModelEstimator(inputSequences, substModel ,ot, rateCategories, alpha, estimateAlpha, tripletIdxs.size());
 	ste = new StateTransitionEstimator(indelModel, ot, 2*tripletIdxs.size(), dict->getGapID());
-
-	estimateParameters();
-	rescoreSamples();
-	estimateParameters();
-	rescoreSamples();
-	estimateParameters();
-	rescoreSamples();
-	estimateParameters();
-
-
-
-
-	//Re-score
-
-
 
 	end = chrono::system_clock::now();
     chrono::duration<double> elapsed_seconds = end-start;
@@ -159,195 +129,6 @@ void ModelEstimator::estimateParameters()
 	ste->clean();
 }
 
-void ModelEstimator::rescoreSamples()
-{
-	DUMP("Model Estimator rescoring samples");
-
-	double totalSampleLnlB1;
-	double totalSampleLnlB2;
-
-	double lnlB1, lnlB2;
-
-	double tb1,tb2,tb3;
-
-	//re-calculate transitions etc.
-	for (unsigned int trpIdx = 0; trpIdx < tripletIdxs.size(); trpIdx++)
-	{
-		tb1 = sme->getTripletDivergence(trpIdx,0);
-		tb2 = sme->getTripletDivergence(trpIdx,1);
-		tb3 = sme->getTripletDivergence(trpIdx,2);
-		samplingHMMs[trpIdx].first->setDivergenceTimeAndCalculateModels(tb1+tb2);
-		samplingHMMs[trpIdx].first->setDivergenceTimeAndCalculateModels(tb3+tb2);
-	}
-
-	for (unsigned int trpIdx = 0; trpIdx < tripletIdxs.size(); trpIdx++)
-	{
-		totalSampleLnlB1 = totalSampleLnlB2 = Definitions::minMatrixLikelihood;
-
-		auto itPr1=alSamplesBranch1[trpIdx].begin();
-		auto itPr2=alSamplesBranch2[trpIdx].begin();
-		auto itTrp=alSamplesTriplet[trpIdx].begin();
-
-		for (unsigned int pos = 0; pos < alSamplesTriplet[trpIdx].size(); pos ++)
-		{
-			lnlB1 = samplingHMMs[trpIdx].first->getAlignmentLikelihood(itPr1->second->first, itPr1->second->second,dict);
-			lnlB2 = samplingHMMs[trpIdx].second->getAlignmentLikelihood(itPr2->second->first, itPr2->second->second,dict);
-
-			itPr1->first = lnlB1;
-			itPr2->first = lnlB2;
-			itTrp->first = lnlB1+lnlB2;
-
-
-			totalSampleLnlB1 = maths->logSum(totalSampleLnlB1, lnlB1);
-			totalSampleLnlB2 = maths->logSum(totalSampleLnlB2, lnlB2);
-			itPr1++;
-			itPr2++;
-			itTrp++;
-		}
-
-		SamplesBranch1Lnls[trpIdx] = totalSampleLnlB1;
-		SamplesBranch2Lnls[trpIdx] = totalSampleLnlB2;
-
-		std::sort(alSamplesBranch1[trpIdx].begin(),alSamplesBranch1[trpIdx].end(),
-				[](const std::pair<double,pair<vector<unsigned char>*, vector<unsigned char>*>* > &left,
-						const std::pair<double,pair<vector<unsigned char>*, vector<unsigned char>*>* > &right)
-			{
-				return left.first >= right.first;
-			}
-		);
-		std::sort(alSamplesBranch2[trpIdx].begin(),alSamplesBranch2[trpIdx].end(),
-				[](const std::pair<double,pair<vector<unsigned char>*, vector<unsigned char>*>* > &left,
-						const std::pair<double,pair<vector<unsigned char>*, vector<unsigned char>*>* > &right)
-				{
-					return left.first >= right.first;
-				}
-		);
-
-		std::sort(alSamplesTriplet[trpIdx].begin(),alSamplesTriplet[trpIdx].end(),
-						[](const std::pair<double, array<vector<unsigned char>*,3>* > &left,
-								const std::pair<double, array<vector<unsigned char>*,3>* > &right)
-						{
-							return left.first >= right.first;
-						}
-				);
-	}
-}
-
-
-void ModelEstimator::sampleAlignments()
-{
-	DEBUG("\n****MODEL ESTIMATOR ALIGNMNENT SAMPLER****\n");
-	//FIXME  - check if maps are empty, zero if not
-	//Same with likelihood values
-	int cap;
-	int sampleCount = Definitions::pathSampleCount;
-	int analysisCount = Definitions::pathInformativeCount;
-	double totalSampleLnlB1;
-	double totalSampleLnlB2;
-	double lnlB1, lnlB2;
-	int ctr;
-
-	//do the first sample
-
-	for (unsigned int trpIdx = 0; trpIdx < samplingHMMs.size(); trpIdx++)
-	{
-		totalSampleLnlB1 = totalSampleLnlB2 = Definitions::minMatrixLikelihood;
-		for(ctr = 1; ctr < sampleCount; ctr++){
-			auto branch1Sample = samplingHMMs[trpIdx].first->sampleAlignment(dict,lnlB1);
-			auto branch2Sample = samplingHMMs[trpIdx].second->sampleAlignment(dict,lnlB2);
-
-			alSamplesBranch1[trpIdx].push_back(make_pair(lnlB1, branch1Sample));
-			alSamplesBranch2[trpIdx].push_back(make_pair(lnlB2, branch2Sample));
-
-			totalSampleLnlB1 = maths->logSum(totalSampleLnlB1, lnlB1);
-			totalSampleLnlB2 = maths->logSum(totalSampleLnlB2, lnlB2);
-		}
-
-		SamplesBranch1Lnls[trpIdx] = totalSampleLnlB1;
-		SamplesBranch2Lnls[trpIdx] = totalSampleLnlB2;
-
-		std::sort(alSamplesBranch1[trpIdx].begin(),alSamplesBranch1[trpIdx].end(),
-			[](const std::pair<double,pair<vector<unsigned char>*, vector<unsigned char>*>* > &left,
-					const std::pair<double,pair<vector<unsigned char>*, vector<unsigned char>*>* > &right)
-			{
-				return (left.first >= right.first);
-			}
-		);
-		std::sort(alSamplesBranch2[trpIdx].begin(),alSamplesBranch2[trpIdx].end(),
-				[](const std::pair<double,pair<vector<unsigned char>*, vector<unsigned char>*>* > &left,
-						const std::pair<double,pair<vector<unsigned char>*, vector<unsigned char>*>* > &right)
-				{
-					return (left.first >= right.first);
-				}
-		);
-
-
-		DUMP("****** Sampler totalSampleLnlB1\t" << totalSampleLnlB1 << " totalSampleLnlB2\t" << totalSampleLnlB2  );
-
-		auto itPr1=alSamplesBranch1[trpIdx].begin();
-		auto itPr2=alSamplesBranch2[trpIdx].begin();
-
-		cap = min(alSamplesBranch1[trpIdx].size(),alSamplesBranch2[trpIdx].size());
-		cap = Definitions::pathInformativeCount < cap ? Definitions::pathInformativeCount : cap;
-
-		DUMP("****** Sampler " << cap << " triple alignments will be added"  );
-
-		for (unsigned int i=0; i < cap; i++)
-		{
-			//auto tripletSample = tal->align(itPr1->second, itPr2->second);
-			DUMP("****** Sampler adding triple alignment with lnl " << (itPr1->first+itPr2->first)
-					<< "\tBranch 1 wt " << exp(itPr1->first - SamplesBranch1Lnls[trpIdx] ) << "\tBranch 2 wt " << exp(itPr2->first - SamplesBranch2Lnls[trpIdx])
-					<< "\tTotal wt " << exp(itPr1->first+itPr2->first-SamplesBranch1Lnls[trpIdx]-SamplesBranch2Lnls[trpIdx]));
-			alSamplesTriplet[trpIdx].push_back(make_pair((itPr1->first+itPr2->first), tal->align(itPr1->second, itPr2->second)));
-			itPr1++;
-			itPr2++;
-		}
-
-		/*
-		map<double, pair<string, string> > alSamples1;
-		map<double, pair<string, string> > alSamples2;
-		for(ctr = 0; ctr < 10000; ctr++){
-			auto pr1 = samplingHMMs[i].first->sampleAlignment(inputSequences->getRawSequenceAt(tripletIdxs[i][0]), inputSequences->getRawSequenceAt(tripletIdxs[i][1]));
-			auto v1= dict->translate(pr1.first);
-			auto v2= dict->translate(pr1.second);
-			double tlnl = samplingHMMs[i].first->getAlignmentLikelihood(v1,v2);
-			alSamples1.insert(make_pair(tlnl, pr1));
-		}
-
-		DUMP("Top 100 alignments String ver");
-			auto its=alSamples1.rbegin();
-			int cap = 100 < alSamples1.size() ? 100 : alSamples1.size();
-
-			for (int c=0;c<cap; c++)
-			{
-				stringstream ss1;
-				DUMP(its->first);
-				DUMP(its->second.first);
-				DUMP(its->second.second);
-				its++;
-			}
-
-		DUMP("Top 100 alignments SeqEL ver");
-		auto it=alSamplesBranch1[i].rbegin();
-		cap = 100 < alSamplesBranch1[i].size() ? 100 : alSamplesBranch1[i].size();
-
-		for (int c=0;c<cap; c++)
-		{
-			stringstream ss1;
-			DUMP(it->first);
-			for (auto el : it->second.first)
-				ss1 << el.getSymbol();
-			DUMP(ss1.str());
-			stringstream ss2;
-			for (auto el : it->second.second)
-				ss2 << el.getSymbol();
-			DUMP(ss2.str());
-			it++;
-		}
-		*/
-	}
-}
-
 void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 {
 	DEBUG("EstimateTripleAligment");
@@ -356,11 +137,15 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 	double tmpd;
 
 	double initAlpha = 0.75;
-	double initKappa = 2.5;
-	double initLambda = 0.02;
+	double initKappa = 2.0;
+	double initLambda = 0.05;
 	double initEpsilon = 0.5;
 	//k-mers tend to underestimate the distances;
 	double initTimeModifier = 1.5;
+
+	vector<double> timeModifiers = {0.75, 1.0, 1.5};
+	vector<double> lambdas = {0.03, 0.07};
+	vector<double> alphas = {0.5,1.0};
 
 	ForwardPairHMM *f1, *f2;
 
@@ -377,20 +162,22 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 	}
 
 
-
 	substModel->setObservedFrequencies(inputSequences->getElementFrequencies());
 	//alpha setting will have no effect if we're dealing with 1 rate category
 	substModel->setAlpha(initAlpha);
 	if (!aaMode)
 		substModel->setParameters({initKappa});
-	substModel->calculateModel();
+	//substModel->calculateModel();
 
 	indelModel = new NegativeBinomialGapModel();
 	indelModel->setParameters({initLambda,initEpsilon});
 
 	vector<pair<Band*, Band*> > bandPairs(tripletIdxs.size());
+
 	vector<array<vector<SequenceElement*>*,3> > seqsA(tripletIdxs.size());
 	vector<array<double,3> > distancesA(tripletIdxs.size());
+
+	vector<array<ForwardPairHMM*,2> > fwdHMMs;
 
 	for (int i = 0; i < tripletIdxs.size(); i++)
 	{
@@ -419,27 +206,85 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 		DUMP("Triplet " << i << " guide distance between seq 2 and 3 " << tmpd);
 		distancesA[i][1] = tmpd;
 		//0-2
-
-
 		tmpd = gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][0],tripletIdxs[i][2]);
 		DUMP("Triplet " << i << " guide distance between seq 1 and 3 " << tmpd);
 		distancesA[i][2] = tmpd;
 		//bandPairs[i] = make_pair(new Band(len1,len2),new Band(len2,len3));
 		bandPairs[i] = make_pair(nullptr,nullptr);
 
+		fwdHMMs[i][0] = new ForwardPairHMM(seqsA[i][0],seqsA[i][1], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].first,true);
+		fwdHMMs[i][1] = new ForwardPairHMM(seqsA[i][1],seqsA[i][2], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].second,true);
+	}
+	double bestLnl = Definitions::minMatrixLikelihood;
+	double currentLnl;
+	double bestA, bestL, bestTm;
 
-		f1 = new ForwardPairHMM(seqsA[i][0],seqsA[i][1], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].first,true);
-		f2 = new ForwardPairHMM(seqsA[i][1],seqsA[i][2], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].second,true);
+	for (auto tm : timeModifiers){
+		for(auto l : lambdas){
+			indelModel->setParameters({l,initEpsilon});
+			for(auto a : alphas){
+				substModel->setAlpha(a);
+				if (estAlpha)
+					substModel->calculateModel();
+				currentLnl = 0;
+				for (int i = 0; i < tripletIdxs.size(); i++){
+					f1 = fwdHMMs[i][0];
+					f2 = fwdHMMs[i][1];
 
-		f1->setDivergenceTimeAndCalculateModels(distancesA[i][0]*initTimeModifier);
-		f2->setDivergenceTimeAndCalculateModels(distancesA[i][1]*initTimeModifier);
+					f1->setDivergenceTimeAndCalculateModels(distancesA[i][0]*tm);
+					f2->setDivergenceTimeAndCalculateModels(distancesA[i][1]*tm);
 
-		f1->runAlgorithm();
-		f2->runAlgorithm();
+					currentLnl += (f1->runAlgorithm() + f2->runAlgorithm()) * -1.0;
+					if (currentLnl > bestLnl){
+						bestLnl = currentLnl;
+						bestA = a;
+						bestL = l;
+						bestTm = tm;
 
-		this->samplingHMMs.push_back(make_pair(f1,f2));
+					}
+				}
+
+			}
+		}
+	}
+	substModel->setAlpha(bestA);
+	if (estAlpha)
+		substModel->calculateModel();
+	indelModel->setParameters({bestL,initEpsilon});
+
+	//Fwd + bwd + MPD
+	for (int i = 0; i < tripletIdxs.size(); i++){
+		f1 = fwdHMMs[i][0];
+		f2 = fwdHMMs[i][1];
+		f1->setDivergenceTimeAndCalculateModels(distancesA[i][0]*bestTm);
+		f2->setDivergenceTimeAndCalculateModels(distancesA[i][1]*bestTm);
+
+		BackwardPairHMM b1(seqsA[i][0],seqsA[i][1], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].first);
+		BackwardPairHMM b2(seqsA[i][1],seqsA[i][2], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].second);
+
+		b1.setDivergenceTimeAndCalculateModels(distancesA[i][0]*bestTm);
+		b2.setDivergenceTimeAndCalculateModels(distancesA[i][1]*bestTm);
+
+		b1.runAlgorithm();
+		b2.runAlgorithm();
+
+		b1.calculatePosteriors(f1);
+		b2.calculatePosteriors(f2);
+
+		b1.calculateMaximumPosteriorMatrix();
+		b2.calculateMaximumPosteriorMatrix();
+
+
+
+		delete f1;
+		delete f2;
 
 	}
+
+
+	//align triplets based on  posteriors
+
+
 }
 
 
