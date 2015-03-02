@@ -595,7 +595,7 @@ double ForwardPairHMM::runAlgorithm()
 
 	//FIXME - multiple runs using the same hmm object do not require dp matrix zeroing as long as the band stays the same!
 
-	DUMP("Forward equilibriums : PiM\t" << piM << "\tPiI\t" << piI << "\tPiD\t" << piD);
+	//DUMP("Forward equilibriums : PiM\t" << piM << "\tPiI\t" << piI << "\tPiD\t" << piD);
 
 	M->initializeData(this->piM);
 	X->initializeData(this->piI);
@@ -738,8 +738,7 @@ double ForwardPairHMM::runAlgorithm()
 
 	//cerr << "\t" << sX << "\t" << sY << "\t"<< sM << "\t" << sS << endl;
 
-	DUMP ("Forward matrix likelihoods:");
-	DUMP (" X, Y, M, Total " << sX << "\t" << sY << "\t" << sM << "\t" << sS);
+	DUMP ("Forward lnls I, D, M, Total " << sX << "\t" << sY << "\t" << sM << "\t" << sS);
 
 	return sS* -1.0;
 }

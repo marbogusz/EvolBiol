@@ -166,7 +166,7 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 	vector<array<vector<SequenceElement*>*,3> > seqsA(tripletIdxs.size());
 	vector<array<double,3> > distancesA(tripletIdxs.size());
 
-	vector<array<ForwardPairHMM*,2> > fwdHMMs;
+	vector<array<ForwardPairHMM*,2> > fwdHMMs(tripletIdxs.size());
 
 	for (int i = 0; i < tripletIdxs.size(); i++)
 	{
@@ -262,6 +262,17 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 
 		b1.calculateMaximumPosteriorMatrix();
 		b2.calculateMaximumPosteriorMatrix();
+
+		auto mp1 = b1.getMPAlignment();
+		auto mp2 = b2.getMPAlignment();
+
+		DUMP("Pair 1 MPD alignment");
+		DUMP(mp1.first);
+		DUMP(mp1.second);
+		DUMP("Pair 2 MPD alignment");
+		DUMP(mp2.first);
+		DUMP(mp2.second);
+
 
 		delete f1;
 		delete f2;
