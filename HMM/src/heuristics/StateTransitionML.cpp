@@ -11,7 +11,7 @@
 namespace EBC
 {
 
-void StateTransitionML::addSample(vector<unsigned char>* s1, vector<unsigned char>* s2, double weight)
+void StateTransitionML::addSample(vector<unsigned char>* s1, vector<unsigned char>* s2)
 {
 	Definitions::StateId previousState;
 
@@ -30,11 +30,11 @@ void StateTransitionML::addSample(vector<unsigned char>* s1, vector<unsigned cha
 		{
 			//Delete
 			if(previousState == Definitions::StateId::Match)
-				counts[Definitions::StateId::Match][Definitions::StateId::Delete] += weight;
+				counts[Definitions::StateId::Match][Definitions::StateId::Delete] += 1;
 			if(previousState == Definitions::StateId::Insert)
-				counts[Definitions::StateId::Insert][Definitions::StateId::Delete] += weight;
+				counts[Definitions::StateId::Insert][Definitions::StateId::Delete] += 1;
 			if(previousState == Definitions::StateId::Delete)
-				counts[Definitions::StateId::Delete][Definitions::StateId::Delete] += weight;
+				counts[Definitions::StateId::Delete][Definitions::StateId::Delete] += 1;
 
 			previousState = Definitions::StateId::Delete;
 		}
@@ -42,22 +42,22 @@ void StateTransitionML::addSample(vector<unsigned char>* s1, vector<unsigned cha
 		{
 			//Insert
 			if(previousState == Definitions::StateId::Match)
-				counts[Definitions::StateId::Match][Definitions::StateId::Insert] += weight;
+				counts[Definitions::StateId::Match][Definitions::StateId::Insert] += 1;
 			if(previousState == Definitions::StateId::Insert)
-				counts[Definitions::StateId::Insert][Definitions::StateId::Insert] += weight;
+				counts[Definitions::StateId::Insert][Definitions::StateId::Insert] += 1;
 			if(previousState == Definitions::StateId::Delete)
-				counts[Definitions::StateId::Delete][Definitions::StateId::Insert] += weight;
+				counts[Definitions::StateId::Delete][Definitions::StateId::Insert] += 1;
 			previousState = Definitions::StateId::Insert;
 		}
 		else
 		{
 			//Match
 			if(previousState == Definitions::StateId::Match)
-				counts[Definitions::StateId::Match][Definitions::StateId::Match] += weight;
+				counts[Definitions::StateId::Match][Definitions::StateId::Match] += 1;
 			if(previousState == Definitions::StateId::Insert)
-				counts[Definitions::StateId::Insert][Definitions::StateId::Match] += weight;
+				counts[Definitions::StateId::Insert][Definitions::StateId::Match] += 1;
 			if(previousState == Definitions::StateId::Delete)
-				counts[Definitions::StateId::Delete][Definitions::StateId::Match] += weight;
+				counts[Definitions::StateId::Delete][Definitions::StateId::Match] += 1;
 
 			previousState = Definitions::StateId::Match;
 		}

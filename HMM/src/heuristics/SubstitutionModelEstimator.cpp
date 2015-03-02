@@ -86,12 +86,12 @@ SubstitutionModelEstimator::~SubstitutionModelEstimator()
 	}
 }
 
-void SubstitutionModelEstimator::addTriplet(array<vector<unsigned char>*, 3>* tripleAlignment, unsigned int trp, double weight)
+void SubstitutionModelEstimator::addTriplet(array<vector<unsigned char>*, 3> tripleAlignment, unsigned int trp)
 {
-	DUMP("SME : adding patterns for triplet " << trp << "\t triplet weight : " << weight);
-	for(int pos = 0; pos < (*tripleAlignment)[0]->size(); pos++)
+	DUMP("SME : adding patterns for triplet " << trp);
+	for(int pos = 0; pos < tripleAlignment[0]->size(); pos++)
 	{
-		patterns[trp][{{(*(*tripleAlignment)[0])[pos], (*(*tripleAlignment)[1])[pos],(*(*tripleAlignment)[2])[pos]}}] += weight;
+		patterns[trp][{{(*tripleAlignment[0])[pos], (*tripleAlignment[1])[pos],(*tripleAlignment[2])[pos]}}] += 1;
 	}
 	//for (auto pat : patterns[trp])
 	//{
@@ -104,6 +104,9 @@ void SubstitutionModelEstimator::optimize()
 
 	bfgs->optimize();
 	INFO("SubstitutionModelEstimator results:");
+
+	substModel->setAlpha(modelParams->getAlpha());
+	substModel->setParameters(modelParams->getSubstParameters());
 
 	modelParams->logParameters();
 /*

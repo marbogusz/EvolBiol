@@ -73,15 +73,9 @@ protected:
 	bool estIndel;
 	bool estSubst;
 
-	//vector<array<vector<SequenceElement>, 3> > tripleAlignments;
-	//vector<array<vector<SequenceElement>, 4> > pairAlignments;
-
-	vector<pair<ForwardPairHMM*, ForwardPairHMM*> > samplingHMMs;
-
-	vector<double> SamplesBranch1Lnls;
-	vector<double> SamplesBranch2Lnls;
-	vector<double> SamplesTripletLnls;
-
+	vector<array<vector<unsigned char>*, 3> > tripleAlignments;
+	vector<array<vector<unsigned char>*, 4> > pairAlignments;
+	vector<array<vector<double>*, 2> > pairwisePosteriors;
 	vector<array<unsigned int, 3> > tripletIdxs;
 
 	unsigned int gammaRateCategories;

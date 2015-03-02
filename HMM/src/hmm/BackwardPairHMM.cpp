@@ -429,20 +429,81 @@ void BackwardPairHMM::calculateMaximumPosteriorMatrix() {
 
 
 }
-pair<pair<vector<double>*,vector<double>*>, pair<vector<SequenceElement*>*, vector<SequenceElement*>*> >
-getMPDWithPosteriors(){
+pair<vector<double>*, pair<vector<unsigned char>*, vector<unsigned char>*> >
+BackwardPairHMM::getMPDWithPosteriors(){
 	DUMP("Backward HMM get MPD alignment with posteriors");
+	pair<vector<double>*, pair<vector<unsigned char>*, vector<unsigned char>*> >
+	ret = make_pair(new vector<double>(),make_pair(new vector<unsigned char>(), new vector<unsigned char>()));
+
+	unsigned char gapElem = this->substModel->getMatrixSize(); // last matrix element is the gap ID!
+
+	double tm, ti, td;
+
+	unsigned int i = xSize-1;
+	unsigned int j = ySize-1;
+
+	//FIXME - which index should I consider while performing a readback ???
+
+	while(i > 0 && j > 0)
+	{
+		tm = MPstate->getValueAt(i-1,j-1);
+		ti = MPstate->getValueAt(i-1,j);
+		td = MPstate->getValueAt(i,j-1);
+
+		//DUMP(tm << "\t" << ti << "\t" << td);
+
+		if (tm >= ti && tm >= td){
+			//MATCH
+			//DUMP("M");
+			ret.second.first->push_back((*seq1)[i-1]->getMatrixIndex());
+			ret.second.second->push_back((*seq2)[j-1]->getMatrixIndex());
+			i--;
+			j--;
+			ret.first->push_back(M->getValueAt(i,j));
+		}
+		else if (ti >= td){
+			//INSERT
+			//DUMP("I");
+			ret.second.first->push_back((*seq1)[i-1]->getMatrixIndex());
+			ret.second.second->push_back(gapElem);//gapElem;
+			i--;
+			ret.first->push_back(X->getValueAt(i,j));
+		}
+		else{
+			//DELETE
+			//DUMP("D");
+			ret.second.first->push_back(gapElem);//gapElem;
+			ret.second.second->push_back((*seq2)[j-1]->getMatrixIndex());
+			j--;
+			ret.first->push_back(Y->getValueAt(i,j));
+		}
+	}
 
 
+	if (j==0)
+	{
+		while(i > 0){
+			ret.second.first->push_back((*seq1)[i-1]->getMatrixIndex());
+			ret.second.second->push_back(gapElem);
+			i--;
+			ret.first->push_back(X->getValueAt(i,j));
+		}
+	}
+	else if (i==0)
+	{
+		while(j > 0){
+			ret.second.second->push_back((*seq2)[j-1]->getMatrixIndex());
+			ret.second.first->push_back(gapElem);
+			j--;
+			ret.first->push_back(Y->getValueAt(i,j));
+		}
+	}
+	//deal with the last row or column
 
-
-
-
-
-
-
-
-
+	reverse(ret.second.first->begin(), ret.second.first->end());
+	reverse(ret.second.second->begin(), ret.second.second->end());
+	reverse(ret.first->begin(), ret.first->end());
+	return ret;
 }
 
 pair<string, string> BackwardPairHMM::getMPAlignment() {

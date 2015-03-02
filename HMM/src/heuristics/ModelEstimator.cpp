@@ -30,8 +30,11 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 	tal = new TripletAligner (inputSequences, gtree->getDistanceMatrix());
 
 	tripletIdxs = tst.sampleFromTree();
-
 	tripletIdxsSize = tripletIdxs.size();
+
+	tripleAlignments.resize(tripletIdxsSize);
+	pairAlignments.resize(tripletIdxsSize);
+	pairwisePosteriors.resize(tripletIdxsSize);
 
 	//FIXME - release the memory!!!! - delete pair objects and vectors (arrays) of SeqEls
 
@@ -39,7 +42,6 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
     start = chrono::system_clock::now();
 
 	this->calculateInitialHMMs(model);
-
 	//delete initial simplified model
 	delete substModel;
 
@@ -62,7 +64,11 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 	substModel->setObservedFrequencies(inputSequences->getElementFrequencies());
 
 	sme = new SubstitutionModelEstimator(inputSequences, substModel ,ot, rateCategories, alpha, estimateAlpha, tripletIdxs.size());
-	ste = new StateTransitionEstimator(indelModel, ot, 2*tripletIdxs.size(), dict->getGapID());
+	ste = new StateTransitionEstimator(indelModel, ot, 2*tripletIdxsSize, dict->getGapID());
+
+	estimateParameters();
+	//recalculateHMMs();
+	//estimateParameters();
 
 	end = chrono::system_clock::now();
     chrono::duration<double> elapsed_seconds = end-start;
@@ -76,21 +82,14 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 
 void ModelEstimator::estimateParameters()
 {
+
 	DUMP("Model Estimator estimate parameters iteration");
 
 	int cap;
-	//cap = Definitions::pathInformativeCount < alSamplesTriplet->size() ? Definitions::pathInformativeCount : alSamplesTriplet->size();
 
 	for(unsigned int trp = 0; trp < tripletIdxsSize; trp++)
 	{
-		auto it= alSamplesTriplet[trp].begin();
-		cap = Definitions::pathInformativeCount < alSamplesTriplet[trp].size() ? Definitions::pathInformativeCount : alSamplesTriplet[trp].size();
-		for (unsigned int i=0; i < cap; i++)
-		{
-			DUMP("About to add triplet with lnl " << it->first << "\ttotal lnl " << (SamplesBranch1Lnls[trp]+SamplesBranch2Lnls[trp]));
-			sme->addTriplet(it->second, trp, (double)exp((it->first)-(SamplesBranch1Lnls[trp]+SamplesBranch2Lnls[trp])));
-			it++;
-		}
+		sme->addTriplet(tripleAlignments[trp], trp);
 	}
 	sme->optimize();
 
@@ -106,19 +105,9 @@ void ModelEstimator::estimateParameters()
 		ste->addTime(tb1+tb2,trp,0);
 		ste->addTime(tb3+tb2,trp,1);
 
-		auto itPr1=alSamplesBranch1[trp].begin();
-		auto itPr2=alSamplesBranch2[trp].begin();
+		ste->addPair(pairAlignments[trp][0],pairAlignments[trp][1],trp,0);
+		ste->addPair(pairAlignments[trp][2],pairAlignments[trp][3],trp,1);
 
-		cap = min(alSamplesBranch1[trp].size(),alSamplesBranch2[trp].size());
-		cap = Definitions::pathInformativeCount < cap ? Definitions::pathInformativeCount : cap;
-
-		for (unsigned int i=0; i < cap; i++)
-		{
-			ste->addPair((itPr1->second)->first,(itPr1->second)->second,trp,0,(double)exp((itPr1->first)-(SamplesBranch1Lnls[trp])));
-			ste->addPair((itPr2->second)->first,(itPr2->second)->second,trp,1,(double)exp((itPr2->first)-(SamplesBranch2Lnls[trp])));
-			itPr1++;
-			itPr2++;
-		}
 	}
 	ste->optimize();
 
@@ -274,17 +263,24 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 		b1.calculateMaximumPosteriorMatrix();
 		b2.calculateMaximumPosteriorMatrix();
 
-
-
 		delete f1;
 		delete f2;
 
+		//store pairs, align triplets
+		pair<vector<double>*, pair<vector<unsigned char>*, vector<unsigned char>*> > alP1 = b1.getMPDWithPosteriors();
+		pair<vector<double>*, pair<vector<unsigned char>*, vector<unsigned char>*> > alP2 = b1.getMPDWithPosteriors();
+
+		pairAlignments[i][0] = alP1.second.first;
+		pairAlignments[i][1] = alP1.second.second;
+		pairAlignments[i][2] = alP2.second.first;
+		pairAlignments[i][3] = alP2.second.second;
+
+		pairwisePosteriors[i][0] = alP1.first;
+		pairwisePosteriors[i][1] = alP2.first;
+
+		tripleAlignments[i] = tal->alignPosteriors(alP1.second, alP2.second, alP1.first, alP2.first);
+
 	}
-
-
-	//align triplets based on  posteriors
-
-
 }
 
 
@@ -292,15 +288,21 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 
 ModelEstimator::~ModelEstimator()
 {
-	for (auto pr : samplingHMMs)
-	{
-		delete pr.first;
-		delete pr.second;
-	}
 
-	this->alSamplesBranch1.resize(tripletIdxs.size());
-	this->alSamplesBranch2.resize(tripletIdxs.size());
-	this->alSamplesTriplet.resize(tripletIdxs.size());
+	for (int i =0; i < tripletIdxsSize; i++)
+	{
+		delete tripleAlignments[i][0];
+		delete tripleAlignments[i][1];
+		delete tripleAlignments[i][2];
+
+		delete pairAlignments[i][0];
+		delete pairAlignments[i][1];
+		delete pairAlignments[i][2];
+		delete pairAlignments[i][3];
+
+		delete pairwisePosteriors[i][0];
+		delete pairwisePosteriors[i][1];
+	}
 
 //FIXME - clean up!
 

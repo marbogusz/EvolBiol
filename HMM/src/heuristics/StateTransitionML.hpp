@@ -33,7 +33,7 @@ protected:
 
 	double md[Definitions::stateCount][Definitions::stateCount];
 	//match,insert, delete
-	double counts[Definitions::stateCount][Definitions::stateCount];
+	unsigned int counts[Definitions::stateCount][Definitions::stateCount];
 	double pis[Definitions::stateCount];
 
 	unsigned char isGap;
@@ -48,7 +48,7 @@ public:
 
 	StateTransitionML(IndelModel* im, double time, unsigned char);
 
-	void addSample(vector<unsigned char>*, vector<unsigned char>* s2, double weight);
+	void addSample(vector<unsigned char>*, vector<unsigned char>* s2);
 
 	double getLnL();
 };

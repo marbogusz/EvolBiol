@@ -47,15 +47,16 @@ void StateTransitionEstimator::addTime(double time, unsigned int triplet, unsign
 }
 
 void StateTransitionEstimator::addPair(vector<unsigned char>* s1,
-		vector<unsigned char>* s2, unsigned int triplet, unsigned int pr, double weight)
+		vector<unsigned char>* s2, unsigned int triplet, unsigned int pr)
 {
-	DUMP("State Transition Estimator add pair for triplet " << triplet << " and pair no " << pr << " with weight " << weight);
-	stmSamples[2*triplet+pr]->addSample(s1,s2, weight);
+	DUMP("State Transition Estimator add pair for triplet " << triplet << " and pair no " << pr );
+	stmSamples[2*triplet+pr]->addSample(s1,s2);
 }
 
 void StateTransitionEstimator::optimize()
 {
 	bfgs->optimize();
+	indelModel->setParameters(modelParams->getIndelParameters());
 	INFO("StateTransitionEstimator results:");
 	modelParams->logParameters();
 	//modelParams->outputParameters();

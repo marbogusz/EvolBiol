@@ -13,6 +13,7 @@
 #include "core/SequenceElement.hpp"
 #include <array>
 #include <vector>
+#include <cmath>
 
 using namespace std;
 
@@ -50,6 +51,9 @@ public:
 	array<vector<SequenceElement*>*, 3>* align(pair<vector<SequenceElement*>*, vector<SequenceElement*>* >* p1, pair<vector<SequenceElement*>*, vector<SequenceElement*>* >* p2);
 
 	array<vector<unsigned char>*, 3>* align(pair<vector<unsigned char>*, vector<unsigned char>* >* p1, pair<vector<unsigned char>*, vector<unsigned char>* >* p2);
+
+	array<vector<unsigned char>*, 3> alignPosteriors(pair<vector<unsigned char>*, vector<unsigned char>* > p1,
+			pair<vector<unsigned char>*, vector<unsigned char>* > p2, vector<double>* postP1, vector<double>* postP2);
 };
 
 } /* namespace EBC */

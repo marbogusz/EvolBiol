@@ -45,7 +45,7 @@ protected:
 
 	vector<array<PMatrixTriple* ,3> > ptMatrices;
 
-	vector<map<array<unsigned char, 3>, double> > patterns;
+	vector<map<array<unsigned char, 3>, unsigned int> > patterns;
 
 	unsigned int gammaRateCategories;
 
@@ -65,7 +65,7 @@ public:
 
 	virtual ~SubstitutionModelEstimator();
 
-	void addTriplet(array<vector<unsigned char>*, 3>* tripleAlignment, unsigned int tiplet, double weight);
+	void addTriplet(array<vector<unsigned char>*, 3> tripleAlignment, unsigned int tiplet);
 
 	double runIteration();
 

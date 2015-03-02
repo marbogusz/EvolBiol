@@ -38,7 +38,7 @@ public:
 
 	void addTime(double time, unsigned int triplet, unsigned int pr);
 
-	void addPair(vector<unsigned char>* s1, vector<unsigned char>* s2, unsigned int triplet, unsigned int pr, double weight);
+	void addPair(vector<unsigned char>* s1, vector<unsigned char>* s2, unsigned int triplet, unsigned int pr);
 
 	double runIteration();
 

@@ -161,7 +161,24 @@ int main(int argc, char ** argv) {
 			//cerr << "Alpha " << alpha << endl;
 			//cerr << "Rate cat " << cmdReader->getCategories() << endl;
 			INFO("Creating Model Parameters heuristics...");
-			HMMEstimator* tme = new HMMEstimator(inputSeqs, cmdReader->getModelType(),
+
+			ModelEstimator* tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),
+					cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
+					cmdReader->estimateAlpha());
+
+			//tme->getModelParameters();
+			substParams = tme->getSubstitutionParameters();
+			indelParams = tme->getIndelParameters();
+			if(cmdReader->estimateAlpha())
+				alpha = tme->getAlpha();
+
+			cout << indelParams[0] << '\t' << indelParams[1] << endl;
+
+			delete tme;
+
+
+
+			/*HMMEstimator* tme = new HMMEstimator(inputSeqs, cmdReader->getModelType(),
 					cmdReader->getOptimizationType(), cmdReader->getCategories(), alpha,
 					cmdReader->estimateAlpha(), substParams, indelParams, dist);
 
@@ -175,7 +192,7 @@ int main(int argc, char ** argv) {
 			//cout << "Final subst params" << endl;
 			//cout << substParams[0] << endl;
 
-			delete tme;
+			delete tme;*/
 
 		}
 

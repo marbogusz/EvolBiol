@@ -57,7 +57,7 @@ public:
 	//maximum posteriori alignment
 	pair<string, string> getMPAlignment();
 
-	pair<pair<vector<double>*,vector<double>*>, pair<vector<SequenceElement*>*, vector<SequenceElement*>*> >
+	pair<vector<double>*, pair<vector<unsigned char>*, vector<unsigned char>*> >
 	getMPDWithPosteriors();
 
 };
