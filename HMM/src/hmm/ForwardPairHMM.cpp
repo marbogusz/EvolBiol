@@ -685,7 +685,7 @@ double ForwardPairHMM::runAlgorithm()
 			loM = bracketM.first;
 			loD = bracketD.first;
 
-			if (loD != -1)
+			if (loD > -1)
 			{
 				hiD = bracketD.second;
 				for(i = loD; i <= hiD; i++)

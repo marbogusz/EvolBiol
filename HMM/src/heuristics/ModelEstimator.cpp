@@ -69,8 +69,8 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 	ste = new StateTransitionEstimator(indelModel, ot, 2*tripletIdxsSize, dict->getGapID(),false);
 
 	estimateParameters();
-	recalculateHMMs();
-	estimateParameters();
+	//recalculateHMMs();
+	//estimateParameters();
 
 	end = chrono::system_clock::now();
     chrono::duration<double> elapsed_seconds = end-start;
@@ -285,8 +285,8 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 		tmpd = gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][0],tripletIdxs[i][2]);
 		DUMP("Triplet " << i << " guide distance between seq 1 and 3 " << tmpd);
 		distancesA[i][2] = tmpd;
-		//bandPairs[i] = make_pair(new Band(len1,len2),new Band(len2,len3));
-		bandPairs[i] = make_pair(nullptr,nullptr);
+		bandPairs[i] = make_pair(new Band(len1,len2),new Band(len2,len3));
+		//bandPairs[i] = make_pair(nullptr,nullptr);
 
 		fwdHMMs[i][0] = new ForwardPairHMM(seqsA[i][0],seqsA[i][1], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].first,true);
 		fwdHMMs[i][1] = new ForwardPairHMM(seqsA[i][1],seqsA[i][2], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].second,true);
@@ -340,8 +340,8 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 		f1->runAlgorithm();
 		f2->runAlgorithm();
 
-		BackwardPairHMM b1(seqsA[i][0],seqsA[i][1], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].first);
-		BackwardPairHMM b2(seqsA[i][1],seqsA[i][2], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].second);
+		BackwardPairHMM b1(seqsA[i][0],seqsA[i][1], substModel, indelModel, Definitions::DpMatrixType::Full, nullptr/*bandPairs[i].first*/);
+		BackwardPairHMM b2(seqsA[i][1],seqsA[i][2], substModel, indelModel, Definitions::DpMatrixType::Full, nullptr/*bandPairs[i].second*/);
 
 		b1.setDivergenceTimeAndCalculateModels(distancesA[i][0]*bestTm);
 		b2.setDivergenceTimeAndCalculateModels(distancesA[i][1]*bestTm);

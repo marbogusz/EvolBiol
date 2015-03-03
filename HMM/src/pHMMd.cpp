@@ -175,7 +175,6 @@ int main(int argc, char ** argv) {
 			cout << alpha << '\t' << indelParams[0] << '\t' << indelParams[1];
 			for (auto param : substParams)
 				cout  << '\t' << param;
-			cout << endl;
 
 			delete tme;
 
