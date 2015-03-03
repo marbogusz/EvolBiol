@@ -172,7 +172,10 @@ int main(int argc, char ** argv) {
 			if(cmdReader->estimateAlpha())
 				alpha = tme->getAlpha();
 
-			cout << indelParams[0] << '\t' << indelParams[1] << endl;
+			cout << alpha << '\t' << indelParams[0] << '\t' << indelParams[1];
+			for (auto param : substParams)
+				cout  << '\t' << param;
+			cout << endl;
 
 			delete tme;
 

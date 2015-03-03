@@ -22,6 +22,8 @@ void StateTransitionML::addSample(vector<unsigned char>* s1, vector<unsigned cha
 	else
 		previousState = Definitions::StateId::Match;
 
+	firstState = previousState;
+
 
 
 	for(int pos = 1; pos < s1->size(); pos++)
@@ -65,7 +67,7 @@ void StateTransitionML::addSample(vector<unsigned char>* s1, vector<unsigned cha
 
 }
 
-StateTransitionML::StateTransitionML(IndelModel* im, double tme, unsigned char gap) : isGap(gap)
+StateTransitionML::StateTransitionML(IndelModel* im, double tme, unsigned char gap, bool stEq) : isGap(gap), useStateEq(stEq)
 {
 	this->tpb = new TransitionProbabilities(im);
 	this->time = tme;
@@ -118,14 +120,22 @@ double StateTransitionML::getLnL()
 	g = tpb->getGapOpening();
 
 	calculateParameters();
+
 	calculatePIs();
 
 	for(int i = 0; i < Definitions::stateCount; i++)
 			for(int j = 0; j<Definitions::stateCount; j++)
 			{
 				//go through site patterns
-				lnl += counts[i][j] * log(pis[i]*md[i][j]);
+				if (this->useStateEq)
+					lnl += counts[i][j] * log(pis[i]*md[i][j]);
+				else
+					lnl += counts[i][j] * log(md[i][j]);
 			}
+	if(!useStateEq){
+		lnl += log((md[0][firstState] * pis[0]) + (md[1][firstState] * pis[1]) + (md[2][firstState] * pis[2]));
+	}
+
 	if (std::isnan(lnl))
 	{
 		ERROR("NAN extension " << e);
@@ -133,6 +143,7 @@ double StateTransitionML::getLnL()
 		ERROR("ERROR - EXITING WITHOUT DOING CALCLULATIONS due to wrong extension/opening probabilities : " << e << " " << g);
 		//FIXME - remove this!!!!!
 		//FIXME - fix this estimation, don't exit like this - only for test purposes
+		cerr << "ERROR - EXITING WITHOUT DOING CALCLULATIONS due to wrong extension/opening probabilities : " << e << " " << g << endl;
 		exit(0);
 	}
 

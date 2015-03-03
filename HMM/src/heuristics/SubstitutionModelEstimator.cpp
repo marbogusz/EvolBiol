@@ -19,7 +19,8 @@ namespace EBC
 SubstitutionModelEstimator::SubstitutionModelEstimator(Sequences* inputSeqs, SubstitutionModelBase* model,
 		Definitions::OptimizationType ot,unsigned int rateCategories, double alpha,
 		bool estimateAlpha, unsigned int matCount) :
-				inputSequences(inputSeqs), substModel(model), gammaRateCategories(rateCategories), patterns(matCount), ptMatrices(matCount)
+				inputSequences(inputSeqs), substModel(model), gammaRateCategories(rateCategories),
+				patterns(matCount), ptMatrices(matCount)
 
 
 {

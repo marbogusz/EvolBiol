@@ -70,7 +70,7 @@ void NegativeBinomialGapModel::setParameters(double* params)
 
 void NegativeBinomialGapModel::summarize()
 {
-	cout << endl << "Affine geometric gap model parameters:" << endl;
+	//cout << endl << "Affine geometric gap model parameters:" << endl;
 	cout << "lambda:\t" << lambda << "\t" << "ext.prob\t" <<  gapExtensionProbability << endl;
 }
 

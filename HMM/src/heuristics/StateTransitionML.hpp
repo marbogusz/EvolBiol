@@ -38,6 +38,10 @@ protected:
 
 	unsigned char isGap;
 
+	bool useStateEq;
+
+	Definitions::StateId firstState;
+
 public:
 	virtual ~StateTransitionML();
 
@@ -46,7 +50,7 @@ public:
 
 	void calculateParameters();
 
-	StateTransitionML(IndelModel* im, double time, unsigned char);
+	StateTransitionML(IndelModel* im, double time, unsigned char, bool);
 
 	void addSample(vector<unsigned char>*, vector<unsigned char>* s2);
 

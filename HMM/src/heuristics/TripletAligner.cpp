@@ -172,7 +172,11 @@ array<vector<unsigned char>*, 3> TripletAligner::alignPosteriors(pair<vector<uns
 	//posterior prob limit
 
 	//FIXME - magic number
-	double postLim = log(0.8);
+
+	double postLim = Definitions::minMatrixLikelihood;
+	if (this->usePosteriors){
+		postLim = log(this->posteriorTsh);
+	}
 
 	int c;
 
@@ -265,6 +269,7 @@ array<vector<unsigned char>*, 3>* TripletAligner::align(pair<vector<unsigned cha
 	vector<unsigned char>* p1al = p1->first;
 	vector<unsigned char>* p2al = p2->second;
 
+
 	int c;
 
 	Dictionary* dict  = this->inputSeqs->getDictionary();
@@ -282,6 +287,8 @@ array<vector<unsigned char>*, 3>* TripletAligner::align(pair<vector<unsigned cha
 	unsigned int ctr2;
 
 	ctr1 = ctr2 = 0;
+
+
 
 	while(ctr1 < anch1->size() && ctr2 < anch2->size())
 	{
@@ -342,8 +349,13 @@ array<vector<unsigned char>*, 3>* TripletAligner::align(pair<vector<unsigned cha
 	return new array<vector<unsigned char>*, 3>({tr1,tr2,tr3});
 }
 
-TripletAligner::TripletAligner(Sequences* iSeq, DistanceMatrix* dm) : inputSeqs(iSeq), distMat(dm)
+TripletAligner::TripletAligner(Sequences* iSeq, DistanceMatrix* dm, double postTsh) : inputSeqs(iSeq), distMat(dm)
 {
+	usePosteriors = false;
+	if (postTsh > 0.0){
+		posteriorTsh = postTsh;
+		usePosteriors = true;
+	}
 	DEBUG("Starting TripletAligner");
 
 

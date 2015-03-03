@@ -83,9 +83,9 @@ void EvolutionaryPairHMM::getStateEquilibriums()
 	piI = piI < minPi ? Definitions::minMatrixLikelihood : log(piI);
 	piM = piM < minPi ? Definitions::minMatrixLikelihood : log(piM);
 
-	initTransX = max(max(X->getTransitionProbabilityFromInsert() + piI, X->getTransitionProbabilityFromDelete() + piD), X->getTransitionProbabilityFromMatch() + piM);
-	initTransY = max(max(Y->getTransitionProbabilityFromInsert() + piI, Y->getTransitionProbabilityFromDelete() + piD), Y->getTransitionProbabilityFromMatch() + piM);
-	initTransM = max(max(M->getTransitionProbabilityFromInsert() + piI, M->getTransitionProbabilityFromDelete() + piD), M->getTransitionProbabilityFromMatch() + piM);
+	initTransX = maths->logSum(X->getTransitionProbabilityFromInsert() + piI, X->getTransitionProbabilityFromDelete() + piD, X->getTransitionProbabilityFromMatch() + piM);
+	initTransY = maths->logSum(Y->getTransitionProbabilityFromInsert() + piI, Y->getTransitionProbabilityFromDelete() + piD, Y->getTransitionProbabilityFromMatch() + piM);
+	initTransM = maths->logSum(M->getTransitionProbabilityFromInsert() + piI, M->getTransitionProbabilityFromDelete() + piD, M->getTransitionProbabilityFromMatch() + piM);
 
 	md[0][0] = log(md[0][0]);
 	md[1][1] = log(md[1][1]);

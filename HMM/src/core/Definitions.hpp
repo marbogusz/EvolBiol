@@ -65,7 +65,7 @@ public:
 
 	//FIXME
 	constexpr static const double divergenceBound = 3.5;
-	constexpr static const double initialLambda = 0.02;
+	constexpr static const double initialLambda = 0.05;
 	constexpr static const double initialEpsilon = 0.5;
 
 	constexpr static const unsigned int minBandDelta = 7; //This makes the min band width of 15 characters

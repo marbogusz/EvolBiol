@@ -50,6 +50,11 @@ void HKY85Model::summarize()
 {
 	INFO("HKY85 model summary:");
 	INFO("kappa " << *k );
+
+	cout << "Alpha " << this->alpha << endl;
+ 	cout << "Kappa " << *k <<endl;
+
+
 	INFO("Frequencies (T C A G)");
 	INFO(this->piFreqs[0] << '\t' << this->piFreqs[1] << '\t' << this->piFreqs[2] << '\t' << this->piFreqs[3] << '\t');
 	//summarizeRates();

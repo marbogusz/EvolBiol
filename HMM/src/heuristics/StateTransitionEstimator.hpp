@@ -32,9 +32,11 @@ protected:
 
 	unsigned char gapCharacter;
 
+	bool useStateEq;
+
 
 public:
-	StateTransitionEstimator(IndelModel* im, Definitions::OptimizationType ot, unsigned int pairCategories, unsigned char);
+	StateTransitionEstimator(IndelModel* im, Definitions::OptimizationType ot, unsigned int pairCategories, unsigned char gapchar, bool useEq = true);
 
 	void addTime(double time, unsigned int triplet, unsigned int pr);
 

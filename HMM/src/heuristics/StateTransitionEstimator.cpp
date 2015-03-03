@@ -11,7 +11,8 @@
 namespace EBC
 {
 
-StateTransitionEstimator::StateTransitionEstimator(IndelModel* im, Definitions::OptimizationType ot, unsigned int pc, unsigned char gc) : indelModel(im), stmSamples(pc), gapCharacter(gc)
+StateTransitionEstimator::StateTransitionEstimator(IndelModel* im, Definitions::OptimizationType ot, unsigned int pc, unsigned char gc, bool useEq) :
+		indelModel(im), stmSamples(pc), gapCharacter(gc), useStateEq(useEq)
 {
 	DEBUG("Starting State Transition Estimator");
 	//indelModel = new NegativeBinomialGapModel();
@@ -43,7 +44,7 @@ void StateTransitionEstimator::addTime(double time, unsigned int triplet, unsign
 {
 
 	DEBUG("State Transition Estimator add time for triplet " << triplet << "\t pair " << pr << "\ttime " << time);
-	stmSamples[2*triplet+pr] = new StateTransitionML(indelModel, time, gapCharacter);
+	stmSamples[2*triplet+pr] = new StateTransitionML(indelModel, time, gapCharacter, useStateEq);
 }
 
 void StateTransitionEstimator::addPair(vector<unsigned char>* s1,
