@@ -367,31 +367,71 @@ double BackwardPairHMM::runAlgorithm()
 	}
 
 
-	for (i = xSize-2; i >= 0; i--)
-	{
-		for (j = ySize-2; j >= 0; j--)
+	if(this->band == NULL){
+		for (i = xSize-2; i >= 0; i--)
 		{
+			for (j = ySize-2; j >= 0; j--)
+			{
 
-			bxp = X->getValueAt(i+1,j) + ptmatrix->getLogEquilibriumFreq((*seq1)[i]->getMatrixIndex());
-			byp = Y->getValueAt(i,j+1) + ptmatrix->getLogEquilibriumFreq((*seq2)[j]->getMatrixIndex());
-			bmp = M->getValueAt(i+1,j+1) + ptmatrix->getLogPairTransition((*seq1)[i]->getMatrixIndex(), (*seq2)[j]->getMatrixIndex());
+				bxp = X->getValueAt(i+1,j) + ptmatrix->getLogEquilibriumFreq((*seq1)[i]->getMatrixIndex());
+				byp = Y->getValueAt(i,j+1) + ptmatrix->getLogEquilibriumFreq((*seq2)[j]->getMatrixIndex());
+				bmp = M->getValueAt(i+1,j+1) + ptmatrix->getLogPairTransition((*seq1)[i]->getMatrixIndex(), (*seq2)[j]->getMatrixIndex());
 
-			bx = maths->logSum(M->getTransitionProbabilityFromInsert() + bmp,
-					X->getTransitionProbabilityFromInsert() + bxp,
-					Y->getTransitionProbabilityFromInsert() + byp);
+				bx = maths->logSum(M->getTransitionProbabilityFromInsert() + bmp,
+						X->getTransitionProbabilityFromInsert() + bxp,
+						Y->getTransitionProbabilityFromInsert() + byp);
 
-			by = maths->logSum(M->getTransitionProbabilityFromDelete() + bmp,
-								X->getTransitionProbabilityFromDelete() + bxp,
-								Y->getTransitionProbabilityFromDelete() + byp);
+				by = maths->logSum(M->getTransitionProbabilityFromDelete() + bmp,
+									X->getTransitionProbabilityFromDelete() + bxp,
+									Y->getTransitionProbabilityFromDelete() + byp);
 
-			bm = maths->logSum(M->getTransitionProbabilityFromMatch() + bmp,
-											X->getTransitionProbabilityFromMatch() + bxp,
-											Y->getTransitionProbabilityFromMatch() + byp);
+				bm = maths->logSum(M->getTransitionProbabilityFromMatch() + bmp,
+												X->getTransitionProbabilityFromMatch() + bxp,
+												Y->getTransitionProbabilityFromMatch() + byp);
 
-				X->setValueAt(i, j, bx);
-				Y->setValueAt(i, j, by);
-				M->setValueAt(i, j, bm);
+					X->setValueAt(i, j, bx);
+					Y->setValueAt(i, j, by);
+					M->setValueAt(i, j, bm);
 
+			}
+		}
+	}
+	else{
+		int loI, hiI;
+		int iMin = xSize-2;
+		int iMax = 0;
+
+		//FIXME - I make a simplifying assumption that the band is the same for all 3 matrices!
+		//Use bracket I as isnsert uses the very first column
+
+		for (j = ySize-2; j >= 0; j--){
+			auto bracketI = band->getInsertRangeAt(j);
+
+			loI = max((bracketI.first - 1), iMax);
+			hiI = min(bracketI.second, iMin);
+
+
+			for (int i = hiI; i >= loI; i--){
+				bxp = X->getValueAt(i+1,j) + ptmatrix->getLogEquilibriumFreq((*seq1)[i]->getMatrixIndex());
+				byp = Y->getValueAt(i,j+1) + ptmatrix->getLogEquilibriumFreq((*seq2)[j]->getMatrixIndex());
+				bmp = M->getValueAt(i+1,j+1) + ptmatrix->getLogPairTransition((*seq1)[i]->getMatrixIndex(), (*seq2)[j]->getMatrixIndex());
+
+				bx = maths->logSum(M->getTransitionProbabilityFromInsert() + bmp,
+						X->getTransitionProbabilityFromInsert() + bxp,
+						Y->getTransitionProbabilityFromInsert() + byp);
+
+				by = maths->logSum(M->getTransitionProbabilityFromDelete() + bmp,
+									X->getTransitionProbabilityFromDelete() + bxp,
+									Y->getTransitionProbabilityFromDelete() + byp);
+
+				bm = maths->logSum(M->getTransitionProbabilityFromMatch() + bmp,
+												X->getTransitionProbabilityFromMatch() + bxp,
+												Y->getTransitionProbabilityFromMatch() + byp);
+
+					X->setValueAt(i, j, bx);
+					Y->setValueAt(i, j, by);
+					M->setValueAt(i, j, bm);
+			}
 		}
 	}
 
@@ -416,6 +456,9 @@ void BackwardPairHMM::calculateMaximumPosteriorMatrix() {
 	//no need to initialize data
 	//set the P00 to 1 (ln(1) = 0)
 	MPstate->setValueAt(0,0,0);
+
+	//TODO - we can band it as well
+
 	for (unsigned int i = 1 ; i < xSize; i++)
 		for (unsigned int j = 1; j < ySize; j++){
 			k = i-1;
@@ -457,25 +500,28 @@ BackwardPairHMM::getMPDWithPosteriors(){
 			//DUMP("M");
 			ret.second.first->push_back((*seq1)[i-1]->getMatrixIndex());
 			ret.second.second->push_back((*seq2)[j-1]->getMatrixIndex());
+			ret.first->push_back(M->getValueAt(i,j));
 			i--;
 			j--;
-			ret.first->push_back(M->getValueAt(i,j));
+
 		}
 		else if (ti >= td){
 			//INSERT
 			//DUMP("I");
 			ret.second.first->push_back((*seq1)[i-1]->getMatrixIndex());
 			ret.second.second->push_back(gapElem);//gapElem;
-			i--;
 			ret.first->push_back(X->getValueAt(i,j));
+			i--;
+
 		}
 		else{
 			//DELETE
 			//DUMP("D");
 			ret.second.first->push_back(gapElem);//gapElem;
 			ret.second.second->push_back((*seq2)[j-1]->getMatrixIndex());
-			j--;
 			ret.first->push_back(Y->getValueAt(i,j));
+			j--;
+
 		}
 	}
 
@@ -485,8 +531,9 @@ BackwardPairHMM::getMPDWithPosteriors(){
 		while(i > 0){
 			ret.second.first->push_back((*seq1)[i-1]->getMatrixIndex());
 			ret.second.second->push_back(gapElem);
-			i--;
 			ret.first->push_back(X->getValueAt(i,j));
+			i--;
+
 		}
 	}
 	else if (i==0)
@@ -494,8 +541,8 @@ BackwardPairHMM::getMPDWithPosteriors(){
 		while(j > 0){
 			ret.second.second->push_back((*seq2)[j-1]->getMatrixIndex());
 			ret.second.first->push_back(gapElem);
-			j--;
 			ret.first->push_back(Y->getValueAt(i,j));
+			j--;
 		}
 	}
 	//deal with the last row or column
