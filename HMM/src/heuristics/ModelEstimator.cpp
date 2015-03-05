@@ -340,8 +340,8 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 		f1->runAlgorithm();
 		f2->runAlgorithm();
 
-		BackwardPairHMM b1(seqsA[i][0],seqsA[i][1], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].first);
-		BackwardPairHMM b2(seqsA[i][1],seqsA[i][2], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].second);
+		BackwardPairHMM b1(seqsA[i][0],seqsA[i][1], substModel, indelModel, Definitions::DpMatrixType::Full, nullptr/*bandPairs[i].first*/);
+		BackwardPairHMM b2(seqsA[i][1],seqsA[i][2], substModel, indelModel, Definitions::DpMatrixType::Full, nullptr/*bandPairs[i].second*/);
 
 		b1.setDivergenceTimeAndCalculateModels(distancesA[i][0]*bestTm);
 		b2.setDivergenceTimeAndCalculateModels(distancesA[i][1]*bestTm);

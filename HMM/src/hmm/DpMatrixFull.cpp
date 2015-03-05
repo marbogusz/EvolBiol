@@ -14,10 +14,15 @@ using namespace std;
 
 void EBC::DpMatrixFull::allocateData()
 {
-	matrixData = new TraceStep*[xSize];
+	matrixData = new double*[xSize];
+	//matrixData = new TraceStep*[xSize];
 	for(unsigned int i=0; i<xSize; i++)
 	{
-		matrixData[i] = new TraceStep[ySize];
+		//matrixData[i] = new TraceStep[ySize];
+		matrixData[i] = new double[ySize];
+		//set the value to zero prob
+		std::fill(matrixData[i], matrixData[i]+ySize, Definitions::minMatrixLikelihood);
+
 	}
 }
 
@@ -38,16 +43,18 @@ EBC::DpMatrixFull::DpMatrixFull(unsigned int xS, unsigned int yS) : DpMatrixBase
 void EBC::DpMatrixFull::setValue(unsigned int x, unsigned int y, double value)
 {
 	//TODO - check bounds
-	matrixData[x][y].score = value;
+	//matrixData[x][y].score = value;
+	matrixData[x][y] = value;
 }
 
 void EBC::DpMatrixFull::setWholeRow(unsigned int row, double value)
 {
 	for (unsigned int i=0; i<ySize; i++)
 	{
-		matrixData[row][i].score = value;
-		matrixData[row][i].hor = true;
-		matrixData[row][i].src = this;
+		matrixData[row][i] = value;
+		//matrixData[row][i].score = value;
+		//matrixData[row][i].hor = true;
+		//matrixData[row][i].src = this;
 	}
 }
 
@@ -55,20 +62,22 @@ void EBC::DpMatrixFull::setWholeCol(unsigned int col, double value)
 {
 	for (unsigned int i=0; i<xSize; i++)
 	{
-		matrixData[i][col].score = value;
-		matrixData[i][col].vert = true;
-		matrixData[i][col].src = this;
+		matrixData[i][col] = value;
+		//matrixData[i][col].score = value;
+		//matrixData[i][col].vert = true;
+		//matrixData[i][col].src = this;
 	}
 }
 
 
 double EBC::DpMatrixFull::valueAt(unsigned int i, unsigned int j)
 {
-	return matrixData[i][j].score;
+	return matrixData[i][j];//.score;
 }
 
 void EBC::DpMatrixFull::outputTrace(unsigned int bound=0)
 {
+	/*
 	unsigned int xl = bound !=0 ? bound : xSize;
 	unsigned int yl = bound !=0 ? bound : ySize;
 
@@ -95,6 +104,7 @@ void EBC::DpMatrixFull::outputTrace(unsigned int bound=0)
 		}
 		cout << endl;
 	}
+	*/
 }
 
 void EBC::DpMatrixFull::outputValues(unsigned int bound=0)
@@ -113,10 +123,10 @@ void EBC::DpMatrixFull::outputValues(unsigned int bound=0)
 	{
 		for(unsigned int j=0; j < yl; j++)
 		{
-			TraceStep& ts = matrixData[i][j];
+
 
 			//if (ts.score > -5.0)
-				sstr << ts.score*-1.0 << "\t";
+				sstr << matrixData[i][j] *-1.0 << "\t";
 			//else sstr << ".";
 
 		}
@@ -134,9 +144,7 @@ void EBC::DpMatrixFull::outputValuesWithBands(const vector<pair<int, int> >& ban
 		{
 			for(unsigned int j=0; j < ySize; j++)
 			{
-				TraceStep& ts = matrixData[i][j];
-
-				if (ts.score <= (Definitions::minMatrixLikelihood /2.0))
+				if (matrixData[i][j] <= (Definitions::minMatrixLikelihood /2.0))
 				{
 					if (band[j].first <= i && band[j].second >= i)
 						sstr << "*";
@@ -160,26 +168,27 @@ void EBC::DpMatrixFull::outputValuesWithBands(const vector<pair<int, int> >& ban
 
 void EBC::DpMatrixFull::setDiagonalAt(unsigned int i, unsigned int j)
 {
-	matrixData[i][j].diag = true;
+	//matrixData[i][j].diag = true;
 }
 
 void EBC::DpMatrixFull::setHorizontalAt(unsigned int i, unsigned int j)
 {
-	matrixData[i][j].hor = true;
+	//matrixData[i][j].hor = true;
 }
 
 void EBC::DpMatrixFull::setVerticalAt(unsigned int i, unsigned int j)
 {
-	matrixData[i][j].vert = true;
+	//matrixData[i][j].vert = true;
 }
 
 void EBC::DpMatrixFull::setSrc(unsigned int i, unsigned int j, DpMatrixBase* src)
 {
-	matrixData[i][j].src = static_cast<DpMatrixFull*>(src);
+	//matrixData[i][j].src = static_cast<DpMatrixFull*>(src);
 }
 
 void EBC::DpMatrixFull::tracebackRaw(vector<SequenceElement> s1, vector<SequenceElement> s2, Dictionary* dict, vector<std::pair<unsigned int, unsigned int> >& al)
 {
+		/*
 		unsigned int i = xSize-1;
 		unsigned int j = ySize-1;
 
@@ -225,10 +234,12 @@ void EBC::DpMatrixFull::tracebackRaw(vector<SequenceElement> s1, vector<Sequence
 		//std::cerr << a1 << endl;
 		//std::cerr << a2 << endl << endl;
 
+*/
 }
 
 void EBC::DpMatrixFull::traceback(string& seq_a, string& seq_b, std::pair<string,string>* alignment)
 {
+	/*
 	unsigned int i = xSize-1;
 	unsigned int j = ySize-1;
 
@@ -261,6 +272,7 @@ void EBC::DpMatrixFull::traceback(string& seq_a, string& seq_b, std::pair<string
 		}
 
 	}
+	*/
 }
 
 

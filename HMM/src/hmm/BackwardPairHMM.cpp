@@ -284,6 +284,8 @@ double BackwardPairHMM::runAlgorithm()
 
 	double bmp, bxp,byp;
 
+	double initProb = log(xi);
+
 	M->initializeData(true);
 	X->initializeData(true);
 	Y->initializeData(true);
@@ -309,9 +311,9 @@ double BackwardPairHMM::runAlgorithm()
 		if (i==xSize-1  && j==ySize-1)
 		{
 
-			X->setValueAt(i, j, this->piI);
-			Y->setValueAt(i, j, this->piD);
-			M->setValueAt(i, j, this->piM);
+			X->setValueAt(i, j, initProb);
+			Y->setValueAt(i, j, initProb);
+			M->setValueAt(i, j, initProb);
 
 /*
 			X->setValueAt(i, j, 0);
@@ -348,9 +350,9 @@ double BackwardPairHMM::runAlgorithm()
 		{
 
 
-			X->setValueAt(i, j, this->piI);
-			Y->setValueAt(i, j, this->piD);
-			M->setValueAt(i, j, this->piM);
+			X->setValueAt(i, j, initProb);
+			Y->setValueAt(i, j, initProb);
+			M->setValueAt(i, j, initProb);
 
 /*
 			X->setValueAt(i, j, 0);

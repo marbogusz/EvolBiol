@@ -44,7 +44,8 @@ public:
 
 	void setWholeCol(unsigned int col, double value);
 
-	TraceStep ** matrixData;
+	double  ** matrixData;
+	//TraceStep ** matrixData;
 
 	void traceback(string& seqA, string& seqB, std::pair<string,string>* alignment);
 

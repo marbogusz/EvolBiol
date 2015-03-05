@@ -17,6 +17,10 @@ EvolutionaryPairHMM::EvolutionaryPairHMM(vector<SequenceElement*>* s1, vector<Se
 			Definitions::DpMatrixType mt, Band* bandObj, bool useEquilibriumFreqs) :
 					substModel(smdl), indelModel(imdl), band(bandObj), equilibriumFreqs(useEquilibriumFreqs)
 {
+	//TODO - unfix the xi terminal probability  ????
+	//length distribution fixed
+	xi = 0.001;
+
 	M = X = Y = NULL;
 	this->seq1 = s1;
 	this->seq2 = s2;
@@ -61,7 +65,7 @@ void EvolutionaryPairHMM::getStateEquilibriums()
 	double minPi = exp(Definitions::minMatrixLikelihood);
 
 	//TODO - change indices to state ids from the enum!!!
-	md[0][0] = 1.0-2*g;
+	md[0][0] = (1.0-2*g);
 	md[1][1] = e+((1.0-e)*g);
 	md[2][2] = e+((1.0-e)*g);
 	md[0][1] = g;
@@ -77,15 +81,22 @@ void EvolutionaryPairHMM::getStateEquilibriums()
 	piI = ((piD*(md[0][1]-md[2][1]))-md[0][1])/(md[1][1]-1.0-md[0][1]);
 	piM = 1.0 -piI - piD;
 
-	//DUMP("Decimal equilibriums : PiM\t" << piM << "\tPiI\t" << piI << "\tPiD\t" << piD);
+	DUMP("Decimal equilibriums : PiM\t" << piM << "\tPiI\t" << piI << "\tPiD\t" << piD);
+
+	//substract xi/3 prob
+	double xx, yy;
+	xx = yy = log((e * piI) - (xi/3.0));
+	double mm = log((((1.0-xi)*(1.0-2*g))*piM) - (xi/3.0));
 
 	piD = piD < minPi ? Definitions::minMatrixLikelihood : log(piD);
 	piI = piI < minPi ? Definitions::minMatrixLikelihood : log(piI);
 	piM = piM < minPi ? Definitions::minMatrixLikelihood : log(piM);
 
-	initTransX = maths->logSum(X->getTransitionProbabilityFromInsert() + piI, X->getTransitionProbabilityFromDelete() + piD, X->getTransitionProbabilityFromMatch() + piM);
-	initTransY = maths->logSum(Y->getTransitionProbabilityFromInsert() + piI, Y->getTransitionProbabilityFromDelete() + piD, Y->getTransitionProbabilityFromMatch() + piM);
-	initTransM = maths->logSum(M->getTransitionProbabilityFromInsert() + piI, M->getTransitionProbabilityFromDelete() + piD, M->getTransitionProbabilityFromMatch() + piM);
+	initTransX = maths->logSum(xx, X->getTransitionProbabilityFromDelete() + piD, X->getTransitionProbabilityFromMatch() + piM);
+	initTransY = maths->logSum(Y->getTransitionProbabilityFromInsert() + piI, yy, Y->getTransitionProbabilityFromMatch() + piM);
+	initTransM = maths->logSum(M->getTransitionProbabilityFromInsert() + piI, M->getTransitionProbabilityFromDelete() + piD, mm);
+
+
 
 	md[0][0] = log(md[0][0]);
 	md[1][1] = log(md[1][1]);
@@ -107,18 +118,18 @@ void EvolutionaryPairHMM::setTransitionProbabilities()
 	e = tpb->getGapExtension();
 	g = tpb->getGapOpening();
 
-	M->setTransitionProbabilityFromMatch(log(1-2*g));
-	M->setTransitionProbabilityFromInsert(log((1-e)*(1-2*g)));
-	M->setTransitionProbabilityFromDelete(log((1-e)*(1-2*g)));
+	M->setTransitionProbabilityFromMatch(log((1-2*g)*(1-xi)));
+	M->setTransitionProbabilityFromInsert(log((1-e-xi)*(1-2*g)));
+	M->setTransitionProbabilityFromDelete(log((1-e-xi)*(1-2*g)));
 
-	X->setTransitionProbabilityFromInsert(log(e+((1-e)*g)));
-	Y->setTransitionProbabilityFromDelete(log(e+((1-e)*g)));
+	X->setTransitionProbabilityFromInsert(log(e+((1-e-xi)*g)));
+	Y->setTransitionProbabilityFromDelete(log(e+((1-e-xi)*g)));
 
-	X->setTransitionProbabilityFromDelete(log((1-e)*g));
-	Y->setTransitionProbabilityFromInsert(log((1-e)*g));
+	X->setTransitionProbabilityFromDelete(log((1-e-xi)*g));
+	Y->setTransitionProbabilityFromInsert(log((1-e-xi)*g));
 
-	X->setTransitionProbabilityFromMatch(log(g));
-	Y->setTransitionProbabilityFromMatch(log(g));
+	X->setTransitionProbabilityFromMatch(log(g*(1-xi)));
+	Y->setTransitionProbabilityFromMatch(log(g*(1-xi)));
 
 	/*
 	DUMP(" Transition probabilities: ");
@@ -137,11 +148,11 @@ void EvolutionaryPairHMM::summarize()
 	g = tpb->getGapOpening();
 
 	DUMP(" Transition probabilities: ");
-	DUMP("M->M : " << log(1-2*g));
-	DUMP("I->I : " << log(e+((1-e)*g)));
-	DUMP("M->I : " << log(g));
-	DUMP("I->M : " << log((1-2*g)*(1-e)));
-	DUMP("I->D : " << log((1-e)*g));
+	DUMP("M->M : " << M->getTransitionProbabilityFromMatch());
+	DUMP("I->I : " << X->getTransitionProbabilityFromInsert());
+	DUMP("M->I : " << X->getTransitionProbabilityFromMatch());
+	DUMP("I->M : " << M->getTransitionProbabilityFromInsert());
+	DUMP("I->D : " << Y->getTransitionProbabilityFromInsert());
 
 	indelModel->summarize();
 	substModel->summarize();

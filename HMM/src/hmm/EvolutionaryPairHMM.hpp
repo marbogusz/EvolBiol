@@ -85,6 +85,9 @@ protected:
 	//gap probs;
 	double e,g;
 
+	//end transition probs
+	double xi;
+
 	//state equilibruim frequencies
 	double piM, piI, piD;
 
