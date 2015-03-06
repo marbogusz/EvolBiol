@@ -34,8 +34,8 @@ int main(int argc, char ** argv) {
 
 	//Set output Precision to 2
 	//FIXME - should normally be set to >= 6
-	//cout << fixed << setprecision(4);
-	cerr << fixed << setprecision(10);
+	cout << fixed << setprecision(2);
+	cerr << fixed << setprecision(2);
 
 	try
 	{
@@ -179,8 +179,8 @@ int main(int argc, char ** argv) {
 			delete tme;
 
 
-
-			/*HMMEstimator* tme = new HMMEstimator(inputSeqs, cmdReader->getModelType(),
+/*
+			HMMEstimator* tme = new HMMEstimator(inputSeqs, cmdReader->getModelType(),
 					cmdReader->getOptimizationType(), cmdReader->getCategories(), alpha,
 					cmdReader->estimateAlpha(), substParams, indelParams, dist);
 
@@ -194,8 +194,8 @@ int main(int argc, char ** argv) {
 			//cout << "Final subst params" << endl;
 			//cout << substParams[0] << endl;
 
-			delete tme;*/
-
+			delete tme;
+*/
 		}
 
 		else

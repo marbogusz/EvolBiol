@@ -88,6 +88,9 @@ void EvolutionaryPairHMM::getStateEquilibriums()
 	xx = yy = log((e * piI) - (xi/3.0));
 	double mm = log((((1.0-xi)*(1.0-2*g))*piM) - (xi/3.0));
 
+	//xx = yy = log((e * piI));
+	//double mm = log((((1.0-xi)*(1.0-2*g))*piM));
+
 	piD = piD < minPi ? Definitions::minMatrixLikelihood : log(piD);
 	piI = piI < minPi ? Definitions::minMatrixLikelihood : log(piI);
 	piM = piM < minPi ? Definitions::minMatrixLikelihood : log(piM);

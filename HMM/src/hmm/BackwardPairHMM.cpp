@@ -139,19 +139,19 @@ void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 
 /*
 	DUMP("MATCH");
-	//DUMP("FORWARD MATRICES");
-	//dynamic_cast<DpMatrixFull*>(fwd->M->getDpMatrix())->outputValues(0);
+	DUMP("FORWARD MATRICES");
+	dynamic_cast<DpMatrixFull*>(fwd->M->getDpMatrix())->outputValues(0);
 	DUMP("BACKWARD MATRICES");
 	dynamic_cast<DpMatrixFull*>(M->getDpMatrix())->outputValues(0);
 	DUMP("\nINSERT");
-	//DUMP("FORWARD MATRICES");
-	//dynamic_cast<DpMatrixFull*>(fwd->X->getDpMatrix())->outputValues(0);
+	DUMP("FORWARD MATRICES");
+	dynamic_cast<DpMatrixFull*>(fwd->X->getDpMatrix())->outputValues(0);
 	DUMP("BACKWARD MATRICES");
 	dynamic_cast<DpMatrixFull*>(X->getDpMatrix())->outputValues(0);
 
 	DUMP("\nDELETE");
-	//DUMP("FORWARD MATRICES");
-	//dynamic_cast<DpMatrixFull*>(fwd->Y->getDpMatrix())->outputValues(0);
+	DUMP("FORWARD MATRICES");
+	dynamic_cast<DpMatrixFull*>(fwd->Y->getDpMatrix())->outputValues(0);
 	DUMP("BACKWARD MATRICES");
 	dynamic_cast<DpMatrixFull*>(Y->getDpMatrix())->outputValues(0);
 	//DUMP("#####Match posteriors########");
@@ -163,11 +163,11 @@ void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 
 	//dynamic_cast<DpMatrixFull*>(Y->getDpMatrix())->outputValues(0);
 
-	DUMP("BACKWARD MATRICES");
+	DUMP("POSTERIORS MATRICES");
 */
-	for (i = 0; i<xSize-1; i++)
+	for (i = 1; i<=xSize-1; i++)
 	{
-		for (j = 0; j<ySize-1; j++)
+		for (j = 1; j<=ySize-1; j++)
 		{
 			xval = X->getValueAt(i,j) + fwd->X->getValueAt(i,j) - fwdT;
 			yval = Y->getValueAt(i,j) + fwd->Y->getValueAt(i,j) - fwdT;
@@ -290,7 +290,7 @@ double BackwardPairHMM::runAlgorithm()
 	X->initializeData(true);
 	Y->initializeData(true);
 
-	for (j = ySize-1, i=xSize-1; j >= 0; j--)
+	for (j = ySize-1, i=xSize-1; j > 0; j--)
 	{
 		bxp = (i==xSize-1) ? xL : X->getValueAt(i+1,j) + ptmatrix->getLogEquilibriumFreq((*seq1)[i]->getMatrixIndex());
 		byp = (j==ySize-1) ? yL : Y->getValueAt(i,j+1) + ptmatrix->getLogEquilibriumFreq((*seq2)[j]->getMatrixIndex());
@@ -310,7 +310,6 @@ double BackwardPairHMM::runAlgorithm()
 
 		if (i==xSize-1  && j==ySize-1)
 		{
-
 			X->setValueAt(i, j, initProb);
 			Y->setValueAt(i, j, initProb);
 			M->setValueAt(i, j, initProb);
@@ -328,7 +327,7 @@ double BackwardPairHMM::runAlgorithm()
 			M->setValueAt(i, j, bm);
 		}
 	}
-	for (i = xSize-1, j=ySize-1; i >= 0; i--)
+	for (i = xSize-1, j=ySize-1; i > 0; i--)
 	{
 		bxp = (i==xSize-1) ? xL : X->getValueAt(i+1,j) + ptmatrix->getLogEquilibriumFreq((*seq1)[i]->getMatrixIndex());
 		byp = (j==ySize-1) ? yL : Y->getValueAt(i,j+1) + ptmatrix->getLogEquilibriumFreq((*seq2)[j]->getMatrixIndex());
@@ -348,7 +347,6 @@ double BackwardPairHMM::runAlgorithm()
 
 		if (i==xSize-1  && j==ySize-1)
 		{
-
 
 			X->setValueAt(i, j, initProb);
 			Y->setValueAt(i, j, initProb);
@@ -370,9 +368,9 @@ double BackwardPairHMM::runAlgorithm()
 
 
 	if(this->band == NULL){
-		for (i = xSize-2; i >= 0; i--)
+		for (i = xSize-2; i > 0; i--)
 		{
-			for (j = ySize-2; j >= 0; j--)
+			for (j = ySize-2; j > 0; j--)
 			{
 
 				bxp = X->getValueAt(i+1,j) + ptmatrix->getLogEquilibriumFreq((*seq1)[i]->getMatrixIndex());
@@ -397,6 +395,10 @@ double BackwardPairHMM::runAlgorithm()
 
 			}
 		}
+
+		bmp  = M->getValueAt(1,1) + ptmatrix->getLogPairTransition((*seq1)[0]->getMatrixIndex(), (*seq2)[0]->getMatrixIndex());
+		bm = bmp + initTransM;
+		M->setValueAt(0, 0, bm);
 	}
 	else{
 		int loI, hiI;

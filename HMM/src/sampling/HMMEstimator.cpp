@@ -69,11 +69,11 @@ HMMEstimator::HMMEstimator(Sequences* inputSeqs, Definitions::ModelType model ,
 	bfgs = new Optimizer(modelParams, this, Definitions::OptimizationType::BFGS);
 
 	this->calculateInitialPairs(model,substP, indelP,dist);
-	this->optimise();
+	//this->optimise();
 
-	cout << modelParams->getIndelParameters()[0] << endl;
+	//cout << modelParams->getIndelParameters()[0] << endl;
 
-	//this->runIteration();
+	this->runIteration();
 	//for (auto &worker : sampleWorkers)
 	//{
 	//	worker.doExtraStuff();
@@ -148,7 +148,7 @@ void HMMEstimator::calculateInitialPairs(Definitions::ModelType model,vector<dou
 
 	double initAlpha = 0.75;
 	double initKappa = 2.5;
-	double initLambda = 0.025;
+	double initLambda = 0.05;
 	double initEpsilon = 0.5;
 	//k-mers tend to underestimate the distances;
 	double initTimeModifier = 1.5;

@@ -13,18 +13,18 @@ PairHMMSampler::PairHMMSampler(vector<SequenceElement*>* s1, vector<SequenceElem
 		SubstitutionModelBase* smdl, IndelModel* imdl, double initialDivergence) :
 				maths(new Maths()), seq1(s1), seq2(s2), substModel(smdl), indelModel(imdl),
 				divergenceT(initialDivergence), modelParams(nullptr,nullptr, 2, 1, false, false, false, true, maths),
-				fwdHmm(seq1,seq2, substModel, indelModel, Definitions::DpMatrixType::Full, nullptr,true)
+				fwdHmm(seq1,seq2, substModel, indelModel, Definitions::DpMatrixType::Full, nullptr,true),
 				//vitHmm(seq1,seq2, substModel, indelModel, Definitions::DpMatrixType::Full, nullptr,true)//,
-				//bacHmm(seq1,seq2, substModel, indelModel, Definitions::DpMatrixType::Full, nullptr)
+				bacHmm(seq1,seq2, substModel, indelModel, Definitions::DpMatrixType::Full, nullptr)
 {
-	//fwdHmm.setDivergenceTimeAndCalculateModels(divergenceT);
-	//bacHmm.setDivergenceTimeAndCalculateModels(divergenceT);
+	fwdHmm.setDivergenceTimeAndCalculateModels(divergenceT);
+	bacHmm.setDivergenceTimeAndCalculateModels(divergenceT);
 	//vitHmm.setDivergenceTimeAndCalculateModels(divergenceT);
 
-	//fwdHmm.runAlgorithm();
-	//bacHmm.runAlgorithm();
+	fwdHmm.runAlgorithm();
+	bacHmm.runAlgorithm();
 
-	//bacHmm.calculatePosteriors(&fwdHmm);
+	bacHmm.calculatePosteriors(&fwdHmm);
 
 	//now we have posteriors!!!
 	//Calculate MP path - requires a new type of HMM - MP hmm, right ?
@@ -259,12 +259,14 @@ double PairHMMSampler::runIteration()
 	totalSampleLnL = Definitions::minMatrixLikelihood;
 	double result = Definitions::minMatrixLikelihood;;
 
+	return 1.0;
+
 	//double time = modelParams.getDivergenceTime(0);
 	//fwdHmm.setDivergenceTimeAndCalculateModels(time);
-	fwdHmm.setDivergenceTimeAndCalculateModels(divergenceT);
+	//fwdHmm.setDivergenceTimeAndCalculateModels(divergenceT);
 
 	//vitHmm.setDivergenceTimeAndCalculateModels(time);
-	return fwdHmm.runAlgorithm();
+	//return fwdHmm.runAlgorithm();
 /*
 	for (auto &entry : samples){
 		entry.first = fwdHmm.calculateSampleLnL(entry.second);

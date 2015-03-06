@@ -53,7 +53,7 @@ protected:
 
 	ForwardPairHMM fwdHmm;
 	//ViterbiPairHMM vitHmm;
-	//BackwardPairHMM bacHmm;
+	BackwardPairHMM bacHmm;
 
 	double forwardLnL;
 
