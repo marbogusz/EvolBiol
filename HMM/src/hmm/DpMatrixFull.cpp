@@ -15,13 +15,14 @@ using namespace std;
 void EBC::DpMatrixFull::allocateData()
 {
 	matrixData = new double*[xSize];
+	double minProb = EBC::Definitions::minMatrixLikelihood;
 	//matrixData = new TraceStep*[xSize];
 	for(unsigned int i=0; i<xSize; i++)
 	{
 		//matrixData[i] = new TraceStep[ySize];
 		matrixData[i] = new double[ySize];
 		//set the value to zero prob
-		std::fill(matrixData[i], matrixData[i]+ySize, Definitions::minMatrixLikelihood);
+		std::fill(matrixData[i], matrixData[i]+ySize, minProb);
 
 	}
 }

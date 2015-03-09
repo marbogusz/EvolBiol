@@ -8,10 +8,13 @@
 #ifndef DPMATRIXFULL_H_
 #define DPMATRIXFULL_H_
 
+
+#include "hmm/DpMatrixBase.hpp"
+#include "core/Definitions.hpp"
+
+#include <vector>
 #include <limits>
 #include <iostream>
-#include "hmm/DpMatrixBase.hpp"
-#include <vector>
 
 using namespace std;
 
@@ -31,7 +34,7 @@ class DpMatrixFull : public DpMatrixBase
 		DpMatrixFull* src;
 
 		TraceStep() : vert(false), hor(false),
-			diag(false), score(Definitions::minMatrixLikelihood), src(NULL) {}
+			diag(false), score(-100000.0), src(NULL) {}
 	};
 
 protected:

@@ -27,7 +27,7 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 	
 	maths = new Maths();
 	dict = inputSequences->getDictionary();
-	tal = new TripletAligner (inputSequences, gtree->getDistanceMatrix(), 0.9);
+	tal = new TripletAligner (inputSequences, gtree->getDistanceMatrix(), -1.0);
 
 	tripletIdxs = tst.sampleFromTree();
 	tripletIdxsSize = tripletIdxs.size();

@@ -218,7 +218,7 @@ int main(int argc, char ** argv) {
 				alpha = tme->getAlpha();
 
 
-			delete tme;
+
 			//FileLogger::Logger() << "True indel paramteres     : ";
 			//FileLogger::Logger() << cmdReader->getIndelParams() << '\n';
 			FileLogger::Logger() << "Estimated indel paramteres: ";
@@ -246,6 +246,7 @@ int main(int argc, char ** argv) {
 
 			treefile.close();
 			delete be;
+			delete tme;
 
 		}
 
