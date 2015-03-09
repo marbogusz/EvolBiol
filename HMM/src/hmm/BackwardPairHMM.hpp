@@ -23,12 +23,6 @@ protected:
 	//maximum posterior state;
 	PairwiseHmmStateBase* MPstate;
 
-	void getBandWidth()
-	{
-		this->bandSpan = ySize/(bandFactor);
-		DEBUG("Band span " << bandSpan);
-	}
-
 	inline bool withinBand(unsigned int line, int position, unsigned int width)
 	{
 		int low = line - width;

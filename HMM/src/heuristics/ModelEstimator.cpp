@@ -30,6 +30,10 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 	tal = new TripletAligner (inputSequences, gtree->getDistanceMatrix(), -1.0);
 
 	tripletIdxs = tst.sampleFromTree();
+
+	if (tripletIdxsSize == 0)
+		throw HmmException("No triplets selected for model estimation");
+
 	tripletIdxsSize = tripletIdxs.size();
 
 	tripleAlignments.resize(tripletIdxsSize);
@@ -65,7 +69,7 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 
 	substModel->setObservedFrequencies(inputSequences->getElementFrequencies());
 	 */
-	sme = new SubstitutionModelEstimator(inputSequences, substModel ,ot, rateCategories, alpha, estimateAlpha, tripletIdxs.size());
+	sme = new SubstitutionModelEstimator(inputSequences, substModel ,ot, rateCategories, alpha, estimateAlpha, tripletIdxsSize);
 	ste = new StateTransitionEstimator(indelModel, ot, 2*tripletIdxsSize, dict->getGapID(),false);
 
 	estimateParameters();
@@ -250,12 +254,12 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 	indelModel = new NegativeBinomialGapModel();
 	indelModel->setParameters({initLambda,initEpsilon});
 
-	vector<pair<Band*, Band*> > bandPairs(tripletIdxs.size());
+	vector<pair<Band*, Band*> > bandPairs(tripletIdxsSize);
 
-	vector<array<vector<SequenceElement*>*,3> > seqsA(tripletIdxs.size());
-	vector<array<double,3> > distancesA(tripletIdxs.size());
+	vector<array<vector<SequenceElement*>*,3> > seqsA(tripletIdxsSize);
+	vector<array<double,3> > distancesA(tripletIdxsSize);
 
-	for (int i = 0; i < tripletIdxs.size(); i++)
+	for (int i = 0; i < tripletIdxsSize; i++)
 	{
 
 
@@ -303,7 +307,7 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 				if (estAlpha)
 					substModel->calculateModel();
 				currentLnl = 0;
-				for (int i = 0; i < tripletIdxs.size(); i++){
+				for (int i = 0; i < tripletIdxsSize; i++){
 					f1 = fwdHMMs[i][0];
 					f2 = fwdHMMs[i][1];
 
@@ -331,9 +335,14 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 	DUMP("Best a " << bestA << "\tbest l " << bestL << "\ttimeMult " << bestTm );
 
 	//Fwd + bwd + MPD
-	for (int i = 0; i < tripletIdxs.size(); i++){
+	for (int i = 0; i < tripletIdxsSize; i++){
 		f1 = fwdHMMs[i][0];
 		f2 = fwdHMMs[i][1];
+
+		//remove bands for more accurate estimates
+		f1->setBand(nullptr);
+		f2->setBand(nullptr);
+
 		f1->setDivergenceTimeAndCalculateModels(distancesA[i][0]*bestTm);
 		f2->setDivergenceTimeAndCalculateModels(distancesA[i][1]*bestTm);
 

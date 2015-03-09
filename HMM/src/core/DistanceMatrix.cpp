@@ -51,11 +51,34 @@ void  DistanceMatrix::invalidate(std::pair<unsigned int, unsigned int>& pr)
 	}
 }
 
+vector<pair<unsigned int, unsigned int> > EBC::DistanceMatrix::getPairsWithinDistance(
+		double lo, double hi)
+{
+	vector<pair<unsigned int, unsigned int> > retvec;
+	auto itlow = revdistances.lower_bound(lo);
+	auto ithi = revdistances.upper_bound(hi);
+	auto end = revdistances.end();
+	auto begin = revdistances.begin();
+
+	if (itlow != end && ithi != begin){
+		//we're in the bracket
+		//unsigned int dist = std::distance(itlow,ithi);
+		//uniform_int_distribution<int> dist2(0,dist);
+		//std::advance(itlow, dist2(generator));
+		while(itlow != ithi){
+			retvec.push_back(make_pair((*itlow).second.first,(*itlow).second.second));
+			itlow++;
+		}
+		//invalidate(ret);
+	}
+	return retvec;
+}
+
 pair<unsigned int, unsigned int> EBC::DistanceMatrix::getPairWithinDistance(
 		double lo, double hi)
 {
-	default_random_engine generator;
-	uniform_int_distribution<int> distribution(0,revdistances.size()-1);
+	//default_random_engine generator;
+	//uniform_int_distribution<int> distribution(0,revdistances.size()-1);
 	//iterate over keys
 	auto itlow = revdistances.lower_bound(lo);
 	auto ithi = revdistances.upper_bound(hi);
@@ -63,26 +86,25 @@ pair<unsigned int, unsigned int> EBC::DistanceMatrix::getPairWithinDistance(
 	auto begin = revdistances.begin();
 	pair<unsigned int, unsigned int> ret;
 
-	if (itlow != end)
-	{
+	if (itlow != end && ithi != begin){
 		//we're in the bracket
-		unsigned int dist = std::distance(itlow,ithi);
-		uniform_int_distribution<int> dist2(0,dist);
-		std::advance(itlow, dist2(generator));
+		//unsigned int dist = std::distance(itlow,ithi);
+		//uniform_int_distribution<int> dist2(0,dist);
+		//std::advance(itlow, dist2(generator));
 		ret = make_pair((*itlow).second.first,(*itlow).second.second);
 		invalidate(ret);
-
 	}
 	//return the lowest anyway ?
-	else
-	{
-		std::advance(begin, distribution(generator) );
+	else if(ithi == begin){
+		//std::advance(begin, distribution(generator) );
 		ret = make_pair((*begin).second.first,(*begin).second.second);
 		invalidate(ret);
 	}
-
+	else {
+		ret = make_pair((*(--end)).second.first,(*(--end)).second.second);
+		invalidate(ret);
+	}
 	return ret;
-
 }
 
 unsigned int DistanceMatrix::getThirdLeafWithinDistance(double targetLen, unsigned int l1, unsigned int l2)

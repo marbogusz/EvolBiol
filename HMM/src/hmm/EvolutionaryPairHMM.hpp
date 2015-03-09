@@ -57,9 +57,6 @@ protected:
 
 	unsigned int xSize, ySize;
 
-	//Bound scale
-	unsigned int bandFactor;
-	unsigned int bandSpan;
 	unsigned int gammaRateCategories;
 
 	bool bandingEnabled;
@@ -112,6 +109,11 @@ public:
 
 	EvolutionaryPairHMM(vector<SequenceElement*>* s1, vector<SequenceElement*>* s2, SubstitutionModelBase* smdl,
 			IndelModel* imdl, Definitions::DpMatrixType, Band* bandObj, bool useEquilibriumFreqs);
+
+	inline void setBand(Band* bnd)
+	{
+		this->band = bnd;
+	}
 
 	virtual ~EvolutionaryPairHMM();
 

@@ -44,6 +44,13 @@ private:
 		return false;
 	}
 
+	inline bool isWithinRange(double val, pair<double, double> ran)
+	{
+		if(val >= ran.first && val <= ran.second)
+			return true;
+		return false;
+	}
+
 	DistanceMatrix* distMat;
 
 	double idealTreeSize;

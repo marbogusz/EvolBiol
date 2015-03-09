@@ -34,8 +34,8 @@ int main(int argc, char ** argv) {
 
 	//Set output Precision to 2
 	//FIXME - should normally be set to >= 6
-	cout << fixed << setprecision(2);
-	cerr << fixed << setprecision(2);
+	cout << fixed << setprecision(6);
+	cerr << fixed << setprecision(6);
 
 	try
 	{
