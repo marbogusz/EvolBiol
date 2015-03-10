@@ -153,6 +153,7 @@ void TripletSamplingTree::fromNewick(const string& newick)
 			smatch basematch;
 			string sstr = newick.substr(i);
 
+			//FIXME - Change ASAP this piece of code is really dangerous - get the sequence number from the seq dictionary!!!
 			if (regex_match(sstr, basematch, regDescDist))
 			{
 				sequenceNo = std::stoi(basematch[2].str());
@@ -329,76 +330,63 @@ vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromTree()
 			}
 		}
 		if(!found){
+			//nothing was found. this means that either all the distances are very small or big
+			//small = get the biggest, big - get the smallest
 			unsigned int id = 0;
+			double tdist = 0;
+			//bool largeDistances = false;
 
-			while(id == s1 || id == s2)
-				id ++;
-			result.push_back({{s1,s2,id}});
-		}
+			//if (distMat->getDistance(s1, s2) > secondaryRange.second){
+			//	largeDistances = true;
+			//}
+			double currentDist = 100;
 
-	}
-	/*
-	while(availableNodes.size() >=3 && treeNo < 3)
-	{
-		auto pairN = distMat->getPairWithinDistance(idealRange.first, idealRange.second);
-		firstNd = leafNodes[pairN.first];
-		s1 = pairN.first;
-		s2 = pairN.second;
-		secondNd  = leafNodes[pairN.second];
+			availableNodes.erase(s1);
+			availableNodes.erase(s2);
 
+			for(auto nd : availableNodes)
+			{
+				//deviation from the sweetspot
+				//FIXME - magicnumber for the sweetspot
+				tdist = abs(0.5 - distMat->getDistance(nd.first, s1)) + abs(0.5 - distMat->getDistance(nd.first, s2));
 
+					if (tdist < currentDist){
+						currentDist = tdist;
+						id = nd.first;
+					}
 
-		found = false;
-		for (auto nd : availableNodes)
-		{
-
-			if (nd.second->nodeId == firstNd->nodeId || nd.second->nodeId == secondNd->nodeId)
-				continue;
-			tmpd1 =  distMat->getDistance(nd.second->nodeId, firstNd->nodeId);
-			tmpd2 =  distMat->getDistance(nd.second->nodeId, secondNd->nodeId);
-
-			if (isWithinRange(tmpd1, idealRange)) {
-				result.push_back({{s2,s1,nd.first}});
-				DEBUG("Sampled triplet : " << s2 << "\t\t" << s1 << "\t\t" << nd.first);
-				availableNodes.erase(pairN.first);
-				availableNodes.erase(pairN.second);
-				availableNodes.erase(nd.first);
-				found = true;
-				treeNo++;
-				break;
 			}
-			else if(isWithinRange(tmpd2, idealRange)){
-				result.push_back({{s1,s2,nd.first}});
-				DEBUG("Sampled triplet : " << s1 << "\t\t" << s2 << "\t\t" << nd.first);
-				availableNodes.erase(pairN.first);
-				availableNodes.erase(pairN.second);
-				availableNodes.erase(nd.first);
-				found = true;
-				treeNo++;
-				break;
+
+			tmpd1 = distMat->getDistance(s1, id);
+			tmpd2 = distMat->getDistance(s2, id);
+
+			if (tmpd1 > distMat->getDistance(s1,s2)){
+				if(tmpd1 < tmpd2){
+					result.push_back({{s2,s1,id}});
+					DEBUG("Sampled triplet : " << s2 << "\t\t" << s1 << "\t\t" << id);
+				}
+				else{
+					result.push_back({{s1,s2,id}});
+					DEBUG("Sampled triplet : " << s1 << "\t\t" << s2 << "\t\t" << id);
+				}
 			}
 			else{
-				continue;
+				if(tmpd1 < tmpd2){
+					result.push_back({{s1,s2,id}});
+					DEBUG("Sampled triplet : " << s1 << "\t\t" << s2 << "\t\t" << id);
+				}
+				else{
+					result.push_back({{s2,s1,id}});
+					DEBUG("Sampled triplet : " << s2 << "\t\t" << s1 << "\t\t" << id);
+				}
 			}
+
+//			result.push_back({{s1,s2,id}});
+//			DEBUG("Sampled triplet : " << s1 << "\t\t" << s2 << "\t\t" << id);
 		}
-		//min 1 triplet, max 3 triplets
-		if (!found && treeNo < 1)
-		{
-			// grab any unused leaf node
-			result.push_back({{s1,s2,availableNodes.begin()->first}});
-			availableNodes.erase(availableNodes.begin());
-		}
-		treeNo++;
 
 	}
-	*/
-	//distance to root
 
-	//get another one with distance between 0.3 and 0.7
-	//what about root node - root node has no parent set - go through list and check ?????
-	//find their common ancestor
-	//based on the ancestor, calculate the distance to it and target the next taxon based on the distance to root + common to root
-	//invalidate the leaves laying on the common path.
 
 
 	return result;

@@ -31,10 +31,10 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 
 	tripletIdxs = tst.sampleFromTree();
 
+	tripletIdxsSize = tripletIdxs.size();
+
 	if (tripletIdxsSize == 0)
 		throw HmmException("No triplets selected for model estimation");
-
-	tripletIdxsSize = tripletIdxs.size();
 
 	tripleAlignments.resize(tripletIdxsSize);
 	pairAlignments.resize(tripletIdxsSize);

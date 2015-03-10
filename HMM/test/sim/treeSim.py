@@ -2,12 +2,13 @@
 
 import random
 import dendropy
-from dendropy import treesim
+from dendropy import Tree, treesim
 import sys
 import os
 import subprocess
 import shutil
 import re
+import math
 from threading import Thread
 from multiprocessing import Process
 
@@ -17,7 +18,9 @@ from multiprocessing import Process
 
 class TreeGenerator:
     def __init__(self):
+        self.taxCtr = 0
         self.fullTaxonSet = []
+        self.bal_newick =''
         for i in range(256):
             self.fullTaxonSet.append('S'+str(i))
     def get_birth_rate_from_expected_height(self, ntips, expected_height):
@@ -32,14 +35,86 @@ class TreeGenerator:
             n.edge_length = round(random.gauss(n.edge_length*factor, n.edge_length*0.1*factor),3) 
             #n.edge_length = random.gauss(n.edge_length*factor, n.edge_length*0.1*factor) 
 
+    def getHeight(self,tree):
+        node_prev = None
+        node = tree.leaf_nodes()[0]
+    
+        fd  = node.distance_from_root()
+
+        #print(fd)
+
+        while node.parent_node is not None:
+            node = node.parent_node
+            node_prev = node
+        rd = node_prev.distance_from_root()
+
+        #print(rd)
+
+        return (fd-rd)
+
+    def getBalancedTreeByHeight(self, size, th):
+        clades  = int(math.log(size,2)) 
+        unit = (th*1.0) / clades
+        self.taxCtr = 0;
+
+        self.bal_newick = ''
+        self.buildBalancedString(1,clades,unit)
+        self.bal_newick += ';'
+        #print(self.bal_newick)
+        tree = Tree.get_from_string(self.bal_newick,"newick")
+        #print(tree)
+        tree.deroot()
+        return tree
+
+    def buildBalancedString(self, lvl,max_lvl,unit):
+        self.bal_newick += '('
+        if lvl == max_lvl:
+            self.bal_newick += self.fullTaxonSet[self.taxCtr] + ':' + str(round(unit,3))
+            self.taxCtr += 1
+        else: 
+            self.buildBalancedString(lvl+1, max_lvl, unit)
+        self.bal_newick += ','
+        if lvl == max_lvl:
+            self.bal_newick += self.fullTaxonSet[self.taxCtr] + ':' + str(round(unit,3))
+            self.taxCtr += 1
+        else: 
+            self.buildBalancedString(lvl+1, max_lvl, unit)
+        self.bal_newick += ')' + ':' + str(round(unit,3))
+
+
+
+    def getChainedTreeByHeight(self, size, th):
+        unit = (th*1.0) / size
+        #print('size: ' + str(size) + ' height ' + str(th) + ' unit len ' + str(unit)) 
+        newick = ''
+        for i in range(size-1):
+            newick += '('
+        newick += self.fullTaxonSet[0] + ':' + str(round(unit*2,3)) + ',' + self.fullTaxonSet[1] + ':' + str(round(unit*2,3)) + ')'
+        for i in range(2,size):
+            newick += str(round(unit,3)) + ',' + self.fullTaxonSet[i] + ':' +  str(round(unit*(i+1),3)) + ')'
+        newick += ';'
+
+        tree = Tree.get_from_string(newick,"newick")
+        #print(tree)
+        tree.deroot()
+        return tree
+
     def getTreeByHeight(self, size, th):
-        return self.getTree(size,self.get_birth_rate_from_expected_height(size,th))
+
+        tree = self.getTree(size,self.get_birth_rate_from_expected_height(size,th))
+
+        while abs(self.getHeight(tree) - th) > (th * 0.05) :
+            tree = self.getTree(size,self.get_birth_rate_from_expected_height(size,th))
+
+        tree.deroot()
+        return tree
 
     def getTree(self, size, birthParam):
         tree = treesim.birth_death(birth_rate=birthParam, death_rate=0, taxon_set=dendropy.TaxonSet(self.fullTaxonSet[0:size]))
-        tree.deroot()
+        #tree.deroot()
+        #print(tree)
         #randomize slightly
-        self.rescaleTree(tree,1.0)
+        #self.rescaleTree(tree,1.0)
         return tree
 
 class HmmDistanceGenerator:
@@ -59,14 +134,17 @@ class HmmDistanceGenerator:
         self.treegen = TreeGenerator()
         
         #indicates how many birth rate steps to generate
+        self.p_c = 'tr_chnd_'
+        self.p_r = 'tr_rand_'
+        self.p_b = 'tr_baln_'
         self.steps = 15
         self.cores = 3;
         self.indelible_binary = 'indelible'
         self.hmm_binary = 'HMMtree1'
         self.hmm_base_params = ['--lD', '-F','--in']
         self.hmm_misc_params = ['-b', '1', '-o', '0', '--bf', '20']
-        self.hmm_alpha_params = ['--rateCat', '5', '--initAlpha']
-        self.hmm_alpha_est_params = ['--estimateAlpha', '1']
+        self.hmm_alpha_params = ['--initAlpha']
+        self.hmm_alpha_est_params = ['--estimateAlpha', '1', '--rateCat', '5']
         self.file_prefix = 'control'
         self.hmmtreefile = '.hmm.tree'
         self.original_treefile = 'tree.sim'
@@ -80,6 +158,7 @@ class HmmDistanceGenerator:
         self.mafft_exec = 'mafft-linsi'
         self.muscle_exec = 'muscle'
         self.prank_exec = 'prank'
+        self.clustal_exec = 'clustal'
         self.raxml_bin = 'raxmlHPC'
         self.raxml_prefix = 'RAxML_bestTree.'
         self.raxml_GTR_params = ['-m', 'GTRGAMMA', '-p', '12345']
@@ -104,8 +183,8 @@ class HmmDistanceGenerator:
         
     def run(self):
         self.simulate(self.steps,self.replicates,self.model);
-        #self.calculate(self.steps,self.replicates,self.model);
-        #self.analyzeOutput(self.steps,self.replicates,self.model);
+        self.calculate(self.steps,self.replicates,self.model);
+        self.analyzeOutput(self.steps,self.replicates,self.model);
         
     def simulate(self, s,r,modelname):
     
@@ -131,6 +210,9 @@ class HmmDistanceGenerator:
             for rpl in range(r):
 
                 tree = self.treegen.getTreeByHeight(self.taxaNo,treeHeight)
+
+                #print (tree)
+
                 ofile = open('control.txt', 'w');
 
                 p1 = re.compile('(\(.*\)).*')
@@ -196,7 +278,6 @@ class HmmDistanceGenerator:
             print("**********Calculation step {}".format(treeHeight))
             current_dir = str(self.taxaNo) + '_taxa_' + self.model_suffix + '_' + str(self.seq_len) + '_' + str(treeHeight) + '_Indelible_' + str(r) 
             os.chdir(current_dir)
-            #self.runHMMbatch(r,outfile_all,True)
             self.runHMMbatch(r)
             self.alignBatch(r)
             self.runRaxml(r)
@@ -223,6 +304,7 @@ class HmmDistanceGenerator:
             rmft = []
             rtru = []
             rmus = []
+            rclu = []
             hmmt = []
             for i in range(r):
                 #print('analysing replicate ' + str(i+1))
@@ -233,6 +315,8 @@ class HmmDistanceGenerator:
                 rmft.append(dendropy.Tree.get_from_stream(open(self.raxml_prefix + 'mafft'+str(i+1), 'rU'), "newick", tree_offset=0))
                 #muscle rax
                 rmus.append(dendropy.Tree.get_from_stream(open(self.raxml_prefix + 'muscle'+str(i+1), 'rU'), "newick", tree_offset=0))
+                #clustal rax
+                rclu.append(dendropy.Tree.get_from_stream(open(self.raxml_prefix + 'clustal'+str(i+1), 'rU'), "newick", tree_offset=0))
                 #hmm
                 hmmt.append(dendropy.Tree.get_from_stream(open(self.indelible_output + '_' + str(i+1) + '_1.fas' + self.hmmtreefile, 'rU'), "newick", tree_offset=0))
 
@@ -244,11 +328,13 @@ class HmmDistanceGenerator:
                 self.writeRF(resultsRF, treeHeight, reftree.symmetric_difference(rtru[-1]), 'True+RAxML')
                 self.writeRF(resultsRF, treeHeight, reftree.symmetric_difference(rmft[-1]), 'MAFFT+RaXML')
                 self.writeRF(resultsRF, treeHeight, reftree.symmetric_difference(rmus[-1]), 'MUSCLE+RaXML')
+                self.writeRF(resultsRF, treeHeight, reftree.symmetric_difference(rclu[-1]), 'Clustal+RaXML')
                 self.writeRF(resultsRF, treeHeight, reftree.symmetric_difference(hmmt[-1]), 'alignment-free_HMM')
 
                 self.writeTD(resultsTD, treeHeight, reftree.length(), rtru[-1].length() , 'true')
                 self.writeTD(resultsTD, treeHeight, reftree.length(), rmft[-1].length() , 'mafft')
                 self.writeTD(resultsTD, treeHeight, reftree.length(), rmus[-1].length() , 'muscle')
+                self.writeTD(resultsTD, treeHeight, reftree.length(), rclu[-1].length() , 'clustal')
                 self.writeTD(resultsTD, treeHeight, reftree.length(), hmmt[-1].length() , 'hmm')
 
             os.chdir('..');
@@ -270,22 +356,26 @@ class HmmDistanceGenerator:
             self.alignMafft(i)
             self.alignMuscle(i)
             #self.alignPrank(i)
+            self.alignClustal(i)
     
     def runRaxml(self, count):
 	for i in range(count):
 	    true_fc = self.indelible_output + '_' + str(i+1) +  '_TRUE_1.fas'
             mafft_fc = 'mafft_' + str(i+1) + '.fas'
             muscle_fc = 'muscle_' + str(i+1) + '.fas'
+            clustal_fc = 'clustal_' + str(i+1) + '.fas'
             #prank_fc = 'prank_' + str(i+1) + '.best.fas'
 
             params_true = self.raxml_params[:]
             params_mafft = self.raxml_params[:]
             params_muscle = self.raxml_params[:]
+            params_clustal = self.raxml_params[:]
             #params_prank = self.raxml_params[:]
 
             params_true += [true_fc,'-n', 'true'+str(i+1)]
             params_mafft += [mafft_fc,'-n', 'mafft'+str(i+1)]
             params_muscle += [muscle_fc,'-n', 'muscle'+str(i+1)]
+            params_clustal += [clustal_fc,'-n', 'clustal'+str(i+1)]
             #params_prank += [prank_fc,'-n', 'prank'+str(i+1)]
 
             #threads = []
@@ -307,6 +397,7 @@ class HmmDistanceGenerator:
             self.callRaxml(([self.raxml_bin]+params_muscle))
             self.callRaxml(([self.raxml_bin]+params_true))
             self.callRaxml(([self.raxml_bin]+params_mafft))
+            self.callRaxml(([self.raxml_bin]+params_clustal))
 
     def runHMMbatch(self, count):
         i = 0
@@ -339,19 +430,20 @@ class HmmDistanceGenerator:
         params.append(executable)
         params += self.hmm_base_params
         params.append(filename)
-        params.append('-i')
-        params += ind
+        #params.append('-i')
+        #params += ind
         if (self.model == 'GTR'):
             params.append('--rev')
-            params.append('--param_rev')
-            params += sub
+            #params.append('--param_rev')
+            #params += sub
         if (self.model == 'HKY'):
             params.append('--hky')
         if (self.model == 'LG'):
             params.append('--lg')
-        params +=self.hmm_alpha_params
-        params.append(alp)
-
+        #params +=self.hmm_alpha_params
+        #params.append(alp)
+        params += self.hmm_alpha_est_params
+        print(params)
         subprocess.call(params,stdout=self.logfile) 
 
     def callRaxml(self, params):
@@ -381,11 +473,17 @@ class HmmDistanceGenerator:
 
     def alignPrank(self, fid):
         curr_file  = self.indelible_output + '_' + str(fid+1) +'_1.fas' 
-        prank_file = 'prank_' + str(fid+1)
+        prank_file = 'prank_' + str(fid+1)+ '.fas'
         if os.path.isfile(prank_file):
             return
         subprocess.call([self.prank_exec, '-d='+curr_file, '-o='+prank_file],stdout=self.logfile,stderr=self.logfile)
     
+    def alignClustal(self, fid):
+        curr_file  = self.indelible_output + '_' + str(fid+1) +'_1.fas' 
+        clustal_file = 'clustal_' + str(fid+1)+ '.fas'
+        if os.path.isfile(clustal_file):
+            return
+        subprocess.call([self.clustal_exec, '-i', curr_file, '-o', clustal_file],stdout=self.logfile,stderr=self.logfile)
 
 
     def getAlpha(self):
