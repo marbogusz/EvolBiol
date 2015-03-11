@@ -118,7 +118,7 @@ class TreeGenerator:
         return tree
 
 class HmmDistanceGenerator:
-    def __init__(self,numberTaxa, sequenceLength, replicatesNo, modelName):
+    def __init__(self,numberTaxa, sequenceLength, replicatesNo, modelName, ttpe):
         #sequence length for indelible
         self.seq_len = int(sequenceLength)
         #number of replicates for indelible
@@ -134,11 +134,20 @@ class HmmDistanceGenerator:
         self.treegen = TreeGenerator()
         
         #indicates how many birth rate steps to generate
-        self.p_c = 'tr_chnd_'
-        self.p_r = 'tr_rand_'
-        self.p_b = 'tr_baln_'
-        self.steps = 15
-        self.cores = 3;
+        self.t_c = 'chained'
+        self.t_r = 'random'
+        self.t_b = 'balanced'
+        self.treeType = self.t_r
+
+        if ttpe == 'C':
+            self.treeType = self.t_c
+        if ttpe == 'B':
+            self.treeType = self.t_b
+
+
+        self.steps = 16
+        self.cores = 4;
+
         self.indelible_binary = 'indelible'
         self.hmm_binary = 'HMMtree1'
         self.hmm_base_params = ['--lD', '-F','--in']
@@ -176,7 +185,7 @@ class HmmDistanceGenerator:
 
         self.raxml_params.append('-s')
 
-        self.logfile = open('sim_' + str(self.taxaNo) + '_taxa_' + self.model_suffix + '_' + str(self.seq_len) + '_'  + str(self.replicates) +  '.log', 'w')
+        self.logfile = open('sim_' + str(self.taxaNo) + '_taxa_' + self.model_suffix + '_' + str(self.seq_len) + '_'  + str(self.replicates) + '_' + self.treeType + '.log', 'w')
         self.gamma = 'gamma'
 
         print("HMM analysis for {} steps with {} replicates.".format(self.steps,self.replicates))
@@ -199,7 +208,7 @@ class HmmDistanceGenerator:
             treeHeight = s + 1
             #birth_rate = 0.1 * (s+1)
         
-            current_dir = str(self.taxaNo) + '_taxa_' + self.model_suffix + '_' + str(self.seq_len) + '_' + str(treeHeight) + '_Indelible_' + str(r) 
+            current_dir = str(self.taxaNo) + '_taxa_' + self.model_suffix + '_' + str(self.seq_len) + '_' + str(treeHeight) + '_' + self.treeType +  '_' + str(r) 
             if os.path.exists(current_dir):
                 print('Simulation direcory ' + current_dir + ' exists. Skipping\n') 
                 index +=1
@@ -208,8 +217,13 @@ class HmmDistanceGenerator:
             os.mkdir(current_dir)
 
             for rpl in range(r):
-
-                tree = self.treegen.getTreeByHeight(self.taxaNo,treeHeight)
+                
+                if self.treeType == self.t_r:
+                    tree = self.treegen.getTreeByHeight(self.taxaNo,treeHeight)
+                elif self.treeType == self.t_b:
+                    tree = self.treegen.getBalancedTreeByHeight(self.taxaNo,treeHeight)
+                else:
+                    tree = self.treegen.getChainedTreeByHeight(self.taxaNo,treeHeight)
 
                 #print (tree)
 
@@ -276,14 +290,14 @@ class HmmDistanceGenerator:
             #birth_rate = 0.1 * s
             treeHeight = s
             print("**********Calculation step {}".format(treeHeight))
-            current_dir = str(self.taxaNo) + '_taxa_' + self.model_suffix + '_' + str(self.seq_len) + '_' + str(treeHeight) + '_Indelible_' + str(r) 
+            current_dir = str(self.taxaNo) + '_taxa_' + self.model_suffix + '_' + str(self.seq_len) + '_' + str(treeHeight) + '_' + self.treeType +  '_' + str(r) 
             os.chdir(current_dir)
             self.runHMMbatch(r)
             self.alignBatch(r)
             self.runRaxml(r)
 
     def analyzeOutput(self, s, r, model):
-        filepref = str(self.taxaNo) + '_taxa_' + self.model_suffix + '_' + str(self.seq_len) + '_'  + str(r) 
+        filepref = str(self.taxaNo) + '_taxa_' + self.model_suffix + '_' + str(self.seq_len) + '_'  + self.treeType +  '_'+ str(r) 
         
         #Robinson Foulds results
         rfname = 'RF_' + filepref + '.txt'
@@ -298,7 +312,7 @@ class HmmDistanceGenerator:
             #birth_rate = 0.1 * s
             treeHeight = s
             print("Analysis step {}".format(treeHeight))
-            current_dir = str(self.taxaNo) + '_taxa_' + self.model_suffix + '_' + str(self.seq_len) + '_' + str(treeHeight) + '_Indelible_' + str(r) 
+            current_dir = str(self.taxaNo) + '_taxa_' + self.model_suffix + '_' + str(self.seq_len) + '_' + str(treeHeight) + '_' + self.treeType +  '_' + str(r) 
             os.chdir(current_dir)
             #create trees based on results
             rmft = []
@@ -573,11 +587,11 @@ class HmmDistanceGenerator:
     
     
 if __name__ == "__main__":
-    if len(sys.argv) != 5:
-        print('Usage: ' + sys.argv[0] + ' numberTaxa seqence_length replicate_no model')
+    if len(sys.argv) != 6:
+        print('Usage: ' + sys.argv[0] + ' numberTaxa seqence_length replicate_no model{GTR|HKY|LG} tree_type{B|C|R')
         raise SystemExit(1)
 
-    runner = HmmDistanceGenerator(int(sys.argv[1]), sys.argv[2], sys.argv[3], sys.argv[4])
+    runner = HmmDistanceGenerator(int(sys.argv[1]), sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
     runner.run()
 
 
