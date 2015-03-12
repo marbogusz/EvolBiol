@@ -63,6 +63,8 @@ public:
 		return gapOpeningProbability;
 	}
 
+	virtual double* getParameters()=0;
+
 	unsigned int getParamsNumber() const
 	{
 		return paramsNumber;

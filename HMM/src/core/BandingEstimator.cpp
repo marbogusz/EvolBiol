@@ -62,6 +62,8 @@ BandingEstimator::BandingEstimator(Definitions::AlgorithmType at, Sequences* inp
 	modelParams = new OptimizedModelParameters(substModel, indelModel,2, 1, estimateSubstitutionParams,
 			estimateIndelParams, estimateAlpha, true, maths);
 
+	modelParams->boundDivergenceBasedOnLambda(indel_params[0]);
+
 	if(!estimateIndelParams)
 		modelParams->setUserIndelParams(indel_params);
 	if(!estimateSubstitutionParams)
@@ -141,6 +143,7 @@ void BandingEstimator::optimizePairByPair()
 {
 	EvolutionaryPairHMM* hmm;
 	Band* band;
+	DistanceMatrix* dm = gt->getDistanceMatrix();
 	PairHmmCalculationWrapper* wrapper = new PairHmmCalculationWrapper();
 	double result;
 
@@ -170,6 +173,7 @@ void BandingEstimator::optimizePairByPair()
 		wrapper->setTargetHMM(hmm);
 		DUMP("Set model parameter in the hmm...");
 		wrapper->setModelParameters(modelParams);
+		modelParams->setUserDivergenceParams({dm->getDistance(idxs.first,idxs.second)});
 		bfgs->setTarget(wrapper);
 		result = bfgs->optimize() * -1.0;
 		DEBUG("Likelihood after pairwise optimization: " << result);
@@ -197,40 +201,6 @@ double BandingEstimator::runIteration()
 {
 	double result = 0;
 	double tmp;
-/*	EvolutionaryPairHMM* hmm;
-
-	if (estimateSubstitutionParams == true)
-	{
-			//set parameters and calculate the model
-		if(this->estimateAlpha)
-		{
-			substModel->setAlpha(modelParams->getAlpha());
-		}
-		substModel->setParameters(modelParams->getSubstParameters());
-		substModel->calculateModel();
-	}
-
-	if (estimateIndelParams == true)
-	{
-		//set parameters and calculate the model
-		indelModel->setParameters(modelParams->getIndelParameters());
-	}
-
-	DEBUGN("DBG pair likelihoods : ");
-	for(unsigned int i =0; i<pairCount; i++)
-	{
-		hmm = hmms[i];
-		hmm->setDivergenceTimeAndCalculateModels(modelParams->getDivergenceTime(i));
-		//indelModel->setTime(modelParams->getDivergenceTime(i));
-		//indelModel->calculate();
-		tmp = hmm->runAlgorithm();
-		DEBUGN("\t\t" << tmp << " " << modelParams->getDivergenceTime(i));
-		FileLogger::DebugLogger() << tmp << " " << modelParams->getDivergenceTime(i) << '\n';
-		result += tmp;
-		//modelParams->outputParameters();
-	}
-	DEBUGN("\n");
-	//cerr << " lnl " << result << endl;*/
 	return result;
 }
 

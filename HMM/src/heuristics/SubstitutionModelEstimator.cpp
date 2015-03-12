@@ -20,7 +20,7 @@ SubstitutionModelEstimator::SubstitutionModelEstimator(Sequences* inputSeqs, Sub
 		Definitions::OptimizationType ot,unsigned int rateCategories, double alpha,
 		bool estimateAlpha, unsigned int matCount) :
 				inputSequences(inputSeqs), substModel(model), gammaRateCategories(rateCategories),
-				patterns(matCount), ptMatrices(matCount)
+				patterns(matCount), ptMatrices(matCount), distances(3*matCount)
 
 
 {
@@ -40,6 +40,7 @@ SubstitutionModelEstimator::SubstitutionModelEstimator(Sequences* inputSeqs, Sub
 
 	modelParams = new OptimizedModelParameters(substModel, NULL,3, 3*patterns.size(), estimateSubstitutionParams,
 			false, estimateAlpha, true, maths);
+	modelParams->useSubstitutionModelInitialParameters();
 
 	modelParams->setAlpha(alpha);
 
@@ -87,7 +88,8 @@ SubstitutionModelEstimator::~SubstitutionModelEstimator()
 	}
 }
 
-void SubstitutionModelEstimator::addTriplet(array<vector<unsigned char>*, 3> tripleAlignment, unsigned int trp)
+void SubstitutionModelEstimator::addTriplet(array<vector<unsigned char>*, 3> tripleAlignment, unsigned int trp,
+		double d1, double d2, double d3)
 {
 	DUMP("SME : adding patterns for triplet " << trp);
 	for(int pos = 0; pos < tripleAlignment[0]->size(); pos++)
@@ -98,11 +100,15 @@ void SubstitutionModelEstimator::addTriplet(array<vector<unsigned char>*, 3> tri
 	//{
 	//	DUMP("SME " << pat.first[0] << " " << pat.first[1] << " " << pat.first[2] << " : " << pat.second);
 	//}
+	distances[trp*3] = d1 > 0 ? d1 : 0.5;
+	distances[trp*3 + 1] = d2 > 0 ? d2 : 0.5;
+	distances[trp*3 + 2] = d3 > 0 ? d3 : 0.5;
 }
 
 void SubstitutionModelEstimator::optimize()
 {
 
+	modelParams->setUserDivergenceParams(distances);
 	bfgs->optimize();
 	INFO("SubstitutionModelEstimator results:");
 

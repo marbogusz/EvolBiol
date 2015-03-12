@@ -64,7 +64,10 @@ HMMEstimator::HMMEstimator(Sequences* inputSeqs, Definitions::ModelType model ,
 
 	indelModel = new NegativeBinomialGapModel();
 
+
+	//FIXME - generate initial model params if you want to use it!!!
 	modelParams = new OptimizedModelParameters(substModel, indelModel, 0, 0, false, true, false, false, maths);
+
 
 	bfgs = new Optimizer(modelParams, this, Definitions::OptimizationType::BFGS);
 

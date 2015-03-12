@@ -48,6 +48,7 @@ protected:
 	SubstitutionModelBase* substModel;
 	IndelModel* indelModel;
 
+	//FIXME - generatie initial model params if you want to use it !
 	OptimizedModelParameters modelParams;
 	Optimizer* bfgs;
 

@@ -77,6 +77,7 @@ protected:
 	vector<array<vector<unsigned char>*, 4> > pairAlignments;
 	vector<array<vector<double>*, 2> > pairwisePosteriors;
 	vector<array<unsigned int, 3> > tripletIdxs;
+	vector<array<double, 3> > tripletDistances;
 	vector<array<ForwardPairHMM*,2> > fwdHMMs;
 
 	unsigned int gammaRateCategories;

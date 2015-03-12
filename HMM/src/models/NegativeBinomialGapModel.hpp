@@ -19,6 +19,8 @@ class NegativeBinomialGapModel: public EBC::IndelModel
 protected:
 	double lambda;
 
+	double params[2];
+
 public:
 
 	NegativeBinomialGapModel();
@@ -31,6 +33,8 @@ public:
 	void calculateGeometricProbability(double lambda, double t);
 
 	void setParameters(double* params);
+
+	double* getParameters();
 
 	void setParameters(vector<double>);
 

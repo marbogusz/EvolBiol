@@ -14,6 +14,7 @@
 #include "core/OptimizedModelParameters.hpp"
 #include "core/Definitions.hpp"
 #include "core/BandingEstimator.hpp"
+#include "core/DistanceMatrix.hpp"
 #include "core/Maths.hpp"
 #include "core/Dictionary.hpp"
 #include "core/Sequences.hpp"

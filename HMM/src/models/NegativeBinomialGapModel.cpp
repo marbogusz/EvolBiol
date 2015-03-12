@@ -20,8 +20,8 @@ NegativeBinomialGapModel::NegativeBinomialGapModel() : IndelModel(Definitions::N
 {
 	//logMode = true;
 	this->parameterLoBounds[0] = this->parameterLoBounds[1] = 0.000001;
-	this->parameterHiBounds[0] = 0.15;  //lambda limitation due to the model!
-	this->parameterHiBounds[1] = 0.9;
+	this->parameterHiBounds[0] = Definitions::lambdaHiBound;
+	this->parameterHiBounds[1] = Definitions::epsilonHiBound;
 }
 
 NegativeBinomialGapModel::~NegativeBinomialGapModel()
@@ -40,6 +40,8 @@ double NegativeBinomialGapModel::calculateGapExtension(double time)
 
 void NegativeBinomialGapModel::setParameters(vector<double> vc)
 {
+	params[0] = vc[0];
+	params[1] = vc[1];
 	this->lambda = vc[0];
 	this->gapExtensionProbability = vc[1];
 }
@@ -57,12 +59,19 @@ void NegativeBinomialGapModel::calculateGeometricProbability(double lambda, doub
 	this->gapOpeningProbability = exponent;
 }
 
-void NegativeBinomialGapModel::setParameters(double* params)
+double* NegativeBinomialGapModel::getParameters()
+{
+	return this->params;
+}
+
+void NegativeBinomialGapModel::setParameters(double* par)
 {
 
-	this->lambda = params[0];
+	params[0] = par[0];
+	params[1] = par[1];
+	this->lambda = par[0];
 
-	this->gapExtensionProbability = params[1];
+	this->gapExtensionProbability = par[1];
 
 	//std::cerr << " Opening " << this->gapOpeningProbability << "\t" << "Extension " << this->gapExtensionProbability << std::endl;
 

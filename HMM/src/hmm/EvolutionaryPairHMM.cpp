@@ -84,20 +84,20 @@ void EvolutionaryPairHMM::getStateEquilibriums()
 	DUMP("Decimal equilibriums : PiM\t" << piM << "\tPiI\t" << piI << "\tPiD\t" << piD);
 
 	//substract xi/3 prob
-	double xx, yy;
-	xx = yy = log((e * piI) - (xi/3.0));
-	double mm = log((((1.0-xi)*(1.0-2*g))*piM) - (xi/3.0));
+	//double xx, yy;
+	//xx = yy = log((e * piI) - (xi/3.0));
+	//double mm = log((((1.0-xi)*(1.0-2*g))*piM) - (xi/3.0));
 
 	//xx = yy = log((e * piI));
 	//double mm = log((((1.0-xi)*(1.0-2*g))*piM));
 
-	piD = piD < minPi ? Definitions::minMatrixLikelihood : log(piD);
-	piI = piI < minPi ? Definitions::minMatrixLikelihood : log(piI);
-	piM = piM < minPi ? Definitions::minMatrixLikelihood : log(piM);
+	piD = (piD- (xi/3.0)) < minPi ? Definitions::minMatrixLikelihood : log(piD- (xi/3.0));
+	piI = (piI- (xi/3.0)) < minPi ? Definitions::minMatrixLikelihood : log(piI- (xi/3.0));
+	piM = (piM- (xi/3.0)) < minPi ? Definitions::minMatrixLikelihood : log(piM- (xi/3.0));
 
-	initTransX = maths->logSum(xx, X->getTransitionProbabilityFromDelete() + piD, X->getTransitionProbabilityFromMatch() + piM);
-	initTransY = maths->logSum(Y->getTransitionProbabilityFromInsert() + piI, yy, Y->getTransitionProbabilityFromMatch() + piM);
-	initTransM = maths->logSum(M->getTransitionProbabilityFromInsert() + piI, M->getTransitionProbabilityFromDelete() + piD, mm);
+	initTransX = maths->logSum(X->getTransitionProbabilityFromInsert() + piI, X->getTransitionProbabilityFromDelete() + piD, X->getTransitionProbabilityFromMatch() + piM);
+	initTransY = maths->logSum(Y->getTransitionProbabilityFromInsert() + piI, Y->getTransitionProbabilityFromDelete() + piD, Y->getTransitionProbabilityFromMatch() + piM);
+	initTransM = maths->logSum(M->getTransitionProbabilityFromInsert() + piI, M->getTransitionProbabilityFromDelete() + piD, M->getTransitionProbabilityFromMatch() + piM);
 
 
 

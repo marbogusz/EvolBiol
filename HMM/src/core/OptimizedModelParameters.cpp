@@ -24,21 +24,52 @@ OptimizedModelParameters::OptimizedModelParameters(SubstitutionModelBase* sm, In
 
 	this->divergenceBound  = Definitions::divergenceBound;
 
-	if(estimateIndelParams)
-		generateInitialIndelParameters();
-	if(estimateSubstParams)
-		generateInitialSubstitutionParameters();
-	generateInitialDistanceParameters();
+	//if(estimateIndelParams)
+	//	generateInitialIndelParameters();
+	//if(estimateSubstParams)
+	//	generateInitialSubstitutionParameters();
+	if (distCount > 0)
+		generateInitialDistanceParameters();
 }
 
-} /* namespace EBC */
 
-unsigned int EBC::OptimizedModelParameters::optParamCount()
+
+void OptimizedModelParameters::useSubstitutionModelInitialParameters()
+{
+	if (sm != NULL){
+		double* params = sm->getParameters();
+		for(unsigned int i=0; i< substCount; i++)
+		{
+			substParameters[i] = params[i];
+		}
+	}
+
+}
+void OptimizedModelParameters::useIndelModelInitialParameters()
+{
+	if (im != NULL){
+		double* params = im->getParameters();
+		for(unsigned int i=0; i< indelCount; i++)
+		{
+			indelParameters[i] = params[i];
+		}
+	}
+}
+
+void OptimizedModelParameters::boundDivergenceBasedOnLambda(double lambda){
+	//lambda * t must be smaller than negative ln(0.5)
+	double ln05 = log(0.5)*-1.0;
+	this->divergenceBound = (ln05/lambda) - 0.01; //substract 0.01 just to be sure
+	DUMP("Optimised Model Parameters divergence bound : " << divergenceBound);
+}
+
+
+unsigned int OptimizedModelParameters::optParamCount()
 {
 	return optCount;
 }
 
-void EBC::OptimizedModelParameters::toDlibVector(column_vector& vals, column_vector& lbounds, column_vector& hbounds)
+void OptimizedModelParameters::toDlibVector(column_vector& vals, column_vector& lbounds, column_vector& hbounds)
 {
 	unsigned int i;
 	unsigned int ptr = 0;
@@ -83,7 +114,7 @@ void EBC::OptimizedModelParameters::toDlibVector(column_vector& vals, column_vec
 	}
 }
 
-void EBC::OptimizedModelParameters::generateInitialSubstitutionParameters()
+void OptimizedModelParameters::generateInitialSubstitutionParameters()
 {
 	for(unsigned int i=0; i< substCount; i++)
 	{
@@ -93,7 +124,7 @@ void EBC::OptimizedModelParameters::generateInitialSubstitutionParameters()
 	DUMP(substParameters);
 }
 
-void EBC::OptimizedModelParameters::generateInitialIndelParameters()
+void OptimizedModelParameters::generateInitialIndelParameters()
 {
 	for(unsigned int i=0; i< indelCount; i++)
 	{
@@ -103,7 +134,7 @@ void EBC::OptimizedModelParameters::generateInitialIndelParameters()
 	DUMP(indelParameters);
 }
 
-void EBC::OptimizedModelParameters::generateInitialDistanceParameters()
+void OptimizedModelParameters::generateInitialDistanceParameters()
 {
 	for(unsigned int i=0; i< distCount; i++)
 	{
@@ -114,7 +145,7 @@ void EBC::OptimizedModelParameters::generateInitialDistanceParameters()
 	DUMP(divergenceTimes);
 }
 
-void EBC::OptimizedModelParameters::fromDlibVector(const column_vector& vals)
+void OptimizedModelParameters::fromDlibVector(const column_vector& vals)
 {
 	unsigned int i;
 	unsigned int ptr = 0;
@@ -148,30 +179,30 @@ void EBC::OptimizedModelParameters::fromDlibVector(const column_vector& vals)
 	}
 }
 
-void EBC::OptimizedModelParameters::setAlpha(double a)
+void OptimizedModelParameters::setAlpha(double a)
 {
 	alpha = a;
 }
 
-void EBC::OptimizedModelParameters::setUserIndelParams(
+void OptimizedModelParameters::setUserIndelParams(
 		vector<double> allocator)
 {
 	indelParameters = allocator;
 }
 
-void EBC::OptimizedModelParameters::setUserDivergenceParams(
+void OptimizedModelParameters::setUserDivergenceParams(
 		vector<double> allocator)
 {
 	divergenceTimes = allocator;
 }
 
-void EBC::OptimizedModelParameters::setUserSubstParams(
+void OptimizedModelParameters::setUserSubstParams(
 		vector<double> allocator)
 {
 	substParameters = allocator;
 }
 
-void EBC::OptimizedModelParameters::logParameters()
+void OptimizedModelParameters::logParameters()
 {
 	//for (auto p : substParameters)
 	//		std::cerr << p  << '\t';
@@ -190,7 +221,7 @@ void EBC::OptimizedModelParameters::logParameters()
 
 }
 
-void EBC::OptimizedModelParameters::outputToConsole()
+void OptimizedModelParameters::outputToConsole()
 {
 	for (auto p : substParameters)
 			std::cout << p  << '\t';
@@ -204,7 +235,7 @@ void EBC::OptimizedModelParameters::outputToConsole()
 }
 
 
-double EBC::OptimizedModelParameters::getDistanceBetween(unsigned int i,
+double OptimizedModelParameters::getDistanceBetween(unsigned int i,
 		unsigned int j)
 {
 	unsigned int total  = seqCount;
@@ -224,3 +255,5 @@ double EBC::OptimizedModelParameters::getDistanceBetween(unsigned int i,
 		return divergenceTimes[index];
 	}
 }
+
+} /* namespace EBC */

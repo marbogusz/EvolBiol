@@ -64,7 +64,13 @@ public:
 
 
 	//FIXME
-	constexpr static const double divergenceBound = 3.5;
+	constexpr static const double divergenceBound = 20;
+
+	constexpr static const double lambdaHiBound = 0.3;
+
+	constexpr static const double epsilonHiBound = 0.95;
+
+
 	constexpr static const double initialLambda = 0.05;
 	constexpr static const double initialEpsilon = 0.5;
 

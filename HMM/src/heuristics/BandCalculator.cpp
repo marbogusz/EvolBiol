@@ -18,21 +18,25 @@ BandCalculator::BandCalculator(vector<SequenceElement*>* s1, vector<SequenceElem
 	posteriorLikelihoodLimit = -3;
 	posteriorLikelihoodDelta = -9;
 
+	band = new Band(s1->size(),s2->size(),0.25);
+
 	this->ptMatrix =  new PMatrixDouble(substModel);
 	this->trProbs = new TransitionProbabilities(indelModel);
 	//FIXME - magic numbers
-	array<double,3> multipliers = {{0.5,1,1.5}};
+	array<double,5> multipliers = {{0.5, 1, 1.5, 3, 5}};
 	unsigned int best = 0;
 	double tmpRes = std::numeric_limits<double>::max();
 	double lnl;
 
+	fwd[0] = new ForwardPairHMM(seq1,seq2, substModel,indelModel, Definitions::DpMatrixType::Full, band);
+
 	DUMP("Trying 3 forward calculations to assess the band...");
-	for(unsigned int i = 0; i < fwd.size(); i++)
+	for(unsigned int i = 0; i < 5; i++)
 	{
 
-		fwd[i] = new ForwardPairHMM(seq1,seq2, substModel,indelModel, Definitions::DpMatrixType::Full);
-		fwd[i]->setDivergenceTimeAndCalculateModels(time*multipliers[i]);
-		lnl = fwd[i]->runAlgorithm();
+		//fwd[i] = new ForwardPairHMM(seq1,seq2, substModel,indelModel, Definitions::DpMatrixType::Full, band);
+		fwd[0]->setDivergenceTimeAndCalculateModels(time*multipliers[i]);
+		lnl = fwd[0]->runAlgorithm();
 		DUMP("Calculation "<< i << " with divergence time " << time*multipliers[i] << " and lnL " << lnl);
 		if(lnl < tmpRes)
 		{
@@ -44,15 +48,17 @@ BandCalculator::BandCalculator(vector<SequenceElement*>* s1, vector<SequenceElem
 		//bwd[i]->runAlgorithm();
 	}
 
+	fwd[0]->setDivergenceTimeAndCalculateModels(time*time*multipliers[best]);
+	fwd[0]->runAlgorithm();
+
 	bwd =  new BackwardPairHMM(seq1,seq2, substModel,indelModel, Definitions::DpMatrixType::Full);
 	bwd->setDivergenceTimeAndCalculateModels(time*multipliers[best]);
 	DUMP("Backward calculation runs...");
 	bwd->runAlgorithm();
 
 	//combine fwd and bwd metrics into one!
-	band = new Band(s2->size()+1);
 
-	bwd->calculatePosteriors(fwd[best]);
+	bwd->calculatePosteriors(fwd[0]);
 	this->processPosteriorProbabilities(bwd, band);
 }
 
@@ -60,10 +66,12 @@ BandCalculator::~BandCalculator()
 {
 	delete bwd;
 
-	for(int i=0; i< fwd.size(); i++)
-	{
-		delete fwd[i];
-	}
+
+	//FIXME - cleanup
+	//for(int i=0; i< fwd.size(); i++)
+	//{
+		delete fwd[0];
+	//}
 
 	delete trProbs;
 	delete ptMatrix;

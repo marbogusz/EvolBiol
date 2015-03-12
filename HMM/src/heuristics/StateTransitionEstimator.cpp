@@ -20,6 +20,8 @@ StateTransitionEstimator::StateTransitionEstimator(IndelModel* im, Definitions::
 
 	modelParams = new OptimizedModelParameters(NULL, indelModel,0, 0, false,
 	true, false, false, maths);
+	modelParams->useIndelModelInitialParameters();
+
 
 	bfgs = new Optimizer(modelParams, this,ot);
 }

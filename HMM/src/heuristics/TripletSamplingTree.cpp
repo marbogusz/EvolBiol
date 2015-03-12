@@ -246,7 +246,9 @@ vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromTree()
 		s1 = pr.first;
 		s2 = pr.second;
 
-
+		if (availableNodes.find(s1) == availableNodes.end()
+				|| availableNodes.find(s2) == availableNodes.end())
+			continue;
 
 		//break vec pairs
 		if (treeNo >= 3)

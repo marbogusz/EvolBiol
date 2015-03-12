@@ -59,6 +59,12 @@ public:
 
 	unsigned int optParamCount();
 
+	void useSubstitutionModelInitialParameters();
+
+	void useIndelModelInitialParameters();
+
+	void boundDivergenceBasedOnLambda(double lambda);
+
 	void toDlibVector(column_vector&,column_vector&,column_vector&);
 
 	void fromDlibVector(const column_vector&);

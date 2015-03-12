@@ -14,7 +14,7 @@ namespace EBC
 
 ForwardPairHMM::ForwardPairHMM(vector<SequenceElement*>* s1, vector<SequenceElement*>* s2, SubstitutionModelBase* smdl,
 		IndelModel* imdl, Definitions::DpMatrixType mt, Band* bandObj, bool useEquilibriumFreqs) :
-		EvolutionaryPairHMM(s1,s2, smdl, imdl, mt, bandObj, useEquilibriumFreqs)
+		EvolutionaryPairHMM(s1,s2, smdl, imdl, mt, bandObj, true)
 {
 }
 
@@ -605,24 +605,24 @@ double ForwardPairHMM::runAlgorithm()
 	{
 		//handle 0-index rows and columns separately!
 		//1st col
-		for(i=1,j=0; i< xSize; i++)
+		X->setValueAt(1,0, ptmatrix->getLogEquilibriumFreq((*seq1)[0]->getMatrixIndex()) + initTransX);
+
+		for(i=2,j=0; i< xSize; i++)
 		{
 			k = i-1;
 			emissionX = ptmatrix->getLogEquilibriumFreq((*seq1)[i-1]->getMatrixIndex());
-			xm = M->getValueAt(k,j) + X->getTransitionProbabilityFromMatch();
 			xx = X->getValueAt(k,j) + X->getTransitionProbabilityFromInsert();
-			xy = Y->getValueAt(k,j) + X->getTransitionProbabilityFromDelete();
-			X->setValueAt(i,j, emissionX + maths->logSum(xm,xx,xy));
+			X->setValueAt(i,j, emissionX + xx);
 		}
 		//1st row
-		for(j=1,i=0; j< ySize; j++)
+
+		Y->setValueAt(0,1, ptmatrix->getLogEquilibriumFreq((*seq2)[0]->getMatrixIndex()) + initTransY);
+		for(j=2,i=0; j< ySize; j++)
 		{
 			k = j-1;
 			emissionY = ptmatrix->getLogEquilibriumFreq((*seq2)[j-1]->getMatrixIndex());
-			ym = M->getValueAt(i,k) + Y->getTransitionProbabilityFromMatch();
-			yx = X->getValueAt(i,k) + Y->getTransitionProbabilityFromInsert();
 			yy = Y->getValueAt(i,k) + Y->getTransitionProbabilityFromDelete();
-			Y->setValueAt(i,j, emissionY + maths->logSum(ym,yx,yy));
+			Y->setValueAt(i,j, emissionY + yy);
 		}
 
 

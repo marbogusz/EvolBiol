@@ -47,6 +47,8 @@ protected:
 
 	vector<map<array<unsigned char, 3>, unsigned int> > patterns;
 
+	vector<double> distances;
+
 	unsigned int gammaRateCategories;
 
 	OptimizedModelParameters* modelParams;
@@ -65,7 +67,8 @@ public:
 
 	virtual ~SubstitutionModelEstimator();
 
-	void addTriplet(array<vector<unsigned char>*, 3> tripleAlignment, unsigned int tiplet);
+	void addTriplet(array<vector<unsigned char>*, 3> tripleAlignment, unsigned int tiplet,
+			double d1 = 0.5, double d2 = 0.5, double d3 = 0.5);
 
 	double runIteration();
 
