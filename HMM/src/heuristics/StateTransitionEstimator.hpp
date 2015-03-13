@@ -32,6 +32,8 @@ protected:
 
 	unsigned char gapCharacter;
 
+	double maxTime;
+
 	bool useStateEq;
 
 

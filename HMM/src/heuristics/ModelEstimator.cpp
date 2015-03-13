@@ -207,8 +207,8 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 	double initTimeModifier = 1.5;
 
 	vector<double> timeModifiers = {0.75, 1.0, 1.5};
-	vector<double> lambdas = {0.02, 0.04, 0.08, 0.1};
-	vector<double> alphas = {0.5,1.0,3.0};
+	vector<double> lambdas = {0.03, 0.07};
+	vector<double> alphas = {0.5,1.0};
 
 	ForwardPairHMM *f1, *f2;
 
@@ -273,7 +273,7 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 		tmpd = gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][0],tripletIdxs[i][2]);
 		DUMP("Triplet " << i << " guide distance between seq 1 and 3 " << tmpd);
 		tripletDistances[i][2] = tmpd;
-		bandPairs[i] = make_pair(new Band(len1,len2,0.25),new Band(len2,len3,0.25));
+		bandPairs[i] = make_pair(new Band(len1,len2),new Band(len2,len3));
 		//bandPairs[i] = make_pair(nullptr,nullptr);
 
 		fwdHMMs[i][0] = new ForwardPairHMM(seqsA[i][0],seqsA[i][1], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].first,true);

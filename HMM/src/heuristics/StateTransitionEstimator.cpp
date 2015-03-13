@@ -22,8 +22,9 @@ StateTransitionEstimator::StateTransitionEstimator(IndelModel* im, Definitions::
 	true, false, false, maths);
 	modelParams->useIndelModelInitialParameters();
 
-
 	bfgs = new Optimizer(modelParams, this,ot);
+
+	maxTime = 0.000001;
 }
 
 double StateTransitionEstimator::runIteration()
@@ -45,6 +46,8 @@ double StateTransitionEstimator::runIteration()
 void StateTransitionEstimator::addTime(double time, unsigned int triplet, unsigned int pr)
 {
 
+	if (time > maxTime)
+		maxTime = time;
 	DEBUG("State Transition Estimator add time for triplet " << triplet << "\t pair " << pr << "\ttime " << time);
 	stmSamples[2*triplet+pr] = new StateTransitionML(indelModel, time, gapCharacter, useStateEq);
 }
@@ -58,6 +61,7 @@ void StateTransitionEstimator::addPair(vector<unsigned char>* s1,
 
 void StateTransitionEstimator::optimize()
 {
+	modelParams->boundLambdaBasedOnDivergence(maxTime);
 	bfgs->optimize();
 	indelModel->setParameters(modelParams->getIndelParameters());
 	INFO("StateTransitionEstimator results:");

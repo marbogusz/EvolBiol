@@ -136,6 +136,7 @@ double StateTransitionML::getLnL()
 		lnl += log((md[0][firstState] * pis[0]) + (md[1][firstState] * pis[1]) + (md[2][firstState] * pis[2]));
 	}
 
+	//THIS SHOULD NEVER HAPPEN
 	if (std::isnan(lnl))
 	{
 		ERROR("NAN extension " << e);

@@ -69,7 +69,7 @@ double TripletSamplingTree::distanceToParent(Node* n1, Node* par)
 }
 
 
-
+//TODO - this is no longer in use really.
 void TripletSamplingTree::fromNewick(const string& newick)
 {
 	//parse Newick!

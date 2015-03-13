@@ -595,8 +595,8 @@ namespace EBC
         /*   fprintf(output,"%s,",str); */
         if(length < 0)
         {
-        	ERROR("NEGATIVE BRANCH LENGTH IN BIONJ!!! setting branch to a positive value");
-        	output << std::fixed <<  setprecision(8) << length*-1.0 << ",";
+        	ERROR("NEGATIVE BRANCH LENGTH IN BIONJ!!! setting branch to zero");
+        	output << std::fixed <<  setprecision(8) << 0.000001 << ",";
         }
         else
         	output<< std::fixed  << setprecision(8) << length << ",";

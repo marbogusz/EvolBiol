@@ -149,8 +149,7 @@ class HmmDistanceGenerator:
         self.cores = 4;
 
         self.indelible_binary = 'indelible'
-        #self.hmm_binary = 'HMMtree1'
-        self.hmm_binary = 'HMMtree3'
+        self.hmm_binary = 'HMMtree1'
         self.hmm_base_params = ['--lD', '-F','--in']
         self.hmm_misc_params = ['-b', '1', '-o', '0', '--bf', '20']
         self.hmm_alpha_params = ['--initAlpha']
@@ -158,11 +157,8 @@ class HmmDistanceGenerator:
         self.file_prefix = 'control'
         self.hmmtreefile = '.hmm.tree'
 
-        self.hmmExtTrees = []
-        self.hmmExtBins = [] 
-        
-        #self.hmmExtTrees = ['.hmm.tree.2', '.hmm.tree.3','.hmm.tree.4']
-        #self.hmmExtBins = ['HMMtree2', 'HMMtree3','HMMtree4']
+        self.hmmExtTrees = ['.hmm.tree.2', '.hmm.tree.3','.hmm.tree.4']
+        self.hmmExtBins = ['HMMtree2', 'HMMtree3','HMMtree4']
         
         self.original_treefile = 'tree.sim'
 
@@ -200,9 +196,9 @@ class HmmDistanceGenerator:
         print("HMM analysis for {} steps with {} replicates.".format(self.steps,self.replicates))
         
     def run(self):
-        self.simulate(self.steps,self.replicates,self.model);
-        self.calculate(self.steps,self.replicates,self.model);
-        #self.analyseOutput(self.steps,self.replicates,self.model);
+        #self.simulate(self.steps,self.replicates,self.model);
+        #self.calculate(self.steps,self.replicates,self.model);
+        self.analyseOutput(self.steps,self.replicates,self.model);
         
     def simulate(self, s,r,modelname):
     
@@ -302,8 +298,8 @@ class HmmDistanceGenerator:
             current_dir = str(self.taxaNo) + '_taxa_' + self.model_suffix + '_' + str(self.seq_len) + '_' + str(treeHeight) + '_' + self.treeType +  '_' + str(r) 
             os.chdir(current_dir)
             self.runHMMbatch(r)
-            self.alignBatch(r)
-            self.runRaxml(r)
+            #self.alignBatch(r)
+            #self.runRaxml(r)
 
     def analyseOutput(self, s, r, model):
         filepref = str(self.taxaNo) + '_taxa_' + self.model_suffix + '_' + str(self.seq_len) + '_'  + self.treeType +  '_'+ str(r) 
@@ -526,22 +522,24 @@ class HmmDistanceGenerator:
         return round(random.uniform(0.1,4.0),3)
       
     def getLambda(self):
-        ret = round(random.gauss(0.04,0.03),3)
+        ret = round(random.gauss(0.03,0.02),3)
         while ret  <= 0:
-            ret = round(random.gauss(0.04,0.03),3)
+            ret = round(random.gauss(0.03,0.02),3)
         return ret
+
+        return round(random.gauss(0.03,0.02),3)
       
     def getEpsilon(self):
-        return round(random.uniform(0.15,0.85),3)
+        return round(random.uniform(0.25,0.75),3)
     
     def getNucleotideFrequencies(self):
         f1=f2=f3=f4=-1.0
         while f1  <= 0:
-            f1 = round(random.gauss(0.25,0.05),3)
+            f1 = round(random.gauss(0.25,0.1),3)
         while f2  <= 0 or f1+f2 > 1.0:
-            f2 = round(random.gauss(0.25,0.05),3)
-        while f3  <= 0 or f1+f2+f3 > 0.99:
-            f3 = round(random.gauss(0.25,0.05),3)
+            f2 = round(random.gauss(0.25,0.1),3)
+        while f3  <= 0 or f1+f2+f3 > 1.0:
+            f3 = round(random.gauss(0.25,0.1),3)
         f4 = round(1.0 -f1 -f2 -f3,3);
         return [f1,f2,f3,f4]
     def getRevRates(self):

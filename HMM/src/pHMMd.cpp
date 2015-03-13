@@ -221,14 +221,16 @@ int main(int argc, char ** argv) {
 
 			//FileLogger::Logger() << "True indel paramteres     : ";
 			//FileLogger::Logger() << cmdReader->getIndelParams() << '\n';
-			FileLogger::Logger() << "Estimated indel paramteres: ";
-			FileLogger::Logger() << indelParams << '\n';
+			//FileLogger::Logger() << "Estimated indel paramteres: ";
+			//FileLogger::Logger() << indelParams << '\n';
 			//FileLogger::Logger() << "True substitution paramteres     : ";
 			//FileLogger::Logger() << cmdReader->getSubstParams();
-			FileLogger::Logger() << "Estimated substitution paramteres: ";
-			FileLogger::Logger() << substParams;
+			//FileLogger::Logger() << "Estimated substitution paramteres: ";
+			//FileLogger::Logger() << substParams;
 			//FileLogger::Logger() << "True alpha      : " << cmdReader->getAlpha() << "\n";
-			FileLogger::Logger() << "Estimated alpha : " << alpha << "\n";
+			//FileLogger::Logger() << "Estimated alpha : " << alpha << "\n";
+
+
 
 
 			//FIXME - hardcoding substitution parameters and alpha to come from the estimator
@@ -236,12 +238,24 @@ int main(int argc, char ** argv) {
 					substParams, cmdReader->getOptimizationType(), cmdReader->getCategories(),alpha, tme->getGuideTree());
 			be->optimizePairByPair();
 
-			INFO ("Running BioNJ");
+			DEBUG ("Running BioNJ");
 
 			//change bionj init here!
 			BioNJ nj(inputSeqs->getSequenceCount(), be->getOptimizedTimes(), inputSeqs);
 			//DEBUG("Final tree : " << nj.calculate());
-			treefile << nj.calculate() << endl;
+			string treeStr = nj.calculate();
+
+
+			INFO("Indel parameters");
+			INFO(indelParams);
+			INFO("Substitution parameters");
+			INFO(substParams);
+			INFO("Gamma parameters (alpha and rate categories)");
+			INFO(alpha << '\t' << cmdReader->getCategories());
+			INFO("Newick tree");
+			INFO(treeStr);
+
+			treefile << treeStr << endl;
 
 
 			treefile.close();

@@ -12,7 +12,7 @@ namespace EBC
 
 OptimizedModelParameters::OptimizedModelParameters(SubstitutionModelBase* sm, IndelModel* im, unsigned int sCount, unsigned int dCount,
 		bool se, bool ie, bool ae, bool de, Maths* m) : maths(m), sm(sm), im(im), indelParameters(im != NULL ? im->getParamsNumber() : 0),
-		substParameters(sm != NULL ? sm->getParamsNumber() : 0), divergenceTimes(dCount),
+		substParameters(sm != NULL ? sm->getParamsNumber() : 0), divergenceTimes(dCount), indelHiBounds(im != NULL ? im->getParamsNumber() : 0),
 		estimateIndelParams(ie), estimateSubstParams(se), estimateAlpha(ae), estimateDivergence(de)
 {
 	indelCount = indelParameters.size();
@@ -24,6 +24,11 @@ OptimizedModelParameters::OptimizedModelParameters(SubstitutionModelBase* sm, In
 
 	this->divergenceBound  = Definitions::divergenceBound;
 
+	if(im != NULL){
+		for (int i =0; i< indelCount; i++){
+			indelHiBounds[i] = im->getHiBound(i);
+		}
+	}
 	//if(estimateIndelParams)
 	//	generateInitialIndelParameters();
 	//if(estimateSubstParams)
@@ -63,6 +68,12 @@ void OptimizedModelParameters::boundDivergenceBasedOnLambda(double lambda){
 	DUMP("Optimised Model Parameters divergence bound : " << divergenceBound);
 }
 
+void OptimizedModelParameters::boundLambdaBasedOnDivergence(double time){
+	//lambda * t must be smaller than negative ln(0.5)
+	double ln05 = log(0.5)*-1.0;
+	indelHiBounds[0] = min((ln05/time) - 0.001, im->getHiBound(0));
+	DUMP("Optimised Model Parameters lambda Hi bound : " << indelHiBounds[0] );
+}
 
 unsigned int OptimizedModelParameters::optParamCount()
 {
@@ -92,7 +103,7 @@ void OptimizedModelParameters::toDlibVector(column_vector& vals, column_vector& 
 			vals(i+ptr) = indelParameters[i];
 			//default probs bounds
 			lbounds(i+ptr) = im->getLoBound(i);
-			hbounds(i+ptr) = im->getHiBound(i);
+			hbounds(i+ptr) = indelHiBounds[i];
 		}
 		ptr += indelCount;
 	}

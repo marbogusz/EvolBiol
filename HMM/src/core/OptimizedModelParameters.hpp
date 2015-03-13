@@ -35,6 +35,7 @@ protected:
 	vector<double> divergenceTimes;
 	double alpha;
 	double divergenceBound;
+	vector<double> indelHiBounds;
 
 	bool estimateIndelParams;
 	bool estimateSubstParams;
@@ -64,6 +65,8 @@ public:
 	void useIndelModelInitialParameters();
 
 	void boundDivergenceBasedOnLambda(double lambda);
+
+	void boundLambdaBasedOnDivergence(double time);
 
 	void toDlibVector(column_vector&,column_vector&,column_vector&);
 

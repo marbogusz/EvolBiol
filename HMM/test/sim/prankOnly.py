@@ -200,7 +200,7 @@ class HmmDistanceGenerator:
         print("HMM analysis for {} steps with {} replicates.".format(self.steps,self.replicates))
         
     def run(self):
-        self.simulate(self.steps,self.replicates,self.model);
+        #self.simulate(self.steps,self.replicates,self.model);
         self.calculate(self.steps,self.replicates,self.model);
         #self.analyseOutput(self.steps,self.replicates,self.model);
         
@@ -301,7 +301,7 @@ class HmmDistanceGenerator:
             print("**********Calculation step {}".format(treeHeight))
             current_dir = str(self.taxaNo) + '_taxa_' + self.model_suffix + '_' + str(self.seq_len) + '_' + str(treeHeight) + '_' + self.treeType +  '_' + str(r) 
             os.chdir(current_dir)
-            self.runHMMbatch(r)
+            #self.runHMMbatch(r)
             self.alignBatch(r)
             self.runRaxml(r)
 
@@ -388,30 +388,30 @@ class HmmDistanceGenerator:
     
     def alignBatch(self, count):
         for i in range(count):
-            self.alignMafft(i)
-            self.alignMuscle(i)
-            #self.alignPrank(i)
-            self.alignClustal(i)
+            #self.alignMafft(i)
+            #self.alignMuscle(i)
+            self.alignPrank(i)
+            #self.alignClustal(i)
     
     def runRaxml(self, count):
 	for i in range(count):
-	    true_fc = self.indelible_output + '_' + str(i+1) +  '_TRUE_1.fas'
-            mafft_fc = 'mafft_' + str(i+1) + '.fas'
-            muscle_fc = 'muscle_' + str(i+1) + '.fas'
-            clustal_fc = 'clustal_' + str(i+1) + '.fas'
-            #prank_fc = 'prank_' + str(i+1) + '.best.fas'
+	    #true_fc = self.indelible_output + '_' + str(i+1) +  '_TRUE_1.fas'
+            #mafft_fc = 'mafft_' + str(i+1) + '.fas'
+            #muscle_fc = 'muscle_' + str(i+1) + '.fas'
+            #clustal_fc = 'clustal_' + str(i+1) + '.fas'
+            prank_fc = 'prank_' + str(i+1) + '.best.fas'
 
-            params_true = self.raxml_params[:]
-            params_mafft = self.raxml_params[:]
-            params_muscle = self.raxml_params[:]
-            params_clustal = self.raxml_params[:]
-            #params_prank = self.raxml_params[:]
+            #params_true = self.raxml_params[:]
+            #params_mafft = self.raxml_params[:]
+            #params_muscle = self.raxml_params[:]
+            #params_clustal = self.raxml_params[:]
+            params_prank = self.raxml_params[:]
 
-            params_true += [true_fc,'-n', 'true'+str(i+1)]
-            params_mafft += [mafft_fc,'-n', 'mafft'+str(i+1)]
-            params_muscle += [muscle_fc,'-n', 'muscle'+str(i+1)]
-            params_clustal += [clustal_fc,'-n', 'clustal'+str(i+1)]
-            #params_prank += [prank_fc,'-n', 'prank'+str(i+1)]
+            #params_true += [true_fc,'-n', 'true'+str(i+1)]
+            #params_mafft += [mafft_fc,'-n', 'mafft'+str(i+1)]
+            #params_muscle += [muscle_fc,'-n', 'muscle'+str(i+1)]
+            #params_clustal += [clustal_fc,'-n', 'clustal'+str(i+1)]
+            params_prank += [prank_fc,'-n', 'prank'+str(i+1)]
 
             #threads = []
             #t = Thread(target=self.callRaxml, args=([self.raxml_bin]+params_true,))
@@ -429,10 +429,11 @@ class HmmDistanceGenerator:
 
             #for th in threads:
             #    th.join()
-            self.callRaxml(([self.raxml_bin]+params_muscle))
-            self.callRaxml(([self.raxml_bin]+params_true))
-            self.callRaxml(([self.raxml_bin]+params_mafft))
-            self.callRaxml(([self.raxml_bin]+params_clustal))
+            #self.callRaxml(([self.raxml_bin]+params_muscle))
+            #self.callRaxml(([self.raxml_bin]+params_true))
+            #self.callRaxml(([self.raxml_bin]+params_mafft))
+            #self.callRaxml(([self.raxml_bin]+params_clustal))
+            self.callRaxml(([self.raxml_bin]+params_prank))
 
     def runHMMbatch(self, count):
         i = 0
@@ -526,22 +527,24 @@ class HmmDistanceGenerator:
         return round(random.uniform(0.1,4.0),3)
       
     def getLambda(self):
-        ret = round(random.gauss(0.04,0.03),3)
+        ret = round(random.gauss(0.03,0.02),3)
         while ret  <= 0:
-            ret = round(random.gauss(0.04,0.03),3)
+            ret = round(random.gauss(0.03,0.02),3)
         return ret
+
+        return round(random.gauss(0.03,0.02),3)
       
     def getEpsilon(self):
-        return round(random.uniform(0.15,0.85),3)
+        return round(random.uniform(0.25,0.75),3)
     
     def getNucleotideFrequencies(self):
         f1=f2=f3=f4=-1.0
         while f1  <= 0:
-            f1 = round(random.gauss(0.25,0.05),3)
+            f1 = round(random.gauss(0.25,0.1),3)
         while f2  <= 0 or f1+f2 > 1.0:
-            f2 = round(random.gauss(0.25,0.05),3)
-        while f3  <= 0 or f1+f2+f3 > 0.99:
-            f3 = round(random.gauss(0.25,0.05),3)
+            f2 = round(random.gauss(0.25,0.1),3)
+        while f3  <= 0 or f1+f2+f3 > 1.0:
+            f3 = round(random.gauss(0.25,0.1),3)
         f4 = round(1.0 -f1 -f2 -f3,3);
         return [f1,f2,f3,f4]
     def getRevRates(self):
