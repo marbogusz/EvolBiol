@@ -47,7 +47,7 @@ BandCalculator::BandCalculator(vector<SequenceElement*>* s1, vector<SequenceElem
 	}
 
 	//TODO - perhaps band it as well ???
-	bwd =  new BackwardPairHMM(seq1,seq2, substModel,indelModel, Definitions::DpMatrixType::Full);
+	bwd =  new BackwardPairHMM(seq1,seq2, substModel,indelModel, Definitions::DpMatrixType::Full,band);
 	bwd->setDivergenceTimeAndCalculateModels(time*multipliers[best]);
 	DUMP("Backward calculation runs...");
 	bwd->runAlgorithm();
