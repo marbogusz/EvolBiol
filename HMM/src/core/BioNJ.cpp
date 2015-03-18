@@ -539,7 +539,7 @@ namespace EBC
         length=0.5*(Distance(i,j,delta) + Distance(i,k,delta)
                 -Distance(j,k,delta));
         if (length < 0){
-        	ERROR("NEGATIVE BRANCH LENGTH IN BIONJ!!! setting branch to a zero");
+        	INFO("NEGATIVE BRANCH LENGTH IN BIONJ!!! setting branch to a zero");
         	length = 0.000001;
         }
         return(length);
@@ -595,7 +595,7 @@ namespace EBC
         /*   fprintf(output,"%s,",str); */
         if(length < 0)
         {
-        	ERROR("NEGATIVE BRANCH LENGTH IN BIONJ!!! setting branch to zero");
+        	INFO("NEGATIVE BRANCH LENGTH IN BIONJ!!! setting branch to zero");
         	output << std::fixed <<  setprecision(8) << 0.000001 << ",";
         }
         else
@@ -609,7 +609,7 @@ namespace EBC
         /*   fprintf(output,"%s,",str); */
         if(length < 0)
         {
-        	ERROR("NEGATIVE BRANCH LENGTH IN BIONJ!!! setting branch to  zero");
+        	INFO("NEGATIVE BRANCH LENGTH IN BIONJ!!! setting branch to  zero");
         	output << std::fixed <<  setprecision(8) << 0.000001 << ",";
         }
         else
@@ -673,7 +673,7 @@ namespace EBC
                     -Sum_S(b,delta))/(r-2));
         if (length < 0)
         {
-        	ERROR("NEGATIVE BRANCH LENGTH IN BIONJ!!! setting branch to zero");
+        	INFO("NEGATIVE BRANCH LENGTH IN BIONJ!!! setting branch to zero");
         	length = length = 0.000001;;
         }
         return(length);

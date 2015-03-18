@@ -35,6 +35,11 @@ private:
 public:
 	DistanceMatrix(int size);
 
+	unsigned int getSize()
+	{
+		return taxas;
+	}
+
 	void addDistance(unsigned int s1, unsigned int s2, double distance);
 
 	double getDistance(unsigned int s1, unsigned int s2);

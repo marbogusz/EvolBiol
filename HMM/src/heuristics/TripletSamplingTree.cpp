@@ -6,7 +6,7 @@
  */
 
 #include "heuristics/TripletSamplingTree.hpp"
-#include <regex>
+//#include <regex>
 #include <stack>
 #include <random>
 #include <iostream>
@@ -75,6 +75,7 @@ void TripletSamplingTree::fromNewick(const string& newick)
 	//parse Newick!
 	//start with a bracket, end with a bracket and a semicolon
 	//TODO - check if the newick string is well formed
+/*
 	bool endReached = false;
 	unsigned int i = 0;
 	unsigned int ids = 0;
@@ -186,6 +187,7 @@ void TripletSamplingTree::fromNewick(const string& newick)
 	this->leafBranchSd /= leafNodes.size();
 	this->leafBranchSd = std::sqrt(leafBranchSd);
 	DEBUG("Newick tree parsed");
+*/
 }
 
 vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromDM()
@@ -219,7 +221,17 @@ vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromTree()
 	Node *firstNd, *secondNd;
 	unsigned int treeNo = 0;
 	//copy
+
+	distMat->getSize();
+
+	for (unsigned int i = 0;  i < distMat->getSize(); i++)
+	{
+		leafNodes[i] = nullptr;
+	}
+
 	availableNodes = leafNodes;
+
+
 	//randomly select 1 leaf
 	double treeSize;
 	this->idealTreeSize = 3 * this->averageLeafbranch;
@@ -240,9 +252,6 @@ vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromTree()
 	for(auto pr : vecPairs){
 		if (treeNo >2)
 			break;
-
-		firstNd = leafNodes[pr.first];
-		secondNd  = leafNodes[pr.second];
 		s1 = pr.first;
 		s2 = pr.second;
 
@@ -291,8 +300,6 @@ vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromTree()
 	}
 	if(!found){
 		auto pr = vecPairs[0]; //get the best one
-		firstNd = leafNodes[pr.first];
-		secondNd  = leafNodes[pr.second];
 		s1 = pr.first;
 		s2 = pr.second;
 

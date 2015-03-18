@@ -20,7 +20,7 @@ Optimizer::Optimizer(OptimizedModelParameters* mp, IOptimizable* opt, Definition
 	this->lowerBounds.set_size(paramsCount);
 	this->upperBounds.set_size(paramsCount);
 
-	omp->toDlibVector(initParams,lowerBounds,upperBounds);
+	//omp->toDlibVector(initParams,lowerBounds,upperBounds);
 
 	DEBUG("Numeric optimizer with " << paramsCount << " parameter(s) created");
 	//cerr << "DLIB optimizer init with " << paramsCount << " parameters" << endl;
@@ -52,6 +52,8 @@ const column_vector Optimizer::objectiveFunctionDerivative(const column_vector& 
 
 double Optimizer::optimize()
 {
+	omp->toDlibVector(initParams,lowerBounds,upperBounds);
+
 	using std::placeholders::_1;
 	std::function<double(const column_vector&)> f_objective= std::bind( &Optimizer::objectiveFunction, this, _1 );
 	double likelihood;

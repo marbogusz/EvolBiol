@@ -60,7 +60,7 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
     chrono::duration<double> elapsed_seconds = end-start;
 
     INFO("Model Estimator elapsed time: " << elapsed_seconds.count() << " seconds");
-    cerr <<  "|||||||||||| Model Estimator elapsed time: " << elapsed_seconds.count() << "s ||||||||||||||\n";
+    //cerr <<  "|||||||||||| Model Estimator elapsed time: " << elapsed_seconds.count() << "s ||||||||||||||\n";
 
 	//substModel->summarize();
 

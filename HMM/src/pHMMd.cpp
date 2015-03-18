@@ -201,7 +201,7 @@ int main(int argc, char ** argv) {
 		else
 		{
 
-			treefile.open((string(cmdReader->getInputFileName()).append(".hmm.tree")).c_str(),ios::out);
+
 
 			INFO("Creating Model Parameters heuristics...");
 			ModelEstimator* tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),
@@ -255,9 +255,9 @@ int main(int argc, char ** argv) {
 			INFO("Newick tree");
 			INFO(treeStr);
 
+
+			treefile.open((string(cmdReader->getInputFileName()).append(".hmm.tree")).c_str(),ios::out);
 			treefile << treeStr << endl;
-
-
 			treefile.close();
 			delete be;
 			delete tme;
