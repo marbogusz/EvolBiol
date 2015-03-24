@@ -84,6 +84,8 @@ protected:
 
 	unsigned int tripletIdxsSize;
 
+	double userAlpha;
+
 	bool estimateAlpha;
 
 	void calculateInitialHMMs(Definitions::ModelType model);

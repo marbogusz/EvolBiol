@@ -19,7 +19,7 @@ namespace EBC
 ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType model ,
 		Definitions::OptimizationType ot, unsigned int rateCategories, double alpha, bool estimateAlpha) :
 				inputSequences(inputSeqs), gammaRateCategories(rateCategories),
-				gtree(new GuideTree(inputSeqs)), tst(*gtree), estAlpha(estimateAlpha), estIndel(true), estSubst(true)
+				gtree(new GuideTree(inputSeqs)), tst(*gtree), userAlpha(alpha), estAlpha(estimateAlpha), estIndel(true), estSubst(true)
 {
 
 	DEBUG("About to sample some triplets");
@@ -208,7 +208,11 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 
 	vector<double> timeModifiers = {0.75, 1.0, 1.5};
 	vector<double> lambdas = {0.03, 0.07};
-	vector<double> alphas = {0.5,1.0};
+	vector<double> alphas;
+	if (!estAlpha)
+		alphas = {userAlpha};
+	else
+		alphas = {0.5,1.0};
 
 	ForwardPairHMM *f1, *f2;
 
@@ -231,7 +235,10 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 
 	substModel->setObservedFrequencies(inputSequences->getElementFrequencies());
 	//alpha setting will have no effect if we're dealing with 1 rate category
-	substModel->setAlpha(initAlpha);
+	if (estAlpha)
+		substModel->setAlpha(initAlpha);
+	else
+		substModel->setAlpha(userAlpha);
 	//if (!aaMode)
 	//	substModel->setParameters({initKappa});
 	//substModel->calculateModel();
@@ -288,8 +295,7 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 			indelModel->setParameters({l,initEpsilon});
 			for(auto a : alphas){
 				substModel->setAlpha(a);
-				if (estAlpha)
-					substModel->calculateModel();
+				substModel->calculateModel();
 				currentLnl = 0;
 				for (int i = 0; i < tripletIdxsSize; i++){
 					f1 = fwdHMMs[i][0];
