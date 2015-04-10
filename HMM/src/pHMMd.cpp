@@ -145,7 +145,23 @@ int main(int argc, char ** argv) {
 		else if (cmdReader->isMLE())
 		{
 
-			vector<double> indelParams;
+			//DISTANCE-BASED estimation using an alignment
+
+			GuideTree gt(inputSeqs);
+			MlEstimator tme(inputSeqs, cmdReader->getModelType(), {}, {},
+							cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
+							false, gt.getDistances(), false);
+
+
+			BioNJ nj(inputSeqs->getSequenceCount(), tme.getOptimizedTimes(), inputSeqs);
+			//DEBUG("Final tree : " << nj.calculate());
+			string treeStr = nj.calculate();
+
+			treefile.open((string(cmdReader->getInputFileName()).append(".nj.tree")).c_str(),ios::out);
+			treefile << treeStr << endl;
+			treefile.close();
+
+			/*vector<double> indelParams;
 			vector<double> substParams;
 			double alpha = alpha = cmdReader->getAlpha();
 
@@ -177,7 +193,7 @@ int main(int argc, char ** argv) {
 				cout  << '\t' << param;
 
 			delete tme;
-
+*/
 
 /*
 			HMMEstimator* tme = new HMMEstimator(inputSeqs, cmdReader->getModelType(),

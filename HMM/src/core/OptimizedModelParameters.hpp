@@ -51,9 +51,7 @@ protected:
 	//FIXME - static bound vectors!
 
 
-	void generateInitialIndelParameters();
-	void generateInitialSubstitutionParameters();
-	void generateInitialDistanceParameters();
+
 
 public:
 	OptimizedModelParameters(SubstitutionModelBase*, IndelModel*, unsigned int, unsigned int, bool, bool, bool, bool, Maths*);
@@ -85,6 +83,10 @@ public:
 	void outputToConsole();
 
 	double getDistanceBetween(unsigned int i, unsigned int j);
+
+	void generateInitialIndelParameters();
+	void generateInitialSubstitutionParameters();
+	void generateInitialDistanceParameters();
 
 	double getAlpha() const
 	{

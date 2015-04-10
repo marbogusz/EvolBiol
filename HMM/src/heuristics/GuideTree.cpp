@@ -66,6 +66,7 @@ void GuideTree::constructTree()
 			DUMP("k-mer distance between seq. " << i << " and " << j << " is " << identity << " adjusted distance " << estIdentity );
 
 			distMat->addDistance(i,j,estIdentity);
+			distances.push_back(estIdentity);
 		}
 
 	DEBUG("Initialized distance matrix");

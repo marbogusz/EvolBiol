@@ -24,6 +24,7 @@ void Dictionary::setAlphabet(char dict[], unsigned short size)
 	{
 		//this->alphabet.push_back(string(1,dict[i]));
 		this->translator.insert(std::make_pair(alphabet[i],new SequenceElement(i==gapId, i, NULL, alphabet[i])));
+		this->translator.insert(std::make_pair(tolower(alphabet[i]),new SequenceElement(i==gapId, i, NULL, alphabet[i])));
 	}
 
 	//alphabet size does not include gap e.g. size is 4 for nucleotides
