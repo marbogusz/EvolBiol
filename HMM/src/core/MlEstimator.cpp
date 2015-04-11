@@ -25,7 +25,7 @@ MlEstimator::BFGS::BFGS(MlEstimator* enclosing, Definitions::OptimizationType ot
 
 	parent->modelParams->toDlibVector(initParams,lowerBounds,upperBounds);
 
-	cerr << "DLIB optimizer init with " << paramsCount << " parameters" << endl;
+	//cerr << "DLIB optimizer init with " << paramsCount << " parameters" << endl;
 }
 
 MlEstimator::BFGS::~BFGS()
@@ -103,7 +103,14 @@ MlEstimator::MlEstimator(Sequences* inputSeqs, Definitions::ModelType model ,std
 
 	indelModel = new NegativeBinomialGapModel();
 
+	substModel->setAlpha(alpha);
+
 	estimateSubstitutionParams = true;
+	if (subst_params.size() > 0){
+		estimateSubstitutionParams = false;
+		substModel->setParameters(subst_params);
+		substModel->calculateModel();
+	}
 	estimateIndelParams = false;
 	//can't estimate alpha!
 	//unless done before using triplets!
@@ -114,10 +121,11 @@ MlEstimator::MlEstimator(Sequences* inputSeqs, Definitions::ModelType model ,std
 
 	useViterbi = false;
 
-	modelParams = new OptimizedModelParameters(substModel, NULL,inputSequences->getSequenceCount(), pairCount, true,
-				false, false, true, maths);
+	modelParams = new OptimizedModelParameters(substModel, NULL,inputSequences->getSequenceCount(), pairCount, estimateSubstitutionParams,
+			estimateIndelParams, estimateAlpha, true, maths);
 
-	modelParams->generateInitialSubstitutionParameters();
+	if (estimateSubstitutionParams)
+		modelParams->generateInitialSubstitutionParameters();
 	//modelParams->generateInitialDistanceParameters();
 	modelParams->setUserDivergenceParams(userTime);
 
@@ -151,10 +159,10 @@ MlEstimator::~MlEstimator()
 double MlEstimator::runIteration()
 {
 	double result = 0;
-
-	substModel->setParameters(modelParams->getSubstParameters());
-	substModel->calculateModel();
-
+	if (estimateSubstitutionParams){
+		substModel->setParameters(modelParams->getSubstParameters());
+		substModel->calculateModel();
+	}
 	for(unsigned int i =0; i<pairCount; i++)
 	{
 		//this calculates the matrix(matrices for a gamma model)

@@ -147,9 +147,17 @@ int main(int argc, char ** argv) {
 
 			//DISTANCE-BASED estimation using an alignment
 
+			vector<double> indelParams;
+			vector<double> substParams;
+			double alpha;
+
+			substParams = cmdReader->getSubstParams();
+			indelParams = cmdReader->getIndelParams();
+			alpha = cmdReader->getAlpha();
+
 			GuideTree gt(inputSeqs);
-			MlEstimator tme(inputSeqs, cmdReader->getModelType(), {}, {},
-							cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
+			MlEstimator tme(inputSeqs, cmdReader->getModelType(), indelParams, substParams,
+							cmdReader->getOptimizationType(), cmdReader->getCategories(), alpha,
 							false, gt.getDistances(), false);
 
 
@@ -161,57 +169,6 @@ int main(int argc, char ** argv) {
 			treefile << treeStr << endl;
 			treefile.close();
 
-			/*vector<double> indelParams;
-			vector<double> substParams;
-			double alpha = alpha = cmdReader->getAlpha();
-
-			double dist =  cmdReader->getDistance();
-			if (dist < 0)
-				dist = 1.0;
-
-			substParams = cmdReader->getSubstParams();
-			indelParams = cmdReader->getIndelParams();
-
-			//tme->getModelParameters();
-
-			//cerr << "Alpha " << alpha << endl;
-			//cerr << "Rate cat " << cmdReader->getCategories() << endl;
-			INFO("Creating Model Parameters heuristics...");
-
-			ModelEstimator* tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),
-					cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
-					cmdReader->estimateAlpha());
-
-			//tme->getModelParameters();
-			substParams = tme->getSubstitutionParameters();
-			indelParams = tme->getIndelParameters();
-			if(cmdReader->estimateAlpha())
-				alpha = tme->getAlpha();
-
-			cout << alpha << '\t' << indelParams[0] << '\t' << indelParams[1];
-			for (auto param : substParams)
-				cout  << '\t' << param;
-
-			delete tme;
-*/
-
-/*
-			HMMEstimator* tme = new HMMEstimator(inputSeqs, cmdReader->getModelType(),
-					cmdReader->getOptimizationType(), cmdReader->getCategories(), alpha,
-					cmdReader->estimateAlpha(), substParams, indelParams, dist);
-
-			substParams = tme->getSubstitutionParameters();
-			indelParams = tme->getIndelParameters();
-			//if(cmdReader->estimateAlpha())
-			//	alpha = tme->getAlpha();
-
-			//cout << "Final indel params" << endl;
-			//cout << (1.0-exp(indelParams[0]*-1.0*dist)) << "\t" << indelParams[1] << "\n";
-			//cout << "Final subst params" << endl;
-			//cout << substParams[0] << endl;
-
-			delete tme;
-*/
 		}
 
 		else
@@ -232,20 +189,6 @@ int main(int argc, char ** argv) {
 			indelParams = tme->getIndelParameters();
 			if(cmdReader->estimateAlpha())
 				alpha = tme->getAlpha();
-
-
-
-			//FileLogger::Logger() << "True indel paramteres     : ";
-			//FileLogger::Logger() << cmdReader->getIndelParams() << '\n';
-			//FileLogger::Logger() << "Estimated indel paramteres: ";
-			//FileLogger::Logger() << indelParams << '\n';
-			//FileLogger::Logger() << "True substitution paramteres     : ";
-			//FileLogger::Logger() << cmdReader->getSubstParams();
-			//FileLogger::Logger() << "Estimated substitution paramteres: ";
-			//FileLogger::Logger() << substParams;
-			//FileLogger::Logger() << "True alpha      : " << cmdReader->getAlpha() << "\n";
-			//FileLogger::Logger() << "Estimated alpha : " << alpha << "\n";
-
 
 
 
