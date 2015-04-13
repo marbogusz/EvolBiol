@@ -57,7 +57,7 @@ void MlEstimator::BFGS::optimize()
 		case Definitions::OptimizationType::BFGS:
 		{
 			dlib::objective_delta_stop_strategy strt(1e-7);
-			strt.be_verbose();
+			//strt.be_verbose();
 			likelihood = dlib::find_min_box_constrained(dlib::bfgs_search_strategy(),
 					strt,
 					f_objective,
@@ -108,8 +108,6 @@ MlEstimator::MlEstimator(Sequences* inputSeqs, Definitions::ModelType model ,std
 	estimateSubstitutionParams = true;
 	if (subst_params.size() > 0){
 		estimateSubstitutionParams = false;
-		substModel->setParameters(subst_params);
-		substModel->calculateModel();
 	}
 	estimateIndelParams = false;
 	//can't estimate alpha!
@@ -130,6 +128,10 @@ MlEstimator::MlEstimator(Sequences* inputSeqs, Definitions::ModelType model ,std
 	modelParams->setUserDivergenceParams(userTime);
 
 	substModel->setObservedFrequencies(inputSequences->getElementFrequencies());
+	if (!estimateSubstitutionParams){
+		substModel->setParameters(subst_params);
+		substModel->calculateModel();
+	}
 
 	for(unsigned int i =0; i<pairCount; i++)
 	{

@@ -68,6 +68,7 @@ int main(int argc, char ** argv) {
 			vector<double> substParams;
 			substParams = cmdReader->getSubstParams();
 			indelParams = cmdReader->getIndelParams();
+			double alpha = cmdReader->getAlpha();
 
 			Optimizer* bfgs;
 			Dictionary* dict;
@@ -82,15 +83,15 @@ int main(int argc, char ** argv) {
 
 			if (cmdReader->getModelType() == Definitions::ModelType::GTR)
 			{
-				substModel = new GTRModel(dict, maths,1);
+				substModel = new GTRModel(dict, maths,cmdReader->getCategories());
 			}
 			else if (cmdReader->getModelType() == Definitions::ModelType::HKY85)
 			{
-				substModel = new HKY85Model(dict, maths,1);
+				substModel = new HKY85Model(dict, maths,cmdReader->getCategories());
 			}
 			else if (cmdReader->getModelType() == Definitions::ModelType::LG)
 			{
-					substModel = new AminoacidSubstitutionModel(dict, maths,1,Definitions::aaLgModel);
+					substModel = new AminoacidSubstitutionModel(dict, maths,cmdReader->getCategories(),Definitions::aaLgModel);
 			}
 
 			indelModel = new NegativeBinomialGapModel();
@@ -98,16 +99,19 @@ int main(int argc, char ** argv) {
 			modelParams = new OptimizedModelParameters(substModel, indelModel,2, 1, false,
 					false, false, true, maths);
 
+			modelParams->generateInitialDistanceParameters();
 
-			modelParams->setUserIndelParams(indelParams);
-			modelParams->setUserSubstParams(substParams);
+
+			//modelParams->setUserIndelParams(indelParams);
+			//modelParams->setUserSubstParams(substParams);
 
 			substModel->setObservedFrequencies(inputSeqs->getElementFrequencies());
-			substModel->setParameters(modelParams->getSubstParameters());
+			substModel->setAlpha(alpha);
+			substModel->setParameters(substParams);
 			substModel->calculateModel();
 
 
-			indelModel->setParameters(modelParams->getIndelParameters());
+			indelModel->setParameters(indelParams);
 
 			EvolutionaryPairHMM *hmm;
 
@@ -133,13 +137,9 @@ int main(int argc, char ** argv) {
 			//hmm->setDivergenceTime(modelParams->getDivergenceTime(0)); //zero as there's only one pair!
 			wrapper->setTargetHMM(hmm);
 			wrapper->setModelParameters(modelParams);
-
 			bfgs->setTarget(wrapper);
 			bfgs->optimize();
-
 			cout << modelParams->getDivergenceTime(0);
-
-
 		}
 
 		else if (cmdReader->isMLE())
@@ -161,13 +161,14 @@ int main(int argc, char ** argv) {
 							false, gt.getDistances(), false);
 
 
-			BioNJ nj(inputSeqs->getSequenceCount(), tme.getOptimizedTimes(), inputSeqs);
+			cout << tme.getOptimizedTimes()[0];
+			//BioNJ nj(inputSeqs->getSequenceCount(), tme.getOptimizedTimes(), inputSeqs);
 			//DEBUG("Final tree : " << nj.calculate());
-			string treeStr = nj.calculate();
+			//string treeStr = nj.calculate();
 
-			treefile.open((string(cmdReader->getInputFileName()).append(".nj.tree")).c_str(),ios::out);
-			treefile << treeStr << endl;
-			treefile.close();
+			//treefile.open((string(cmdReader->getInputFileName()).append(".nj.tree")).c_str(),ios::out);
+			//treefile << treeStr << endl;
+			//treefile.close();
 
 		}
 

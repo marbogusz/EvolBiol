@@ -70,8 +70,9 @@ void GuideTree::constructTree()
 		}
 
 	DEBUG("Initialized distance matrix");
-	BioNJ nj(sequenceCount, distMat);
-	newickTree = nj.calculate();
+	//BioNJ nj(sequenceCount, distMat);
+	//newickTree = nj.calculate();
+	newickTree = "";
 
 	/*
 	TripletSamplingTree tst(distMat);
