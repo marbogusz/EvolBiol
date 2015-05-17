@@ -23,10 +23,10 @@ class SequenceElement
 protected:
 	bool isGap;
 	unsigned char matrixIndex;
-	char symbol;
+	string symbol;
 	//vector<short> alternativeIndexes;
 public:
-	SequenceElement(bool, unsigned char, short*, char smbl);
+	SequenceElement(bool, unsigned char, short*, string smbl);
 
 	inline bool isIsGap() const
 	{
@@ -38,7 +38,7 @@ public:
 		return matrixIndex;
 	}
 
-	inline char getSymbol()
+	inline string& getSymbol()
 	{
 		return symbol;
 	}

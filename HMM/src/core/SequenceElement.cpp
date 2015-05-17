@@ -12,7 +12,7 @@ namespace EBC
 
 
 
-SequenceElement::SequenceElement(bool isGap, unsigned char index, short* alternativeIndexes, char sy) : symbol(sy)
+SequenceElement::SequenceElement(bool isGap, unsigned char index, short* alternativeIndexes, string sy) : symbol(sy)
 {
 	this->isGap = isGap;
 	//matrix index of -1 means gap or multiple options!

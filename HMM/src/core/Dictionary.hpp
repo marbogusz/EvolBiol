@@ -23,23 +23,22 @@ namespace EBC
 	protected:
 		unsigned short alphabetSize;
 		unsigned char gapId;
-		string alphabet;
-		map<char,SequenceElement*> translator;
+		vector<string> alphabet;
+		map<string,SequenceElement*> translator;
 
 	public:
 
-		static const char nucleotides[5];
-		static const char aminoacids[21];
-		static const char gapChar;
+		static const string nucleotides[5];
+		static const string aminoacids[21];
+		static const string gapChar;
 
-		//virtual short getSymbolIndex(string &symbol);
-		virtual unsigned char getSymbolIndex(char symbol);
 		virtual vector<SequenceElement*>* translate(string &sequence, bool disregardIndels = false);
+
 		virtual unsigned short getAlphabetSize();
 
-		SequenceElement* getSequenceElement(char symbol);
+		SequenceElement* getSequenceElement(string& symbol);
 
-		virtual char getSymbolAt(unsigned char i);
+		virtual string& getSymbolAt(unsigned char i);
 
 		virtual void outputAlphabet();
 
@@ -49,7 +48,7 @@ namespace EBC
 		}
 
 	protected:
-		virtual void setAlphabet(char alphabet[], unsigned short size);
+		virtual void setAlphabet(const string alphabet[], unsigned short size);
 
 	};
 
@@ -63,6 +62,12 @@ namespace EBC
 	{
 	public:
 		AminoacidDictionary();
+	};
+
+	class CodonDictionary : public Dictionary
+	{
+	public:
+		CodonDictionary();
 	};
 }
 

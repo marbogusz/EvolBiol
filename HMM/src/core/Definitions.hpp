@@ -85,6 +85,8 @@ public:
 
 	constexpr static const unsigned int AAParamCount = 0;
 
+	constexpr static const unsigned int CodonM0ParamCount = 2;
+
 	constexpr static const unsigned int NBIndelParamCount = 2;
 
 	constexpr static const unsigned int nucleotideCount = 4;
