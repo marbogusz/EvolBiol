@@ -45,7 +45,7 @@ protected:
 	double* piLogFreqs;
 
 	//q-rates
-	double* qMatrix;
+	double** qMatrix;
 
 	double* vMatrix;
 
