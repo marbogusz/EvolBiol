@@ -7,10 +7,14 @@
 
 #include "core/Dictionary.hpp"
 #include "core/Definitions.hpp"
+#include "core/HmmException.hpp"
 #include <algorithm>
 
 namespace EBC
 {
+
+
+//FIXME  - U and T equivalence!!!
 
 void Dictionary::setAlphabet(const string dict[], unsigned short size)
 {
@@ -74,8 +78,27 @@ vector<SequenceElement*>* Dictionary::translate(string& sequence, bool disregard
 }
 
 const string Dictionary::nucleotides[] = {"T", "C", "A", "G", "-"};
+
+//FIXME - T and U equivalence needs to be addressed
+//const string Dictionary::UracilSymbol = "U";
+//const unsigned int Dictionary::UracilId = 0;
+
 //const char Dictionary::nucleotides[] = {'A', 'C', 'G', 'T'};
 const string Dictionary::aminoacids[] = {"A","R","N","D","C","Q","E","G","H","I","L","K","M","F","P","S","T","W","Y","V","-"};
+									//	  0   1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  16  17  18  19  20
+
+const string Dictionary::codons[] = {"TTT", "TTC", "TTA", "TTG", "TCT", "TCC", "TCA", "TCG","TAT", "TAC", "TAA", "TAG", "TGT", "TGC", "TGA", "TGG",
+									 "CTT", "CTC", "CTA", "CTG", "CCT", "CCC", "CCA", "CCG","CAT", "CAC", "CAA", "CAG", "CGT", "CGC", "CGA", "CGG",
+									 "ATT", "ATC", "ATA", "ATG", "ACT", "ACC", "ACA", "ACG","AAT", "AAC", "AAA", "AAG", "AGT", "AGC", "AGA", "AGG",
+									 "GTT", "GTC", "GTA", "GTG", "GCT", "GCC", "GCA", "GCG","GAT", "GAC", "GAA", "GAG", "GGT", "GGC", "GGA", "GGG", "---"};
+
+
+//aminoacid Id to codon conversion
+const int Dictionary::geneticCode[] = {13,13,10,10,15,15,15,15,18,18,-1,-1, 4, 4,-1,17,
+									   10,10,10,10,14,14,14,14, 8, 8, 5, 5, 1, 1, 1, 1,
+                                        9, 9, 9,-1,16,16,16,16, 2, 2,11,11,15,15, 1, 1,
+                                       19,19,19,19, 0, 0, 0, 0, 3, 3, 6, 6, 7, 7, 7, 7 };
+
 
 const string Dictionary::gapChar = "-";
 
@@ -90,6 +113,8 @@ NucleotideDictionary::NucleotideDictionary()
 	gapId = 4;
 	this->setAlphabet(Dictionary::nucleotides,4);
 
+	this->translator.insert(std::make_pair("U",new SequenceElement(false, 0, NULL, "U")));
+
 }
 
 
@@ -100,7 +125,94 @@ AminoacidDictionary::AminoacidDictionary()
 
 }
 
+CodonDictionary::CodonDictionary()
+{
+	gapId = 64;
+	this->setAlphabet(Dictionary::codons,64);
+	this->setGeneticCode(Dictionary::geneticCode);
+}
 
+void CodonDictionary::setGeneticCode(const int gc[])
+{
+	std::copy(gc,gc + this->alphabetSize, this->genCode);
+}
+
+int CodonDictionary::getAminoacidId(unsigned int codonId)
+{
+	return genCode[codonId];
+}
+
+bool CodonDictionary::isPurine(char base)
+{
+	return (base == 'A' || base == 'G');
+}
+
+bool CodonDictionary::isPyramidine(char base)
+{
+	return (base == 'T' || base == 'C');
+}
+
+unsigned int CodonDictionary::getNumberOfDifferentPositions(unsigned int codon1,
+		unsigned int codon2, bool& synonymous, bool& transition)
+{
+	synonymous = false;
+	transition = true;
+
+	string& c1 = alphabet[codon1];
+	string& c2 = alphabet[codon2];
+
+	//iterate over positions
+	unsigned int counter = 0;
+	int changedPos = -1;
+	for(unsigned int i = 0; i < 3; i++)
+	{
+		if (c1[i] != c2[i]){
+			counter++;
+			changedPos = i;
+		}
+	}
+	if(counter == 0 || counter > 1)
+		return counter;
+
+	if (getAminoacidId(codon1) ==  getAminoacidId(codon2))
+		synonymous = true;
+
+	bool c1Purine = isPurine(c1[changedPos]);
+	bool c2Purine = isPurine(c2[changedPos]);
+
+	if (c1Purine != c2Purine)
+		transition = false;
+
+	return counter;
+}
+
+vector<SequenceElement*>* CodonDictionary::translate(string& sequence, bool disregardIndels)
+{
+
+	if(sequence.size() % 3 != 0)
+		throw HmmException("Sequence length should be divisible by 3 for codon models! Quitting");
+
+
+	vector<SequenceElement*> *translatedVector = new vector<SequenceElement*>(sequence.size()/3);
+	unsigned short currentEl;
+
+//	DEBUG("Transled: ");
+
+
+	unsigned int pos = 0;
+	unsigned int strpos = 0;
+
+
+	while(strpos < sequence.size()){
+		string cstrg = sequence.substr(strpos,3);
+		(*translatedVector)[pos] = getSequenceElement(cstrg);
+		strpos +=3;
+		pos++;
+
+	}
+//	DEBUGN(std::endl);
+	return translatedVector;
 
 }
 
+}//Namespace definition

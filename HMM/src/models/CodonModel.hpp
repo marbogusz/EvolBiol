@@ -22,17 +22,19 @@ class CodonModel : public EBC::SubstitutionModelBase
 
 protected:
 
-	/*
-	vector<unsigned int> piCodons;
-	vector<unsigned int> kCodons;
-	vector<unsigned int> wCodons;
-	vector<unsigned int> kwCodons;
-	*/
+
+	vector<pair<unsigned int, unsigned int> > piCodons;
+	vector<pair<unsigned int, unsigned int> > kCodons;
+	vector<pair<unsigned int, unsigned int> > wCodons;
+	vector<pair<unsigned int, unsigned int> > kwCodons;
+
+	//now we can check for syn/nonsyn/ti/tv
+	CodonDictionary* cdict = dynamic_cast<CodonDictionary*>(dictionary);
+
 	//params[0] - kappa
 	//params[1] - omega
 
 	void buildInitialQmatrix();
-
 
 public:
 
@@ -41,6 +43,10 @@ public:
 	virtual ~CodonModel();
 
 	void calculateModel();
+
+	void setParameters(const vector<double>&);
+
+	void summarize();
 
 };
 

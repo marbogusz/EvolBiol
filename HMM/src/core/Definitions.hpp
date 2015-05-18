@@ -93,6 +93,8 @@ public:
 
 	constexpr static const unsigned int aminoacidCount = 20;
 
+	constexpr static const int stopCodonId = -1;
+
 	struct aaModelDefinition
 	{
 		double maxRate;
@@ -102,7 +104,7 @@ public:
 
 	enum SequenceType {Nucleotide, Aminoacid, Codon};
 	//TODO - CODON lookup table
-	enum ModelType {GTR, HKY85, LG};
+	enum ModelType {GTR, HKY85, LG, M0};
 
 	enum OptimizationType {BFGS, BOBYQA};
 

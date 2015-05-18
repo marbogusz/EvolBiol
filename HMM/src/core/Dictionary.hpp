@@ -30,6 +30,8 @@ namespace EBC
 
 		static const string nucleotides[5];
 		static const string aminoacids[21];
+		static const string codons[65];
+		static const int geneticCode[64];
 		static const string gapChar;
 
 		virtual vector<SequenceElement*>* translate(string &sequence, bool disregardIndels = false);
@@ -66,8 +68,23 @@ namespace EBC
 
 	class CodonDictionary : public Dictionary
 	{
+	protected:
+		int genCode[64];
+
+		bool isPurine(char base);
+		bool isPyramidine(char base);
+
 	public:
 		CodonDictionary();
+
+		vector<SequenceElement*>* translate(string &sequence, bool disregardIndels = false);
+
+		void setGeneticCode(const int[]);
+
+		int getAminoacidId(unsigned int codonId);
+
+		unsigned int getNumberOfDifferentPositions(unsigned int codon1, unsigned int codon2,
+				bool& synonymous, bool& transition);
 	};
 }
 

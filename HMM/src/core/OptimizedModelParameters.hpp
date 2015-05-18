@@ -51,11 +51,14 @@ protected:
 	//FIXME - static bound vectors!
 
 
+
+
+public:
+
 	void generateInitialIndelParameters();
 	void generateInitialSubstitutionParameters();
 	void generateInitialDistanceParameters();
 
-public:
 	OptimizedModelParameters(SubstitutionModelBase*, IndelModel*, unsigned int, unsigned int, bool, bool, bool, bool, Maths*);
 
 	unsigned int optParamCount();

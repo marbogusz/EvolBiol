@@ -93,6 +93,10 @@ public:
 		{
 			return Definitions::ModelType::LG;
 		}
+		if (parser.option("m0"))
+		{
+			return Definitions::ModelType::M0;
+		}
 		//default;
 		return Definitions::ModelType::GTR;
 	}
@@ -158,8 +162,10 @@ public:
 	{
 		if (parser.option("rev") || parser.option("hky"))
 			return Definitions::SequenceType::Nucleotide;
-		else return Definitions::SequenceType::Aminoacid;
-		//FIXME codons???
+		else if (parser.option("lg"))
+			return Definitions::SequenceType::Aminoacid;
+		else if (parser.option("m0"))
+			return Definitions::SequenceType::Codon;
 	}
 };
 

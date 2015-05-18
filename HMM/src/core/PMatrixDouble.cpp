@@ -46,15 +46,15 @@ void PMatrixDouble::calculatePairSitePatterns()
 				continue;
 			if (i == matrixSize)
 			{
-				sitePatterns[i][j]  = log(getEquilibriumFreq(j));
+				sitePatterns[i][j]  = getLogEquilibriumFreq(j);
 			}
 			else if (j == matrixSize)
 			{
-				sitePatterns[i][j]  = log(getEquilibriumFreq(i));
+				sitePatterns[i][j]  = getLogEquilibriumFreq(i);
 			}
 			else
 			{
-				sitePatterns[i][j] = log(getPairTransition(i,j));
+				sitePatterns[i][j] = getLogPairTransition(i,j);
 			}
 		}
 	sitePatterns[matrixSize][matrixSize] = 0;

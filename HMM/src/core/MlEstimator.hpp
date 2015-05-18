@@ -99,7 +99,7 @@ protected:
 public:
 	MlEstimator(Sequences* inputSeqs, Definitions::ModelType model,std::vector<double> indel_params,
 			std::vector<double> subst_params,Definitions::OptimizationType ot,
-			unsigned int rateCategories, double alpha, bool estimateAlpha, double userTime, bool useViterbi);
+			unsigned int rateCategories, double alpha, bool estimateAlpha, vector<double> userTimes, bool useViterbi);
 
 	virtual ~MlEstimator();
 
@@ -107,7 +107,7 @@ public:
 
 	double runIteration();
 
-	const vector<double>& getOptimizedTimes()
+	const vector<double> getOptimizedTimes()
 	{
 		return this->modelParams->getDivergenceTimes();
 	}

@@ -31,6 +31,7 @@ CommandReader::CommandReader(int argc, char** argv)
 		parser.add_option("rev", "REV Substitution Model");
 		parser.add_option("hky", "HKY85 Substitution Model");
 		parser.add_option("lg", "Le & Gasquel AA Substitution Model");
+		parser.add_option("m0", "M0 codon model");
 		parser.add_option("i","indel parameters (NB probability and rate)",2);
 		//FIXME - remove
 		parser.add_option("d","evolutionary distance",1);

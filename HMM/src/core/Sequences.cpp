@@ -146,6 +146,10 @@ void Sequences::buildDictionary(Definitions::SequenceType st)
 	case (Definitions::SequenceType::Nucleotide):
 		dict = new NucleotideDictionary();
 		break;
+
+	case (Definitions::SequenceType::Codon):
+		dict = new CodonDictionary();
+		break;
 	}
 }
 
