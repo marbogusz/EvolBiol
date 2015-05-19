@@ -165,14 +165,15 @@ void SubstitutionModelBase::setObservedFrequencies(double* observedFrequencies)
 	}
 }
 
-double SubstitutionModelBase::getEquilibriumFrequencies(unsigned int xi)
+//FIXME - potential performance loss due to this extra check ?
+double SubstitutionModelBase::getEquilibriumFrequencies(int xi)
 {
-	return piFreqs[xi];
+	return xi >= 0 ? piFreqs[xi] : 0;
 }
 
-double SubstitutionModelBase::getLogEquilibriumFrequencies(unsigned int xi)
+double SubstitutionModelBase::getLogEquilibriumFrequencies(int xi)
 {
-	return piLogFreqs[xi];
+	return xi >= 0 ? piLogFreqs[xi] : 0;
 }
 
 void SubstitutionModelBase::summarizeRates()

@@ -37,16 +37,18 @@ public:
 
 	void calculate();
 
-	inline double getPairSitePattern(unsigned int xi, unsigned int yi)
+	inline double getPairSitePattern(int xi, int yi)
 	{
+		if( xi < 0 || yi <0 )
+			return 0;
 		return sitePatterns[xi][yi];
 	}
 
-	double getPairTransition(array<unsigned int, 2>& nodes);
+	double getPairTransition(array<int, 2>& nodes);
 
-	double getPairTransition(unsigned int xi, unsigned int yi);
+	double getPairTransition(int xi, int yi);
 
-	double getLogPairTransition(unsigned int xi, unsigned int yi);
+	double getLogPairTransition(int xi, int yi);
 
 	void summarize();
 

@@ -135,7 +135,10 @@ MlEstimator::MlEstimator(Sequences* inputSeqs, Definitions::ModelType model ,std
 		vector<SequenceElement*>*  s2 = inputSequences->getSequencesAt(idxs.second);
 		for(int j = 0; j< s1->size(); j++)
 		{
-			patterns[i][{{(*s1)[j]->getMatrixIndex(),(*s2)[j]->getMatrixIndex()}}]++;
+			auto mi1 = (*s1)[j]->getMatrixIndex();
+			auto mi2 = (*s2)[j]->getMatrixIndex();
+			if(mi1 >= 0 && mi2 >= 0 )
+				patterns[i][{{mi1,mi2}}]++;
 		}
 	}
 
@@ -170,11 +173,19 @@ double MlEstimator::runIteration()
 		//go through the map of patterns!
 		for(auto it : patterns[i])
 		{
-			result += ptMatrices[i]->getPairSitePattern(it.first[0],it.first[1]) * it.second;
+			unsigned int i1 = it.first[0];
+			unsigned int i2 = it.first[1];
+
+			result += ptMatrices[i]->getPairSitePattern(i1,i2) * it.second;
+
+			if (std::isnan(result))
+				cerr << "NNNAAAANNNN" << endl;
+
 		}
 
 	}
 
+	exit(0);
 	//cerr << result << endl;
 	return result * -1.0;
 }

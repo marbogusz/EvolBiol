@@ -26,14 +26,14 @@ protected:
 	string symbol;
 	//vector<short> alternativeIndexes;
 public:
-	SequenceElement(bool, unsigned char, short*, string smbl);
+	SequenceElement(bool, short, short*, string smbl);
 
 	inline bool isIsGap() const
 	{
 		return isGap;
 	}
 
-	inline unsigned char getMatrixIndex()
+	inline short getMatrixIndex()
 	{
 		return matrixIndex;
 	}

@@ -86,18 +86,22 @@ void PMatrixDouble::calculate()
 }
 
 
-double PMatrixDouble::getPairTransition(array<unsigned int, 2>& nodes)
+double PMatrixDouble::getPairTransition(array<int, 2>& nodes)
 {
 	return getPairTransition(nodes[0],nodes[1]);
 }
 
-double PMatrixDouble::getPairTransition(unsigned int xi, unsigned int yi)
+double PMatrixDouble::getPairTransition(int xi, int yi)
 {
+	if (xi < 0 || yi < 0)
+		return 0;
 	return model->getEquilibriumFrequencies(xi) * fastPairGammaPt[xi*matrixSize+yi];
 }
 
-double PMatrixDouble::getLogPairTransition(unsigned int xi, unsigned int yi)
+double PMatrixDouble::getLogPairTransition(int xi, int yi)
 {
+	if (xi < 0 || yi < 0)
+		return 0;
 	return model->getLogEquilibriumFrequencies(xi) + fastLogPairGammaPt[xi*matrixSize+yi];
 }
 

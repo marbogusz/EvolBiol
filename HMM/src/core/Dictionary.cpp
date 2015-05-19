@@ -127,9 +127,34 @@ AminoacidDictionary::AminoacidDictionary()
 
 CodonDictionary::CodonDictionary()
 {
-	gapId = 64;
-	this->setAlphabet(Dictionary::codons,64);
 	this->setGeneticCode(Dictionary::geneticCode);
+	unsigned short codonNo = 64;
+	//this->setAlphabet(Dictionary::codons,64);
+
+	unsigned short i,j;
+	unsigned short actualNo = 0;
+
+	for (i = 0; i <= codonNo ;i++){
+		if (genCode[i] > 0){
+			actualNo++;
+		}
+		alphabet.push_back(Dictionary::codons[i]);
+	}
+	//push the gap as well
+	gapId = codonNo;
+	alphabetSize = actualNo;
+
+	i=0;
+	j=0;
+	short negIdx = -1;
+	for(auto cod : alphabet)
+	{
+			//this->alphabet.push_back(string(1,dict[i]));
+
+		this->translator.insert(std::make_pair(cod,new SequenceElement(i==gapId, genCode[i] < 0 ? negIdx-- : j++, NULL, alphabet[i])));
+		i++;
+	}
+		//alphabet size does not include gap e.g. size is 4 for nucleotides
 }
 
 void CodonDictionary::setGeneticCode(const int gc[])

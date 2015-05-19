@@ -108,9 +108,9 @@ public:
 
 	//double getPXiYi(unsigned int xi, unsigned int yi);
 
-	double getEquilibriumFrequencies(unsigned int xi);
+	double getEquilibriumFrequencies(int xi);
 
-	double getLogEquilibriumFrequencies(unsigned int xi);
+	double getLogEquilibriumFrequencies(int xi);
 
 	//double getSitePattern(unsigned int xi, unsigned int yi);
 

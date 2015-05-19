@@ -326,6 +326,9 @@ array<vector<unsigned char>*, 3>* TripletAligner::align(pair<vector<unsigned cha
 	//triAlignment[2] = tr3;
 
 	//int c;
+
+	/*
+	//POTENTIAL PROBLEM WITH CODONS -  CHECK IT IF NEEDED !!!!
 	for (c=0; c < tr1->size(); c++)
 	{
 		sp1 << dict->getSymbolAt((*tr1)[c]);
@@ -338,6 +341,7 @@ array<vector<unsigned char>*, 3>* TripletAligner::align(pair<vector<unsigned cha
 	{
 		sp3 << dict->getSymbolAt((*tr3)[c]);
 	}
+	*/
 /*
 	cerr << sp1.str() <<endl;
 	cerr << sp2.str() <<endl;

@@ -85,8 +85,11 @@ void Sequences::calculateObservedFrequencies()
 		{
 			if (!((*it2)->isIsGap()))
 			{
-				count++;
-				observedFrequencies[(*it2)->getMatrixIndex()]++;
+				auto mi = (*it2)->getMatrixIndex();
+				if (mi >=0){
+					observedFrequencies[mi]++;
+					count++;
+				}
 			}
 		}
 	}
