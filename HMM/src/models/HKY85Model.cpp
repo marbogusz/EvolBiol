@@ -13,9 +13,9 @@ namespace EBC
 HKY85Model::HKY85Model(Dictionary* dict, Maths* alg, unsigned int rates)
 	: NucleotideSubstitutionModel(dict, alg, rates, Definitions::HKY85ParamCount)
 {
-	//FIXME - magic numbers to definitions
-	this->parameterHiBounds[0] = 5;
-	this->parameterLoBounds[0] = 0.000001;
+
+	this->parameterHiBounds[0] = Definitions::kappaHiBound;
+	this->parameterLoBounds[0] = Definitions::standardLowBound;
 
 	//TODO - set within the model
 }

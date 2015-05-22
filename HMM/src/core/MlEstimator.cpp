@@ -121,7 +121,9 @@ MlEstimator::MlEstimator(Sequences* inputSeqs, Definitions::ModelType model ,std
 	modelParams = new OptimizedModelParameters(substModel, NULL,inputSequences->getSequenceCount(), pairCount, true,
 				false, false, true, maths);
 
-	modelParams->generateInitialSubstitutionParameters();
+	//modelParams->generateInitialSubstitutionParameters();
+	modelParams->setUserSubstParams({2.0,0.4});
+
 	//modelParams->generateInitialDistanceParameters();
 	modelParams->setUserDivergenceParams(userTime);
 
@@ -180,12 +182,12 @@ double MlEstimator::runIteration()
 
 			if (std::isnan(result))
 				cerr << "NNNAAAANNNN" << endl;
+				ptMatrices[i]->getPairSitePattern(i1,i2);
 
 		}
 
 	}
 
-	exit(0);
 	//cerr << result << endl;
 	return result * -1.0;
 }

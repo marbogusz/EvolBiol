@@ -85,17 +85,17 @@ void Sequences::calculateObservedFrequencies()
 		{
 			if (!((*it2)->isIsGap()))
 			{
-				auto mi = (*it2)->getMatrixIndex();
-				if (mi >=0){
-					observedFrequencies[mi]++;
-					count++;
-				}
+				count++;
+				observedFrequencies[(*it2)->getMatrixIndex()]++;
 			}
 		}
 	}
 
-	for (i=0; i < dict->getAlphabetSize(); i++)
-		this->observedFrequencies[i] /= count;
+	for (i=0; i < dict->getAlphabetSize(); i++){
+		//FIXME -change  asap!!!!
+		this->observedFrequencies[i] = 1.0/61;// /= count;
+
+	}
 }
 
 double* Sequences::getElementFrequencies()

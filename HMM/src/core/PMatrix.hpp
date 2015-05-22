@@ -42,12 +42,12 @@ public:
 
 	virtual void calculate()=0;
 
-	inline double getEquilibriumFreq(int xi)
+	inline double getEquilibriumFreq(unsigned int xi)
 	{
 		return model->getEquilibriumFrequencies(xi);
 	}
 
-	inline double getLogEquilibriumFreq(int xi)
+	inline double getLogEquilibriumFreq(unsigned int xi)
 	{
 		return model->getLogEquilibriumFrequencies(xi);
 	}

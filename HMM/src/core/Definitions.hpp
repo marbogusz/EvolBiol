@@ -74,6 +74,12 @@ public:
 	constexpr static const double initialLambda = 0.05;
 	constexpr static const double initialEpsilon = 0.5;
 
+	constexpr static const double kappaHiBound = 20;
+
+	constexpr static const double omegaHiBound = 20;
+
+	constexpr static const double standardLowBound = 0.000001;
+
 	constexpr static const unsigned int minBandDelta = 7; //This makes the min band width of 15 characters
 
 	constexpr static const double minMatrixLikelihood = -1000000.0;
@@ -113,6 +119,8 @@ public:
 	enum DpMatrixType {Full, Limited};
 
 	enum StateId {Match, Insert , Delete};
+
+	enum FrequencyScheme {Equal = 0, OneOver61 = 0, Empirical = 1, F61 = 1, F1x4 = 2, F3x4 = 3};
 
 
 

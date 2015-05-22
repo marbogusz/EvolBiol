@@ -47,14 +47,20 @@ void PMatrixDouble::calculatePairSitePatterns()
 			if (i == matrixSize)
 			{
 				sitePatterns[i][j]  = getLogEquilibriumFreq(j);
+				if (std::isnan(sitePatterns[i][j]))
+					getLogEquilibriumFreq(j);
 			}
 			else if (j == matrixSize)
 			{
 				sitePatterns[i][j]  = getLogEquilibriumFreq(i);
+				if (std::isnan(sitePatterns[i][j]))
+					getLogEquilibriumFreq(i);
 			}
 			else
 			{
 				sitePatterns[i][j] = getLogPairTransition(i,j);
+				if (std::isnan(sitePatterns[i][j]))
+					getLogPairTransition(i,j);
 			}
 		}
 	sitePatterns[matrixSize][matrixSize] = 0;
@@ -86,22 +92,18 @@ void PMatrixDouble::calculate()
 }
 
 
-double PMatrixDouble::getPairTransition(array<int, 2>& nodes)
+double PMatrixDouble::getPairTransition(array<unsigned int, 2>& nodes)
 {
 	return getPairTransition(nodes[0],nodes[1]);
 }
 
-double PMatrixDouble::getPairTransition(int xi, int yi)
+double PMatrixDouble::getPairTransition(unsigned int xi, unsigned int yi)
 {
-	if (xi < 0 || yi < 0)
-		return 0;
 	return model->getEquilibriumFrequencies(xi) * fastPairGammaPt[xi*matrixSize+yi];
 }
 
-double PMatrixDouble::getLogPairTransition(int xi, int yi)
+double PMatrixDouble::getLogPairTransition(unsigned int xi, unsigned int yi)
 {
-	if (xi < 0 || yi < 0)
-		return 0;
 	return model->getLogEquilibriumFrequencies(xi) + fastLogPairGammaPt[xi*matrixSize+yi];
 }
 

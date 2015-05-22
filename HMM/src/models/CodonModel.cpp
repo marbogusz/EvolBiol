@@ -13,6 +13,13 @@ namespace EBC
 CodonModel::CodonModel(Dictionary* dict, Maths* alg, unsigned int alpha) :
 	SubstitutionModelBase(dict,alg,alpha,Definitions::CodonM0ParamCount)
 {
+	DUMP("Codon Model: construction");
+	this->parameterHiBounds[0] = Definitions::kappaHiBound;
+	this->parameterLoBounds[0] = Definitions::standardLowBound;
+
+	this->parameterHiBounds[1] = Definitions::omegaHiBound;
+	this->parameterLoBounds[1] = Definitions::standardLowBound;
+
 	this->parameters = new double[Definitions::CodonM0ParamCount];
 	this->buildInitialQmatrix();
 }
@@ -27,6 +34,7 @@ void CodonModel::setParameters(const vector<double>& par)
 
 void CodonModel::buildInitialQmatrix()
 {
+	DUMP("Codon Model: build initial qMatrix");
 	bool transition;
 	bool synonymous;
 	unsigned int nodiff;
@@ -71,6 +79,8 @@ void CodonModel::summarize()
 
 void CodonModel::calculateModel()
 {
+	DUMP("Codon Model: calculate model");
+
 	double k = parameters[0];
 	double w = parameters[1];
 	double kw = k*w;
@@ -120,6 +130,8 @@ void CodonModel::calculateModel()
 		//TODO Should I multiply it by Pis ?
 
 		this->doEigenDecomposition();
+
+	DUMP("Codon Model: calculated");
 
 }
 

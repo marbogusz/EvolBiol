@@ -16,6 +16,8 @@ namespace EBC
 
 //FIXME  - U and T equivalence!!!
 
+Dictionary::Dictionary(Definitions::FrequencyScheme fs) : fScheme(fs) {}
+
 void Dictionary::setAlphabet(const string dict[], unsigned short size)
 {
 	unsigned short i;
@@ -32,6 +34,14 @@ void Dictionary::setAlphabet(const string dict[], unsigned short size)
 
 	//alphabet size does not include gap e.g. size is 4 for nucleotides
 	this->alphabetSize = size;
+
+	simpleCount = 0;
+}
+
+void Dictionary::setEqualFrequencies()
+{
+	for(unsigned int i = 0; i < alphabetSize; i++)
+		elementFrequencies[i] = 1.0/alphabetSize;
 }
 
 void Dictionary::outputAlphabet()
@@ -57,22 +67,20 @@ vector<SequenceElement*>* Dictionary::translate(string& sequence, bool disregard
 
 	vector<SequenceElement*> *translatedVector = new vector<SequenceElement*>(sequence.size());
 	unsigned short currentEl;
+	SequenceElement* se = NULL;
 
-//	DEBUG("Transled: ");
+
 	unsigned int pos = 0;
 	for(string::iterator it = sequence.begin(); it < sequence.end(); it++)
 	{
 		string cstrg = string(1, *it);
-		(*translatedVector)[pos] = getSequenceElement(cstrg);
+		se = getSequenceElement(cstrg);
+		elementFrequencies[se->getMatrixIndex()] += 1;
+		(*translatedVector)[pos] = se;
 		pos++;
-		//currentEl = getSymbolIndex(*it);
-		//if (currentEl == alphabetSize && disregardIndels)
-		//	continue;
-//		DEBUGN(currentEl);
-		//translatedVector.push_back(SequenceElement((currentEl == alphabetSize), currentEl,NULL, getSymbolAt(currentEl)));
-		//translatedVector.push_back(SequenceElement((currentEl == alphabetSize), currentEl,NULL, getSymbolAt(currentEl)));
+		simpleCount++;
+
 	}
-//	DEBUGN(std::endl);
 	return translatedVector;
 
 }
@@ -96,7 +104,7 @@ const string Dictionary::codons[] = {"TTT", "TTC", "TTA", "TTG", "TCT", "TCC", "
 //aminoacid Id to codon conversion
 const int Dictionary::geneticCode[] = {13,13,10,10,15,15,15,15,18,18,-1,-1, 4, 4,-1,17,
 									   10,10,10,10,14,14,14,14, 8, 8, 5, 5, 1, 1, 1, 1,
-                                        9, 9, 9,-1,16,16,16,16, 2, 2,11,11,15,15, 1, 1,
+                                        9, 9, 9,12,16,16,16,16, 2, 2,11,11,15,15, 1, 1,
                                        19,19,19,19, 0, 0, 0, 0, 3, 3, 6, 6, 7, 7, 7, 7 };
 
 
@@ -105,139 +113,6 @@ const string Dictionary::gapChar = "-";
 unsigned short Dictionary::getAlphabetSize()
 {
 	return this->alphabetSize;
-}
-
-
-NucleotideDictionary::NucleotideDictionary()
-{
-	gapId = 4;
-	this->setAlphabet(Dictionary::nucleotides,4);
-
-	this->translator.insert(std::make_pair("U",new SequenceElement(false, 0, NULL, "U")));
-
-}
-
-
-AminoacidDictionary::AminoacidDictionary()
-{
-	gapId = 20;
-	this->setAlphabet(Dictionary::aminoacids,20);
-
-}
-
-CodonDictionary::CodonDictionary()
-{
-	this->setGeneticCode(Dictionary::geneticCode);
-	unsigned short codonNo = 64;
-	//this->setAlphabet(Dictionary::codons,64);
-
-	unsigned short i,j;
-	unsigned short actualNo = 0;
-
-	for (i = 0; i <= codonNo ;i++){
-		if (genCode[i] > 0){
-			actualNo++;
-		}
-		alphabet.push_back(Dictionary::codons[i]);
-	}
-	//push the gap as well
-	gapId = codonNo;
-	alphabetSize = actualNo;
-
-	i=0;
-	j=0;
-	short negIdx = -1;
-	for(auto cod : alphabet)
-	{
-			//this->alphabet.push_back(string(1,dict[i]));
-
-		this->translator.insert(std::make_pair(cod,new SequenceElement(i==gapId, genCode[i] < 0 ? negIdx-- : j++, NULL, alphabet[i])));
-		i++;
-	}
-		//alphabet size does not include gap e.g. size is 4 for nucleotides
-}
-
-void CodonDictionary::setGeneticCode(const int gc[])
-{
-	std::copy(gc,gc + this->alphabetSize, this->genCode);
-}
-
-int CodonDictionary::getAminoacidId(unsigned int codonId)
-{
-	return genCode[codonId];
-}
-
-bool CodonDictionary::isPurine(char base)
-{
-	return (base == 'A' || base == 'G');
-}
-
-bool CodonDictionary::isPyramidine(char base)
-{
-	return (base == 'T' || base == 'C');
-}
-
-unsigned int CodonDictionary::getNumberOfDifferentPositions(unsigned int codon1,
-		unsigned int codon2, bool& synonymous, bool& transition)
-{
-	synonymous = false;
-	transition = true;
-
-	string& c1 = alphabet[codon1];
-	string& c2 = alphabet[codon2];
-
-	//iterate over positions
-	unsigned int counter = 0;
-	int changedPos = -1;
-	for(unsigned int i = 0; i < 3; i++)
-	{
-		if (c1[i] != c2[i]){
-			counter++;
-			changedPos = i;
-		}
-	}
-	if(counter == 0 || counter > 1)
-		return counter;
-
-	if (getAminoacidId(codon1) ==  getAminoacidId(codon2))
-		synonymous = true;
-
-	bool c1Purine = isPurine(c1[changedPos]);
-	bool c2Purine = isPurine(c2[changedPos]);
-
-	if (c1Purine != c2Purine)
-		transition = false;
-
-	return counter;
-}
-
-vector<SequenceElement*>* CodonDictionary::translate(string& sequence, bool disregardIndels)
-{
-
-	if(sequence.size() % 3 != 0)
-		throw HmmException("Sequence length should be divisible by 3 for codon models! Quitting");
-
-
-	vector<SequenceElement*> *translatedVector = new vector<SequenceElement*>(sequence.size()/3);
-	unsigned short currentEl;
-
-//	DEBUG("Transled: ");
-
-
-	unsigned int pos = 0;
-	unsigned int strpos = 0;
-
-
-	while(strpos < sequence.size()){
-		string cstrg = sequence.substr(strpos,3);
-		(*translatedVector)[pos] = getSequenceElement(cstrg);
-		strpos +=3;
-		pos++;
-
-	}
-//	DEBUGN(std::endl);
-	return translatedVector;
-
 }
 
 }//Namespace definition

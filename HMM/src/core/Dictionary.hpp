@@ -22,9 +22,21 @@ namespace EBC
 	{
 	protected:
 		unsigned short alphabetSize;
+		
 		unsigned char gapId;
+
+		Definitions::FrequencyScheme fScheme;
+
+		//equilibruim frequencies based on various strategies
+		double* elementFrequencies;	
+
 		vector<string> alphabet;
+		
 		map<string,SequenceElement*> translator;
+
+		void setEqualFrequencies();
+
+		unsigned int simpleCount;
 
 	public:
 
@@ -38,11 +50,15 @@ namespace EBC
 
 		virtual unsigned short getAlphabetSize();
 
+		Dictionary(Definitions::FrequencyScheme fs);
+
 		SequenceElement* getSequenceElement(string& symbol);
 
 		virtual string& getSymbolAt(unsigned char i);
 
 		virtual void outputAlphabet();
+
+		virtual double* getElementFrequencies();
 
 		inline unsigned char getGapID()
 		{
@@ -52,39 +68,6 @@ namespace EBC
 	protected:
 		virtual void setAlphabet(const string alphabet[], unsigned short size);
 
-	};
-
-	class NucleotideDictionary : public Dictionary
-	{
-	public:
-		NucleotideDictionary();
-	};
-
-	class AminoacidDictionary : public Dictionary
-	{
-	public:
-		AminoacidDictionary();
-	};
-
-	class CodonDictionary : public Dictionary
-	{
-	protected:
-		int genCode[64];
-
-		bool isPurine(char base);
-		bool isPyramidine(char base);
-
-	public:
-		CodonDictionary();
-
-		vector<SequenceElement*>* translate(string &sequence, bool disregardIndels = false);
-
-		void setGeneticCode(const int[]);
-
-		int getAminoacidId(unsigned int codonId);
-
-		unsigned int getNumberOfDifferentPositions(unsigned int codon1, unsigned int codon2,
-				bool& synonymous, bool& transition);
 	};
 }
 
