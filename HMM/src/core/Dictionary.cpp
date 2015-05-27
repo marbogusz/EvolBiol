@@ -16,7 +16,13 @@ namespace EBC
 
 //FIXME  - U and T equivalence!!!
 
-Dictionary::Dictionary(Definitions::FrequencyScheme fs) : fScheme(fs) {}
+Dictionary::Dictionary(Definitions::FrequencyScheme fs) : fScheme(fs), freqsCalculated(false) {}
+
+
+Dictionary::~Dictionary()
+{
+	delete[] elementFrequencies;
+}
 
 void Dictionary::setAlphabet(const string dict[], unsigned short size)
 {
@@ -42,6 +48,21 @@ void Dictionary::setEqualFrequencies()
 {
 	for(unsigned int i = 0; i < alphabetSize; i++)
 		elementFrequencies[i] = 1.0/alphabetSize;
+}
+
+void Dictionary::calculateFreqeuencies()
+{
+	freqsCalculated = true;
+	for (unsigned int i=0; i < alphabetSize; i++){
+		elementFrequencies[i] /= simpleCount;
+	}
+}
+
+double* Dictionary::getElementFrequencies()
+{
+	if (!freqsCalculated)
+		calculateFreqeuencies();
+	return elementFrequencies;
 }
 
 void Dictionary::outputAlphabet()

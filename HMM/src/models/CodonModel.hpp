@@ -9,6 +9,7 @@
 #define CODON_MODEL_H_
 
 #include "core/Dictionary.hpp"
+#include "core/CodonDictionary.hpp"
 #include "core/Definitions.hpp"
 #include "models/SubstitutionModelBase.hpp"
 #include "core/Maths.hpp"

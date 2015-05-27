@@ -45,6 +45,9 @@ CommandReader::CommandReader(int argc, char** argv)
 		parser.add_option("rateCat", "Specify gamma rate categories, default is 5",1);
 		parser.add_option("initAlpha", "Specify initial alpha parameter, default is 0.5",1 );
 		parser.add_option("estimateAlpha", "Specify to estimate alpha 0|1, default is 1",1 );
+		parser.add_option("pi", "Specify element frequency scheme, default is empirical count",1 );
+
+
 
 		parser.add_option("lE", "log error");
 		parser.add_option("lW", "log warning");

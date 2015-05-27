@@ -36,7 +36,11 @@ namespace EBC
 
 		void setEqualFrequencies();
 
+		bool freqsCalculated;
+
 		unsigned int simpleCount;
+
+		virtual void calculateFreqeuencies();
 
 	public:
 
@@ -51,6 +55,8 @@ namespace EBC
 		virtual unsigned short getAlphabetSize();
 
 		Dictionary(Definitions::FrequencyScheme fs);
+
+		virtual ~Dictionary();
 
 		SequenceElement* getSequenceElement(string& symbol);
 

@@ -112,6 +112,7 @@ public:
 			return (Definitions::OptimizationType) opt;
 	}
 
+
 	FileLogger::logType getLoggingLevel()
 	{
 		if (parser.option("lDD"))

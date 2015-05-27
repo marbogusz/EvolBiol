@@ -49,7 +49,7 @@ vector<SequenceElement*>* Sequences::getSequencesAt(unsigned int pos){
 Sequences::~Sequences()
 {
 	delete dict;
-	delete[] observedFrequencies;
+	//delete[] observedFrequencies;
 }
 
 Dictionary* Sequences::getDictionary()
@@ -100,10 +100,11 @@ void Sequences::calculateObservedFrequencies()
 
 double* Sequences::getElementFrequencies()
 {
-	if(observedFrequencies == NULL)
-		calculateObservedFrequencies();
+	//if(observedFrequencies == NULL)
+	//	calculateObservedFrequencies();
 	//DEBUGV(observedFrequencies,4);
-	return observedFrequencies;
+	return dict->getElementFrequencies();
+		//return observedFrequencies;
 }
 
 double* Sequences::getElementFrequencies(array<unsigned int, 3>& triplet)
@@ -143,15 +144,15 @@ void Sequences::buildDictionary(Definitions::SequenceType st)
 	switch(st)
 	{
 	case (Definitions::SequenceType::Aminoacid):
-		dict = new AminoacidDictionary();
+		dict = new AminoacidDictionary(Definitions::FrequencyScheme::Empirical);
 		break;
 
 	case (Definitions::SequenceType::Nucleotide):
-		dict = new NucleotideDictionary();
+		dict = new NucleotideDictionary(Definitions::FrequencyScheme::Empirical);
 		break;
 
 	case (Definitions::SequenceType::Codon):
-		dict = new CodonDictionary();
+		dict = new CodonDictionary(Definitions::FrequencyScheme::Empirical);
 		break;
 	}
 }
