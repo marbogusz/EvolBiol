@@ -16,7 +16,10 @@ namespace EBC
 
 //FIXME  - U and T equivalence!!!
 
-Dictionary::Dictionary(Definitions::FrequencyScheme fs) : fScheme(fs), freqsCalculated(false) {}
+Dictionary::Dictionary(Definitions::FrequencyScheme fs) : fScheme(fs), freqsCalculated(false)
+{
+	simpleCount = 0;
+}
 
 
 Dictionary::~Dictionary()
@@ -41,7 +44,7 @@ void Dictionary::setAlphabet(const string dict[], unsigned short size)
 	//alphabet size does not include gap e.g. size is 4 for nucleotides
 	this->alphabetSize = size;
 
-	simpleCount = 0;
+
 }
 
 void Dictionary::setEqualFrequencies()
