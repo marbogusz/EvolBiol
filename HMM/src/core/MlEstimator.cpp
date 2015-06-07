@@ -82,7 +82,8 @@ void MlEstimator::BFGS::optimize()
 MlEstimator::MlEstimator(Sequences* inputSeqs, Definitions::ModelType model ,std::vector<double> indel_params,
 		std::vector<double> subst_params,   Definitions::OptimizationType ot,
 		unsigned int rateCategories, double alpha, bool estimateAlpha, vector<double> userTime, bool alignViterbi) : inputSequences(inputSeqs), gammaRateCategories(rateCategories),
-		pairCount(inputSequences->getPairCount()), hmms(pairCount), ptMatrices(pairCount, nullptr), useViterbi(alignViterbi), patterns(pairCount)
+		pairCount(inputSequences->getPairCount()), hmms(pairCount), ptMatrices(pairCount, nullptr), useViterbi(alignViterbi), patterns(pairCount),
+		optTimes(pairCount)
 
 {
 	maths = new Maths();
@@ -105,11 +106,15 @@ MlEstimator::MlEstimator(Sequences* inputSeqs, Definitions::ModelType model ,std
 
 	substModel->setAlpha(alpha);
 
+	/*
 	estimateSubstitutionParams = true;
 	if (subst_params.size() > 0){
 		estimateSubstitutionParams = false;
 	}
+	*/
+
 	estimateIndelParams = false;
+	estimateSubstitutionParams = false;
 	//can't estimate alpha!
 	//unless done before using triplets!
 
@@ -119,19 +124,27 @@ MlEstimator::MlEstimator(Sequences* inputSeqs, Definitions::ModelType model ,std
 
 	useViterbi = false;
 
+	/*
 	modelParams = new OptimizedModelParameters(substModel, NULL,inputSequences->getSequenceCount(), pairCount, estimateSubstitutionParams,
 			estimateIndelParams, estimateAlpha, true, maths);
+
+	*/
+	modelParams = new OptimizedModelParameters(substModel, NULL,2, 1, false,
+				false, false, true, maths);
 
 	if (estimateSubstitutionParams)
 		modelParams->generateInitialSubstitutionParameters();
 	//modelParams->generateInitialDistanceParameters();
-	modelParams->setUserDivergenceParams(userTime);
+
+	//modelParams->setUserDivergenceParams(userTime);
 
 	substModel->setObservedFrequencies(inputSequences->getElementFrequencies());
 	if (!estimateSubstitutionParams){
 		substModel->setParameters(subst_params);
 		substModel->calculateModel();
 	}
+
+	bfgs = new BFGS(this,ot);
 
 	for(unsigned int i =0; i<pairCount; i++)
 	{
@@ -143,12 +156,12 @@ MlEstimator::MlEstimator(Sequences* inputSeqs, Definitions::ModelType model ,std
 		{
 			patterns[i][{{(*s1)[j]->getMatrixIndex(),(*s2)[j]->getMatrixIndex()}}]++;
 		}
+		currentPair = i;
+		modelParams->setUserDivergenceParams({i});
+		bfgs->optimize();
+		optTimes[i] = modelParams->getDivergenceTime(0);
+
 	}
-
-
-
-	bfgs = new BFGS(this,ot);
-	bfgs->optimize();
 }
 
 MlEstimator::~MlEstimator()
@@ -165,19 +178,19 @@ double MlEstimator::runIteration()
 		substModel->setParameters(modelParams->getSubstParameters());
 		substModel->calculateModel();
 	}
-	for(unsigned int i =0; i<pairCount; i++)
-	{
+	//for(unsigned int i =0; i<pairCount; i++)
+	//{
 		//this calculates the matrix(matrices for a gamma model)
-		ptMatrices[i]->setTime(modelParams->getDivergenceTime(i));
-		ptMatrices[i]->calculate();
+		ptMatrices[currentPair]->setTime(modelParams->getDivergenceTime(0));
+		ptMatrices[currentPair]->calculate();
 
 		//go through the map of patterns!
-		for(auto it : patterns[i])
+		for(auto it : patterns[currentPair])
 		{
-			result += ptMatrices[i]->getPairSitePattern(it.first[0],it.first[1]) * it.second;
+			result += ptMatrices[currentPair]->getPairSitePattern(it.first[0],it.first[1]) * it.second;
 		}
 
-	}
+	//}
 
 	//cerr << result << endl;
 	return result * -1.0;

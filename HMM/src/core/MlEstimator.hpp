@@ -85,6 +85,10 @@ protected:
 	//for viterbi calculation
 	vector<ViterbiPairHMM*> hmms;
 
+	unsigned int currentPair;
+
+	vector<double> optTimes;
+
 	//
 	//vector<SubstitutionModelBase*> substs;
 
@@ -109,7 +113,8 @@ public:
 
 	const vector<double> getOptimizedTimes()
 	{
-		return this->modelParams->getDivergenceTimes();
+		//return this->modelParams->getDivergenceTimes();
+		return optTimes;
 	}
 
 	//ModelParameters getMlParameters()

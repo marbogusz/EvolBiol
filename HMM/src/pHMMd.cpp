@@ -155,20 +155,35 @@ int main(int argc, char ** argv) {
 			indelParams = cmdReader->getIndelParams();
 			alpha = cmdReader->getAlpha();
 
+			ModelEstimator* tme;
+
+			if (substParams.size() == 0){
+				tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),
+								cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
+								false);
+
+				substParams = tme->getSubstitutionParameters();
+
+			}
+
+
 			GuideTree gt(inputSeqs);
-			MlEstimator tme(inputSeqs, cmdReader->getModelType(), indelParams, substParams,
+
+
+			MlEstimator mle(inputSeqs, cmdReader->getModelType(), indelParams, substParams,
 							cmdReader->getOptimizationType(), cmdReader->getCategories(), alpha,
 							false, gt.getDistances(), false);
 
 
-			cout << tme.getOptimizedTimes()[0];
-			//BioNJ nj(inputSeqs->getSequenceCount(), tme.getOptimizedTimes(), inputSeqs);
-			//DEBUG("Final tree : " << nj.calculate());
-			//string treeStr = nj.calculate();
+			//cout << tme.getOptimizedTimes()[0];
 
-			//treefile.open((string(cmdReader->getInputFileName()).append(".nj.tree")).c_str(),ios::out);
-			//treefile << treeStr << endl;
-			//treefile.close();
+			BioNJ nj(inputSeqs->getSequenceCount(), mle.getOptimizedTimes(), inputSeqs);
+			DEBUG("Final tree : " << nj.calculate());
+			string treeStr = nj.calculate();
+
+			treefile.open((string(cmdReader->getInputFileName()).append(".nj.tree")).c_str(),ios::out);
+			treefile << treeStr << endl;
+			treefile.close();
 
 		}
 
