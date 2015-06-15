@@ -156,7 +156,7 @@ int main(int argc, char ** argv) {
 			alpha = cmdReader->getAlpha();
 
 			ModelEstimator* tme;
-
+/*
 			if (substParams.size() == 0){
 				tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),
 								cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
@@ -165,7 +165,7 @@ int main(int argc, char ** argv) {
 				substParams = tme->getSubstitutionParameters();
 
 			}
-
+*/
 
 			GuideTree gt(inputSeqs);
 
