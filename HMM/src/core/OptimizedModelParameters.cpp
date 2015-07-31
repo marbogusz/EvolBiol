@@ -63,8 +63,9 @@ void OptimizedModelParameters::useIndelModelInitialParameters()
 
 void OptimizedModelParameters::boundDivergenceBasedOnLambda(double lambda){
 	//lambda * t must be smaller than negative ln(0.5)
-	double ln05 = log(0.5)*-1.0;
-	this->divergenceBound = (ln05/lambda) - 0.01; //substract 0.01 just to be sure
+	double db = ((log(0.5)*-1.0)/lambda) - 0.01; //substract 0.01 just to be sure
+
+	this->divergenceBound = db <  Definitions::divergenceBound? db : Definitions::divergenceBound;
 	DUMP("Optimised Model Parameters divergence bound : " << divergenceBound);
 }
 

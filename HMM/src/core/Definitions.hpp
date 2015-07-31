@@ -62,9 +62,7 @@ public:
 	constexpr static const unsigned int samplingPathCount = 1000;
 	constexpr static const double samplingPathLnLDelta = 10.0;
 
-
-	//FIXME
-	constexpr static const double divergenceBound = 20;
+	constexpr static const double divergenceBound = 50;
 
 	constexpr static const double lambdaHiBound = 0.3;
 

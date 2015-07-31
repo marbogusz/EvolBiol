@@ -63,7 +63,7 @@ double Optimizer::optimize()
 		case Definitions::OptimizationType::BFGS:
 		{
 			likelihood = dlib::find_min_box_constrained(dlib::bfgs_search_strategy(),
-					dlib::objective_delta_stop_strategy(1e-8),
+					dlib::objective_delta_stop_strategy(1e-6),  //changed the delta drastically
 					f_objective,
 					derivative(f_objective),
 					initParams,
