@@ -48,7 +48,7 @@ int main(int argc, char ** argv) {
 		CommandReader* cmdReader = new CommandReader(argc, argv);
 		ofstream treefile;
 
-		FileLogger::start(cmdReader->getLoggingLevel(), (string(cmdReader->getInputFileName()).append(".hmm.njlog")));
+		FileLogger::start(cmdReader->getLoggingLevel(), (string(cmdReader->getInputFileName()).append(".hmm.brentLog")));
 
 
 
@@ -238,6 +238,8 @@ int main(int argc, char ** argv) {
 					substParams, cmdReader->getOptimizationType(), cmdReader->getCategories(),alpha, tme->getGuideTree());
 			be->optimizePairByPair();
 
+
+
 			DEBUG ("Running BioNJ");
 
 			//change bionj init here!
@@ -256,9 +258,12 @@ int main(int argc, char ** argv) {
 			INFO(treeStr);
 
 
-			treefile.open((string(cmdReader->getInputFileName()).append(".hmm.njtree")).c_str(),ios::out);
+			treefile.open((string(cmdReader->getInputFileName()).append(".hmm.brentTree")).c_str(),ios::out);
 			treefile << treeStr << endl;
 			treefile.close();
+
+
+
 			delete be;
 			delete tme;
 

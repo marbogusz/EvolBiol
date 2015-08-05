@@ -18,12 +18,13 @@ FileLogger FileLogger::wrnL;
 FileLogger FileLogger::dbgL;
 FileLogger FileLogger::dmpL;
 FileLogger FileLogger::infL;
+FileLogger FileLogger::clnL;
 
 
 //FIXME Separate default logger?
 FileLogger& FileLogger::Logger()
 {
-	return errL;
+	return clnL;
 }
 
 FileLogger& FileLogger::DumpLogger()

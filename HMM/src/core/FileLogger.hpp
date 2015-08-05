@@ -53,6 +53,7 @@ public:
 			wrnL.activate();
 		default:
 			errL.activate();
+			clnL.activate();
 			errL.setCerr();
 		}
 		logFile.open (fname.c_str());
@@ -157,6 +158,7 @@ private:
     FileLogger(const FileLogger& logger) {}
     //FileLogger& operator = (const FileLogger& logger) {}
 	static FileLogger errL;
+	static FileLogger clnL;
 	static FileLogger wrnL;
 	static FileLogger dbgL;
 	static FileLogger dmpL;

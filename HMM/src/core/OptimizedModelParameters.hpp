@@ -34,7 +34,7 @@ protected:
 	vector<double> substParameters;
 	vector<double> divergenceTimes;
 	double alpha;
-	double divergenceBound;
+
 	vector<double> indelHiBounds;
 
 	bool estimateIndelParams;
@@ -56,6 +56,8 @@ protected:
 	void generateInitialDistanceParameters();
 
 public:
+	double divergenceBound;
+
 	OptimizedModelParameters(SubstitutionModelBase*, IndelModel*, unsigned int, unsigned int, bool, bool, bool, bool, Maths*);
 
 	unsigned int optParamCount();
@@ -79,6 +81,10 @@ public:
 	void setUserSubstParams(vector<double>);
 
 	void setUserDivergenceParams(vector<double>);
+
+	void setSingleDivergenceParam(unsigned int pos, double val){
+		divergenceTimes[pos] = val;
+	}
 
 	void logParameters();
 

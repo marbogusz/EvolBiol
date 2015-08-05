@@ -111,8 +111,8 @@ void OptimizedModelParameters::toDlibVector(column_vector& vals, column_vector& 
 	if(estimateAlpha)
 	{
 		vals(ptr) = alpha;
-		lbounds(ptr) = 0.000001;
-		hbounds(ptr) = 99.999999;
+		lbounds(ptr) =  Definitions::almostZero;
+		hbounds(ptr) = Definitions::maxAlpha;
 		ptr++;
 	}
 	if(estimateDivergence)
@@ -120,7 +120,7 @@ void OptimizedModelParameters::toDlibVector(column_vector& vals, column_vector& 
 		for (i=0; i < distCount; i++)
 		{
 			vals(i+ptr) = divergenceTimes[i];
-			lbounds(i+ptr) = 0.000001;
+			lbounds(i+ptr) = Definitions::almostZero;
 			hbounds(i+ptr) = divergenceBound;
 		}
 	}

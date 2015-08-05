@@ -10,8 +10,8 @@
 namespace EBC
 {
 
-Optimizer::Optimizer(OptimizedModelParameters* mp, IOptimizable* opt, Definitions::OptimizationType ot) :
-		optimizationType(ot), omp(mp), target(opt)
+Optimizer::Optimizer(OptimizedModelParameters* mp, IOptimizable* opt, Definitions::OptimizationType ot, double accuracy) :
+		accuracy(accuracy), optimizationType(ot), omp(mp), target(opt)
 {
 
 
@@ -63,7 +63,7 @@ double Optimizer::optimize()
 		case Definitions::OptimizationType::BFGS:
 		{
 			likelihood = dlib::find_min_box_constrained(dlib::bfgs_search_strategy(),
-					dlib::objective_delta_stop_strategy(1e-6),  //changed the delta drastically
+					dlib::objective_delta_stop_strategy(accuracy),  //changed the delta drastically
 					f_objective,
 					derivative(f_objective),
 					initParams,

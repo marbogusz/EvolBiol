@@ -11,6 +11,7 @@
 #include "models/AminoacidSubstitutionModel.hpp"
 #include "models/NegativeBinomialGapModel.hpp"
 #include "hmm/DpMatrixFull.hpp"
+#include "extras/LikelihoodSurfacePlotter.hpp"
 
 namespace EBC
 {
@@ -120,7 +121,7 @@ BandingEstimator::BandingEstimator(Definitions::AlgorithmType at, Sequences* inp
 			delete bc;
 		}
 */
-	bfgs = new Optimizer(modelParams, NULL, ot);
+	numopt = new BrentOptimizer(modelParams, NULL,1e-4);
 	//bfgs->optimize();
 	//this->modelParams->logParameters();
 
@@ -130,7 +131,7 @@ BandingEstimator::~BandingEstimator()
 {
 	//for(auto hmm : hmms)
 	//	delete hmm;
-	delete bfgs;
+	delete numopt;
 	delete modelParams;
     delete maths;
     //for (auto bnd : bands)
@@ -170,12 +171,18 @@ void BandingEstimator::optimizePairByPair()
 		}
 
 		//hmm->setDivergenceTimeAndCalculateModels(modelParams->getDivergenceTime(0)); //zero as there's only one pair!
+
+		//LikelihoodSurfacePlotter lsp;
+		//lsp.setTargetHMM(hmm);
+		//lsp.getLikelihoodSurface();
+
+
 		wrapper->setTargetHMM(hmm);
 		DUMP("Set model parameter in the hmm...");
 		wrapper->setModelParameters(modelParams);
 		modelParams->setUserDivergenceParams({dm->getDistance(idxs.first,idxs.second)});
-		bfgs->setTarget(wrapper);
-		result = bfgs->optimize() * -1.0;
+		numopt->setTarget(wrapper);
+		result = numopt->optimize() * -1.0;
 		DEBUG("Likelihood after pairwise optimization: " << result);
 		if (result <= (Definitions::minMatrixLikelihood /2.0))
 		{

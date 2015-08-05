@@ -20,6 +20,7 @@
 #include "core/Sequences.hpp"
 #include "core/HmmException.hpp"
 #include "core/Optimizer.hpp"
+#include "core/BrentOptimizer.hpp"
 #include "core/PairHmmCalculationWrapper.hpp"
 
 #include "models/SubstitutionModelBase.hpp"
@@ -48,7 +49,7 @@ private:
 
 protected:
 
-	Optimizer* bfgs;
+	BrentOptimizer* numopt;
 	Dictionary* dict;
 	SubstitutionModelBase* substModel;
 	IndelModel* indelModel;

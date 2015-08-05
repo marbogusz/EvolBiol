@@ -48,6 +48,12 @@ public:
 
 	constexpr static const double defaultGapPenalty = 0.5;
 
+	constexpr static const double accuracyBFGS = 1e-6;
+
+	constexpr static const double almostZero = 1e-6;
+
+	constexpr static const double maxAlpha = 99.999999;
+
 	constexpr static const unsigned int stateCount = 3;
 
 	constexpr static const unsigned int heuristicsTreeSize = 3;
