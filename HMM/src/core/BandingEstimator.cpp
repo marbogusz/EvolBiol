@@ -121,7 +121,7 @@ BandingEstimator::BandingEstimator(Definitions::AlgorithmType at, Sequences* inp
 			delete bc;
 		}
 */
-	numopt = new BrentOptimizer(modelParams, NULL,1e-4);
+	numopt = new BrentOptimizer(modelParams, NULL,1e-8);
 	//bfgs->optimize();
 	//this->modelParams->logParameters();
 

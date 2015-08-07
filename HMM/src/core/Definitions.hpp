@@ -48,7 +48,7 @@ public:
 
 	constexpr static const double defaultGapPenalty = 0.5;
 
-	constexpr static const double accuracyBFGS = 1e-6;
+	constexpr static const double accuracyBFGS = 1e-9;
 
 	constexpr static const double almostZero = 1e-6;
 

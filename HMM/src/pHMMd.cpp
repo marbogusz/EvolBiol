@@ -48,7 +48,7 @@ int main(int argc, char ** argv) {
 		CommandReader* cmdReader = new CommandReader(argc, argv);
 		ofstream treefile;
 
-		FileLogger::start(cmdReader->getLoggingLevel(), (string(cmdReader->getInputFileName()).append(".hmm.brentLog")));
+		FileLogger::start(cmdReader->getLoggingLevel(), (string(cmdReader->getInputFileName()).append(".hmm.log")));
 
 
 
@@ -258,7 +258,7 @@ int main(int argc, char ** argv) {
 			INFO(treeStr);
 
 
-			treefile.open((string(cmdReader->getInputFileName()).append(".hmm.brentTree")).c_str(),ios::out);
+			treefile.open((string(cmdReader->getInputFileName()).append(".hmm.tree")).c_str(),ios::out);
 			treefile << treeStr << endl;
 			treefile.close();
 
