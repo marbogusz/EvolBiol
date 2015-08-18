@@ -46,18 +46,28 @@ class Definitions
 {
 public:
 
+	constexpr static const double kmerHighDivergence = 0.8;
+
 	constexpr static const double defaultGapPenalty = 0.5;
 
+	//model param estimation accuracy
 	constexpr static const double accuracyBFGS = 1e-9;
 
+	//band factor default for intial fwd likelihood calculations
+	constexpr static const double initialBandFactor = 0.33;
+
+	//small number close to zero for param estimation
 	constexpr static const double almostZero = 1e-6;
 
 	constexpr static const double maxAlpha = 99.999999;
 
+	//3 states - M I D
 	constexpr static const unsigned int stateCount = 3;
 
+	//triplet trees
 	constexpr static const unsigned int heuristicsTreeSize = 3;
 
+	//obsolete
 	constexpr static const unsigned int pathSampleCount = 10000;
 	constexpr static const unsigned int pathInformativeCount = 50;
 
@@ -68,8 +78,10 @@ public:
 	constexpr static const unsigned int samplingPathCount = 1000;
 	constexpr static const double samplingPathLnLDelta = 10.0;
 
+	//max divergence
 	constexpr static const double divergenceBound = 50;
 
+	//initial max lambda, however the max depends on divergence
 	constexpr static const double lambdaHiBound = 0.3;
 
 	constexpr static const double epsilonHiBound = 0.95;
@@ -78,7 +90,8 @@ public:
 	constexpr static const double initialLambda = 0.05;
 	constexpr static const double initialEpsilon = 0.5;
 
-	constexpr static const unsigned int minBandDelta = 7; //This makes the min band width of 15 characters
+	//This makes the min band width of 15 characters
+	constexpr static const unsigned int minBandDelta = 7;
 
 	constexpr static const double minMatrixLikelihood = -1000000.0;
 

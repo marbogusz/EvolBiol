@@ -30,7 +30,7 @@ public:
 	Band(unsigned int size);
 
 	//Creates a default band that covers specified fraction of the column
-	Band(unsigned int len1, unsigned int len2, double coverage=0.33);
+	Band(unsigned int len1, unsigned int len2, double coverage=Definitions::initialBandFactor);
 
 	virtual ~Band();
 

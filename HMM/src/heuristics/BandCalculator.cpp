@@ -18,17 +18,32 @@ BandCalculator::BandCalculator(vector<SequenceElement*>* s1, vector<SequenceElem
 	posteriorLikelihoodLimit = -3;
 	posteriorLikelihoodDelta = -9;
 
-	band = new Band(s1->size(),s2->size());
-
 	this->ptMatrix =  new PMatrixDouble(substModel);
 	this->trProbs = new TransitionProbabilities(indelModel);
-	//FIXME - magic numbers
-	array<double,3> multipliers = {{0.5,1,1.5}};
+
+	bool highDivergence = false;
+
+	//standard multipliers
+	array<double,3> normalMultipliers = {{0.5,1,1.5}};
+	//for high divergences
+	array<double,3> highMultipliers = {{1,3,9}};
+
+
+	array<double,3> &multipliers = normalMultipliers;
+
+	band = new Band(s1->size(),s2->size());
+
+	if (time > Definitions::kmerHighDivergence){
+		highDivergence = true;
+		multipliers = highMultipliers;
+	}
+
+
 	unsigned int best = 0;
 	double tmpRes = std::numeric_limits<double>::max();
 	double lnl;
 
-	DUMP("Trying 3 forward calculations to assess the band...");
+	DUMP("Trying several forward calculations to assess the band...");
 	for(unsigned int i = 0; i < fwd.size(); i++)
 	{
 
