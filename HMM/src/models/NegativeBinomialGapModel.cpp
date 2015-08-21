@@ -19,7 +19,7 @@ namespace EBC
 NegativeBinomialGapModel::NegativeBinomialGapModel() : IndelModel(Definitions::NBIndelParamCount)
 {
 	//logMode = true;
-	this->parameterLoBounds[0] = this->parameterLoBounds[1] = 0.000001;
+	this->parameterLoBounds[0] = this->parameterLoBounds[1] = Definitions::almostZero;
 	this->parameterHiBounds[0] = Definitions::lambdaHiBound;
 	this->parameterHiBounds[1] = Definitions::epsilonHiBound;
 }
@@ -30,7 +30,8 @@ NegativeBinomialGapModel::~NegativeBinomialGapModel()
 
 double NegativeBinomialGapModel::calculateGapOpening(double time)
 {
-	return 1-exp(-1*lambda*time);
+	double NegLambdaT = -1.0*lambda*time;
+	return 1.0-exp(NegLambdaT);
 }
 
 double NegativeBinomialGapModel::calculateGapExtension(double time)
@@ -55,7 +56,7 @@ void NegativeBinomialGapModel::calculate()
 void NegativeBinomialGapModel::calculateGeometricProbability(double lambda, double t)
 {
 	//FIXME - remove
-	double exponent = 1-exp(-1*lambda*t);
+	double exponent = 1.0-exp(-1.0*lambda*t);
 	this->gapOpeningProbability = exponent;
 }
 

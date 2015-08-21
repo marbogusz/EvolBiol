@@ -15,8 +15,8 @@ BandCalculator::BandCalculator(vector<SequenceElement*>* s1, vector<SequenceElem
 {
 	DEBUG("Band estimator running...");
 	//FIXME magic numbers
-	posteriorLikelihoodLimit = -3;
-	posteriorLikelihoodDelta = -9;
+	posteriorLikelihoodLimit = Definitions::bandPosteriorLikelihoodLimit;
+	posteriorLikelihoodDelta = Definitions::bandPosteriorLikelihoodDelta;
 
 	this->ptMatrix =  new PMatrixDouble(substModel);
 	this->trProbs = new TransitionProbabilities(indelModel);
@@ -26,12 +26,15 @@ BandCalculator::BandCalculator(vector<SequenceElement*>* s1, vector<SequenceElem
 	//standard multipliers
 	array<double,3> normalMultipliers = {{0.5,1,1.5}};
 	//for high divergences
-	array<double,3> highMultipliers = {{1,3,9}};
+	array<double,3> highMultipliers = {{1,2,4}};
 
 
 	array<double,3> &multipliers = normalMultipliers;
 
 	band = new Band(s1->size(),s2->size());
+
+	//default accura
+	accuracy = Definitions::normalDivergenceAccuracyDelta;
 
 	if (time > Definitions::kmerHighDivergence){
 		highDivergence = true;
@@ -71,6 +74,21 @@ BandCalculator::BandCalculator(vector<SequenceElement*>* s1, vector<SequenceElem
 
 	bwd->calculatePosteriors(fwd[best]);
 	this->processPosteriorProbabilities(bwd, band);
+
+	bestTime = time*multipliers[best];
+	//for high divergences likelihood surfaces tend to be flatter
+	if(highDivergence){
+		if(best==1){
+			//divergence of 2-3
+			accuracy = Definitions::highDivergenceAccuracyDelta;
+		}
+		else if(best==2){
+			//divergence of 7-9
+			accuracy = Definitions::ultraDivergenceAccuracyDelta;
+		}
+	}
+
+
 }
 
 BandCalculator::~BandCalculator()
@@ -168,4 +186,14 @@ void BandCalculator::processPosteriorProbabilities(BackwardPairHMM* hmm, Band* b
 	}
 }
 
+double BandCalculator::getClosestDistance() {
+	return this->bestTime;
+}
+
+double BandCalculator::getBrentAccuracy() {
+	return this->accuracy;
+}
+
 } /* namespace EBC */
+
+

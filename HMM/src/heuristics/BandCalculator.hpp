@@ -55,6 +55,9 @@ protected:
 	double posteriorLikelihoodLimit;
 	double posteriorLikelihoodDelta;
 
+	double bestTime;
+	double accuracy;
+
 	void processPosteriorProbabilities(BackwardPairHMM* hmm, Band* band);
 
 public:
@@ -65,6 +68,10 @@ public:
 	{
 		return this->band;
 	}
+
+	double getClosestDistance();
+
+	double getBrentAccuracy();
 };
 
 } /* namespace EBC */

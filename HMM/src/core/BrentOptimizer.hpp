@@ -28,6 +28,14 @@ public:
 	double optimize();
 	void setTarget(IOptimizable* opt);
 	double objectiveFunction(double x);
+
+	double getAccuracy() const {
+		return accuracy;
+	}
+
+	void setAccuracy(double accuracy) {
+		this->accuracy = accuracy;
+	}
 };
 
 } /* namespace EBC */

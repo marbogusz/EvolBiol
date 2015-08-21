@@ -121,7 +121,7 @@ BandingEstimator::BandingEstimator(Definitions::AlgorithmType at, Sequences* inp
 			delete bc;
 		}
 */
-	numopt = new BrentOptimizer(modelParams, NULL,1e-8);
+	numopt = new BrentOptimizer(modelParams, NULL);
 	//bfgs->optimize();
 	//this->modelParams->logParameters();
 
@@ -180,8 +180,9 @@ void BandingEstimator::optimizePairByPair()
 		wrapper->setTargetHMM(hmm);
 		DUMP("Set model parameter in the hmm...");
 		wrapper->setModelParameters(modelParams);
-		modelParams->setUserDivergenceParams({dm->getDistance(idxs.first,idxs.second)});
+		modelParams->setUserDivergenceParams({bc->getClosestDistance()});
 		numopt->setTarget(wrapper);
+		numopt->setAccuracy(bc->getBrentAccuracy());
 		result = numopt->optimize() * -1.0;
 		DEBUG("Likelihood after pairwise optimization: " << result);
 		if (result <= (Definitions::minMatrixLikelihood /2.0))

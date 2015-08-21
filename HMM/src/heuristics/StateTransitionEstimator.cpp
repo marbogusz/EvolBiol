@@ -24,7 +24,7 @@ StateTransitionEstimator::StateTransitionEstimator(IndelModel* im, Definitions::
 
 	bfgs = new Optimizer(modelParams, this,ot);
 
-	maxTime = 0.000001;
+	maxTime = Definitions::almostZero;
 }
 
 double StateTransitionEstimator::runIteration()

@@ -46,12 +46,26 @@ class Definitions
 {
 public:
 
-	constexpr static const double kmerHighDivergence = 0.8;
+
+	//this value coming from k-mer estimation is considered high and means that
+	//the actual distance can potentially be higher than 1
+	constexpr static const double kmerHighDivergence = 0.85;
+
+	//for band calculations
+	constexpr static const double bandPosteriorLikelihoodLimit = -3;
+	constexpr static const double bandPosteriorLikelihoodDelta = -9;
+
+	constexpr static const double normalDivergenceAccuracyDelta = 1e-3;
+
+	constexpr static const double highDivergenceAccuracyDelta = 1e-2;
+
+	constexpr static const double ultraDivergenceAccuracyDelta = 1e-1;
+
 
 	constexpr static const double defaultGapPenalty = 0.5;
 
 	//model param estimation accuracy
-	constexpr static const double accuracyBFGS = 1e-9;
+	constexpr static const double accuracyBFGS = 1e-8;
 
 	//band factor default for intial fwd likelihood calculations
 	constexpr static const double initialBandFactor = 0.33;
