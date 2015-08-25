@@ -55,7 +55,7 @@ public:
 	constexpr static const double bandPosteriorLikelihoodLimit = -3;
 	constexpr static const double bandPosteriorLikelihoodDelta = -9;
 
-	constexpr static const double normalDivergenceAccuracyDelta = 1e-3;
+	constexpr static const double normalDivergenceAccuracyDelta = 1e-6;
 
 	constexpr static const double highDivergenceAccuracyDelta = 1e-2;
 

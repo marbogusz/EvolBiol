@@ -14,6 +14,10 @@ BandCalculator::BandCalculator(vector<SequenceElement*>* s1, vector<SequenceElem
 		fwd(3,nullptr), seq1(s1), seq2(s2), substModel(sm), indelModel(im), time(divergenceTime)
 {
 	DEBUG("Band estimator running...");
+
+
+
+
 	//FIXME magic numbers
 	posteriorLikelihoodLimit = Definitions::bandPosteriorLikelihoodLimit;
 	posteriorLikelihoodDelta = Definitions::bandPosteriorLikelihoodDelta;
@@ -36,11 +40,13 @@ BandCalculator::BandCalculator(vector<SequenceElement*>* s1, vector<SequenceElem
 	//default accura
 	accuracy = Definitions::normalDivergenceAccuracyDelta;
 
+	/*
 	if (time > Definitions::kmerHighDivergence){
 		highDivergence = true;
 		multipliers = highMultipliers;
 	}
 
+	*/
 
 	unsigned int best = 0;
 	double tmpRes = std::numeric_limits<double>::max();
@@ -88,7 +94,7 @@ BandCalculator::BandCalculator(vector<SequenceElement*>* s1, vector<SequenceElem
 		}
 	}
 
-
+	INFO("k-mer time: " << divergenceTime);
 }
 
 BandCalculator::~BandCalculator()
@@ -117,6 +123,10 @@ void BandCalculator::processPosteriorProbabilities(BackwardPairHMM* hmm, Band* b
 	M = hmm->getM();
 	X = hmm->getX();
 	Y = hmm->getY();
+
+	double ccM, ccI, ccD;
+	ccM = ccD = ccI = 0;
+	double rowcols = M->getRows() * M->getCols();
 
 	//cumulative posterior likelihood
 	double cpl = posteriorLikelihoodLimit + posteriorLikelihoodDelta;
@@ -177,6 +187,11 @@ void BandCalculator::processPosteriorProbabilities(BackwardPairHMM* hmm, Band* b
 
 
 		band->setInsertRangeAt(col, xLo,xHi);
+
+		ccI += xHi-xLo+1;
+		ccD += yHi-yLo+1;
+		ccM += mHi-mLo+1;
+
 		band->setDeleteRangeAt(col, yLo,yHi);
 		band->setMatchRangeAt(col, mLo,mHi);
 
@@ -184,6 +199,8 @@ void BandCalculator::processPosteriorProbabilities(BackwardPairHMM* hmm, Band* b
 				<< "\t" << band->getInsertRangeAt(col).first <<"\t" << band->getInsertRangeAt(col).second
 				<< "\t" << band->getDeleteRangeAt(col).first <<"\t" << band->getDeleteRangeAt(col).second);
 	}
+	INFO("Band promiles M:" << (int)(ccM*1000.0/rowcols) << " I:" << (int)(ccI*1000.0/rowcols) << " D:" << (int)(ccD*1000.0/rowcols));
+
 }
 
 double BandCalculator::getClosestDistance() {

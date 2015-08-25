@@ -12,6 +12,8 @@
 #include "models/NegativeBinomialGapModel.hpp"
 #include "hmm/DpMatrixFull.hpp"
 #include "extras/LikelihoodSurfacePlotter.hpp"
+#include <chrono>
+#include <ctime>
 
 namespace EBC
 {
@@ -147,6 +149,9 @@ void BandingEstimator::optimizePairByPair()
 	DistanceMatrix* dm = gt->getDistanceMatrix();
 	PairHmmCalculationWrapper* wrapper = new PairHmmCalculationWrapper();
 	double result;
+	chrono::time_point<chrono::system_clock> start, end;
+	chrono::duration<double> elapsed_seconds;
+
 
 	for(unsigned int i =0; i< pairCount; i++)
 	{
@@ -183,7 +188,18 @@ void BandingEstimator::optimizePairByPair()
 		modelParams->setUserDivergenceParams({bc->getClosestDistance()});
 		numopt->setTarget(wrapper);
 		numopt->setAccuracy(bc->getBrentAccuracy());
+
+		start = chrono::system_clock::now();
+
 		result = numopt->optimize() * -1.0;
+
+		end = chrono::system_clock::now();
+		elapsed_seconds = end-start;
+
+		INFO("Estimated Divergence Time " << modelParams->getDivergenceTime(0));
+	    INFO("Computation time " << elapsed_seconds.count() << "s\n");
+
+
 		DEBUG("Likelihood after pairwise optimization: " << result);
 		if (result <= (Definitions::minMatrixLikelihood /2.0))
 		{
