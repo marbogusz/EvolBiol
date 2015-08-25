@@ -76,6 +76,8 @@ public:
 
 	string& getSequenceName(unsigned int pos);
 
+	unsigned int getSequenceId(string& seqname);
+
 	string& getRawSequenceAt(unsigned int pos);
 
 	std::pair<unsigned int, unsigned int> getPairOfSequenceIndices(unsigned int idx)

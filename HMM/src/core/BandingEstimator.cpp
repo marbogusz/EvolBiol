@@ -6,6 +6,7 @@
  */
 
 #include "core/BandingEstimator.hpp"
+#include "core/PhylogeneticTree.hpp"
 #include "models/GTRModel.hpp"
 #include "models/HKY85Model.hpp"
 #include "models/AminoacidSubstitutionModel.hpp"
@@ -151,6 +152,19 @@ void BandingEstimator::optimizePairByPair()
 	double result;
 	chrono::time_point<chrono::system_clock> start, end;
 	chrono::duration<double> elapsed_seconds;
+
+	ifstream myfile ("tree.sim_1");
+	string newick;
+	if (myfile.is_open())
+	{
+		getline (myfile,newick);
+		myfile.close();
+	}
+
+	PhylogeneticTree ptree;
+	ptree.fromNewick(newick);
+
+
 
 
 	for(unsigned int i =0; i< pairCount; i++)
