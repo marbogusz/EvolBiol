@@ -186,6 +186,7 @@ void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 	DUMP("#####Delete posteriors########");
 	dynamic_cast<DpMatrixFull*>(Y->getDpMatrix())->outputValues(0);
 */
+	dynamic_cast<DpMatrixFull*>(M->getDpMatrix())->outputValues(0);
 }
 
 

@@ -161,7 +161,7 @@ void BandingEstimator::optimizePairByPair()
 		myfile.close();
 	}
 
-	PhylogeneticTree ptree;
+	PhylogeneticTree ptree(this->inputSequences);
 	ptree.fromNewick(newick);
 
 
@@ -200,6 +200,7 @@ void BandingEstimator::optimizePairByPair()
 		DUMP("Set model parameter in the hmm...");
 		wrapper->setModelParameters(modelParams);
 		modelParams->setUserDivergenceParams({bc->getClosestDistance()});
+		//modelParams->setUserDivergenceParams({ptree.distanceById(idxs.first,idxs.second)});
 		numopt->setTarget(wrapper);
 		numopt->setAccuracy(bc->getBrentAccuracy());
 
@@ -211,6 +212,7 @@ void BandingEstimator::optimizePairByPair()
 		elapsed_seconds = end-start;
 
 		INFO("Estimated Divergence Time " << modelParams->getDivergenceTime(0));
+		INFO("Real divergence time " << ptree.distanceById(idxs.first,idxs.second));
 	    INFO("Computation time " << elapsed_seconds.count() << "s\n");
 
 

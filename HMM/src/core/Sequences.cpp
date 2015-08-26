@@ -6,6 +6,7 @@
  */
 
 #include "core/Sequences.hpp"
+#include <algorithm>
 
 namespace EBC
 {

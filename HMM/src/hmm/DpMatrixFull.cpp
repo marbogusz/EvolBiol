@@ -113,6 +113,8 @@ void EBC::DpMatrixFull::outputValues(unsigned int bound=0)
 	unsigned int xl = bound !=0 ? bound : xSize;
 	unsigned int yl = bound !=0 ? bound : ySize;
 
+	double bndlim = Definitions::bandPosteriorLikelihoodLimit + Definitions::bandPosteriorLikelihoodDelta;
+
 	stringstream sstr;
 
 	sstr << endl;
@@ -126,14 +128,19 @@ void EBC::DpMatrixFull::outputValues(unsigned int bound=0)
 		{
 
 
-			//if (ts.score > -5.0)
-				sstr << matrixData[i][j] *-1.0 << "\t";
-			//else sstr << ".";
+			if (matrixData[i][j] > -4)
+				//sstr << int(matrixData[i][j] *-1.0) << "\t";
+				sstr << "*";
+			else if (matrixData[i][j] > -8)
+				sstr << "+";
+			else if (matrixData[i][j] > -12)
+				sstr << ".";
+			else sstr << " ";
 
 		}
 		sstr << endl;
 	}
-	DUMP(sstr.str());
+	INFO(sstr.str());
 }
 
 void EBC::DpMatrixFull::outputValuesWithBands(const vector<pair<int, int> >& band, const vector<pair<int, int> >& oband1, const vector<pair<int, int> >& oband2, char os1, char os2) {
