@@ -58,6 +58,9 @@ protected:
 	double bestTime;
 	double accuracy;
 
+	double leftBound;
+	double rightBound;
+
 	void processPosteriorProbabilities(BackwardPairHMM* hmm, Band* band);
 
 public:
@@ -72,6 +75,14 @@ public:
 	double getClosestDistance();
 
 	double getBrentAccuracy();
+
+	double getLeftBound() {
+		return leftBound;
+	}
+
+	double getRightBound(){
+		return rightBound;
+	}
 };
 
 } /* namespace EBC */

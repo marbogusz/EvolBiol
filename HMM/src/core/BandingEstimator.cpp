@@ -49,19 +49,7 @@ BandingEstimator::BandingEstimator(Definitions::AlgorithmType at, Sequences* inp
 	estimateSubstitutionParams = false;
 	estimateIndelParams = false;
 	estimateAlpha = false;
-	/*
-	estimateSubstitutionParams = subst_params.size() != substModel->getParamsNumber();
-	estimateIndelParams = indel_params.size() == 0;
-	//Do not estimate alpha here. Alpha needs to be estimated beforehand
-	this->estimateAlpha = false;
 
-	DEBUG("Pairwise banding model estimator starting");
-	DEBUG("Estimate substitution parameters set to : " << estimateSubstitutionParams << " Estimate indel parameters set to : " << estimateIndelParams);
-	DEBUG("Estimate alpha set to : " << estimateAlpha << " , rate categories " << gammaRateCategories << " , alpha : " << alpha);
-
-	FileLogger::DebugLogger() << "Estimate substitution parameters set to : " << estimateSubstitutionParams << " Estimate indel parameters set to : " << estimateIndelParams << "\n";
-	FileLogger::DebugLogger() << "Estimate alpha set to : " << estimateAlpha << " , rate categories " << gammaRateCategories << " , alpha : " << alpha << "\n";
-	 */
 	//pairwise comparison mode
 	modelParams = new OptimizedModelParameters(substModel, indelModel,2, 1, estimateSubstitutionParams,
 			estimateIndelParams, estimateAlpha, true, maths);
@@ -89,44 +77,9 @@ BandingEstimator::BandingEstimator(Definitions::AlgorithmType at, Sequences* inp
 		indelModel->setParameters(modelParams->getIndelParameters());
 	}
 
-	//let's assume that we have all the parameters estimated
-	//need to get times!
-
 	EvolutionaryPairHMM *hmm;
-//non banden probs
-//	vector<EvolutionaryPairHMM*> hmmsNB(pairCount);
 
-/*
-	for(unsigned int i =0; i< pairCount; i++)
-		{
-			std::pair<unsigned int, unsigned int> idxs = inputSequences->getPairOfSequenceIndices(i);
-			DEBUG("Running band calculator for sequence " << idxs.first << " and " << idxs.second);
-			FileLogger::InfoLogger() << "Running band calculator for sequence " << idxs.first << " and " << idxs.second << "\n";
-			BandCalculator* bc = new BandCalculator(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
-					substModel, indelModel, gt->getDistanceMatrix()->getDistance(idxs.first,idxs.second));
-			bands[i] = bc->getBand();
-			if (at == Definitions::AlgorithmType::Viterbi)
-			{
-				hmm = hmms[i] = new ViterbiPairHMM(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
-					substModel, indelModel, Definitions::DpMatrixType::Full, bands[i]);
-			}
-			else if (at == Definitions::AlgorithmType::Forward)
-			{
-				hmm = hmms[i] = new ForwardPairHMM(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
-						substModel, indelModel, Definitions::DpMatrixType::Full, bands[i]);
-				//hmmsNB[i] = new ForwardPairHMM(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
-				//						substModel, indelModel, Definitions::DpMatrixType::Full, NULL);
-			}
-			else
-			{
-				throw HmmException("Wrong algorithm type - use either Forward or viterbi\n");
-			}
-			delete bc;
-		}
-*/
 	numopt = new BrentOptimizer(modelParams, NULL);
-	//bfgs->optimize();
-	//this->modelParams->logParameters();
 
 }
 
@@ -205,6 +158,8 @@ void BandingEstimator::optimizePairByPair()
 		//modelParams->setUserDivergenceParams({ptree.distanceById(idxs.first,idxs.second)});
 		numopt->setTarget(wrapper);
 		numopt->setAccuracy(bc->getBrentAccuracy());
+		numopt->setBounds(bc->getLeftBound(), bc->getRightBound() < 0 ? modelParams->divergenceBound : bc->getRightBound());
+
 
 		start = chrono::system_clock::now();
 

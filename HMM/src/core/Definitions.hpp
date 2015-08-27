@@ -47,15 +47,19 @@ class Definitions
 public:
 
 
-	//this value coming from k-mer estimation is considered high and means that
-	//the actual distance can potentially be higher than 1
+	//this value coming from k-mer estimation is considered low and means that
+	//the actual distance is likely to be < 1
+	constexpr static const double kmerLowDivergence = 0.7;
 	constexpr static const double kmerHighDivergence = 0.95;
 
-	//for band calculations
-	constexpr static const double bandPosteriorLikelihoodLimit = -3;
-	constexpr static const double bandPosteriorLikelihoodDelta = -9;
 
-	constexpr static const double normalDivergenceAccuracyDelta = 1e-3;
+
+
+	//for band calculations
+	constexpr static const double bandPosteriorLikelihoodLimit = -2;
+	constexpr static const double bandPosteriorLikelihoodDelta = -6;
+
+	constexpr static const double normalDivergenceAccuracyDelta = 1e-2;
 
 	constexpr static const double highDivergenceAccuracyDelta = 1e-2;
 
@@ -106,7 +110,7 @@ public:
 	constexpr static const double initialLambda = 0.05;
 	constexpr static const double initialEpsilon = 0.5;
 
-	//This makes the min band width of 15 characters
+	//This makes the min band width of 15 characters minimum
 	constexpr static const unsigned int minBandDelta = 7;
 
 	constexpr static const double minMatrixLikelihood = -1000000.0;

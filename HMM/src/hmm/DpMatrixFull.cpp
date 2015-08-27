@@ -116,6 +116,9 @@ void EBC::DpMatrixFull::outputValues(unsigned int bound=0)
 	double bndlim = Definitions::bandPosteriorLikelihoodLimit + Definitions::bandPosteriorLikelihoodDelta;
 
 	stringstream sstr;
+	bool found;
+
+	unsigned int numbers[] = {196,202,208,214,220,226,190,154,118,82,46,47,48,49,50,51,45,39,33,27,21,57,93,129,165,201};
 
 	sstr << endl;
 	for(unsigned int k=0; k < yl; k++)
@@ -127,15 +130,18 @@ void EBC::DpMatrixFull::outputValues(unsigned int bound=0)
 		for(unsigned int j=0; j < yl; j++)
 		{
 
+			found = false;
+			for (int k = 0; k<=24; k++){
+				if (matrixData[i][j] > -0.3333333*(k+1)){
+					sstr << "\e[30;48;5;"<<numbers[k]<<"m ";
+					found = true;
+					break;
+				}
+			}
+			if(!found){
 
-			if (matrixData[i][j] > -4)
-				//sstr << int(matrixData[i][j] *-1.0) << "\t";
-				sstr << "*";
-			else if (matrixData[i][j] > -8)
-				sstr << "+";
-			else if (matrixData[i][j] > -12)
-				sstr << ".";
-			else sstr << " ";
+				sstr << "\e[30;48;5;7m ";
+			}
 
 		}
 		sstr << endl;

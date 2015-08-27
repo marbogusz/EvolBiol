@@ -32,8 +32,8 @@ double BrentOptimizer::objectiveFunction(double x)
 
 double BrentOptimizer::optimize()
 {
-    double leftEnd = Definitions::almostZero;     // left bound should be about 0
-    double rightEnd = omp->divergenceBound;
+    double leftEnd = leftBound;     // left bound should be about 0
+    double rightEnd = rightBound;
     double epsilon = accuracy;
     double minLoc = omp->getDivergenceTime(0);
 
