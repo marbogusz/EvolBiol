@@ -13,6 +13,7 @@
 #include <map>
 #include <unordered_set>
 #include "heuristics/Node.hpp"
+#include "core/Sequences.hpp"
 
 using namespace std;
 
@@ -25,6 +26,8 @@ private:
 	//all nodes
 	vector<Node*> nodes;
 
+	Sequences* inputSeqs;
+
 	map<unsigned int, Node*> leafNodes;
 
 	map<unsigned int, Node*> availableNodes;
@@ -35,13 +38,12 @@ private:
 
 	double distanceToParent(Node* n1, Node* par);
 
-
-	void fromNewick(const string& nString);
-
 public:
-	PhylogeneticTree();
+	PhylogeneticTree(Sequences* seqs);
 
 	~PhylogeneticTree();
+
+	void fromNewick(const string& nString);
 
 	double distanceById(unsigned int n1, unsigned int n2);
 	double distanceByName(string& n1, string& n2);

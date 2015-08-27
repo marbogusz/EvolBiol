@@ -2,7 +2,7 @@
  * BrentOptimizer.hpp
  *
  *  Created on: Aug 5, 2015
- *  Based on John D. Cook's implementation
+ *  Partially based on John D. Cook's implementation
  *  http://www.codeproject.com/Articles/30201/Optimizing-a-Function-of-One-Variable
  */
 

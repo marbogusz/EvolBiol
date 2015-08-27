@@ -6,6 +6,7 @@
  */
 
 #include "core/Sequences.hpp"
+#include <algorithm>
 
 namespace EBC
 {
@@ -66,6 +67,15 @@ string& Sequences::getRawSequenceAt(unsigned int pos)
 string& Sequences::getSequenceName(unsigned int pos)
 {
 	return (*sequenceNames)[pos];
+}
+
+unsigned int Sequences::getSequenceId(string& seqname)
+{
+	unsigned int pos = std::find(sequenceNames->begin(), sequenceNames->end(), seqname) - sequenceNames->begin();
+	if(pos >= sequenceNames->size()) {
+	    throw HmmException(seqname + " not found");
+	}
+	return pos;
 }
 
 void Sequences::calculateObservedFrequencies()

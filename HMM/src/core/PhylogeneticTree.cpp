@@ -16,7 +16,7 @@
 namespace EBC
 {
 
-PhylogeneticTree::PhylogeneticTree()
+PhylogeneticTree::PhylogeneticTree(Sequences* seqs) : inputSeqs(seqs)
 {
 	DEBUG("Creating PhylogeneticTree");
 }
@@ -73,8 +73,10 @@ void PhylogeneticTree::fromNewick(const string& newick)
 	unsigned int i = 0;
 	unsigned int ids = 0;
 	unsigned int sequenceNo;
-	//sequence names should start with S, TODO - change later
+	string seqName;
+	//FIXME - write a regex that accepts any string
 	regex regDescDist("((S[0-9]+):([0-9\\.]+)).*");
+	//regex regDescDist("((.?+):([0-9\\.]+)).*");
 	regex regInterDist(":([0-9\\.]+).*");
 	Node *tmpNode, *tmpParent, *tmpCurrent;
 	stack<Node*> workNodes;
@@ -148,11 +150,16 @@ void PhylogeneticTree::fromNewick(const string& newick)
 			smatch basematch;
 			string sstr = newick.substr(i);
 
-			//FIXME - Change ASAP this piece of code is really dangerous - get the sequence number from the seq dictionary!!!
 			if (regex_match(sstr, basematch, regDescDist))
 			{
-				sequenceNo = std::stoi(basematch[2].str());
+
+
+				seqName = basematch[2].str();
+				sequenceNo = inputSeqs->getSequenceId(seqName);
 				currentDistance =  stof(basematch[3].str());
+
+				cerr << "Newick name, id and distance : " << seqName << " " << sequenceNo << " " << currentDistance << endl;
+
 				tmpCurrent = workNodes.top();
 				tmpCurrent->setSequenceNumber(sequenceNo);
 				tmpCurrent->setDistance(currentDistance);
@@ -163,6 +170,9 @@ void PhylogeneticTree::fromNewick(const string& newick)
 			else if (regex_match(sstr, basematch, regInterDist))
 			{
 				currentDistance =   stof(basematch[1].str());
+
+				cerr << "Newick distance match: " << currentDistance << endl;
+
 				tmpCurrent = workNodes.top();
 				tmpCurrent->setDistance(currentDistance);
 				i += basematch[1].str().size() + 1;
@@ -175,6 +185,20 @@ void PhylogeneticTree::fromNewick(const string& newick)
 }
 
 double PhylogeneticTree::distanceById(unsigned int n1, unsigned int n2) {
+	Node* nd1 = leafNodes[n1];
+	Node* nd2 = leafNodes[n2];
+	Node* mrca = mostRecentAncestor(nd1,nd2);
+
+	double distance = 0;
+
+	for (Node* tmp : {nd1,nd2}){
+		while (tmp != mrca){
+			distance += tmp->distanceToParent;
+			tmp = tmp->parent;
+		}
+	}
+	return distance;
+
 }
 
 double PhylogeneticTree::distanceByName(string& n1, string& n2) {
