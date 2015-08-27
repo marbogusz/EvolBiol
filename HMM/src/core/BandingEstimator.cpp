@@ -175,6 +175,8 @@ void BandingEstimator::optimizePairByPair()
 				<< " ,number " << i+1 <<" out of " << pairCount << " pairs" );
 		BandCalculator* bc = new BandCalculator(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
 				substModel, indelModel, gt->getDistanceMatrix()->getDistance(idxs.first,idxs.second));
+	//	BandCalculator* bc = new BandCalculator(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
+	//					substModel, indelModel, ptree.distanceById(idxs.first,idxs.second));
 		band = bc->getBand();
 		if (algorithm == Definitions::AlgorithmType::Viterbi)
 		{

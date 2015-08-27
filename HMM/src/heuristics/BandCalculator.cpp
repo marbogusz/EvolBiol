@@ -28,7 +28,8 @@ BandCalculator::BandCalculator(vector<SequenceElement*>* s1, vector<SequenceElem
 	bool highDivergence = false;
 
 	//standard multipliers
-	array<double,3> normalMultipliers = {{0.5,1,1.5}};
+//	array<double,3> normalMultipliers = {{0.5,1,1.5}};
+	array<double,3> normalMultipliers = {{0.8,1,1.2}};
 	//for high divergences
 	array<double,3> highMultipliers = {{1,2,4}};
 
