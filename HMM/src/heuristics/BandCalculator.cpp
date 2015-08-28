@@ -47,7 +47,7 @@ BandCalculator::BandCalculator(vector<SequenceElement*>* s1, vector<SequenceElem
 	}
 	else{//very high divergence
 		multipliers = highMultipliers;
-		band = new Band(s1->size(),s2->size(),0.25);
+		band = new Band(s1->size(),s2->size(),0.33);
 		INFO("HIGH divergence");
 		leftBound = 1;
 		//use value from

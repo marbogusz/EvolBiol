@@ -22,6 +22,8 @@
 #include <sstream>
 #include "core/HmmException.hpp"
 #include "core/PMatrixDouble.hpp"
+#include "core/IOptimizable.hpp"
+#include "core/BrentOptimizer.hpp"
 
 #include <vector>
 #include <map>
@@ -33,39 +35,14 @@ using namespace std;
 namespace EBC
 {
 
-class MlEstimator
+class MlEstimator : public IOptimizable
 {
 
 private:
 
-	//BFGS optimization wrapper for dlib
-	class BFGS
-	{
-	protected:
-		column_vector initParams;
-		column_vector lowerBounds;
-		column_vector upperBounds;
-
-		unsigned int paramsCount;
-
-		MlEstimator* parent;
-
-		Definitions::OptimizationType optimizationType;
-
-	public:
-		BFGS(MlEstimator* enclosing, Definitions::OptimizationType ot);
-		virtual ~BFGS();
-		void optimize();
-
-		double objectiveFunction(const column_vector& m);
-
-		const column_vector objectiveFunctionDerivative(const column_vector& m);
-	};
-
-
 protected:
 
-	BFGS* bfgs;
+	BrentOptimizer* numopt;
 
 	Dictionary* dict;
 	SubstitutionModelBase* substModel;
@@ -85,6 +62,10 @@ protected:
 	//for viterbi calculation
 	vector<ViterbiPairHMM*> hmms;
 
+	unsigned int currentPair;
+
+	vector<double> optTimes;
+
 	//
 	//vector<SubstitutionModelBase*> substs;
 
@@ -99,7 +80,7 @@ protected:
 public:
 	MlEstimator(Sequences* inputSeqs, Definitions::ModelType model,std::vector<double> indel_params,
 			std::vector<double> subst_params,Definitions::OptimizationType ot,
-			unsigned int rateCategories, double alpha, bool estimateAlpha, double userTime, bool useViterbi);
+			unsigned int rateCategories, double alpha, bool estimateAlpha, vector<double> userTimes, bool useViterbi);
 
 	virtual ~MlEstimator();
 
@@ -107,9 +88,10 @@ public:
 
 	double runIteration();
 
-	const vector<double>& getOptimizedTimes()
+	const vector<double> getOptimizedTimes()
 	{
-		return this->modelParams->getDivergenceTimes();
+		//return this->modelParams->getDivergenceTimes();
+		return optTimes;
 	}
 
 	//ModelParameters getMlParameters()
