@@ -170,7 +170,30 @@ void BandingEstimator::optimizePairByPair()
 
 		INFO("Estimated Divergence Time " << modelParams->getDivergenceTime(0));
 		INFO("Real divergence time " << ptree.distanceById(idxs.first,idxs.second));
-	    INFO("Computation time " << elapsed_seconds.count() << "s\n");
+		double divdelta =  (modelParams->getDivergenceTime(0) - ptree.distanceById(idxs.first,idxs.second))/ptree.distanceById(idxs.first,idxs.second);
+
+		if(std::abs(divdelta) < 0.025){
+			INFO("Divergence delta % \e[38;5;46m " << divdelta*100 );
+		}
+		else if(std::abs(divdelta) < 0.05){
+			INFO("Divergence delta % \e[38;5;76m " << divdelta*100 );
+		}
+		else if(std::abs(divdelta) < 0.1){
+			INFO("Divergence delta % \e[38;5;106m " << divdelta*100 );
+		}
+		else if(std::abs(divdelta) < 0.25){
+			INFO("Divergence delta % \e[38;5;136m " << divdelta*100 );
+		}
+		else if(std::abs(divdelta) < 0.5){
+			INFO("Divergence delta % \e[38;5;166m " << divdelta*100 );
+		}
+		else{
+			INFO("Divergence delta % \e[38;5;196m " << divdelta*100 );
+		}
+
+
+
+	    //INFO("Computation time " << elapsed_seconds.count() << "s\n");
 
 
 		DEBUG("Likelihood after pairwise optimization: " << result);

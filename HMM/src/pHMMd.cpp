@@ -48,7 +48,7 @@ int main(int argc, char ** argv) {
 		CommandReader* cmdReader = new CommandReader(argc, argv);
 		ofstream treefile;
 
-		FileLogger::start(cmdReader->getLoggingLevel(), (string(cmdReader->getInputFileName()).append(".hmm.newAcctimelog")));
+		FileLogger::start(cmdReader->getLoggingLevel(), (string(cmdReader->getInputFileName()).append(".hmm.nobandlog")));
 
 
 
@@ -258,7 +258,7 @@ int main(int argc, char ** argv) {
 			INFO(treeStr);
 
 
-			treefile.open((string(cmdReader->getInputFileName()).append(".hmm.newAcctimetree")).c_str(),ios::out);
+			treefile.open((string(cmdReader->getInputFileName()).append(".hmm.nobandtree")).c_str(),ios::out);
 			treefile << treeStr << endl;
 			treefile.close();
 

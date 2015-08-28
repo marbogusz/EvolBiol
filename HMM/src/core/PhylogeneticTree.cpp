@@ -158,7 +158,7 @@ void PhylogeneticTree::fromNewick(const string& newick)
 				sequenceNo = inputSeqs->getSequenceId(seqName);
 				currentDistance =  stof(basematch[3].str());
 
-				cerr << "Newick name, id and distance : " << seqName << " " << sequenceNo << " " << currentDistance << endl;
+				//cerr << "Newick name, id and distance : " << seqName << " " << sequenceNo << " " << currentDistance << endl;
 
 				tmpCurrent = workNodes.top();
 				tmpCurrent->setSequenceNumber(sequenceNo);
@@ -171,7 +171,7 @@ void PhylogeneticTree::fromNewick(const string& newick)
 			{
 				currentDistance =   stof(basematch[1].str());
 
-				cerr << "Newick distance match: " << currentDistance << endl;
+				//cerr << "Newick distance match: " << currentDistance << endl;
 
 				tmpCurrent = workNodes.top();
 				tmpCurrent->setDistance(currentDistance);
