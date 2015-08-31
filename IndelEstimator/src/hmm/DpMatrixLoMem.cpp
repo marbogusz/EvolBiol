@@ -5,9 +5,9 @@
  *      Author: root
  */
 
+#include <core/ProgramException.hpp>
 #include "hmm/DpMatrixLoMem.hpp"
 #include <iostream>
-#include "core/HmmException.hpp"
 
 using namespace std;
 
@@ -62,7 +62,7 @@ void EBC::DpMatrixLoMem::setValue(unsigned int i,unsigned int j, double value)
 	else
 	{
 		string msg = "ERROR setValue() index out of bounds, x: " + std::to_string(i) + " y : " + std::to_string(j) + " current row is " + std::to_string(currentRowIndex) + "\n";
-		throw HmmException(msg);
+		throw ProgramException(msg);
 	}
 }
 
@@ -83,7 +83,7 @@ double EBC::DpMatrixLoMem::valueAt(unsigned int i, unsigned int j)
 	else
 	{
 		string msg = "Value At : matrix index out of bounds, x: " + std::to_string(i) + " y : " + std::to_string(j) + " current row is " + std::to_string(currentRowIndex) + "\n";
-		throw HmmException(msg);
+		throw ProgramException(msg);
 	}
 }
 

@@ -8,8 +8,8 @@
 #ifndef COMMANDREADER_H_
 #define COMMANDREADER_H_
 
+#include <core/ProgramException.hpp>
 #include "core/IParser.hpp"
-#include "core/HmmException.hpp"
 #include "core/Definitions.hpp"
 #include <dlib/cmd_line_parser.h>
 
@@ -23,60 +23,17 @@ public:
 	dlib::command_line_parser parser;
 
 	CommandReader(int argc, char** argv);
-	IParser* getParser() throw (HmmException&);
+	IParser* getParser() throw (ProgramException&);
 
-	inline bool isViterbi()
+	inline bool isAlignmentInput()
 	{
-		return parser.option("V");
+		return parser.option("A");
 	}
 
-	inline bool isForward()
+	inline bool isRawInput()
 	{
-		return parser.option("F");
+		return parser.option("R");
 	}
-
-	inline bool isMLE()
-	{
-		return parser.option("M");
-	}
-
-	//2 below are optional and new
-	inline bool isFdist()
-	{
-		return parser.option("X");
-	}
-	inline bool isVdist()
-	{
-		return parser.option("Y");
-	}
-
-	inline bool isFixedAlignment()
-	{
-		return parser.option("fa");
-	}
-
-	vector<double> getIndelParams();
-
-	vector<double> getSubstParams();
-
-	bool isOutputViterbiAlignment()
-	{
-		return parser.option("ov");
-	}
-
-	Definitions::AlgorithmType getAlgorithmType()
-		{
-			if (parser.option("V"))
-			{
-				return Definitions::AlgorithmType::Viterbi;
-			}
-			if (parser.option("F"))
-			{
-				return Definitions::AlgorithmType::Forward;
-			}
-			//default;
-			return Definitions::AlgorithmType::MLE;
-		}
 
 
 	Definitions::ModelType getModelType()
@@ -102,10 +59,9 @@ public:
 		return parser.option("in").argument();
 	}
 
-	Definitions::OptimizationType getOptimizationType()
+	string getTreeFileName()
 	{
-			unsigned int opt = get_option(parser,"o",0);
-			return (Definitions::OptimizationType) opt;
+		return parser.option("tree").argument();
 	}
 
 	FileLogger::logType getLoggingLevel()
@@ -123,20 +79,6 @@ public:
 		//info by default!
 		return
 			FileLogger::L_INF;
-	}
-
-	bool getBanding()
-	{
-		if (parser.option("b"))
-			return true;
-		else
-			return false;
-	}
-
-	double getDistance()
-	{
-		double opt = get_option(parser,"d",-1.0);
-		return opt;
 	}
 
 	double getAlpha()

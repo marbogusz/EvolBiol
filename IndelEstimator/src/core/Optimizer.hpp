@@ -30,7 +30,8 @@ class Optimizer
 		Definitions::OptimizationType optimizationType;
 
 	public:
-		Optimizer(OptimizedModelParameters* mp, IOptimizable* opt, Definitions::OptimizationType ot, double accuracy=Definitions::accuracyBFGS);
+		Optimizer(OptimizedModelParameters* mp, IOptimizable* opt, Definitions::OptimizationType ot=Definitions::OptimizationType::BFGS,
+				double accuracy=Definitions::accuracyBFGS);
 		virtual ~Optimizer();
 
 		double optimize();

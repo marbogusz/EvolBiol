@@ -5,27 +5,27 @@
  *      Author: mbogusz
  */
 
-#include "core/HmmException.hpp"
+#include <core/ProgramException.hpp>
 #include "core/Definitions.hpp"
 
 namespace EBC {
 
-HmmException::HmmException()
+ProgramException::ProgramException()
 {
 	// General message
 	msg = "Parse Exception";
 }
 
-HmmException::~HmmException() throw()
+ProgramException::~ProgramException() throw()
 {
 }
 
-HmmException::HmmException(string message) : msg(message)
+ProgramException::ProgramException(string message) : msg(message)
 {
 	ERROR(message);
 }
 
-const char* HmmException::what() const throw ()
+const char* ProgramException::what() const throw ()
 {
 	return this->msg.c_str();
 }

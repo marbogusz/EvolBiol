@@ -5,9 +5,9 @@
 // Copyright   :
 //============================================================================
 
+#include <core/ProgramException.hpp>
 #include "core/CommandReader.hpp"
 #include "core/Sequences.hpp"
-#include "core/HmmException.hpp"
 #include "core/BandingEstimator.hpp"
 #include "core/MlEstimator.hpp"
 #include "core/BioNJ.hpp"
@@ -30,10 +30,10 @@ using namespace EBC;
 
 int main(int argc, char ** argv) {
 
-	//Set output Precision to 2
-	//FIXME - should normally be set to >= 6
 	cout << fixed << setprecision(6);
 	cerr << fixed << setprecision(6);
+
+	bool rawMode = false;
 
 	try
 	{
@@ -41,156 +41,42 @@ int main(int argc, char ** argv) {
 	    chrono::time_point<chrono::system_clock> start, end;
 	    start = chrono::system_clock::now();
 
-		//FIXME - nothing happens when the model does not get specified!
-
-		CommandReader* cmdReader = new CommandReader(argc, argv);
-		ofstream treefile;
-
-		FileLogger::start(cmdReader->getLoggingLevel(), (string(cmdReader->getInputFileName()).append(".hmm.nobandlog")));
-
-
+	    CommandReader* cmdReader = new CommandReader(argc, argv);
+	    FileLogger::start(cmdReader->getLoggingLevel(), (string(cmdReader->getInputFileName()).append(".indel.log")));
 
 		IParser* parser = cmdReader->getParser();
+		rawMode = cmdReader->isRawInput();
 
-		//FileLogger::DebugLogger().setCerr();
-		//FileLogger::DumpLogger().setCerr();
-		//FileLogger::InfoLogger().setCerr();
 
 		INFO("Reading input sequences...");
-		DEBUG("Creating alignment object...");
 
-		Sequences* inputSeqs = new Sequences(parser, cmdReader->getSequenceType(),cmdReader->isFixedAlignment());
-		if (cmdReader->isFdist() || cmdReader->isVdist())
+		//while working in raw mode indels will be removed if a MSA was provided!
+		Sequences* inputSeqs = new Sequences(parser, cmdReader->getSequenceType(),!rawMode);
+		INFO("Reading tree file...");
+		ifstream treeFile (cmdReader->getTreeFileName());
+		string newick;
+		if (treeFile.is_open())
 		{
-			vector<double> indelParams;
-			vector<double> substParams;
-			substParams = cmdReader->getSubstParams();
-			indelParams = cmdReader->getIndelParams();
-			double alpha = cmdReader->getAlpha();
+			//FIXME - parse newick file in case the string is not located in the first line
+			getline (treeFile,newick);
+			treeFile.close();
+		}
+		else{
+			throw ProgramExcepton("Can't open the tree file");
+		}
+		PhylogeneticTree* ptree = new PhylogeneticTree(this->inputSeqs);
+		ptree->fromNewick(newick);
 
-			Optimizer* bfgs;
-			Dictionary* dict;
+
+		IndelModel* indelModel = new NegativeBinomialGapModel();
+
+
+		if(rawMode){
+
 			SubstitutionModelBase* substModel;
-			IndelModel* indelModel;
-			Maths* maths;
-			Definitions::AlgorithmType algorithm;
-			OptimizedModelParameters* modelParams;
-
-			maths = new Maths();
-			dict = inputSeqs->getDictionary();
-
-			if (cmdReader->getModelType() == Definitions::ModelType::GTR)
-			{
-				substModel = new GTRModel(dict, maths,cmdReader->getCategories());
-			}
-			else if (cmdReader->getModelType() == Definitions::ModelType::HKY85)
-			{
-				substModel = new HKY85Model(dict, maths,cmdReader->getCategories());
-			}
-			else if (cmdReader->getModelType() == Definitions::ModelType::LG)
-			{
-					substModel = new AminoacidSubstitutionModel(dict, maths,cmdReader->getCategories(),Definitions::aaLgModel);
-			}
-
-			indelModel = new NegativeBinomialGapModel();
-
-			modelParams = new OptimizedModelParameters(substModel, indelModel,2, 1, false,
-					false, false, true, maths);
-
-			modelParams->generateInitialDistanceParameters();
-
-
-			//modelParams->setUserIndelParams(indelParams);
-			//modelParams->setUserSubstParams(substParams);
-
-			substModel->setObservedFrequencies(inputSeqs->getElementFrequencies());
-			substModel->setAlpha(alpha);
-			substModel->setParameters(substParams);
-			substModel->calculateModel();
-
-
-			indelModel->setParameters(indelParams);
-
-			EvolutionaryPairHMM *hmm;
-
-			bfgs = new Optimizer(modelParams, NULL, cmdReader->getOptimizationType());
-
-			PairHmmCalculationWrapper* wrapper = new PairHmmCalculationWrapper();
-
-			std::pair<unsigned int, unsigned int> idxs = inputSeqs->getPairOfSequenceIndices(0);
-
-			if (cmdReader->isVdist())
-			{
-				DEBUG("Creating Viterbi algorithm to optimize the pairwise divergence time...");
-				hmm = new ViterbiPairHMM(inputSeqs->getSequencesAt(idxs.first), inputSeqs->getSequencesAt(idxs.second),
-					substModel, indelModel, Definitions::DpMatrixType::Full, nullptr);
-			}
-			else if (cmdReader->isFdist())
-			{
-				DEBUG("Creating forward algorithm to optimize the pairwise divergence time...");
-				hmm = new ForwardPairHMM(inputSeqs->getSequencesAt(idxs.first), inputSeqs->getSequencesAt(idxs.second),
-					substModel, indelModel, Definitions::DpMatrixType::Full, nullptr);
-			}
-
-			//hmm->setDivergenceTime(modelParams->getDivergenceTime(0)); //zero as there's only one pair!
-			wrapper->setTargetHMM(hmm);
-			wrapper->setModelParameters(modelParams);
-			bfgs->setTarget(wrapper);
-			bfgs->optimize();
-			cout << modelParams->getDivergenceTime(0);
-		}
-
-		else if (cmdReader->isMLE())
-		{
-
-			//DISTANCE-BASED estimation using an alignment
-
-			vector<double> indelParams;
-			vector<double> substParams;
-			double alpha;
-
-			substParams = cmdReader->getSubstParams();
-			indelParams = cmdReader->getIndelParams();
-			alpha = cmdReader->getAlpha();
-
-			ModelEstimator* tme;
-/*
-			if (substParams.size() == 0){
-				tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),
-								cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
-								false);
-
-				substParams = tme->getSubstitutionParameters();
-
-			}
-*/
-
-			GuideTree gt(inputSeqs);
-
-
-			MlEstimator mle(inputSeqs, cmdReader->getModelType(), indelParams, substParams,
-							cmdReader->getOptimizationType(), cmdReader->getCategories(), alpha,
-							false, gt.getDistances(), false);
-
-
-			//cout << tme.getOptimizedTimes()[0];
-
-			BioNJ nj(inputSeqs->getSequenceCount(), mle.getOptimizedTimes(), inputSeqs);
-			DEBUG("Final tree : " << nj.calculate());
-			string treeStr = nj.calculate();
-
-			treefile.open((string(cmdReader->getInputFileName()).append(".nj.tree")).c_str(),ios::out);
-			treefile << treeStr << endl;
-			treefile.close();
-
-		}
-
-		else
-		{
-
-
 
 			INFO("Creating Model Parameters heuristics...");
+			/*
 			ModelEstimator* tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),
 					cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
 					cmdReader->estimateAlpha());
@@ -204,72 +90,62 @@ int main(int argc, char ** argv) {
 			if(cmdReader->estimateAlpha())
 				alpha = tme->getAlpha();
 
-
-
-			//FileLogger::Logger() << "True indel paramteres     : ";
-			//FileLogger::Logger() << cmdReader->getIndelParams() << '\n';
-			//FileLogger::Logger() << "Estimated indel paramteres: ";
-			//FileLogger::Logger() << indelParams << '\n';
-			//FileLogger::Logger() << "True substitution paramteres     : ";
-			//FileLogger::Logger() << cmdReader->getSubstParams();
-			//FileLogger::Logger() << "Estimated substitution paramteres: ";
-			//FileLogger::Logger() << substParams;
-			//FileLogger::Logger() << "True alpha      : " << cmdReader->getAlpha() << "\n";
-			//FileLogger::Logger() << "Estimated alpha : " << alpha << "\n";
-
-
-
-
 			//FIXME - hardcoding substitution parameters and alpha to come from the estimator
 			BandingEstimator* be = new BandingEstimator(cmdReader->getAlgorithmType(), inputSeqs, cmdReader->getModelType() ,indelParams,
 					substParams, cmdReader->getOptimizationType(), cmdReader->getCategories(),alpha, tme->getGuideTree());
 			be->optimizePairByPair();
 
-
-
-			DEBUG ("Running BioNJ");
-
-			//change bionj init here!
-			BioNJ nj(inputSeqs->getSequenceCount(), be->getOptimizedTimes(), inputSeqs);
-			//DEBUG("Final tree : " << nj.calculate());
-			string treeStr = nj.calculate();
-
-
 			INFO("Indel parameters");
 			INFO(indelParams);
-			INFO("Substitution parameters");
-			INFO(substParams);
-			INFO("Gamma parameters (alpha and rate categories)");
-			INFO(alpha << '\t' << cmdReader->getCategories());
-			INFO("Newick tree");
-			INFO(treeStr);
-
-
-			treefile.open((string(cmdReader->getInputFileName()).append(".hmm.nobandtree")).c_str(),ios::out);
-			treefile << treeStr << endl;
-			treefile.close();
-
 
 
 			delete be;
 			delete tme;
+			*/
+		}
+		else{
+			//Alignment mode
+
+			//need a set of pairs
+			//getPairs (with ids)
+
+			int i = 1;
+			std::pair<unsigned int, unsigned int> idxs = inputSeqs->getPairOfSequenceIndices(i);
+
+
+			//starting values;
+			double initLambda = 0.025;
+			double initEpsilon = 0.5;
+
+			indelModel->setParameters({initLambda,initEpsilon});
+
+			StateTransitionEstimator ste = new StateTransitionEstimator(indelModel, ot, 2*tripletIdxsSize, dict->getGapID(),false);
+
+
+			for(unsigned int i =0; i< inputSeqs->getPairCount(); i++)
+			{
+				std::pair<unsigned int, unsigned int> idxs = inputSeqs->getPairOfSequenceIndices(i);
+
+				ste->addTime(tb1+tb2,trp,0);
+				ste->addTime(tb3+tb2,trp,1);
+
+				ste->addPair(pairAlignments[trp][0],pairAlignments[trp][1],trp,0);
+				ste->addPair(pairAlignments[trp][2],pairAlignments[trp][3],trp,1);
+
+			}
+			ste->optimize();
+
+			//need distances for those pairs!
+
 
 		}
 
 
-		delete inputSeqs;
+		delete ptree;
+	    delete inputSeqs;
 		delete parser;
 		delete cmdReader;
 
-		//ForwardPairHMM* epHMM = new ForwardPairHMM(inputSeqs);
-
-		//ViterbiPairHMM* epHMM = new ViterbiPairHMM(inputSeqs);
-		//epHMM->runViterbiAlgorithm();
-		//epHMM->runForwardAlgorithm();
-		//epHMM->getResults();
-		//delete epHMM;
-		//ForwardPairHMM* fwdHMM = new ForwardPairHMM(inputSeqs,true);
-		//fwdHMM->summarize();
 
 
 		end = chrono::system_clock::now();
@@ -279,7 +155,7 @@ int main(int argc, char ** argv) {
 	    INFO("Finished computation at " << std::ctime(&end_time) << " elapsed time: " << elapsed_seconds.count() << "s\n");
 
 	}
-	catch(HmmException& pe)
+	catch(ProgramException& pe)
 	{
 		cerr << pe.what();
 	}

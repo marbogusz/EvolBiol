@@ -82,7 +82,7 @@ void PMatrixDouble::calculate()
 		calculatePairSitePatterns();
 	}
 	else
-		throw HmmException("PMatrixDouble : attempting to calculate p(t) with t set to 0");
+		throw ProgramException("PMatrixDouble : attempting to calculate p(t) with t set to 0");
 }
 
 

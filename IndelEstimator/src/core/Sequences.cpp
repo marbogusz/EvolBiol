@@ -11,7 +11,7 @@
 namespace EBC
 {
 
-Sequences::Sequences(IParser* iParser,Definitions::SequenceType st, bool fa) throw (HmmException&)
+Sequences::Sequences(IParser* iParser,Definitions::SequenceType st, bool fa) throw (ProgramException&)
 {
 	//use the file parser to get sequences and build the dictionary
 	fixedAlignment = fa;
@@ -20,7 +20,7 @@ Sequences::Sequences(IParser* iParser,Definitions::SequenceType st, bool fa) thr
 	unsigned int size = iParser->getSequenceCount();
 	if (size <= 0)
 	{
-		throw HmmException("No sequences found. Quitting");
+		throw ProgramException("No sequences found. Quitting");
 	}
 
 	this->buildDictionary(st);
@@ -73,7 +73,7 @@ unsigned int Sequences::getSequenceId(string& seqname)
 {
 	unsigned int pos = std::find(sequenceNames->begin(), sequenceNames->end(), seqname) - sequenceNames->begin();
 	if(pos >= sequenceNames->size()) {
-	    throw HmmException(seqname + " not found");
+	    throw ProgramException(seqname + " not found");
 	}
 	return pos;
 }

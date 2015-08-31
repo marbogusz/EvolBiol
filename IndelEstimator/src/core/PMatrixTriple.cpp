@@ -32,7 +32,7 @@ void PMatrixTriple::calculate()
 		}
 	}
 	else
-		throw HmmException("PMatrixTriple : attempting to calculate p(t) with t set to 0");
+		throw ProgramException("PMatrixTriple : attempting to calculate p(t) with t set to 0");
 }
 
 

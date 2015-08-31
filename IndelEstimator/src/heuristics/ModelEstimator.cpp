@@ -34,7 +34,7 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
 	tripletIdxsSize = tripletIdxs.size();
 
 	if (tripletIdxsSize == 0)
-		throw HmmException("No triplets selected for model estimation");
+		throw ProgramException("No triplets selected for model estimation");
 
 	tripleAlignments.resize(tripletIdxsSize);
 	pairAlignments.resize(tripletIdxsSize);

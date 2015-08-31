@@ -26,7 +26,7 @@ FileParser::FileParser(const char* filename)
 
 	if(!this->infile)
 	{
-		throw HmmException(string("Can't open the file : ") + string(filename) + string("\n"));
+		throw ProgramException(string("Can't open the file : ") + string(filename) + string("\n"));
 	}
 	string tmp;
 	string seq = "";

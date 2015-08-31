@@ -47,7 +47,7 @@ private:
 public:
 
 	//Input from file or console
-	Sequences(IParser*, Definitions::SequenceType, bool fixedAlignment=false) throw (HmmException&);
+	Sequences(IParser*, Definitions::SequenceType, bool fixedAlignment=false) throw (ProgramException&);
 
 	~Sequences();
 

@@ -155,7 +155,7 @@ PairwiseEstimator::PairwiseEstimator(Definitions::AlgorithmType at, Sequences* i
 		}
 		else
 		{
-			throw HmmException("Wrong algorithm type - use either Forward or viterbi\n");
+			throw ProgramException("Wrong algorithm type - use either Forward or viterbi\n");
 		}
 	}
 

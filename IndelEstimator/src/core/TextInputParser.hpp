@@ -29,7 +29,7 @@ protected:
 
 public:
 
-	TextInputParser(char* s1, char* s2, bool debug) throw (HmmException&);
+	TextInputParser(char* s1, char* s2, bool debug) throw (ProgramException&);
 	bool hasMoreData();
 	bool getSequencePair(string& seqA, string& seqB);
 	~TextInputParser();

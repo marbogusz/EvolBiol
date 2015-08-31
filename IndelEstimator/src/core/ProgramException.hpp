@@ -15,15 +15,15 @@ using namespace std;
 
 namespace EBC {
 
-class HmmException: public std::exception {
+class ProgramException: public std::exception {
 
 private:
 	string msg;
 
 public:
-	HmmException();
-	HmmException(string message);
-	virtual ~HmmException() throw();
+	ProgramException();
+	ProgramException(string message);
+	virtual ~ProgramException() throw();
 	virtual const char* what() const throw();
 
 };

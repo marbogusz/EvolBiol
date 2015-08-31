@@ -11,7 +11,7 @@
 namespace EBC
 {
 
-StateTransitionEstimator::StateTransitionEstimator(IndelModel* im, Definitions::OptimizationType ot, unsigned int pc, unsigned char gc, bool useEq) :
+StateTransitionEstimator::StateTransitionEstimator(IndelModel* imzz, unsigned int pc, unsigned char gc, bool useEq) :
 		indelModel(im), stmSamples(pc), gapCharacter(gc), useStateEq(useEq)
 {
 	DEBUG("Starting State Transition Estimator");
