@@ -5,8 +5,7 @@
  *      Author: root
  */
 
-#include "heuristics/TripletSamplingTree.hpp"
-//#include <regex>
+#include <heuristics/PairSamplingTree.hpp>
 #include <stack>
 #include <random>
 #include <iostream>
@@ -16,24 +15,18 @@
 namespace EBC
 {
 
-TripletSamplingTree::TripletSamplingTree(GuideTree& gt) : distMat(gt.getDistanceMatrix())
+PairSamplingTree::PairSamplingTree(DistanceMatrix* dm) : distMat(dm)
 {
-	this->averageLeafbranch = 0;
-	this->leafBranchSd = 0;
-	DEBUG("Creating TripletSamplingTree");
-
-	idealTreeSize = 1.0;
-	this->fromNewick(gt.getNewickTree());
-
+	DEBUG("Creating PairSamplingTree");
 }
 
-TripletSamplingTree::~TripletSamplingTree()
+PairSamplingTree::~PairSamplingTree()
 {
 	for (auto nod : nodes)
 		delete nod;
 }
 
-Node* TripletSamplingTree::mostRecentAncestor(Node* n1, Node* n2)
+Node* PairSamplingTree::mostRecentAncestor(Node* n1, Node* n2)
 {
 	Node* tmpNode1 = n1;
 	Node* tmpNode2 = n2;
@@ -52,7 +45,7 @@ Node* TripletSamplingTree::mostRecentAncestor(Node* n1, Node* n2)
 	return NULL;
 }
 
-double TripletSamplingTree::distanceToParent(Node* n1, Node* par)
+double PairSamplingTree::distanceToParent(Node* n1, Node* par)
 {
 	double distance = 0;
 	Node* tmp = n1;
@@ -68,152 +61,11 @@ double TripletSamplingTree::distanceToParent(Node* n1, Node* par)
 	return distance;
 }
 
-
-//TODO - this is no longer in use really.
-void TripletSamplingTree::fromNewick(const string& newick)
+vector<array<unsigned int, 2> > PairSamplingTree::sampleFromTree()
 {
-	//parse Newick!
-	//start with a bracket, end with a bracket and a semicolon
-	//TODO - check if the newick string is well formed
+
+	vector<array<unsigned int, 2> > result;
 /*
-	bool endReached = false;
-	unsigned int i = 0;
-	unsigned int ids = 0;
-	unsigned int sequenceNo;
-	regex regDescDist("(([0-9]+):([0-9\\.]+)).*");
-	regex regInterDist(":([0-9\\.]+).*");
-	Node *tmpNode, *tmpParent, *tmpCurrent;
-	stack<Node*> workNodes;
-
-	DEBUG("K-mer newick tree : " << newick);
-	//cout << newick << endl;
-
-	string nodeName;
-	double currentDistance;
-
-	while (!endReached && i < newick.size())
-	{
-		if (std::isspace(newick[i]))
-		{
-			i++;
-		}
-		else if(newick[i] == '(')
-		{
-			DUMP("newick (");
-			tmpNode = new Node(++ids);
-			nodes.push_back(tmpNode);
-			workNodes.push(tmpNode);
-			i++;
-		}
-		else if(newick[i] == ',')
-		{
-			DUMP("newick ,");
-			workNodes.pop();
-			if (workNodes.empty())
-			{
-				//push new father
-				tmpNode = new Node(++ids);
-				nodes.push_back(tmpNode);
-				workNodes.push(tmpNode);
-			}
-
-			tmpParent = workNodes.top();
-			tmpParent->setChild(tmpCurrent);
-			tmpCurrent->setParent(tmpParent);
-
-			tmpNode = new Node(++ids);
-			nodes.push_back(tmpNode);
-			workNodes.push(tmpNode);
-
-			i++;
-		}
-		else if(newick[i] == ')')
-		{
-
-			DUMP("newick )");
-			tmpCurrent = workNodes.top();
-			workNodes.pop();
-			if (workNodes.size() > 0)
-			{
-				tmpParent = workNodes.top();
-				tmpParent->setChild(tmpCurrent);
-				tmpCurrent->setParent(tmpParent);
-			}
-
-
-			i++;
-		}
-		else if(newick[i] == ';')
-		{
-			DUMP("newick ;");
-			endReached = true;
-			i++;
-		}
-		else
-		{
-			smatch basematch;
-			string sstr = newick.substr(i);
-
-			//FIXME - Change ASAP this piece of code is really dangerous - get the sequence number from the seq dictionary!!!
-			if (regex_match(sstr, basematch, regDescDist))
-			{
-				sequenceNo = std::stoi(basematch[2].str());
-				currentDistance =  stof(basematch[3].str());
-				tmpCurrent = workNodes.top();
-				tmpCurrent->setSequenceNumber(sequenceNo);
-				tmpCurrent->setDistance(currentDistance);
-				tmpCurrent->setLeaf();
-				this->leafNodes[sequenceNo] = tmpCurrent;
-				this->averageLeafbranch += tmpCurrent->distanceToParent;
-				i += basematch[1].str().size();
-			}
-			else if (regex_match(sstr, basematch, regInterDist))
-			{
-				currentDistance =   stof(basematch[1].str());
-				tmpCurrent = workNodes.top();
-				tmpCurrent->setDistance(currentDistance);
-				i += basematch[1].str().size() + 1;
-			}
-		}
-	}
-	this->averageLeafbranch /= leafNodes.size();
-
-	DEBUG("Newick tree parsed");
-
-	for (auto node : leafNodes)
-	{
-		this->leafBranchSd += (std::pow(node.second->distanceToParent - averageLeafbranch,2));
-	}
-	this->leafBranchSd /= leafNodes.size();
-	this->leafBranchSd = std::sqrt(leafBranchSd);
-	DEBUG("Newick tree parsed");
-*/
-}
-
-vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromDM()
-{
-	vector<array<unsigned int, 3> > result;
-
-	unsigned int s1, s2, s3;
-	double remainingDistance = 2.0 * this->idealTreeSize;
-	auto pair = distMat->getPairWithinDistance(0.5*this->idealTreeSize, 0.8*this->idealTreeSize);
-	s1 = pair.first;
-	s2 = pair.second;
-
-	remainingDistance -= distMat->getDistance(s1, s2);
-
-	s3 = distMat->getThirdLeafWithinDistance(remainingDistance, s1, s2);
-
-	result.push_back({{s1,s2,s3}});
-	DEBUG("Triplet tree DM sampled values : " << s1 << ", " << s2 << ", " << s3);
-	cout << "Triplet tree DM sampled values : " << s1 << ", " << s2 << ", " << s3 << endl;
-	return result;
-}
-
-vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromTree()
-{
-	vector<array<unsigned int, 3> > result;
-
 	//FIXME - remove this magic number
 	pair<double,double> idealRange = make_pair(0.35,0.75);
 	pair<double,double> secondaryRange = make_pair(0.2,0.85);
@@ -247,7 +99,7 @@ vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromTree()
 
 	if (vecPairs.size() == 0){
 		vecPairs.push_back(distMat->getPairWithinDistance(idealRange.first, idealRange.second));
-		DUMP("Triplet sampling tree : no pairs within desired distance found");
+		DUMP("air sampling tree : no pairs within desired distance found");
 	}
 	for(auto pr : vecPairs){
 		if (treeNo >2)
@@ -395,7 +247,7 @@ vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromTree()
 		}
 
 	}
-
+*/
 
 
 	return result;

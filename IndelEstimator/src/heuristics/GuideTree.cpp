@@ -5,8 +5,8 @@
  *      Author: root
  */
 
+#include <heuristics/PairSamplingTree.hpp>
 #include "heuristics/GuideTree.hpp"
-#include "heuristics/TripletSamplingTree.hpp"
 
 namespace EBC
 {

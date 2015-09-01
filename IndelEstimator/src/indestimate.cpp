@@ -5,25 +5,25 @@
 // Copyright   :
 //============================================================================
 
-#include <core/ProgramException.hpp>
-#include "core/CommandReader.hpp"
-#include "core/Sequences.hpp"
-#include "core/BandingEstimator.hpp"
-#include "core/MlEstimator.hpp"
-#include "core/BioNJ.hpp"
+
+#include <heuristics/PairSamplingTree.hpp>
+#include <heuristics/RawIndelEstimator.hpp>
 #include <iostream>
 #include <fstream>
 #include <iomanip>
-#include "heuristics/ModelEstimator.hpp"
 #include <array>
+#include <vector>
 #include <chrono>
 #include <ctime>
 
+#include "core/ProgramException.hpp"
+#include "core/CommandReader.hpp"
+#include "core/Sequences.hpp"
 #include "core/FileLogger.hpp"
-
 #include "core/OptimizedModelParameters.hpp"
-#include "hmm/ForwardPairHMM.hpp"
-#include "hmm/ViterbiPairHMM.hpp"
+#include "core/PhylogeneticTree.hpp"
+
+#include "heuristics/StateTransitionEstimator.hpp"
 
 using namespace std;
 using namespace EBC;
@@ -62,9 +62,9 @@ int main(int argc, char ** argv) {
 			treeFile.close();
 		}
 		else{
-			throw ProgramExcepton("Can't open the tree file");
+			throw ProgramException("Can't open the tree file");
 		}
-		PhylogeneticTree* ptree = new PhylogeneticTree(this->inputSeqs);
+		PhylogeneticTree* ptree = new PhylogeneticTree(inputSeqs);
 		ptree->fromNewick(newick);
 
 
@@ -76,32 +76,15 @@ int main(int argc, char ** argv) {
 			SubstitutionModelBase* substModel;
 
 			INFO("Creating Model Parameters heuristics...");
-			/*
-			ModelEstimator* tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),
-					cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
+
+			PairSamplingTree tst(ptree->getDistanceMatrix());
+			vector<array<unsigned int, 3> > tripletIdxs = tst.sampleFromTree();
+			unsigned int tripletIdxsSize = tripletIdxs.size();
+
+			ModelEstimator* tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(), ptree->getDistanceMatrix(),
+					cmdReader->getCategories(), cmdReader->getAlpha(),
 					cmdReader->estimateAlpha());
 
-			vector<double> indelParams;
-			vector<double> substParams;
-			double alpha = 100;
-
-			substParams = tme->getSubstitutionParameters();
-			indelParams = tme->getIndelParameters();
-			if(cmdReader->estimateAlpha())
-				alpha = tme->getAlpha();
-
-			//FIXME - hardcoding substitution parameters and alpha to come from the estimator
-			BandingEstimator* be = new BandingEstimator(cmdReader->getAlgorithmType(), inputSeqs, cmdReader->getModelType() ,indelParams,
-					substParams, cmdReader->getOptimizationType(), cmdReader->getCategories(),alpha, tme->getGuideTree());
-			be->optimizePairByPair();
-
-			INFO("Indel parameters");
-			INFO(indelParams);
-
-
-			delete be;
-			delete tme;
-			*/
 		}
 		else{
 			//Alignment mode
@@ -119,23 +102,21 @@ int main(int argc, char ** argv) {
 
 			indelModel->setParameters({initLambda,initEpsilon});
 
-			StateTransitionEstimator ste = new StateTransitionEstimator(indelModel, ot, 2*tripletIdxsSize, dict->getGapID(),false);
+			StateTransitionEstimator* ste = new StateTransitionEstimator(indelModel, inputSeqs->getDictionary()->getGapID());
 
 
 			for(unsigned int i =0; i< inputSeqs->getPairCount(); i++)
 			{
 				std::pair<unsigned int, unsigned int> idxs = inputSeqs->getPairOfSequenceIndices(i);
-
-				ste->addTime(tb1+tb2,trp,0);
-				ste->addTime(tb3+tb2,trp,1);
-
-				ste->addPair(pairAlignments[trp][0],pairAlignments[trp][1],trp,0);
-				ste->addPair(pairAlignments[trp][2],pairAlignments[trp][3],trp,1);
-
+				ste->addPair(inputSeqs->getSequencesAt(idxs.first), inputSeqs->getSequencesAt(idxs.second), ptree->distanceById(idxs.first,idxs.second));
 			}
 			ste->optimize();
+			auto params = ste->getModelParams()->getIndelParameters();
 
 			//need distances for those pairs!
+			cout << "Indel rate " << params[0] << endl;
+			cout << "Indel length " << params[1] << endl;
+			delete ste;
 
 
 		}

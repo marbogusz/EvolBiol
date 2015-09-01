@@ -13,7 +13,7 @@
 #include "core/Maths.hpp"
 #include "core/Dictionary.hpp"
 #include "core/Sequences.hpp"
-#include "core/HmmException.hpp"
+#include "core/ProgramException.hpp"
 #include "core/BioNJ.hpp"
 #include <unordered_map>
 #include <vector>

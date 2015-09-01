@@ -14,6 +14,7 @@
 #include <unordered_set>
 #include "heuristics/Node.hpp"
 #include "core/Sequences.hpp"
+#include "core/DistanceMatrix.hpp"
 
 using namespace std;
 
@@ -38,6 +39,10 @@ private:
 
 	double distanceToParent(Node* n1, Node* par);
 
+	DistanceMatrix* dm;
+
+	void buildDM();
+
 public:
 	PhylogeneticTree(Sequences* seqs);
 
@@ -46,7 +51,14 @@ public:
 	void fromNewick(const string& nString);
 
 	double distanceById(unsigned int n1, unsigned int n2);
+
 	double distanceByName(string& n1, string& n2);
+
+	inline DistanceMatrix* getDistanceMatrix(){
+		if(dm == NULL)
+			buildDM();
+		return dm;
+	}
 
 };
 

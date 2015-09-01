@@ -14,14 +14,13 @@
 #include <unordered_set>
 #include "heuristics/Node.hpp"
 #include "core/DistanceMatrix.hpp"
-#include "heuristics/GuideTree.hpp"
 
 using namespace std;
 
 namespace EBC
 {
 
-class TripletSamplingTree
+class PairSamplingTree
 {
 private:
 	//all nodes
@@ -58,18 +57,13 @@ private:
 	double averageLeafbranch;
 	double leafBranchSd;
 
-	void fromNewick(const string& nString);
-
 public:
-	TripletSamplingTree(GuideTree& gt);
+	PairSamplingTree(DistanceMatrix* dm);
 
-	~TripletSamplingTree();
-
-	//sample tripplets on a tree
-	vector<array<unsigned int, 3> > sampleFromTree();
+	~PairSamplingTree();
 
 	//sample only based on the distance matrix
-	vector<array<unsigned int, 3> > sampleFromDM();
+	vector<array<unsigned int, 2> > sampleFromTree();
 
 	// node operator for comparision
 };

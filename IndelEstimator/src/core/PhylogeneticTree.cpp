@@ -16,15 +16,28 @@
 namespace EBC
 {
 
-PhylogeneticTree::PhylogeneticTree(Sequences* seqs) : inputSeqs(seqs)
+PhylogeneticTree::PhylogeneticTree(Sequences* seqs) : inputSeqs(seqs), dm(NULL)
 {
 	DEBUG("Creating PhylogeneticTree");
+
 }
 
 PhylogeneticTree::~PhylogeneticTree()
 {
 	for (auto nod : nodes)
 		delete nod;
+}
+
+
+void PhylogeneticTree::buildDM()
+{
+	int sequenceCount = inputSeqs->getSequenceCount();
+	dm = new DistanceMatrix(sequenceCount);
+	for(int i = 0; i< sequenceCount; i++)
+		for(int j = i+1; j< sequenceCount; j++)
+		{
+			dm->addDistance(i,j,distanceById(i,j));
+		}
 }
 
 Node* PhylogeneticTree::mostRecentAncestor(Node* n1, Node* n2)

@@ -11,7 +11,7 @@
 
 #include "core/OptimizedModelParameters.hpp"
 #include "core/Definitions.hpp"
-#include "core/HmmException.hpp"
+#include "core/ProgramException.hpp"
 #include "core/PMatrixTriple.hpp"
 #include "core/IOptimizable.hpp"
 #include "core/Optimizer.hpp"

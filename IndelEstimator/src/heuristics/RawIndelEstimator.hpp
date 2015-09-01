@@ -9,12 +9,13 @@
 #define MODELESTIMATOR_HPP_
 
 
+#include <heuristics/PairSamplingTree.hpp>
 #include "core/OptimizedModelParameters.hpp"
 #include "core/Definitions.hpp"
 #include "core/Maths.hpp"
 #include "core/Dictionary.hpp"
 #include "core/Sequences.hpp"
-#include "core/HmmException.hpp"
+#include "core/ProgramException.hpp"
 #include "core/PMatrixTriple.hpp"
 
 #include "models/SubstitutionModelBase.hpp"
@@ -23,12 +24,7 @@
 #include "models/GTRModel.hpp"
 #include "models/NegativeBinomialGapModel.hpp"
 
-#include "heuristics/ModelEstimator.hpp"
-#include "heuristics/GuideTree.hpp"
-#include "heuristics/TripletSamplingTree.hpp"
-#include "heuristics/TripletSamplingTree.hpp"
 #include "heuristics/TripletAligner.hpp"
-#include "heuristics/StateTransitionEstimator.hpp"
 #include "heuristics/SubstitutionModelEstimator.hpp"
 
 #include "hmm/ViterbiPairHMM.hpp"
@@ -47,7 +43,7 @@ using namespace std;
 namespace EBC
 {
 
-class ModelEstimator
+class ModelEstimator : public IOptimizable
 {
 protected:
 
@@ -60,41 +56,18 @@ protected:
 	Sequences* inputSequences;
 	Maths* maths;
 
-	GuideTree* gtree;
-	TripletSamplingTree tst;
+	PairSamplingTree pst;
 
-	StateTransitionEstimator* ste;
-	SubstitutionModelEstimator* sme;
-
-	TripletAligner* tal;
-	ViterbiPairHMM* vphmm;
-
-	bool estAlpha;
-	bool estIndel;
-	bool estSubst;
-
-	vector<array<vector<unsigned char>*, 3> > tripleAlignments;
-	vector<array<vector<unsigned char>*, 4> > pairAlignments;
-	vector<array<vector<double>*, 2> > pairwisePosteriors;
-	vector<array<unsigned int, 3> > tripletIdxs;
-	vector<array<double, 3> > tripletDistances;
-	vector<array<ForwardPairHMM*,2> > fwdHMMs;
+	vector<ForwardPairHMM*> fwdHMMs;
 
 	unsigned int gammaRateCategories;
 
-	unsigned int tripletIdxsSize;
-
-	double userAlpha;
-
-	bool estimateAlpha;
-
-	void calculateInitialHMMs(Definitions::ModelType model);
+	DistanceMatrix* distMat;
 
 	void estimateParameters();
 
 public:
-	ModelEstimator(Sequences* inputSeqs, Definitions::ModelType model,
-			Definitions::OptimizationType ot,
+	ModelEstimator(Sequences* inputSeqs, Definitions::ModelType model, DistanceMatrix* dm,
 			unsigned int rateCategories, double alpha, bool estimateAlpha);
 
 	virtual ~ModelEstimator();
@@ -106,11 +79,6 @@ public:
 	double getAlpha();
 
 	void recalculateHMMs();
-
-	GuideTree* getGuideTree()
-	{
-		return gtree;
-	}
 };
 
 } /* namespace EBC */

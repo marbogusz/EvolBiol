@@ -20,7 +20,7 @@
 #include "models/IndelModel.hpp"
 #include "core/Sequences.hpp"
 #include <sstream>
-#include "core/HmmException.hpp"
+#include "core/ProgramException.hpp"
 #include "core/PMatrixDouble.hpp"
 #include "core/IOptimizable.hpp"
 #include "core/BrentOptimizer.hpp"

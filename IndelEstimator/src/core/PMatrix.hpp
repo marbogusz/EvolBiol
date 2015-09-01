@@ -9,7 +9,7 @@
 #define PMATRIX_HPP_
 
 #include "models/SubstitutionModelBase.hpp"
-#include "core/HmmException.hpp"
+#include "core/ProgramException.hpp"
 #include <vector>
 #include <array>
 

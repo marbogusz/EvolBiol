@@ -12,7 +12,7 @@
 #include "core/Definitions.hpp"
 #include "core/IParser.hpp"
 #include "core/Dictionary.hpp"
-#include "core/HmmException.hpp"
+#include "core/ProgramException.hpp"
 #include "core/SequenceElement.hpp"
 #include "core/Definitions.hpp"
 #include <array>

@@ -11,7 +11,7 @@
 
 #include <iostream>
 #include <string>
-#include "core/HmmException.hpp"
+#include "core/ProgramException.hpp"
 #include "core/IParser.hpp"
 
 namespace EBC {

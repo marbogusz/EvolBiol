@@ -67,6 +67,68 @@ void StateTransitionML::addSample(vector<unsigned char>* s1, vector<unsigned cha
 
 }
 
+void StateTransitionML::addSample(vector<SequenceElement*>* s1, vector<SequenceElement*>* s2)
+{
+	Definitions::StateId previousState;
+
+	int pos = 0;
+	while(((*s1)[pos])->isIsGap() && ((*s2)[pos])->isIsGap())
+		pos++;
+
+	if (((*s1)[pos])->isIsGap())
+		previousState = Definitions::StateId::Delete;
+	else if(((*s2)[pos])->isIsGap())
+		previousState = Definitions::StateId::Insert;
+	else
+		previousState = Definitions::StateId::Match;
+
+	firstState = previousState;
+
+
+
+	for(pos = pos+1 ; pos < s1->size(); pos++)
+	{
+		if(((*s1)[pos])->isIsGap() && ((*s2)[pos])->isIsGap())
+			continue;
+		if (((*s1)[pos])->isIsGap())
+		{
+			//Delete
+			if(previousState == Definitions::StateId::Match)
+				counts[Definitions::StateId::Match][Definitions::StateId::Delete] += 1;
+			if(previousState == Definitions::StateId::Insert)
+				counts[Definitions::StateId::Insert][Definitions::StateId::Delete] += 1;
+			if(previousState == Definitions::StateId::Delete)
+				counts[Definitions::StateId::Delete][Definitions::StateId::Delete] += 1;
+
+			previousState = Definitions::StateId::Delete;
+		}
+		else if(((*s2)[pos])->isIsGap())
+		{
+			//Insert
+			if(previousState == Definitions::StateId::Match)
+				counts[Definitions::StateId::Match][Definitions::StateId::Insert] += 1;
+			if(previousState == Definitions::StateId::Insert)
+				counts[Definitions::StateId::Insert][Definitions::StateId::Insert] += 1;
+			if(previousState == Definitions::StateId::Delete)
+				counts[Definitions::StateId::Delete][Definitions::StateId::Insert] += 1;
+			previousState = Definitions::StateId::Insert;
+		}
+		else
+		{
+			//Match
+			if(previousState == Definitions::StateId::Match)
+				counts[Definitions::StateId::Match][Definitions::StateId::Match] += 1;
+			if(previousState == Definitions::StateId::Insert)
+				counts[Definitions::StateId::Insert][Definitions::StateId::Match] += 1;
+			if(previousState == Definitions::StateId::Delete)
+				counts[Definitions::StateId::Delete][Definitions::StateId::Match] += 1;
+
+			previousState = Definitions::StateId::Match;
+		}
+	}
+
+}
+
 StateTransitionML::StateTransitionML(IndelModel* im, double tme, unsigned char gap, bool stEq) : isGap(gap), useStateEq(stEq)
 {
 	this->tpb = new TransitionProbabilities(im);
