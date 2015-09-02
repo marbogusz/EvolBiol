@@ -5,8 +5,8 @@
  *      Author: root
  */
 
-#ifndef MODELESTIMATOR_HPP_
-#define MODELESTIMATOR_HPP_
+#ifndef RAWINDELMODELESTIMATOR_HPP_
+#define RAWINDELMODELESTIMATOR_HPP_
 
 
 #include <heuristics/PairSamplingTree.hpp>
@@ -17,6 +17,7 @@
 #include "core/Sequences.hpp"
 #include "core/ProgramException.hpp"
 #include "core/PMatrixTriple.hpp"
+#include "core/IOptimizable.hpp"
 
 #include "models/SubstitutionModelBase.hpp"
 #include "models/HKY85Model.hpp"
@@ -26,6 +27,7 @@
 
 #include "heuristics/TripletAligner.hpp"
 #include "heuristics/SubstitutionModelEstimator.hpp"
+#include "heuristics/PairSamplingTree.hpp"
 
 #include "hmm/ViterbiPairHMM.hpp"
 #include "hmm/ForwardPairHMM.hpp"
@@ -43,10 +45,12 @@ using namespace std;
 namespace EBC
 {
 
-class ModelEstimator : public IOptimizable
+class RawIndelEstimator : public IOptimizable
 {
 protected:
 
+	Optimizer* bfgs;
+	OptimizedModelParameters* modelParams;
 
 	Dictionary* dict;
 
@@ -66,19 +70,33 @@ protected:
 
 	void estimateParameters();
 
+	vector<array<unsigned int, 2> > pairIdxs;
+	vector<double> pairwiseTimes;
+	vector<Band*> bands;
+
+
+	unsigned int pairIdxsSize;
+
+	double maxTime;
+
+
+
 public:
-	ModelEstimator(Sequences* inputSeqs, Definitions::ModelType model, DistanceMatrix* dm,
-			unsigned int rateCategories, double alpha, bool estimateAlpha);
+	RawIndelEstimator(Sequences* inputSeqs, Definitions::ModelType model, DistanceMatrix* dm);
 
-	virtual ~ModelEstimator();
+	virtual ~RawIndelEstimator();
 
-
-
-	vector<double> getSubstitutionParameters();
 	vector<double> getIndelParameters();
 	double getAlpha();
 
-	void recalculateHMMs();
+	double runIteration();
+
+	void calculateInitials(Definitions::ModelType model);
+
+	OptimizedModelParameters* getModelParams()
+	{
+		return modelParams;
+	}
 };
 
 } /* namespace EBC */

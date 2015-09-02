@@ -16,41 +16,44 @@ using namespace std;
 namespace EBC
 {
 
-ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType model , DistanceMatrix* dm,
-		unsigned int rateCategories, double alpha, bool estimateAlpha) :
-				inputSequences(inputSeqs), gammaRateCategories(rateCategories), distMat(dm),
-				tst(dm), userAlpha(alpha), estAlpha(estimateAlpha), estSubst(true)
+RawIndelEstimator::RawIndelEstimator(Sequences* inputSeqs, Definitions::ModelType model , DistanceMatrix* dm) :
+				inputSequences(inputSeqs), distMat(dm), pst(dm), gammaRateCategories(1) // no heterogeniety
 {
 
-	DEBUG("Sampling triplets of sequences for gamma shape parameter estimation");
-	
+	DEBUG("Sampling pairs of sequences for indel estimation");
+
 	maths = new Maths();
 	dict = inputSequences->getDictionary();
-	tal = new TripletAligner (inputSequences, dm, -1.0);
 
-	tripletIdxs = tst.sampleFromTree();
+	pairIdxs = pst.sampleFromTree();
 
-	tripletIdxsSize = tripletIdxs.size();
+	pairIdxsSize =pairIdxs.size();
 
-	if (tripletIdxsSize == 0)
+	DEBUG(pairIdxsSize << " pairs sampled");
+
+	if (pairIdxsSize == 0)
 		throw ProgramException("No triplets selected for model estimation");
 
-	tripleAlignments.resize(tripletIdxsSize);
-	pairAlignments.resize(tripletIdxsSize);
-	pairwisePosteriors.resize(tripletIdxsSize);
-	fwdHMMs.resize(tripletIdxsSize);
-	tripletDistances.resize(tripletIdxsSize);
+	fwdHMMs.resize(pairIdxsSize);
+	pairwiseTimes.resize(pairIdxsSize);
+	bands.resize(pairIdxsSize);
 
-	//FIXME - release the memory!!!! - delete pair objects and vectors (arrays) of SeqEls
+	maxTime = Definitions::almostZero;
+
+	calculateInitials(model);
+
+	modelParams = new OptimizedModelParameters(NULL, indelModel,0, 0, false,
+	true, false, false, maths);
+	modelParams->useIndelModelInitialParameters();
+	bfgs = new Optimizer(modelParams, this,Definitions::OptimizationType::BFGS);
+
 
     chrono::time_point<chrono::system_clock> start, end;
     start = chrono::system_clock::now();
 
-	this->calculateInitialHMMs(model);
-
-	sme = new SubstitutionModelEstimator(inputSequences, substModel ,Definitions::OptimizationType::BFGS, rateCategories, alpha, estimateAlpha, tripletIdxsSize);
-
-	estimateParameters();
+    modelParams->boundLambdaBasedOnDivergence(maxTime);
+    bfgs->optimize();
+    indelModel->setParameters(modelParams->getIndelParameters());
 
 	end = chrono::system_clock::now();
     chrono::duration<double> elapsed_seconds = end-start;
@@ -58,32 +61,24 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
     INFO("Model Estimator elapsed time: " << elapsed_seconds.count() << " seconds");
 }
 
-
-
-void ModelEstimator::estimateParameters()
+double RawIndelEstimator::runIteration()
 {
+	double lnl = 0;
 
-	double d1,d2,d3;
-	DUMP("Model Estimator estimate parameters iteration");
-
-	int cap;
-
-	for(unsigned int trp = 0; trp < tripletIdxsSize; trp++)
-	{
-		d1 = tripletDistances[trp][0] + tripletDistances[trp][2] - tripletDistances[trp][1];
-		d2 = tripletDistances[trp][0] - d1;
-		d3 = tripletDistances[trp][2] - d1;
-
-		sme->addTriplet(tripleAlignments[trp], trp, d1, d2, d3);
+	for (unsigned int i = 0; i<pairIdxsSize; i++){
+		//set indel params!
+		indelModel->setParameters(modelParams->getIndelParameters());
+		DEBUG("Indel params " << modelParams->getIndelParameters()[0] << " " << modelParams->getIndelParameters()[1]);
+		fwdHMMs[i]->setDivergenceTimeAndCalculateModels(pairwiseTimes[i]);
+		lnl += fwdHMMs[i]->runAlgorithm();
 	}
-	sme->optimize();
-	//get mpd's again?
+	return lnl;
 }
 
-void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
+
+void RawIndelEstimator::calculateInitials(Definitions::ModelType model)
 {
-	DEBUG("EstimateTripleAligment");
-	//amino acid mode
+
 	bool aaMode = false;
 	double tmpd;
 
@@ -91,16 +86,6 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 	double initKappa = 2.0;
 	double initLambda = 0.025;
 	double initEpsilon = 0.5;
-	//k-mers tend to underestimate the distances;
-
-	vector<double> lambdas = {0.01, 0.03, 0.07};
-	vector<double> alphas;
-	if (!estAlpha)
-		alphas = {userAlpha};
-	else
-		alphas = {0.2, 0.75, 2.0};
-
-	ForwardPairHMM *f1, *f2;
 
 	if (model == Definitions::ModelType::HKY85){
 			//FIXME - make model idiotproof by checking if parameters are set;
@@ -120,198 +105,42 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 
 
 	substModel->setObservedFrequencies(inputSequences->getElementFrequencies());
-	//alpha setting will have no effect if we're dealing with 1 rate category
-	if (estAlpha)
-		substModel->setAlpha(initAlpha);
-	else
-		substModel->setAlpha(userAlpha);
-	//if (!aaMode)
-	//	substModel->setParameters({initKappa});
-	//substModel->calculateModel();
+	substModel->calculateModel();
 
 	indelModel = new NegativeBinomialGapModel();
 	indelModel->setParameters({initLambda,initEpsilon});
 
-	vector<pair<Band*, Band*> > bandPairs(tripletIdxsSize);
-
-	vector<array<vector<SequenceElement*>*,3> > seqsA(tripletIdxsSize);
-
-	for (int i = 0; i < tripletIdxsSize; i++)
+	for (int i = 0; i < pairIdxsSize; i++)
 	{
 
+		vector<SequenceElement*>* seq1 = inputSequences->getSequencesAt(pairIdxs[i][0]);
+		vector<SequenceElement*>* seq2 = inputSequences->getSequencesAt(pairIdxs[i][1]);
+		pairwiseTimes[i] = distMat->getDistance(pairIdxs[i][0],pairIdxs[i][1]);
+		if (pairwiseTimes[i] > maxTime)
+			maxTime = pairwiseTimes[i];
+		bands[i] = new Band(seq1->size(),seq2->size(),0.1);
 
-		seqsA[i][0] = inputSequences->getSequencesAt(tripletIdxs[i][0]);
-		DUMP("Triplet " << i << " sequence 1:");
-		DUMP(inputSequences->getRawSequenceAt(tripletIdxs[i][0]));
-		seqsA[i][1] = inputSequences->getSequencesAt(tripletIdxs[i][1]);
-		DUMP("Triplet " << i << " sequence 2:");
-		DUMP(inputSequences->getRawSequenceAt(tripletIdxs[i][1]));
-		seqsA[i][2] = inputSequences->getSequencesAt(tripletIdxs[i][2]);
-		DUMP("Triplet " << i << " sequence 3:");
-		DUMP(inputSequences->getRawSequenceAt(tripletIdxs[i][2]));
-
-		unsigned int len1 = seqsA[i][0]->size();
-		unsigned int len2 = seqsA[i][1]->size();
-		unsigned int len3 = seqsA[i][2]->size();
-
-		//0-1
-		tmpd = distMat->getDistance(tripletIdxs[i][0],tripletIdxs[i][1]);
-		DUMP("Triplet " << i << " guide distance between seq 1 and 2 " << tmpd);
-		tripletDistances[i][0] = tmpd;
-		//1-2
-		tmpd = distMat->getDistance(tripletIdxs[i][1],tripletIdxs[i][2]);
-		DUMP("Triplet " << i << " guide distance between seq 2 and 3 " << tmpd);
-		tripletDistances[i][1] = tmpd;
-		//0-2
-		tmpd = distMat->getDistance(tripletIdxs[i][0],tripletIdxs[i][2]);
-		DUMP("Triplet " << i << " guide distance between seq 1 and 3 " << tmpd);
-		tripletDistances[i][2] = tmpd;
-		//10% band should do
-		bandPairs[i] = make_pair(new Band(len1,len2,0.1),new Band(len2,len3,0.1));
-				;
-		//bandPairs[i] = make_pair(nullptr,nullptr);
-
-		fwdHMMs[i][0] = new ForwardPairHMM(seqsA[i][0],seqsA[i][1], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].first,true);
-		fwdHMMs[i][1] = new ForwardPairHMM(seqsA[i][1],seqsA[i][2], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].second,true);
-	}
-	double bestLnl = Definitions::minMatrixLikelihood;
-	double currentLnl;
-	double bestA, bestL, bestTm;
-
-	for(auto l : lambdas){
-		indelModel->setParameters({l,initEpsilon});
-		for(auto a : alphas){
-			substModel->setAlpha(a);
-			substModel->calculateModel();
-			currentLnl = 0;
-			for (int i = 0; i < tripletIdxsSize; i++){
-				f1 = fwdHMMs[i][0];
-				f2 = fwdHMMs[i][1];
-
-				f1->setDivergenceTimeAndCalculateModels(tripletDistances[i][0]);
-				f2->setDivergenceTimeAndCalculateModels(tripletDistances[i][1]);
-
-				currentLnl += (f1->runAlgorithm() + f2->runAlgorithm()) * -1.0;
-				if (currentLnl > bestLnl){
-					bestLnl = currentLnl;
-					bestA = a;
-					bestL = l;
-				}
-			}
-
-		}
-	}
-
-	substModel->setAlpha(bestA);
-	if (estAlpha)
-		substModel->calculateModel();
-	indelModel->setParameters({bestL,initEpsilon});
-
-	DUMP("Best a " << bestA << "\tbest l " << bestL);
-
-	//Fwd + bwd + MPD
-	for (int i = 0; i < tripletIdxsSize; i++){
-		f1 = fwdHMMs[i][0];
-		f2 = fwdHMMs[i][1];
-
-		//remove bands for more accurate estimates
-		//f1->setBand(nullptr);
-		//f2->setBand(nullptr);
-
-		f1->setDivergenceTimeAndCalculateModels(tripletDistances[i][0]);
-		f2->setDivergenceTimeAndCalculateModels(tripletDistances[i][1]);
-
-		f1->runAlgorithm();
-		f2->runAlgorithm();
-
-		BackwardPairHMM b1(seqsA[i][0],seqsA[i][1], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].first);
-		BackwardPairHMM b2(seqsA[i][1],seqsA[i][2], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].second);
-
-		b1.setDivergenceTimeAndCalculateModels(tripletDistances[i][0]);
-		b2.setDivergenceTimeAndCalculateModels(tripletDistances[i][1]);
-
-		b1.runAlgorithm();
-		b2.runAlgorithm();
-
-		b1.calculatePosteriors(f1);
-		b2.calculatePosteriors(f2);
-
-		b1.calculateMaximumPosteriorMatrix();
-		b2.calculateMaximumPosteriorMatrix();
-
-		auto mp1 = b1.getMPAlignment();
-		auto mp2 = b2.getMPAlignment();
-
-		DUMP("Pair 1 MPD alignment");
-		DUMP(mp1.first);
-		DUMP(mp1.second);
-		DUMP("Pair 2 MPD alignment");
-		DUMP(mp2.first);
-		DUMP(mp2.second);
-
-
-		//delete f1;
-		//delete f2;
-
-		//store pairs, align triplets
-		pair<vector<double>*, pair<vector<unsigned char>*, vector<unsigned char>*> > alP1 = b1.getMPDWithPosteriors();
-		pair<vector<double>*, pair<vector<unsigned char>*, vector<unsigned char>*> > alP2 = b2.getMPDWithPosteriors();
-
-		pairAlignments[i][0] = alP1.second.first;
-		pairAlignments[i][1] = alP1.second.second;
-		pairAlignments[i][2] = alP2.second.first;
-		pairAlignments[i][3] = alP2.second.second;
-
-		pairwisePosteriors[i][0] = alP1.first;
-		pairwisePosteriors[i][1] = alP2.first;
-
-		tripleAlignments[i] = tal->alignPosteriors(alP1.second, alP2.second, alP1.first, alP2.first);
-
-		//TODO - delete band pairs
-
+		DEBUG("Forward HMM for sequence id " << pairIdxs[i][0] << " and " << pairIdxs[i][1] << " and distance " << pairwiseTimes[i]);
+		fwdHMMs[i] = new ForwardPairHMM(seq1,seq2, substModel, indelModel, Definitions::DpMatrixType::Full, bands[i],true);
 	}
 }
 
 
 
 
-ModelEstimator::~ModelEstimator()
+RawIndelEstimator::~RawIndelEstimator()
 {
 
-	for (int i =0; i < tripletIdxsSize; i++)
+	for (int i =0; i < pairIdxsSize; i++)
 	{
-		delete tripleAlignments[i][0];
-		delete tripleAlignments[i][1];
-		delete tripleAlignments[i][2];
+		delete bands[i];
+		delete fwdHMMs[i];
 
-		delete pairAlignments[i][0];
-		delete pairAlignments[i][1];
-		delete pairAlignments[i][2];
-		delete pairAlignments[i][3];
-
-		delete pairwisePosteriors[i][0];
-		delete pairwisePosteriors[i][1];
-
-		delete fwdHMMs[i][0];
-		delete fwdHMMs[i][1];
 	}
 
 //FIXME - clean up!
 
     delete maths;
-    delete sme;
-    delete tal;
-
-}
-
-vector<double> ModelEstimator::getSubstitutionParameters()
-{
-	return this->sme->getModelParams()->getSubstParameters();
-}
-
-double ModelEstimator::getAlpha()
-{
-	return this->sme->getModelParams()->getAlpha();
 }
 
 } /* namespace EBC */

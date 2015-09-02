@@ -5,8 +5,8 @@
  *      Author: root
  */
 
-#ifndef TRIPLETSAMPLINGTREE_HPP_
-#define TRIPLETSAMPLINGTREE_HPP_
+#ifndef PAIRSAMPLINGTREE_HPP_
+#define PAIRSAMPLINGTREE_HPP_
 
 #include <vector>
 #include <array>

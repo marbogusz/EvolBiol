@@ -25,16 +25,18 @@ CommandReader::CommandReader(int argc, char** argv)
 		parser.add_option("R", "Run indel analysis using raw sequence data");
 		parser.add_option("in","This option takes one argument which specifies the name of the file we want to analyze",1);
 		parser.add_option("tree","This option takes one argument which specifies the name of the tree file (newick)",1);
+		parser.set_group_name("Model options for raw analysis");
 		parser.add_option("rev", "REV Substitution Model");
 		parser.add_option("hky", "HKY85 Substitution Model");
 		parser.add_option("lg", "Le & Gasquel AA Substitution Model");
 		parser.set_group_name("Miscellaneous Options");
 		parser.add_option("h","Display this help message.");
-
 		parser.add_option("rateCat", "Specify gamma rate categories, default is 5",1);
 		parser.add_option("initAlpha", "Specify initial alpha parameter, default is 0.5",1 );
 		parser.add_option("estimateAlpha", "Specify to estimate alpha 0|1, default is 1",1 );
+		parser.add_option("ffd","Full forward raw estimation (slow)");
 
+		parser.set_group_name("Logger options");
 		parser.add_option("lE", "log error");
 		parser.add_option("lW", "log warning");
 		parser.add_option("lI", "log info");
@@ -54,7 +56,7 @@ CommandReader::CommandReader(int argc, char** argv)
 
 		parser.check_option_arg_range("initAlpha", 0.0000001, 1000.0);
 
-		if (!(parser.option("A") || parser.option("R")) && !parser.option("in") && !parser.option("tree") )
+		if (!(parser.option("A") || parser.option("R")))
 
 		{
 		    cout << "Usage: indestimate -{A|R} --in sequence_file --tree tree_file\n";
@@ -63,6 +65,12 @@ CommandReader::CommandReader(int argc, char** argv)
 			throw ProgramException("Specify which either A or R option along with sequence and tree files\n");
 		}
 
+		if(parser.option("A") || parser.option("R")){
+			if(!parser.option("in"))
+				throw ProgramException("Specify input sequence file (fasta format)\n");
+			if(!parser.option("tree"))
+				throw ProgramException("Specify input tree file (Newick format)\n");
+		}
 		if (parser.option("h"))
 		{
 			// display all the command line options

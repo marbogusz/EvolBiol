@@ -6,8 +6,10 @@
 //============================================================================
 
 
-#include <heuristics/PairSamplingTree.hpp>
-#include <heuristics/RawIndelEstimator.hpp>
+#include "heuristics/PairSamplingTree.hpp"
+#include "heuristics/PairStateTransitionEstimator.hpp"
+#include "heuristics/RawIndelEstimator.hpp"
+#include "heuristics/ModelEstimator.hpp"
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -23,7 +25,6 @@
 #include "core/OptimizedModelParameters.hpp"
 #include "core/PhylogeneticTree.hpp"
 
-#include "heuristics/StateTransitionEstimator.hpp"
 
 using namespace std;
 using namespace EBC;
@@ -68,22 +69,32 @@ int main(int argc, char ** argv) {
 		ptree->fromNewick(newick);
 
 
-		IndelModel* indelModel = new NegativeBinomialGapModel();
+		if(rawMode && cmdReader->isFFD()){
+			RawIndelEstimator* tme = new RawIndelEstimator(inputSeqs, cmdReader->getModelType(), ptree->getDistanceMatrix());
+			auto params = tme->getModelParams()->getIndelParameters();
+			cout << "Indel rate " << params[0] << endl;
+			cout << "Indel length " << params[1] << endl;
+			delete tme;
 
-
-		if(rawMode){
-
-			SubstitutionModelBase* substModel;
-
+		//alternative raw mode
+		}
+		else if(rawMode){
 			INFO("Creating Model Parameters heuristics...");
-
-			PairSamplingTree tst(ptree->getDistanceMatrix());
-			vector<array<unsigned int, 3> > tripletIdxs = tst.sampleFromTree();
-			unsigned int tripletIdxsSize = tripletIdxs.size();
-
-			ModelEstimator* tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(), ptree->getDistanceMatrix(),
-					cmdReader->getCategories(), cmdReader->getAlpha(),
+			ModelEstimator* tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),
+					Definitions::OptimizationType::BFGS, ptree->getDistanceMatrix(), cmdReader->getCategories(), cmdReader->getAlpha(),
 					cmdReader->estimateAlpha());
+
+			vector<double> indelParams;
+			vector<double> substParams;
+			double alpha = 100;
+
+			substParams = tme->getSubstitutionParameters();
+			indelParams = tme->getIndelParameters();
+
+			cout << "Indel rate " << indelParams[0] << endl;
+			cout << "Indel length " << indelParams[1] << endl;
+
+			delete tme;
 
 		}
 		else{
@@ -96,13 +107,14 @@ int main(int argc, char ** argv) {
 			std::pair<unsigned int, unsigned int> idxs = inputSeqs->getPairOfSequenceIndices(i);
 
 
+			IndelModel* indelModel = new NegativeBinomialGapModel();
 			//starting values;
 			double initLambda = 0.025;
 			double initEpsilon = 0.5;
 
 			indelModel->setParameters({initLambda,initEpsilon});
 
-			StateTransitionEstimator* ste = new StateTransitionEstimator(indelModel, inputSeqs->getDictionary()->getGapID());
+			PairStateTransitionEstimator* ste = new PairStateTransitionEstimator(indelModel, inputSeqs->getDictionary()->getGapID());
 
 
 			for(unsigned int i =0; i< inputSeqs->getPairCount(); i++)

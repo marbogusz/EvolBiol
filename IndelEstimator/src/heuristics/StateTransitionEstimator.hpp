@@ -34,12 +34,15 @@ protected:
 
 	double maxTime;
 
+	bool useStateEq;
+
+
 public:
-	StateTransitionEstimator(IndelModel* im, unsigned char gapchar);
+	StateTransitionEstimator(IndelModel* im, Definitions::OptimizationType ot, unsigned int pairCategories, unsigned char gapchar, bool useEq = true);
 
-	void addPair(vector<unsigned char>* s1, vector<unsigned char>* s2, double time);
+	void addTime(double time, unsigned int triplet, unsigned int pr);
 
-	void addPair(vector<SequenceElement*>* s1, vector<SequenceElement*>* s2, double time);
+	void addPair(vector<unsigned char>* s1, vector<unsigned char>* s2, unsigned int triplet, unsigned int pr);
 
 	double runIteration();
 

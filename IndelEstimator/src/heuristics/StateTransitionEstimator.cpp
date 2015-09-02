@@ -11,8 +11,8 @@
 namespace EBC
 {
 
-StateTransitionEstimator::StateTransitionEstimator(IndelModel* im, unsigned char gc) :
-		indelModel(im), gapCharacter(gc)
+StateTransitionEstimator::StateTransitionEstimator(IndelModel* im, Definitions::OptimizationType ot, unsigned int pc, unsigned char gc, bool useEq) :
+		indelModel(im), stmSamples(pc), gapCharacter(gc), useStateEq(useEq)
 {
 	DEBUG("Starting State Transition Estimator");
 	//indelModel = new NegativeBinomialGapModel();
@@ -22,7 +22,7 @@ StateTransitionEstimator::StateTransitionEstimator(IndelModel* im, unsigned char
 	true, false, false, maths);
 	modelParams->useIndelModelInitialParameters();
 
-	bfgs = new Optimizer(modelParams, this,Definitions::OptimizationType::BFGS);
+	bfgs = new Optimizer(modelParams, this,ot);
 
 	maxTime = Definitions::almostZero;
 }
@@ -43,24 +43,20 @@ double StateTransitionEstimator::runIteration()
 	return result * -1.0;
 }
 
-void StateTransitionEstimator::addPair(vector<unsigned char>* s1,
-		vector<unsigned char>* s2, double time)
+void StateTransitionEstimator::addTime(double time, unsigned int triplet, unsigned int pr)
 {
+
 	if (time > maxTime)
-			maxTime = time;
-	StateTransitionML* stml = new StateTransitionML(indelModel, time, gapCharacter, false);
-	stml->addSample(s1,s2);
-	stmSamples.push_back(stml);
+		maxTime = time;
+	DEBUG("State Transition Estimator add time for triplet " << triplet << "\t pair " << pr << "\ttime " << time);
+	stmSamples[2*triplet+pr] = new StateTransitionML(indelModel, time, gapCharacter, useStateEq);
 }
 
-void StateTransitionEstimator::addPair(vector<SequenceElement*>* s1,
-		vector<SequenceElement*>* s2, double time)
+void StateTransitionEstimator::addPair(vector<unsigned char>* s1,
+		vector<unsigned char>* s2, unsigned int triplet, unsigned int pr)
 {
-	if (time > maxTime)
-			maxTime = time;
-	StateTransitionML* stml = new StateTransitionML(indelModel, time, gapCharacter, false);
-	stml->addSample(s1,s2);
-	stmSamples.push_back(stml);
+	DUMP("State Transition Estimator add pair for triplet " << triplet << " and pair no " << pr );
+	stmSamples[2*triplet+pr]->addSample(s1,s2);
 }
 
 void StateTransitionEstimator::optimize()

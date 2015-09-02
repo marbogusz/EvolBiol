@@ -65,13 +65,13 @@ vector<array<unsigned int, 2> > PairSamplingTree::sampleFromTree()
 {
 
 	vector<array<unsigned int, 2> > result;
-/*
+
 	//FIXME - remove this magic number
 	pair<double,double> idealRange = make_pair(0.35,0.75);
 	pair<double,double> secondaryRange = make_pair(0.2,0.85);
 
 	Node *firstNd, *secondNd;
-	unsigned int treeNo = 0;
+	unsigned int pairsNo = 0;
 	//copy
 
 	distMat->getSize();
@@ -83,10 +83,6 @@ vector<array<unsigned int, 2> > PairSamplingTree::sampleFromTree()
 
 	availableNodes = leafNodes;
 
-
-	//randomly select 1 leaf
-	double treeSize;
-	this->idealTreeSize = 3 * this->averageLeafbranch;
 	bool found;
 	unsigned int s1,s2;
 
@@ -95,14 +91,29 @@ vector<array<unsigned int, 2> > PairSamplingTree::sampleFromTree()
 	//get all the pairs within a good range
 	found = false;
 
-	auto vecPairs = distMat->getPairsWithinDistance(idealRange.first, idealRange.second);
+	vector<pair<unsigned int, unsigned int> > vecPairs = distMat->getPairsWithinDistance(idealRange.first, idealRange.second);
 
 	if (vecPairs.size() == 0){
 		vecPairs.push_back(distMat->getPairWithinDistance(idealRange.first, idealRange.second));
-		DUMP("air sampling tree : no pairs within desired distance found");
+		DEBUG("Pair sampling tree : no pairs within desired distance found");
 	}
+
+	for(auto pr : vecPairs)
+		result.push_back({pr.first,pr.second});
+
+	return result;
+
+	/*
+	//FIXME - magagic numbers
+	while(pairsNo < 20)
+	{
+		vecPairs.push_back(distMat->getPairWithinDistance(idealRange.first, idealRange.second));
+	}
+
+
 	for(auto pr : vecPairs){
-		if (treeNo >2)
+		//FIXME - magagic numbers
+		if (pairNo > 20)
 			break;
 		s1 = pr.first;
 		s2 = pr.second;
@@ -247,10 +258,11 @@ vector<array<unsigned int, 2> > PairSamplingTree::sampleFromTree()
 		}
 
 	}
-*/
+
 
 
 	return result;
+	*/
 }
 
 } /* namespace EBC */

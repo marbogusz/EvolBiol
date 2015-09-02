@@ -35,6 +35,11 @@ public:
 		return parser.option("R");
 	}
 
+	inline bool isFFD()
+	{
+		return parser.option("ffd");
+	}
+
 
 	Definitions::ModelType getModelType()
 	{
@@ -51,7 +56,7 @@ public:
 			return Definitions::ModelType::LG;
 		}
 		//default;
-		return Definitions::ModelType::GTR;
+		throw ProgramException("Specify model for raw sequence analysis\n");
 	}
 
 	string getInputFileName()
