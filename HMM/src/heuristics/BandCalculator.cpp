@@ -14,7 +14,7 @@ BandCalculator::BandCalculator(vector<SequenceElement*>* s1, vector<SequenceElem
 		fwd(3,nullptr), seq1(s1), seq2(s2), substModel(sm), indelModel(im), time(divergenceTime)
 {
 	DEBUG("Band estimator running...");
-	//FIXME magic numbers
+
 	posteriorLikelihoodLimit = Definitions::bandPosteriorLikelihoodLimit;
 	posteriorLikelihoodDelta = Definitions::bandPosteriorLikelihoodDelta;
 
@@ -24,23 +24,37 @@ BandCalculator::BandCalculator(vector<SequenceElement*>* s1, vector<SequenceElem
 	bool highDivergence = false;
 
 	//standard multipliers
+	array<double,3> lowMultipliers = {{0.7,1,1.3}};
 	array<double,3> normalMultipliers = {{0.5,1,1.5}};
-	//for high divergences
 	array<double,3> highMultipliers = {{1,2,4}};
 
+	array<double,3> &multipliers = lowMultipliers;
 
-	array<double,3> &multipliers = normalMultipliers;
-
-	band = new Band(s1->size(),s2->size());
-
-	//default accura
 	accuracy = Definitions::normalDivergenceAccuracyDelta;
 
-	if (time > Definitions::kmerHighDivergence){
-		highDivergence = true;
+	if(time < Definitions::kmerLowDivergence){
+		band = new Band(s1->size(),s2->size(),0.05);
+		INFO("LOW divergence");
+		leftBound = Definitions::almostZero;
+		rightBound = 1.0;
+	}
+	else if (time < Definitions::kmerHighDivergence){
+		multipliers = normalMultipliers;
+		band = new Band(s1->size(),s2->size(),0.15);
+		INFO("MEDIUM divergence");
+		leftBound = 0.25;
+		rightBound = 2.0;
+	}
+	else{//very high divergence
 		multipliers = highMultipliers;
+		band = new Band(s1->size(),s2->size(),0.33);
+		INFO("HIGH divergence");
+		leftBound = 1;
+		//use value from
+		rightBound = -1.0;
 	}
 
+	band = new Band(s1->size(),s2->size());
 
 	unsigned int best = 0;
 	double tmpRes = std::numeric_limits<double>::max();
@@ -76,17 +90,6 @@ BandCalculator::BandCalculator(vector<SequenceElement*>* s1, vector<SequenceElem
 	this->processPosteriorProbabilities(bwd, band);
 
 	bestTime = time*multipliers[best];
-	//for high divergences likelihood surfaces tend to be flatter
-	if(highDivergence){
-		if(best==1){
-			//divergence of 2-3
-			accuracy = Definitions::highDivergenceAccuracyDelta;
-		}
-		else if(best==2){
-			//divergence of 7-9
-			accuracy = Definitions::ultraDivergenceAccuracyDelta;
-		}
-	}
 
 
 }

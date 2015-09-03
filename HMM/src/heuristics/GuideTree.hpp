@@ -58,6 +58,11 @@ public:
 		return newickTree;
 	}
 
+	vector<double> getDistances()
+	{
+		return distances;
+	}
+
 private:
 
 	void extractKmers(string& seq, unordered_map<string,short>* umap);

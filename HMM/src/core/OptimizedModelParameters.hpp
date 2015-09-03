@@ -50,11 +50,6 @@ protected:
 
 	//FIXME - static bound vectors!
 
-
-	void generateInitialIndelParameters();
-	void generateInitialSubstitutionParameters();
-	void generateInitialDistanceParameters();
-
 public:
 	double divergenceBound;
 
@@ -91,6 +86,10 @@ public:
 	void outputToConsole();
 
 	double getDistanceBetween(unsigned int i, unsigned int j);
+
+	void generateInitialIndelParameters();
+	void generateInitialSubstitutionParameters();
+	void generateInitialDistanceParameters();
 
 	double getAlpha() const
 	{

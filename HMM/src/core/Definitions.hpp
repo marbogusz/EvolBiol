@@ -48,14 +48,19 @@ public:
 
 
 	//this value coming from k-mer estimation is considered high and means that
-	//the actual distance can potentially be higher than 1
-	constexpr static const double kmerHighDivergence = 0.95;
+	//this value coming from k-mer estimation is considered low and means that
+	//the actual distance is likely to be < 1
+	constexpr static const double kmerLowDivergence = 0.7;
+	constexpr static const double kmerHighDivergence = 0.99;
+
+
+
 
 	//for band calculations
-	constexpr static const double bandPosteriorLikelihoodLimit = -3;
-	constexpr static const double bandPosteriorLikelihoodDelta = -9;
+	constexpr static const double bandPosteriorLikelihoodLimit = -1;
+	constexpr static const double bandPosteriorLikelihoodDelta = -7;
 
-	constexpr static const double normalDivergenceAccuracyDelta = 1e-3;
+	constexpr static const double normalDivergenceAccuracyDelta = 1e-2;
 
 	constexpr static const double highDivergenceAccuracyDelta = 1e-2;
 

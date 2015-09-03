@@ -162,7 +162,7 @@ void ModelEstimator::estimateParameters()
 
 	for(unsigned int trp = 0; trp < tripletIdxsSize; trp++)
 	{
-		d1 = tripletDistances[trp][0] + tripletDistances[trp][2] - tripletDistances[trp][1];
+		d1 = (tripletDistances[trp][0] + tripletDistances[trp][2] - tripletDistances[trp][1])/2.0;
 		d2 = tripletDistances[trp][0] - d1;
 		d3 = tripletDistances[trp][2] - d1;
 

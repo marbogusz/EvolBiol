@@ -119,6 +119,11 @@ double StateTransitionML::getLnL()
 	e = tpb->getGapExtension();
 	g = tpb->getGapOpening();
 
+	if (g < 0.0){
+		ERROR("NAN opening " << g);
+		g = Definitions::almostZero;
+	}
+
 	calculateParameters();
 
 	calculatePIs();
@@ -126,6 +131,8 @@ double StateTransitionML::getLnL()
 	for(int i = 0; i < Definitions::stateCount; i++)
 			for(int j = 0; j<Definitions::stateCount; j++)
 			{
+				if(counts[i][j] == 0)
+					continue;
 				//go through site patterns
 				if (this->useStateEq)
 					lnl += counts[i][j] * log(pis[i]*md[i][j]);

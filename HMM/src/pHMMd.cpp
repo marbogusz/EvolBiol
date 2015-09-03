@@ -48,7 +48,7 @@ int main(int argc, char ** argv) {
 		CommandReader* cmdReader = new CommandReader(argc, argv);
 		ofstream treefile;
 
-		FileLogger::start(cmdReader->getLoggingLevel(), (string(cmdReader->getInputFileName()).append(".hmm.log")));
+		FileLogger::start(cmdReader->getLoggingLevel(), (string(cmdReader->getInputFileName()).append(".hmm.2log")));
 
 
 
@@ -68,6 +68,7 @@ int main(int argc, char ** argv) {
 			vector<double> substParams;
 			substParams = cmdReader->getSubstParams();
 			indelParams = cmdReader->getIndelParams();
+			double alpha = cmdReader->getAlpha();
 
 			Optimizer* bfgs;
 			Dictionary* dict;
@@ -82,15 +83,15 @@ int main(int argc, char ** argv) {
 
 			if (cmdReader->getModelType() == Definitions::ModelType::GTR)
 			{
-				substModel = new GTRModel(dict, maths,1);
+				substModel = new GTRModel(dict, maths,cmdReader->getCategories());
 			}
 			else if (cmdReader->getModelType() == Definitions::ModelType::HKY85)
 			{
-				substModel = new HKY85Model(dict, maths,1);
+				substModel = new HKY85Model(dict, maths,cmdReader->getCategories());
 			}
 			else if (cmdReader->getModelType() == Definitions::ModelType::LG)
 			{
-					substModel = new AminoacidSubstitutionModel(dict, maths,1,Definitions::aaLgModel);
+					substModel = new AminoacidSubstitutionModel(dict, maths,cmdReader->getCategories(),Definitions::aaLgModel);
 			}
 
 			indelModel = new NegativeBinomialGapModel();
@@ -98,16 +99,19 @@ int main(int argc, char ** argv) {
 			modelParams = new OptimizedModelParameters(substModel, indelModel,2, 1, false,
 					false, false, true, maths);
 
+			modelParams->generateInitialDistanceParameters();
 
-			modelParams->setUserIndelParams(indelParams);
-			modelParams->setUserSubstParams(substParams);
+
+			//modelParams->setUserIndelParams(indelParams);
+			//modelParams->setUserSubstParams(substParams);
 
 			substModel->setObservedFrequencies(inputSeqs->getElementFrequencies());
-			substModel->setParameters(modelParams->getSubstParameters());
+			substModel->setAlpha(alpha);
+			substModel->setParameters(substParams);
 			substModel->calculateModel();
 
 
-			indelModel->setParameters(modelParams->getIndelParameters());
+			indelModel->setParameters(indelParams);
 
 			EvolutionaryPairHMM *hmm;
 
@@ -133,69 +137,54 @@ int main(int argc, char ** argv) {
 			//hmm->setDivergenceTime(modelParams->getDivergenceTime(0)); //zero as there's only one pair!
 			wrapper->setTargetHMM(hmm);
 			wrapper->setModelParameters(modelParams);
-
 			bfgs->setTarget(wrapper);
 			bfgs->optimize();
-
 			cout << modelParams->getDivergenceTime(0);
-
-
 		}
 
 		else if (cmdReader->isMLE())
 		{
 
+			//DISTANCE-BASED estimation using an alignment
+
 			vector<double> indelParams;
 			vector<double> substParams;
-			double alpha = alpha = cmdReader->getAlpha();
-
-			double dist =  cmdReader->getDistance();
-			if (dist < 0)
-				dist = 1.0;
+			double alpha;
 
 			substParams = cmdReader->getSubstParams();
 			indelParams = cmdReader->getIndelParams();
+			alpha = cmdReader->getAlpha();
 
-			//tme->getModelParameters();
-
-			//cerr << "Alpha " << alpha << endl;
-			//cerr << "Rate cat " << cmdReader->getCategories() << endl;
-			INFO("Creating Model Parameters heuristics...");
-
-			ModelEstimator* tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),
-					cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
-					cmdReader->estimateAlpha());
-
-			//tme->getModelParameters();
-			substParams = tme->getSubstitutionParameters();
-			indelParams = tme->getIndelParameters();
-			if(cmdReader->estimateAlpha())
-				alpha = tme->getAlpha();
-
-			cout << alpha << '\t' << indelParams[0] << '\t' << indelParams[1];
-			for (auto param : substParams)
-				cout  << '\t' << param;
-
-			delete tme;
-
-
+			ModelEstimator* tme;
 /*
-			HMMEstimator* tme = new HMMEstimator(inputSeqs, cmdReader->getModelType(),
-					cmdReader->getOptimizationType(), cmdReader->getCategories(), alpha,
-					cmdReader->estimateAlpha(), substParams, indelParams, dist);
+			if (substParams.size() == 0){
+				tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),
+								cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
+								false);
 
-			substParams = tme->getSubstitutionParameters();
-			indelParams = tme->getIndelParameters();
-			//if(cmdReader->estimateAlpha())
-			//	alpha = tme->getAlpha();
+				substParams = tme->getSubstitutionParameters();
 
-			//cout << "Final indel params" << endl;
-			//cout << (1.0-exp(indelParams[0]*-1.0*dist)) << "\t" << indelParams[1] << "\n";
-			//cout << "Final subst params" << endl;
-			//cout << substParams[0] << endl;
-
-			delete tme;
+			}
 */
+
+			GuideTree gt(inputSeqs);
+
+
+			MlEstimator mle(inputSeqs, cmdReader->getModelType(), indelParams, substParams,
+							cmdReader->getOptimizationType(), cmdReader->getCategories(), alpha,
+							false, gt.getDistances(), false);
+
+
+			//cout << tme.getOptimizedTimes()[0];
+
+			BioNJ nj(inputSeqs->getSequenceCount(), mle.getOptimizedTimes(), inputSeqs);
+			DEBUG("Final tree : " << nj.calculate());
+			string treeStr = nj.calculate();
+
+			treefile.open((string(cmdReader->getInputFileName()).append(".nj.tree")).c_str(),ios::out);
+			treefile << treeStr << endl;
+			treefile.close();
+
 		}
 
 		else
@@ -258,13 +247,14 @@ int main(int argc, char ** argv) {
 			INFO(treeStr);
 
 
-			treefile.open((string(cmdReader->getInputFileName()).append(".hmm.tree")).c_str(),ios::out);
+			treefile.open((string(cmdReader->getInputFileName()).append(".hmm.2tree")).c_str(),ios::out);
 			treefile << treeStr << endl;
 			treefile.close();
 
 
 
 			delete be;
+
 			delete tme;
 
 		}

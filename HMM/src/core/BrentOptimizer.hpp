@@ -22,6 +22,8 @@ protected:
 	OptimizedModelParameters* omp;
 	IOptimizable* target;
 	double accuracy;
+	double leftBound;
+	double rightBound;
 
 public:
 	BrentOptimizer(OptimizedModelParameters* mp, IOptimizable* opt, double accuracy=Definitions::accuracyBFGS);
@@ -35,6 +37,12 @@ public:
 
 	void setAccuracy(double accuracy) {
 		this->accuracy = accuracy;
+	}
+
+	void setBounds(double l, double r)
+	{
+		leftBound = l;
+		rightBound = r;
 	}
 };
 

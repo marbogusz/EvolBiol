@@ -183,6 +183,9 @@ void BandingEstimator::optimizePairByPair()
 		modelParams->setUserDivergenceParams({bc->getClosestDistance()});
 		numopt->setTarget(wrapper);
 		numopt->setAccuracy(bc->getBrentAccuracy());
+		numopt->setBounds(bc->getLeftBound(), bc->getRightBound() < 0 ? modelParams->divergenceBound : bc->getRightBound());
+
+
 		result = numopt->optimize() * -1.0;
 		DEBUG("Likelihood after pairwise optimization: " << result);
 		if (result <= (Definitions::minMatrixLikelihood /2.0))
