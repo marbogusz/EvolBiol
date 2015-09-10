@@ -48,7 +48,7 @@ int main(int argc, char ** argv) {
 		CommandReader* cmdReader = new CommandReader(argc, argv);
 		ofstream treefile;
 
-		FileLogger::start(cmdReader->getLoggingLevel(), (string(cmdReader->getInputFileName()).append(".hmm.2log")));
+		FileLogger::start(cmdReader->getLoggingLevel(), (string(cmdReader->getInputFileName()).append(".hmm.log")));
 
 
 
@@ -219,9 +219,6 @@ int main(int argc, char ** argv) {
 			//FileLogger::Logger() << "True alpha      : " << cmdReader->getAlpha() << "\n";
 			//FileLogger::Logger() << "Estimated alpha : " << alpha << "\n";
 
-
-
-
 			//FIXME - hardcoding substitution parameters and alpha to come from the estimator
 			BandingEstimator* be = new BandingEstimator(cmdReader->getAlgorithmType(), inputSeqs, cmdReader->getModelType() ,indelParams,
 					substParams, cmdReader->getOptimizationType(), cmdReader->getCategories(),alpha, tme->getGuideTree());
@@ -247,7 +244,7 @@ int main(int argc, char ** argv) {
 			INFO(treeStr);
 
 
-			treefile.open((string(cmdReader->getInputFileName()).append(".hmm.2tree")).c_str(),ios::out);
+			treefile.open((string(cmdReader->getInputFileName()).append(".hmm.tree")).c_str(),ios::out);
 			treefile << treeStr << endl;
 			treefile.close();
 

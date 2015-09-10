@@ -170,6 +170,9 @@ void ModelEstimator::estimateParameters()
 	}
 	sme->optimize();
 
+	//check if distances are for every triplet!
+	//if not, re-estimate with fixed values for that triplet
+
 	//INDEL PART
 	double tb1,tb2,tb3;
 
@@ -179,6 +182,9 @@ void ModelEstimator::estimateParameters()
 		tb2 = sme->getTripletDivergence(trp,1);
 		tb3 = sme->getTripletDivergence(trp,2);
 
+		if(tb1 <= 1.1*Definitions::almostZero || tb2 <= 1.1*Definitions::almostZero || tb3 <= 1.1 * Definitions::almostZero)
+			ERROR("Triplet estimator zero length branch " << tb1 << " " << tb2 << " " << tb3);
+
 		ste->addTime(tb1+tb2,trp,0);
 		ste->addTime(tb3+tb2,trp,1);
 
@@ -187,6 +193,8 @@ void ModelEstimator::estimateParameters()
 
 	}
 	ste->optimize();
+
+
 
 	//substModel->summarize();
 	//indelModel->summarize();
@@ -209,10 +217,15 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 	vector<double> timeModifiers = {0.75, 1.0, 1.5};
 	vector<double> lambdas = {0.03, 0.07};
 	vector<double> alphas;
+
+	array<double,3> lowMultipliers = {{0.7,1,1.3}};
+	array<double,3> normalMultipliers = {{0.5,1,1.5}};
+	array<double,3> highMultipliers = {{1,2,4}};
+
 	if (!estAlpha)
 		alphas = {userAlpha};
 	else
-		alphas = {0.5,1.0};
+		alphas = {0.5,1.0,3.0};
 
 	ForwardPairHMM *f1, *f2;
 
@@ -289,6 +302,7 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 	double bestLnl = Definitions::minMatrixLikelihood;
 	double currentLnl;
 	double bestA, bestL, bestTm;
+
 
 	for (auto tm : timeModifiers){
 		for(auto l : lambdas){

@@ -75,7 +75,7 @@ public:
 	constexpr static const int BrentMaxIter = 100;
 
 	//band factor default for intial fwd likelihood calculations
-	constexpr static const double initialBandFactor = 0.33;
+	constexpr static const double initialBandFactor = 0.25;
 
 	//small number close to zero for param estimation
 	constexpr static const double almostZero = 1e-8;
