@@ -50,15 +50,15 @@ public:
 	//this value coming from k-mer estimation is considered high and means that
 	//this value coming from k-mer estimation is considered low and means that
 	//the actual distance is likely to be < 1
-	constexpr static const double kmerLowDivergence = 0.7;
-	constexpr static const double kmerHighDivergence = 0.99;
+	constexpr static const double kmerLowDivergence = 0.6;
+	constexpr static const double kmerHighDivergence = 0.8;
 
 
 
 
 	//for band calculations
-	constexpr static const double bandPosteriorLikelihoodLimit = -1;
-	constexpr static const double bandPosteriorLikelihoodDelta = -7;
+	constexpr static const double bandPosteriorLikelihoodLimit = -3;
+	constexpr static const double bandPosteriorLikelihoodDelta = -9;
 
 	constexpr static const double normalDivergenceAccuracyDelta = 1e-2;
 
@@ -75,7 +75,7 @@ public:
 	constexpr static const int BrentMaxIter = 100;
 
 	//band factor default for intial fwd likelihood calculations
-	constexpr static const double initialBandFactor = 0.25;
+	constexpr static const double initialBandFactor = 0.33;
 
 	//small number close to zero for param estimation
 	constexpr static const double almostZero = 1e-8;

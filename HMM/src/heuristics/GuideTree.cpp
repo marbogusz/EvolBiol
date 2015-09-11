@@ -63,7 +63,7 @@ void GuideTree::constructTree()
 			else if(dict->getAlphabetSize() == Definitions::aminoacidCount)
 				estIdentity = aaFunction(identity);
 
-			DUMP("k-mer distance between seq. " << i << " and " << j << " is " << identity << " adjusted distance " << estIdentity );
+			DEBUG("k-mer distance between seq. " << i << " and " << j << " is " << identity << " adjusted distance " << estIdentity );
 
 			distMat->addDistance(i,j,estIdentity);
 			distances.push_back(estIdentity);

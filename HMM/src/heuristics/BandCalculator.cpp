@@ -11,7 +11,7 @@ namespace EBC
 {
 
 BandCalculator::BandCalculator(vector<SequenceElement*>* s1, vector<SequenceElement*>* s2, SubstitutionModelBase* sm, IndelModel* im, double divergenceTime) :
-		fwd(3,nullptr), seq1(s1), seq2(s2), substModel(sm), indelModel(im), time(divergenceTime)
+		fwd(4,nullptr), seq1(s1), seq2(s2), substModel(sm), indelModel(im), time(divergenceTime)
 {
 	DEBUG("Band estimator running...");
 
@@ -24,37 +24,41 @@ BandCalculator::BandCalculator(vector<SequenceElement*>* s1, vector<SequenceElem
 	bool highDivergence = false;
 
 	//standard multipliers
-	array<double,3> lowMultipliers = {{0.7,1,1.3}};
-	array<double,3> normalMultipliers = {{0.5,1,1.5}};
-	array<double,3> highMultipliers = {{1,2,4}};
+	array<double,4> lowMultipliers = {{0.7,0.9,1.1,1.3}};
+	array<double,4> normalMultipliers = {{0.5,0.8, 1.1, 1.4}};
+	array<double,4> highMultipliers = {{0.5,1.0,2.0,4.0}};
 
-	array<double,3> &multipliers = lowMultipliers;
+	array<double,4> &multipliers = lowMultipliers;
 
 	accuracy = Definitions::normalDivergenceAccuracyDelta;
 
 	if(time < Definitions::kmerLowDivergence){
-		band = new Band(s1->size(),s2->size(),0.05);
+		band = new Band(s1->size(),s2->size(),0.075);
 		INFO("LOW divergence");
 		leftBound = Definitions::almostZero;
 		rightBound = 1.0;
 	}
 	else if (time < Definitions::kmerHighDivergence){
-		multipliers = normalMultipliers;
-		band = new Band(s1->size(),s2->size(),0.15);
+		//multipliers = normalMultipliers;
+		band = new Band(s1->size(),s2->size(),0.1);
 		INFO("MEDIUM divergence");
 		leftBound = 0.25;
 		rightBound = 2.0;
 	}
 	else{//very high divergence
-		multipliers = highMultipliers;
-		band = new Band(s1->size(),s2->size(),0.33);
+		//multipliers = highMultipliers;
+		band = new Band(s1->size(),s2->size(),0.25);
 		INFO("HIGH divergence");
 		leftBound = 1;
 		//use value from
 		rightBound = -1.0;
 	}
 
-	band = new Band(s1->size(),s2->size());
+
+	leftBound = Definitions::almostZero;
+	rightBound = -1.0;
+
+	//band = new Band(s1->size(),s2->size());
 
 	unsigned int best = 0;
 	double tmpRes = std::numeric_limits<double>::max();
