@@ -215,8 +215,8 @@ vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromTree()
 	vector<array<unsigned int, 3> > result;
 
 	//FIXME - remove this magic number
-	pair<double,double> idealRange = make_pair(0.15,0.7);
-	pair<double,double> secondaryRange = make_pair(0.075,0.85);
+	pair<double,double> idealRange = make_pair(0.35,0.75);
+	pair<double,double> secondaryRange = make_pair(0.15,0.85);
 
 	unsigned int treeNo = 0;
 	unsigned int maxTrees = 1;
@@ -513,15 +513,14 @@ vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromTree()
 	return result;
 }
 
-
 /*
 vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromTree()
 {
 	vector<array<unsigned int, 3> > result;
 
 	//FIXME - remove this magic number
-	pair<double,double> idealRange = make_pair(0.2,0.75);
-	pair<double,double> secondaryRange = make_pair(0.1,0.85);
+	pair<double,double> idealRange = make_pair(0.35,0.75);
+	pair<double,double> secondaryRange = make_pair(0.2,0.85);
 
 	Node *firstNd, *secondNd;
 	unsigned int treeNo = 0;
@@ -706,5 +705,4 @@ vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromTree()
 	return result;
 }
 */
-
 } /* namespace EBC */
