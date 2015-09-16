@@ -218,9 +218,9 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 	vector<double> lambdas = {0.03, 0.07};
 	vector<double> alphas;
 
-	array<double,5> lowMultipliers = {{0.5,0.75,1.0,1.25,1.5}};
-	array<double,5> normalMultipliers = {{0.4, 0.8, 1, 1.4, 2}};
-	array<double,5> highMultipliers = {{0.5, 1.0, 2.0, 4.0, 8.0}};
+	array<double,3> lowMultipliers = {{0.7,1,1.3}};
+	array<double,3> normalMultipliers = {{0.5,1,1.5}};
+	array<double,3> highMultipliers = {{1,2,4}};
 
 	if (!estAlpha)
 		alphas = {userAlpha};
@@ -263,10 +263,6 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 
 	vector<array<vector<SequenceElement*>*,3> > seqsA(tripletIdxsSize);
 
-	array<Band*,2> tmpBands;
-	array<pair<unsigned int,unsigned int>, 2> tmpLengths;
-	double tmpTime;
-
 	for (int i = 0; i < tripletIdxsSize; i++)
 	{
 
@@ -285,10 +281,6 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 		unsigned int len2 = seqsA[i][1]->size();
 		unsigned int len3 = seqsA[i][2]->size();
 
-		tmpLengths[0] = make_pair(len1,len2);
-		tmpLengths[1] = make_pair(len2,len3);
-
-
 		//0-1
 		tmpd = gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][0],tripletIdxs[i][1]);
 		DUMP("Triplet " << i << " guide distance between seq 1 and 2 " << tmpd);
@@ -301,20 +293,8 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 		tmpd = gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][0],tripletIdxs[i][2]);
 		DUMP("Triplet " << i << " guide distance between seq 1 and 3 " << tmpd);
 		tripletDistances[i][2] = tmpd;
-
-		for (unsigned int pr = 0; pr < 2; pr++){
-			tmpTime = tripletDistances[i][pr];
-			if(tmpTime < Definitions::kmerLowDivergence){
-				tmpBands[pr] = new Band(tmpLengths[pr].first,tmpLengths[pr].second,0.075);
-			}
-			else if (tmpTime < Definitions::kmerHighDivergence){
-				tmpBands[pr] = new Band(tmpLengths[pr].first,tmpLengths[pr].second,0.1);
-			}
-			else
-				tmpBands[pr] = new Band(tmpLengths[pr].first,tmpLengths[pr].second,0.2);
-		}
-
-		bandPairs[i] = make_pair(tmpBands[0], tmpBands[1]);
+		bandPairs[i] = make_pair(new Band(len1,len2),new Band(len2,len3));
+		//bandPairs[i] = make_pair(nullptr,nullptr);
 
 		fwdHMMs[i][0] = new ForwardPairHMM(seqsA[i][0],seqsA[i][1], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].first,true);
 		fwdHMMs[i][1] = new ForwardPairHMM(seqsA[i][1],seqsA[i][2], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].second,true);
@@ -324,44 +304,33 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 	double bestA, bestL, bestTm;
 
 
-	//for (auto tm : timeModifiers){
-
-	for(auto l : lambdas){
-		indelModel->setParameters({l,initEpsilon});
-		for(auto a : alphas){
-			substModel->setAlpha(a);
-			substModel->calculateModel();
-			currentLnl = 0;
-
-			for (int i = 0; i < tripletIdxsSize; i++){
-				array<double,5>& mults1 = tripletDistances[i][0] <= Definitions::kmerLowDivergence ? lowMultipliers :
-						tripletDistances[i][0] <= Definitions::kmerHighDivergence ? normalMultipliers : highMultipliers;
-				array<double,5>& mults2 = tripletDistances[i][1] <= Definitions::kmerLowDivergence ? lowMultipliers :
-										tripletDistances[i][1] <= Definitions::kmerHighDivergence ? normalMultipliers : highMultipliers;
-
-
-				for (unsigned int tid = 0; tid < lowMultipliers.size(); tid++){
-
+	for (auto tm : timeModifiers){
+		for(auto l : lambdas){
+			indelModel->setParameters({l,initEpsilon});
+			for(auto a : alphas){
+				substModel->setAlpha(a);
+				substModel->calculateModel();
+				currentLnl = 0;
+				for (int i = 0; i < tripletIdxsSize; i++){
 					f1 = fwdHMMs[i][0];
 					f2 = fwdHMMs[i][1];
-					f1->setDivergenceTimeAndCalculateModels(tripletDistances[i][0]*mults1[tid]);
-					f2->setDivergenceTimeAndCalculateModels(tripletDistances[i][1]*mults2[tid]);
+
+					f1->setDivergenceTimeAndCalculateModels(tripletDistances[i][0]*tm);
+					f2->setDivergenceTimeAndCalculateModels(tripletDistances[i][1]*tm);
 
 					currentLnl += (f1->runAlgorithm() + f2->runAlgorithm()) * -1.0;
 					if (currentLnl > bestLnl){
 						bestLnl = currentLnl;
 						bestA = a;
 						bestL = l;
-						tripletDistances[i][0] = tripletDistances[i][0]*mults1[tid];
-						tripletDistances[i][1] = tripletDistances[i][1]*mults2[tid];
+						bestTm = tm;
+
 					}
-
 				}
-			}
 
+			}
 		}
 	}
-
 	substModel->setAlpha(bestA);
 	if (estAlpha)
 		substModel->calculateModel();
@@ -378,8 +347,8 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 		//f1->setBand(nullptr);
 		//f2->setBand(nullptr);
 
-		f1->setDivergenceTimeAndCalculateModels(tripletDistances[i][0]);
-		f2->setDivergenceTimeAndCalculateModels(tripletDistances[i][1]);
+		f1->setDivergenceTimeAndCalculateModels(tripletDistances[i][0]*bestTm);
+		f2->setDivergenceTimeAndCalculateModels(tripletDistances[i][1]*bestTm);
 
 		f1->runAlgorithm();
 		f2->runAlgorithm();
@@ -387,8 +356,8 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 		BackwardPairHMM b1(seqsA[i][0],seqsA[i][1], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].first);
 		BackwardPairHMM b2(seqsA[i][1],seqsA[i][2], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].second);
 
-		b1.setDivergenceTimeAndCalculateModels(tripletDistances[i][0]);
-		b2.setDivergenceTimeAndCalculateModels(tripletDistances[i][1]);
+		b1.setDivergenceTimeAndCalculateModels(tripletDistances[i][0]*bestTm);
+		b2.setDivergenceTimeAndCalculateModels(tripletDistances[i][1]*bestTm);
 
 		b1.runAlgorithm();
 		b2.runAlgorithm();

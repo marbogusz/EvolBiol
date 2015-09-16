@@ -36,27 +36,29 @@ BandCalculator::BandCalculator(vector<SequenceElement*>* s1, vector<SequenceElem
 		band = new Band(s1->size(),s2->size(),0.075);
 		INFO("LOW divergence");
 		leftBound = Definitions::almostZero;
-		rightBound = 1.0;
+		rightBound = 2.0;
 	}
 	else if (time < Definitions::kmerHighDivergence){
 		//multipliers = normalMultipliers;
 		band = new Band(s1->size(),s2->size(),0.1);
 		INFO("MEDIUM divergence");
-		leftBound = 0.25;
-		rightBound = 2.0;
+		leftBound = Definitions::almostZero;
+		rightBound = 5.0;
+		accuracy = Definitions::highDivergenceAccuracyDelta;
 	}
 	else{//very high divergence
 		//multipliers = highMultipliers;
 		band = new Band(s1->size(),s2->size(),0.25);
 		INFO("HIGH divergence");
-		leftBound = 1;
+		leftBound = 0.5;
 		//use value from
 		rightBound = -1.0;
+		accuracy = Definitions::ultraDivergenceAccuracyDelta;
 	}
 
 
-	leftBound = Definitions::almostZero;
-	rightBound = -1.0;
+	//leftBound = Definitions::almostZero;
+	//rightBound = -1.0;
 
 	//band = new Band(s1->size(),s2->size());
 
