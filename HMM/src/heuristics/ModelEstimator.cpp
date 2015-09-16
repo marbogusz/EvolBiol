@@ -18,7 +18,7 @@ namespace EBC
 
 ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType model ,
 		Definitions::OptimizationType ot, unsigned int rateCategories, double alpha, bool estimateAlpha) :
-				inputSequences(inputSeqs), gammaRateCategories(rateCategories),
+				inputSequences(inputSeqs), gammaRateCategories(rateCategories), model(model),
 				gtree(new GuideTree(inputSeqs)), tst(*gtree), userAlpha(alpha), estAlpha(estimateAlpha), estIndel(true), estSubst(true)
 {
 
@@ -63,6 +63,20 @@ ModelEstimator::ModelEstimator(Sequences* inputSeqs, Definitions::ModelType mode
     //cerr <<  "|||||||||||| Model Estimator elapsed time: " << elapsed_seconds.count() << "s ||||||||||||||\n";
 
 	//substModel->summarize();
+
+}
+
+vector<double> ModelEstimator::getInitialModelParameters()
+{
+	double initKappa = 2.0;
+	vector<double> params;
+	if (model == Definitions::ModelType::HKY85){
+		params =  {{initKappa}};
+	}
+	else if (model == Definitions::ModelType::GTR){
+		params = {{1.0,1.0/initKappa,1.0/initKappa,1.0/initKappa,1.0/initKappa}};
+	}
+	return params;
 
 }
 
@@ -174,7 +188,10 @@ void ModelEstimator::estimateParameters()
 	//if not, re-estimate with fixed values for that triplet
 
 	//INDEL PART
-	double tb1,tb2,tb3;
+	double tb1,tb2,tb3,steT1, steT2;
+
+	substitutionParameters = sme->getModelParams()->getSubstParameters();
+	alpha = sme->getModelParams()->getAlpha();
 
 	for(unsigned int trp = 0; trp < tripletIdxsSize; trp++)
 	{
@@ -182,17 +199,29 @@ void ModelEstimator::estimateParameters()
 		tb2 = sme->getTripletDivergence(trp,1);
 		tb3 = sme->getTripletDivergence(trp,2);
 
-		if(tb1 <= 1.1*Definitions::almostZero || tb2 <= 1.1*Definitions::almostZero || tb3 <= 1.1 * Definitions::almostZero)
-			ERROR("Triplet estimator zero length branch " << tb1 << " " << tb2 << " " << tb3);
+		steT1 = tb1 + tb2;
+		steT2 = tb3 + tb2;
 
-		ste->addTime(tb1+tb2,trp,0);
-		ste->addTime(tb3+tb2,trp,1);
+		if(tb1 <= 1.1*Definitions::almostZero || tb2 <= 1.1*Definitions::almostZero || tb3 <= 1.1 * Definitions::almostZero){
+			ERROR("Triplet estimator zero length branch " << tb1 << " " << tb2 << " " << tb3);
+			steT1 = tripletDistances[trp][0] * bestFwdTm;
+			steT2 = tripletDistances[trp][1] * bestFwdTm;
+			alpha = bestFwdAlpha;
+			//substitutionParameters = getInitialModelParameters();
+		}
+
+
+
+		ste->addTime(steT1,trp,0);
+		ste->addTime(steT2,trp,1);
 
 		ste->addPair(pairAlignments[trp][0],pairAlignments[trp][1],trp,0);
 		ste->addPair(pairAlignments[trp][2],pairAlignments[trp][3],trp,1);
 
 	}
 	ste->optimize();
+
+	indelParameters = ste->getModelParams()->getIndelParameters();
 
 
 
@@ -293,7 +322,7 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 		tmpd = gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][0],tripletIdxs[i][2]);
 		DUMP("Triplet " << i << " guide distance between seq 1 and 3 " << tmpd);
 		tripletDistances[i][2] = tmpd;
-		bandPairs[i] = make_pair(new Band(len1,len2),new Band(len2,len3));
+		bandPairs[i] = make_pair(new Band(len1,len2,0.1),new Band(len2,len3,0.1));
 		//bandPairs[i] = make_pair(nullptr,nullptr);
 
 		fwdHMMs[i][0] = new ForwardPairHMM(seqsA[i][0],seqsA[i][1], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].first,true);
@@ -321,9 +350,9 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 					currentLnl += (f1->runAlgorithm() + f2->runAlgorithm()) * -1.0;
 					if (currentLnl > bestLnl){
 						bestLnl = currentLnl;
-						bestA = a;
+						this->bestFwdAlpha = bestA = a;
 						bestL = l;
-						bestTm = tm;
+						this->bestFwdTm = bestTm = tm;
 
 					}
 				}
@@ -368,15 +397,15 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 		b1.calculateMaximumPosteriorMatrix();
 		b2.calculateMaximumPosteriorMatrix();
 
-		auto mp1 = b1.getMPAlignment();
-		auto mp2 = b2.getMPAlignment();
+		//auto mp1 = b1.getMPAlignment();
+		//auto mp2 = b2.getMPAlignment();
 
-		DUMP("Pair 1 MPD alignment");
-		DUMP(mp1.first);
-		DUMP(mp1.second);
-		DUMP("Pair 2 MPD alignment");
-		DUMP(mp2.first);
-		DUMP(mp2.second);
+		//DUMP("Pair 1 MPD alignment");
+		//DUMP(mp1.first);
+		//DUMP(mp1.second);
+		//DUMP("Pair 2 MPD alignment");
+		//DUMP(mp2.first);
+		//DUMP(mp2.second);
 
 
 		//delete f1;
@@ -437,17 +466,20 @@ ModelEstimator::~ModelEstimator()
 
 vector<double> ModelEstimator::getSubstitutionParameters()
 {
-	return this->sme->getModelParams()->getSubstParameters();
+	//return this->sme->getModelParams()->getSubstParameters();
+	return this->substitutionParameters;
 }
 
 vector<double> ModelEstimator::getIndelParameters()
 {
-	return this->ste->getModelParams()->getIndelParameters();
+	//return this->ste->getModelParams()->getIndelParameters();
+	return this->indelParameters;
 }
 
 double ModelEstimator::getAlpha()
 {
-	return this->sme->getModelParams()->getAlpha();
+	//return this->sme->getModelParams()->getAlpha();
+	return this->alpha;
 }
 
 } /* namespace EBC */

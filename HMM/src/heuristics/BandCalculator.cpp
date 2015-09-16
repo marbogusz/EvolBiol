@@ -30,7 +30,7 @@ BandCalculator::BandCalculator(vector<SequenceElement*>* s1, vector<SequenceElem
 
 	array<double,4> &multipliers = lowMultipliers;
 
-	accuracy = Definitions::normalDivergenceAccuracyDelta;
+	accuracy = Definitions::highDivergenceAccuracyDelta;
 
 	if(time < Definitions::kmerLowDivergence){
 		band = new Band(s1->size(),s2->size(),0.075);
@@ -44,7 +44,7 @@ BandCalculator::BandCalculator(vector<SequenceElement*>* s1, vector<SequenceElem
 		INFO("MEDIUM divergence");
 		leftBound = Definitions::almostZero;
 		rightBound = 5.0;
-		accuracy = Definitions::highDivergenceAccuracyDelta;
+		//accuracy = Definitions::highDivergenceAccuracyDelta;
 	}
 	else{//very high divergence
 		//multipliers = highMultipliers;
@@ -53,12 +53,12 @@ BandCalculator::BandCalculator(vector<SequenceElement*>* s1, vector<SequenceElem
 		leftBound = 0.5;
 		//use value from
 		rightBound = -1.0;
-		accuracy = Definitions::ultraDivergenceAccuracyDelta;
+		//accuracy = Definitions::ultraDivergenceAccuracyDelta;
 	}
 
 
-	//leftBound = Definitions::almostZero;
-	//rightBound = -1.0;
+	leftBound = Definitions::almostZero;
+	rightBound = -1.0;
 
 	//band = new Band(s1->size(),s2->size());
 

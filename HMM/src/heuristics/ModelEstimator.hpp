@@ -69,6 +69,9 @@ protected:
 	TripletAligner* tal;
 	ViterbiPairHMM* vphmm;
 
+	double bestFwdAlpha;
+	double bestFwdTm;
+
 	bool estAlpha;
 	bool estIndel;
 	bool estSubst;
@@ -79,6 +82,10 @@ protected:
 	vector<array<unsigned int, 3> > tripletIdxs;
 	vector<array<double, 3> > tripletDistances;
 	vector<array<ForwardPairHMM*,2> > fwdHMMs;
+
+	vector<double> substitutionParameters;
+	vector<double> indelParameters;
+	double alpha;
 
 	unsigned int gammaRateCategories;
 
@@ -91,6 +98,10 @@ protected:
 	void calculateInitialHMMs(Definitions::ModelType model);
 
 	void estimateParameters();
+
+	Definitions::ModelType model;
+
+	vector<double> getInitialModelParameters();
 
 public:
 	ModelEstimator(Sequences* inputSeqs, Definitions::ModelType model,
