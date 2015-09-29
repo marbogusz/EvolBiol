@@ -17,12 +17,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * Definitions.hpp
- *
- *  Created on: Jan 14, 2014
- *      Author: mbogusz
- */
+
 
 #ifndef DEFINITIONS_H_
 #define DEFINITIONS_H_
@@ -71,9 +66,6 @@ public:
 	//the actual distance is likely to be < 1
 	constexpr static const double kmerLowDivergence = 0.6;
 	constexpr static const double kmerHighDivergence = 0.8;
-
-
-
 
 	//for band calculations
 	constexpr static const double bandPosteriorLikelihoodLimit = -3;
@@ -147,6 +139,11 @@ public:
 	constexpr static const unsigned int nucleotideCount = 4;
 
 	constexpr static const unsigned int aminoacidCount = 20;
+
+	constexpr static auto distMatExt = ".hmm.distmat";
+	constexpr static auto treeExt = ".hmm.tree";
+	constexpr static auto logExt = ".hmm.log";
+
 
 	struct aaModelDefinition
 	{

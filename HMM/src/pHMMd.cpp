@@ -46,8 +46,8 @@ int main(int argc, char ** argv) {
 
 	//Set output Precision to 2
 	//FIXME - should normally be set to >= 6
-	cout << fixed << setprecision(6);
-	cerr << fixed << setprecision(6);
+	cout << fixed << setprecision(8);
+	cerr << fixed << setprecision(8);
 
 	try
 	{
@@ -59,8 +59,9 @@ int main(int argc, char ** argv) {
 
 		CommandReader* cmdReader = new CommandReader(argc, argv);
 		ofstream treefile;
+		ofstream distfile;
 
-		FileLogger::start(cmdReader->getLoggingLevel(), (string(cmdReader->getInputFileName()).append(".hmm.log")));
+		FileLogger::start(cmdReader->getLoggingLevel(), (string(cmdReader->getInputFileName()).append(Definitions::logExt)));
 
 
 
@@ -237,9 +238,25 @@ int main(int argc, char ** argv) {
 			be->optimizePairByPair();
 
 
+			auto distances = be->getOptimizedTimes();
+			auto seqCount =  inputSeqs->getSequenceCount();
+
+			//output distance matrix
+			distfile.open((string(cmdReader->getInputFileName()).append(Definitions::distMatExt)).c_str(),ios::out);
+			distfile << inputSeqs->getSequenceCount() << endl;
+			for (unsigned int seqId = 0; seqId < seqCount; seqId++){
+				distfile << inputSeqs->getSequenceName(seqId) << "        ";
+				for(unsigned int j = 0; j<seqId; j++)
+				{
+
+					distfile << " " << distances[(seqId - j - 1) + (j*seqCount) - (((1+j)/2.0)*(j*1.0))];
+				}
+				distfile << endl;
+			}
+			distfile.close();
+
 
 			DEBUG ("Running BioNJ");
-
 			//change bionj init here!
 			BioNJ nj(inputSeqs->getSequenceCount(), be->getOptimizedTimes(), inputSeqs);
 			//DEBUG("Final tree : " << nj.calculate());
@@ -256,7 +273,7 @@ int main(int argc, char ** argv) {
 			INFO(treeStr);
 
 
-			treefile.open((string(cmdReader->getInputFileName()).append(".hmm.tree")).c_str(),ios::out);
+			treefile.open((string(cmdReader->getInputFileName()).append(Definitions::treeExt)).c_str(),ios::out);
 			treefile << treeStr << endl;
 			treefile.close();
 
