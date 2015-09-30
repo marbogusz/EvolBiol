@@ -18,35 +18,53 @@
 //==============================================================================
 
 /*
- * IParser.hpp
+ * BrentOptimizer.hpp
  *
- *  Created on: Oct 7, 2013
- *      Author: mbogusz
+ *  Created on: Aug 5, 2015
+ *  Partially based on John D. Cook's implementation
+ *  http://www.codeproject.com/Articles/30201/Optimizing-a-Function-of-One-Variable
  */
 
-#ifndef IPARSER_H_
-#define IPARSER_H_
+#ifndef CORE_BRENTOPTIMIZER_HPP_
+#define CORE_BRENTOPTIMIZER_HPP_
 
-#include "core/Definitions.hpp"
-#include <string>
-#include <vector>
+#include "core/OptimizedModelParameters.hpp"
+#include "core/IOptimizable.hpp"
 
-using namespace std;
 
-namespace EBC
+namespace EBC {
+
+class BrentOptimizer
 {
+protected:
 
-class IParser
-{
+	OptimizedModelParameters* omp;
+	IOptimizable* target;
+	double accuracy;
+	double leftBound;
+	double rightBound;
+
 public:
-	virtual string getNextName() = 0;
-	virtual string getNextSequence() = 0;
-	virtual unsigned int getSequenceCount() = 0;
-	virtual string getSequenceAt(unsigned int) = 0;
-	virtual vector<string>* getNames() =0;
-	virtual vector<string>* getSequences() =0;
+	BrentOptimizer(OptimizedModelParameters* mp, IOptimizable* opt, double accuracy=Definitions::accuracyBFGS);
+	double optimize();
+	void setTarget(IOptimizable* opt);
+	double objectiveFunction(double x);
 
+	double getAccuracy() const {
+		return accuracy;
+	}
+
+	void setAccuracy(double accuracy) {
+		this->accuracy = accuracy;
+	}
+
+	void setBounds(double l, double r)
+	{
+		leftBound = l;
+		rightBound = r;
+	}
 };
 
 } /* namespace EBC */
-#endif /* IPARSER_H_ */
+
+#endif /* CORE_BRENTOPTIMIZER_HPP_ */

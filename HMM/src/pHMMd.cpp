@@ -1,9 +1,21 @@
-//============================================================================
-// Name        : HMM.cpp
-// Author      : Marcin Bogusz
-// Version     :
-// Copyright   :
-//============================================================================
+//==============================================================================
+// Pair-HMM phylogenetic tree estimator
+// 
+// Copyright (c) 2015 Marcin Bogusz.
+// 
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+//     This program is distributed in the hope that it will be useful,
+//     but WITHOUT ANY WARRANTY; without even the implied warranty of
+//     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//     GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses>.
+//==============================================================================
 
 #include "core/CommandReader.hpp"
 #include "core/Sequences.hpp"
@@ -34,8 +46,8 @@ int main(int argc, char ** argv) {
 
 	//Set output Precision to 2
 	//FIXME - should normally be set to >= 6
-	cout << fixed << setprecision(6);
-	cerr << fixed << setprecision(6);
+	cout << fixed << setprecision(8);
+	cerr << fixed << setprecision(8);
 
 	try
 	{
@@ -48,7 +60,7 @@ int main(int argc, char ** argv) {
 		CommandReader* cmdReader = new CommandReader(argc, argv);
 		ofstream treefile;
 
-		FileLogger::start(cmdReader->getLoggingLevel(), (string(cmdReader->getInputFileName()).append(".hmm.log")));
+		FileLogger::start(cmdReader->getLoggingLevel(), (string(cmdReader->getInputFileName()).append(Definitions::logExt)));
 
 
 

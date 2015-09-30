@@ -1,3 +1,22 @@
+//==============================================================================
+// Pair-HMM phylogenetic tree estimator
+// 
+// Copyright (c) 2015 Marcin Bogusz.
+// 
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+//     This program is distributed in the hope that it will be useful,
+//     but WITHOUT ANY WARRANTY; without even the implied warranty of
+//     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//     GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses>.
+//==============================================================================
+
 /*
  * StateTransitionMatrix.cpp
  *
@@ -119,6 +138,11 @@ double StateTransitionML::getLnL()
 	e = tpb->getGapExtension();
 	g = tpb->getGapOpening();
 
+	if (g < 0.0){
+		ERROR("NAN opening " << g);
+		g = Definitions::almostZero;
+	}
+
 	calculateParameters();
 
 	calculatePIs();
@@ -126,6 +150,8 @@ double StateTransitionML::getLnL()
 	for(int i = 0; i < Definitions::stateCount; i++)
 			for(int j = 0; j<Definitions::stateCount; j++)
 			{
+				if(counts[i][j] == 0)
+					continue;
 				//go through site patterns
 				if (this->useStateEq)
 					lnl += counts[i][j] * log(pis[i]*md[i][j]);

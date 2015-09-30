@@ -1,3 +1,22 @@
+//==============================================================================
+// Pair-HMM phylogenetic tree estimator
+// 
+// Copyright (c) 2015 Marcin Bogusz.
+// 
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+//     This program is distributed in the hope that it will be useful,
+//     but WITHOUT ANY WARRANTY; without even the implied warranty of
+//     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//     GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses>.
+//==============================================================================
+
 /*
  * Sequences.cpp
  *
@@ -6,6 +25,7 @@
  */
 
 #include "core/Sequences.hpp"
+#include <algorithm>
 
 namespace EBC
 {
@@ -66,6 +86,15 @@ string& Sequences::getRawSequenceAt(unsigned int pos)
 string& Sequences::getSequenceName(unsigned int pos)
 {
 	return (*sequenceNames)[pos];
+}
+
+unsigned int Sequences::getSequenceId(string& seqname)
+{
+	unsigned int pos = std::find(sequenceNames->begin(), sequenceNames->end(), seqname) - sequenceNames->begin();
+	if(pos >= sequenceNames->size()) {
+	    throw HmmException(seqname + " not found");
+	}
+	return pos;
 }
 
 void Sequences::calculateObservedFrequencies()

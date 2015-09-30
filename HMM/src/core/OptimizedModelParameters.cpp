@@ -1,3 +1,22 @@
+//==============================================================================
+// Pair-HMM phylogenetic tree estimator
+// 
+// Copyright (c) 2015 Marcin Bogusz.
+// 
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+//     This program is distributed in the hope that it will be useful,
+//     but WITHOUT ANY WARRANTY; without even the implied warranty of
+//     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//     GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses>.
+//==============================================================================
+
 /*
  * OptimizedModelParameters.cpp
  *
@@ -63,15 +82,18 @@ void OptimizedModelParameters::useIndelModelInitialParameters()
 
 void OptimizedModelParameters::boundDivergenceBasedOnLambda(double lambda){
 	//lambda * t must be smaller than negative ln(0.5)
-	double ln05 = log(0.5)*-1.0;
-	this->divergenceBound = (ln05/lambda) - 0.01; //substract 0.01 just to be sure
+	double db = ((log(0.5)*-1.0)/lambda) - 0.01; //substract 0.01 just to be sure
+
+	this->divergenceBound = db <  Definitions::divergenceBound? db : Definitions::divergenceBound;
 	DUMP("Optimised Model Parameters divergence bound : " << divergenceBound);
 }
 
 void OptimizedModelParameters::boundLambdaBasedOnDivergence(double time){
 	//lambda * t must be smaller than negative ln(0.5)
 	double ln05 = log(0.5)*-1.0;
-	indelHiBounds[0] = min((ln05/time) - 0.001, im->getHiBound(0));
+	indelHiBounds[0] = min((ln05/time) - Definitions::almostZero, im->getHiBound(0));
+	if (indelParameters[0] > indelHiBounds[0])
+		indelParameters[0] = indelHiBounds[0];
 	DUMP("Optimised Model Parameters lambda Hi bound : " << indelHiBounds[0] );
 }
 
@@ -110,8 +132,8 @@ void OptimizedModelParameters::toDlibVector(column_vector& vals, column_vector& 
 	if(estimateAlpha)
 	{
 		vals(ptr) = alpha;
-		lbounds(ptr) = 0.000001;
-		hbounds(ptr) = 99.999999;
+		lbounds(ptr) =  Definitions::almostZero;
+		hbounds(ptr) = Definitions::maxAlpha;
 		ptr++;
 	}
 	if(estimateDivergence)
@@ -119,7 +141,7 @@ void OptimizedModelParameters::toDlibVector(column_vector& vals, column_vector& 
 		for (i=0; i < distCount; i++)
 		{
 			vals(i+ptr) = divergenceTimes[i];
-			lbounds(i+ptr) = 0.000001;
+			lbounds(i+ptr) = Definitions::almostZero;
 			hbounds(i+ptr) = divergenceBound;
 		}
 	}

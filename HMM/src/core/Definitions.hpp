@@ -1,9 +1,23 @@
-/*
- * Definitions.hpp
- *
- *  Created on: Jan 14, 2014
- *      Author: mbogusz
- */
+//==============================================================================
+// Pair-HMM phylogenetic tree estimator
+// 
+// Copyright (c) 2015 Marcin Bogusz.
+// 
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+//     This program is distributed in the hope that it will be useful,
+//     but WITHOUT ANY WARRANTY; without even the implied warranty of
+//     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//     GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses>.
+//==============================================================================
+
+
 
 #ifndef DEFINITIONS_H_
 #define DEFINITIONS_H_
@@ -46,12 +60,46 @@ class Definitions
 {
 public:
 
+
+	//this value coming from k-mer estimation is considered high and means that
+	//this value coming from k-mer estimation is considered low and means that
+	//the actual distance is likely to be < 1
+	constexpr static const double kmerLowDivergence = 0.6;
+	constexpr static const double kmerHighDivergence = 0.8;
+
+	//for band calculations
+	constexpr static const double bandPosteriorLikelihoodLimit = -3;
+	constexpr static const double bandPosteriorLikelihoodDelta = -9;
+
+	constexpr static const double normalDivergenceAccuracyDelta = 1e-3;
+
+	constexpr static const double highDivergenceAccuracyDelta = 1e-2;
+
+	constexpr static const double ultraDivergenceAccuracyDelta = 1e-1;
+
+
 	constexpr static const double defaultGapPenalty = 0.5;
 
+	//model param estimation accuracy
+	constexpr static const double accuracyBFGS = 1e-8;
+
+	constexpr static const int BrentMaxIter = 100;
+
+	//band factor default for intial fwd likelihood calculations
+	constexpr static const double initialBandFactor = 0.33;
+
+	//small number close to zero for param estimation
+	constexpr static const double almostZero = 1e-8;
+
+	constexpr static const double maxAlpha = 99.999999;
+
+	//3 states - M I D
 	constexpr static const unsigned int stateCount = 3;
 
+	//triplet trees
 	constexpr static const unsigned int heuristicsTreeSize = 3;
 
+	//obsolete
 	constexpr static const unsigned int pathSampleCount = 10000;
 	constexpr static const unsigned int pathInformativeCount = 50;
 
@@ -62,9 +110,8 @@ public:
 	constexpr static const unsigned int samplingPathCount = 1000;
 	constexpr static const double samplingPathLnLDelta = 10.0;
 
-
-	//FIXME
-	constexpr static const double divergenceBound = 20;
+	//max divergence
+	constexpr static const double divergenceBound = 50;
 
 	constexpr static const double lambdaHiBound = 0.3;
 
@@ -78,9 +125,10 @@ public:
 
 	constexpr static const double omegaHiBound = 20;
 
-	constexpr static const double standardLowBound = 0.000001;
+	constexpr static const double standardLowBound = 0.00000001;
 
-	constexpr static const unsigned int minBandDelta = 7; //This makes the min band width of 15 characters
+	//This makes the min band width of 15 characters
+	constexpr static const unsigned int minBandDelta = 7;
 
 	constexpr static const double minMatrixLikelihood = -1000000.0;
 
@@ -100,6 +148,11 @@ public:
 	constexpr static const unsigned int aminoacidCount = 20;
 
 	constexpr static const int stopCodonId = -1;
+
+	constexpr static auto distMatExt = ".hmm.distmat";
+	constexpr static auto treeExt = ".hmm.tree";
+	constexpr static auto logExt = ".hmm.log";
+
 
 	struct aaModelDefinition
 	{

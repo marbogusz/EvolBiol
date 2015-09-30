@@ -1,3 +1,22 @@
+//==============================================================================
+// Pair-HMM phylogenetic tree estimator
+// 
+// Copyright (c) 2015 Marcin Bogusz.
+// 
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+//     This program is distributed in the hope that it will be useful,
+//     but WITHOUT ANY WARRANTY; without even the implied warranty of
+//     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//     GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses>.
+//==============================================================================
+
 /*
  * Optimizer.cpp
  *
@@ -10,8 +29,8 @@
 namespace EBC
 {
 
-Optimizer::Optimizer(OptimizedModelParameters* mp, IOptimizable* opt, Definitions::OptimizationType ot) :
-		optimizationType(ot), omp(mp), target(opt)
+Optimizer::Optimizer(OptimizedModelParameters* mp, IOptimizable* opt, Definitions::OptimizationType ot, double accuracy) :
+		accuracy(accuracy), optimizationType(ot), omp(mp), target(opt)
 {
 
 
@@ -63,7 +82,7 @@ double Optimizer::optimize()
 		case Definitions::OptimizationType::BFGS:
 		{
 			likelihood = dlib::find_min_box_constrained(dlib::bfgs_search_strategy(),
-					dlib::objective_delta_stop_strategy(1e-8),
+					dlib::objective_delta_stop_strategy(accuracy),  //changed the delta drastically
 					f_objective,
 					derivative(f_objective),
 					initParams,

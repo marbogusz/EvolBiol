@@ -1,3 +1,22 @@
+//==============================================================================
+// Pair-HMM phylogenetic tree estimator
+// 
+// Copyright (c) 2015 Marcin Bogusz.
+// 
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+//     This program is distributed in the hope that it will be useful,
+//     but WITHOUT ANY WARRANTY; without even the implied warranty of
+//     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//     GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses>.
+//==============================================================================
+
 /*
  * BandCalculator.cpp
  *
@@ -11,24 +30,62 @@ namespace EBC
 {
 
 BandCalculator::BandCalculator(vector<SequenceElement*>* s1, vector<SequenceElement*>* s2, SubstitutionModelBase* sm, IndelModel* im, double divergenceTime) :
-		fwd(3,nullptr), seq1(s1), seq2(s2), substModel(sm), indelModel(im), time(divergenceTime)
+		fwd(4,nullptr), seq1(s1), seq2(s2), substModel(sm), indelModel(im), time(divergenceTime)
 {
 	DEBUG("Band estimator running...");
-	//FIXME magic numbers
-	posteriorLikelihoodLimit = -3;
-	posteriorLikelihoodDelta = -9;
 
-	band = new Band(s1->size(),s2->size());
+	posteriorLikelihoodLimit = Definitions::bandPosteriorLikelihoodLimit;
+	posteriorLikelihoodDelta = Definitions::bandPosteriorLikelihoodDelta;
 
 	this->ptMatrix =  new PMatrixDouble(substModel);
 	this->trProbs = new TransitionProbabilities(indelModel);
-	//FIXME - magic numbers
-	array<double,3> multipliers = {{0.5,1,1.5}};
+
+	bool highDivergence = false;
+
+	//standard multipliers
+	array<double,4> lowMultipliers = {{0.7,0.9,1.1,1.3}};
+	array<double,4> normalMultipliers = {{0.5,0.8, 1.1, 1.4}};
+	array<double,4> highMultipliers = {{0.5,1.0,2.0,4.0}};
+
+	array<double,4> &multipliers = lowMultipliers;
+
+	accuracy = Definitions::highDivergenceAccuracyDelta;
+
+	if(time < Definitions::kmerLowDivergence){
+		band = new Band(s1->size(),s2->size(),0.075);
+		INFO("LOW divergence");
+		leftBound = Definitions::almostZero;
+		rightBound = 2.0;
+	}
+	else if (time < Definitions::kmerHighDivergence){
+		//multipliers = normalMultipliers;
+		band = new Band(s1->size(),s2->size(),0.1);
+		INFO("MEDIUM divergence");
+		leftBound = Definitions::almostZero;
+		rightBound = 5.0;
+		//accuracy = Definitions::highDivergenceAccuracyDelta;
+	}
+	else{//very high divergence
+		//multipliers = highMultipliers;
+		band = new Band(s1->size(),s2->size(),0.25);
+		INFO("HIGH divergence");
+		leftBound = 0.5;
+		//use value from
+		rightBound = -1.0;
+		//accuracy = Definitions::ultraDivergenceAccuracyDelta;
+	}
+
+
+	leftBound = Definitions::almostZero;
+	rightBound = -1.0;
+
+	//band = new Band(s1->size(),s2->size());
+
 	unsigned int best = 0;
 	double tmpRes = std::numeric_limits<double>::max();
 	double lnl;
 
-	DUMP("Trying 3 forward calculations to assess the band...");
+	DUMP("Trying several forward calculations to assess the band...");
 	for(unsigned int i = 0; i < fwd.size(); i++)
 	{
 
@@ -56,6 +113,10 @@ BandCalculator::BandCalculator(vector<SequenceElement*>* s1, vector<SequenceElem
 
 	bwd->calculatePosteriors(fwd[best]);
 	this->processPosteriorProbabilities(bwd, band);
+
+	bestTime = time*multipliers[best];
+
+
 }
 
 BandCalculator::~BandCalculator()
@@ -153,4 +214,14 @@ void BandCalculator::processPosteriorProbabilities(BackwardPairHMM* hmm, Band* b
 	}
 }
 
+double BandCalculator::getClosestDistance() {
+	return this->bestTime;
+}
+
+double BandCalculator::getBrentAccuracy() {
+	return this->accuracy;
+}
+
 } /* namespace EBC */
+
+

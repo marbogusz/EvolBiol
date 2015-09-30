@@ -1,3 +1,22 @@
+//==============================================================================
+// Pair-HMM phylogenetic tree estimator
+// 
+// Copyright (c) 2015 Marcin Bogusz.
+// 
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+//     This program is distributed in the hope that it will be useful,
+//     but WITHOUT ANY WARRANTY; without even the implied warranty of
+//     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//     GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses>.
+//==============================================================================
+
 /*
  * TripletSamplingTree.cpp
  *
@@ -216,6 +235,310 @@ vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromTree()
 
 	//FIXME - remove this magic number
 	pair<double,double> idealRange = make_pair(0.35,0.75);
+	pair<double,double> secondaryRange = make_pair(0.15,0.85);
+
+	unsigned int treeNo = 0;
+	unsigned int maxTrees = 1;
+
+
+	for (unsigned int i = 0;  i < distMat->getSize(); i++)
+	{
+		leafNodes[i] = nullptr;
+	}
+	availableNodes = leafNodes;
+
+	bool found = false;
+	unsigned int s1,s2;
+
+	double tmpd1, tmpd2;
+
+	auto vecPairsDesired = distMat->getPairsWithinDistance(idealRange.first, idealRange.second);
+	auto vecPairsSecondary = distMat->getPairsWithinDistance(secondaryRange.first, secondaryRange.second);
+
+	if (vecPairsDesired.size() == 0 && vecPairsSecondary.size() == 0){
+		vecPairsSecondary.push_back(distMat->getPairWithinDistance(idealRange.first, idealRange.second));
+		DUMP("Triplet sampling tree : no pairs within desired distance found, geting the closest one");
+	}
+	//Check ideal range
+	for(auto pr : vecPairsDesired){
+		if (treeNo >maxTrees)
+			break;
+		s1 = pr.first;
+		s2 = pr.second;
+
+		if (availableNodes.find(s1) == availableNodes.end()
+				|| availableNodes.find(s2) == availableNodes.end())
+			continue;
+
+		for (auto nd : availableNodes)
+		{
+
+			if (nd.first == s1 || nd.first == s2)
+				continue;
+			tmpd1 =  distMat->getDistance(nd.first, s1);
+			tmpd2 =  distMat->getDistance(nd.first, s2);
+
+			if (isWithinRange(tmpd1, idealRange) && isWithinRange(tmpd1, idealRange)) {
+				result.push_back({{s2,s1,nd.first}});
+				DEBUG("Sampled triplet : " << s2 << "\t\t" << s1 << "\t\t" << nd.first);
+				availableNodes.erase(s1);
+				availableNodes.erase(s2);
+				availableNodes.erase(nd.first);
+				distMat->invalidate(pr);
+				found = true;
+				treeNo++;
+				break;
+			}
+			else{
+				continue;
+			}
+		}
+	}
+	//not found
+	if(!found){
+		for(auto pr : vecPairsSecondary){
+			if (treeNo >maxTrees)
+				break;
+			s1 = pr.first;
+			s2 = pr.second;
+
+			if (availableNodes.find(s1) == availableNodes.end()
+					|| availableNodes.find(s2) == availableNodes.end())
+				continue;
+
+			for (auto nd : availableNodes)
+			{
+
+				if (nd.first == s1 || nd.first == s2)
+					continue;
+				tmpd1 =  distMat->getDistance(nd.first, s1);
+				tmpd2 =  distMat->getDistance(nd.first, s2);
+
+				if (isWithinRange(tmpd1, secondaryRange) && isWithinRange(tmpd1, secondaryRange)) {
+					result.push_back({{s2,s1,nd.first}});
+					DEBUG("Sampled triplet : " << s2 << "\t\t" << s1 << "\t\t" << nd.first);
+					availableNodes.erase(s1);
+					availableNodes.erase(s2);
+					availableNodes.erase(nd.first);
+					distMat->invalidate(pr);
+					found = true;
+					treeNo++;
+					break;
+				}
+				else{
+					continue;
+				}
+			}
+		}
+	}
+	//Still not found?
+	if(!found){
+		for(auto pr : vecPairsDesired){
+			if (treeNo >maxTrees)
+				break;
+			s1 = pr.first;
+			s2 = pr.second;
+
+			if (availableNodes.find(s1) == availableNodes.end()
+					|| availableNodes.find(s2) == availableNodes.end())
+				continue;
+
+			for (auto nd : availableNodes)
+			{
+
+				if (nd.first == s1 || nd.first == s2)
+					continue;
+				tmpd1 =  distMat->getDistance(nd.first, s1);
+				tmpd2 =  distMat->getDistance(nd.first, s2);
+
+				if (isWithinRange(tmpd1, idealRange)) {
+					result.push_back({{s2,s1,nd.first}});
+					DEBUG("Sampled triplet : " << s2 << "\t\t" << s1 << "\t\t" << nd.first);
+					availableNodes.erase(s1);
+					availableNodes.erase(s2);
+					availableNodes.erase(nd.first);
+					distMat->invalidate(pr);
+					found = true;
+					treeNo++;
+					break;
+				}
+				else if(isWithinRange(tmpd2, idealRange)){
+					result.push_back({{s1,s2,nd.first}});
+					DEBUG("Sampled triplet : " << s1 << "\t\t" << s2 << "\t\t" << nd.first);
+					availableNodes.erase(s1);
+					availableNodes.erase(s2);
+					availableNodes.erase(nd.first);
+					distMat->invalidate(pr);
+					found = true;
+					treeNo++;
+					break;
+				}
+				else{
+					continue;
+				}
+			}
+		}
+	}
+	//still nothing
+	if(!found){
+		for(auto pr : vecPairsSecondary){
+			if (treeNo >maxTrees)
+				break;
+			s1 = pr.first;
+			s2 = pr.second;
+
+			if (availableNodes.find(s1) == availableNodes.end()
+					|| availableNodes.find(s2) == availableNodes.end())
+				continue;
+
+
+			for (auto nd : availableNodes)
+			{
+
+				if (nd.first == s1 || nd.first == s2)
+					continue;
+				tmpd1 =  distMat->getDistance(nd.first, s1);
+				tmpd2 =  distMat->getDistance(nd.first, s2);
+
+				if (isWithinRange(tmpd1, secondaryRange)) {
+					result.push_back({{s2,s1,nd.first}});
+					DEBUG("Sampled triplet : " << s2 << "\t\t" << s1 << "\t\t" << nd.first);
+					availableNodes.erase(s1);
+					availableNodes.erase(s2);
+					availableNodes.erase(nd.first);
+					distMat->invalidate(pr);
+					found = true;
+					treeNo++;
+					break;
+				}
+				else if(isWithinRange(tmpd2, secondaryRange)){
+					result.push_back({{s1,s2,nd.first}});
+					DEBUG("Sampled triplet : " << s1 << "\t\t" << s2 << "\t\t" << nd.first);
+					availableNodes.erase(s1);
+					availableNodes.erase(s2);
+					availableNodes.erase(nd.first);
+					distMat->invalidate(pr);
+					found = true;
+					treeNo++;
+					break;
+				}
+				else{
+					continue;
+				}
+			}
+		}
+	}
+	//Nothing within those ranges - just get something
+	if(!found){
+		//check secondary range
+		auto pr = vecPairsSecondary[0]; //get the best one
+		s1 = pr.first;
+		s2 = pr.second;
+
+		for (auto nd : availableNodes)
+		{
+
+			if (nd.first == s1 || nd.first == s2)
+				continue;
+			tmpd1 =  distMat->getDistance(nd.first, s1);
+			tmpd2 =  distMat->getDistance(nd.first, s2);
+
+
+			if (isWithinRange(tmpd1, secondaryRange)) {
+				result.push_back({{s2,s1,nd.first}});
+				DEBUG("Sampled triplet : " << s2 << "\t\t" << s1 << "\t\t" << nd.first);
+				availableNodes.erase(s1);
+				availableNodes.erase(s2);
+				availableNodes.erase(nd.first);
+				distMat->invalidate(pr);
+				found = true;
+				treeNo++;
+				break;
+			}
+			else if(isWithinRange(tmpd2, secondaryRange)){
+				result.push_back({{s1,s2,nd.first}});
+				DEBUG("Sampled triplet : " << s1 << "\t\t" << s2 << "\t\t" << nd.first);
+				availableNodes.erase(s1);
+				availableNodes.erase(s2);
+				availableNodes.erase(nd.first);
+				distMat->invalidate(pr);
+				found = true;
+				treeNo++;
+				break;
+			}
+			else{
+				continue;
+			}
+		}
+		if(!found){
+			//nothing was found. this means that either all the distances are very small or big
+			//small = get the biggest, big - get the smallest
+			unsigned int id = 0;
+			double tdist = 0;
+			//bool largeDistances = false;
+
+			//if (distMat->getDistance(s1, s2) > secondaryRange.second){
+			//	largeDistances = true;
+			//}
+			double currentDist = 100;
+
+			availableNodes.erase(s1);
+			availableNodes.erase(s2);
+
+			for(auto nd : availableNodes)
+			{
+				//deviation from the sweetspot
+				//FIXME - magicnumber for the sweetspot
+				tdist = abs(0.5 - distMat->getDistance(nd.first, s1)) + abs(0.5 - distMat->getDistance(nd.first, s2));
+
+					if (tdist < currentDist){
+						currentDist = tdist;
+						id = nd.first;
+					}
+
+			}
+
+			tmpd1 = distMat->getDistance(s1, id);
+			tmpd2 = distMat->getDistance(s2, id);
+
+			if (tmpd1 > distMat->getDistance(s1,s2)){
+				if(tmpd1 < tmpd2){
+					result.push_back({{s2,s1,id}});
+					DEBUG("Sampled triplet : " << s2 << "\t\t" << s1 << "\t\t" << id);
+				}
+				else{
+					result.push_back({{s1,s2,id}});
+					DEBUG("Sampled triplet : " << s1 << "\t\t" << s2 << "\t\t" << id);
+				}
+			}
+			else{
+				if(tmpd1 < tmpd2){
+					result.push_back({{s1,s2,id}});
+					DEBUG("Sampled triplet : " << s1 << "\t\t" << s2 << "\t\t" << id);
+				}
+				else{
+					result.push_back({{s2,s1,id}});
+					DEBUG("Sampled triplet : " << s2 << "\t\t" << s1 << "\t\t" << id);
+				}
+			}
+
+//			result.push_back({{s1,s2,id}});
+//			DEBUG("Sampled triplet : " << s1 << "\t\t" << s2 << "\t\t" << id);
+			treeNo++;
+		}
+
+	}
+	INFO(treeNo << " triplets sampled");
+	return result;
+}
+
+/*
+vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromTree()
+{
+	vector<array<unsigned int, 3> > result;
+
+	//FIXME - remove this magic number
+	pair<double,double> idealRange = make_pair(0.35,0.75);
 	pair<double,double> secondaryRange = make_pair(0.2,0.85);
 
 	Node *firstNd, *secondNd;
@@ -400,5 +723,5 @@ vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromTree()
 
 	return result;
 }
-
+*/
 } /* namespace EBC */

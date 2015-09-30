@@ -1,3 +1,22 @@
+//==============================================================================
+// Pair-HMM phylogenetic tree estimator
+// 
+// Copyright (c) 2015 Marcin Bogusz.
+// 
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+//     This program is distributed in the hope that it will be useful,
+//     but WITHOUT ANY WARRANTY; without even the implied warranty of
+//     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//     GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses>.
+//==============================================================================
+
 /*
  * AffineGeometricGapModel.cpp
  *
@@ -19,7 +38,7 @@ namespace EBC
 NegativeBinomialGapModel::NegativeBinomialGapModel() : IndelModel(Definitions::NBIndelParamCount)
 {
 	//logMode = true;
-	this->parameterLoBounds[0] = this->parameterLoBounds[1] = 0.000001;
+	this->parameterLoBounds[0] = this->parameterLoBounds[1] = Definitions::almostZero;
 	this->parameterHiBounds[0] = Definitions::lambdaHiBound;
 	this->parameterHiBounds[1] = Definitions::epsilonHiBound;
 }
@@ -30,7 +49,8 @@ NegativeBinomialGapModel::~NegativeBinomialGapModel()
 
 double NegativeBinomialGapModel::calculateGapOpening(double time)
 {
-	return 1-exp(-1*lambda*time);
+	double NegLambdaT = -1.0*lambda*time;
+	return 1.0-exp(NegLambdaT);
 }
 
 double NegativeBinomialGapModel::calculateGapExtension(double time)
@@ -55,7 +75,7 @@ void NegativeBinomialGapModel::calculate()
 void NegativeBinomialGapModel::calculateGeometricProbability(double lambda, double t)
 {
 	//FIXME - remove
-	double exponent = 1-exp(-1*lambda*t);
+	double exponent = 1.0-exp(-1.0*lambda*t);
 	this->gapOpeningProbability = exponent;
 }
 
