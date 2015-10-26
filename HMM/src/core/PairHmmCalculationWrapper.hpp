@@ -39,6 +39,8 @@ class PairHmmCalculationWrapper : public IOptimizable
 private:
 	EvolutionaryPairHMM* phmm;
 	OptimizedModelParameters* modelParams;
+	SubstitutionModelBase* substModel;
+	IndelModel* indelModel;
 
 public:
 	PairHmmCalculationWrapper();
@@ -48,6 +50,14 @@ public:
 	double runIteration();
 
 	void setTargetHMM(EvolutionaryPairHMM* hmm);
+
+	inline void setSubstModel(SubstitutionModelBase* sm){
+		substModel = sm;
+	}
+	inline void setIndelModel(IndelModel* im){
+		indelModel = im;
+	}
+
 	void setModelParameters(OptimizedModelParameters* mp);
 
 

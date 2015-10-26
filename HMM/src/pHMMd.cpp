@@ -37,7 +37,8 @@
 #include "hmm/ForwardPairHMM.hpp"
 #include "hmm/ViterbiPairHMM.hpp"
 
-#include "sampling/HMMEstimator.hpp";
+#include "models/CodonModel.hpp"
+
 
 using namespace std;
 using namespace EBC;
@@ -62,257 +63,70 @@ int main(int argc, char ** argv) {
 
 		FileLogger::start(cmdReader->getLoggingLevel(), (string(cmdReader->getInputFileName()).append(Definitions::logExt)));
 
-
-
 		IParser* parser = cmdReader->getParser();
 
 		//FileLogger::DebugLogger().setCerr();
 		//FileLogger::DumpLogger().setCerr();
-		//FileLogger::InfoLogger().setCerr();
+		FileLogger::InfoLogger().setCerr();
 
 		INFO("Reading input sequences...");
 		DEBUG("Creating alignment object...");
 
 		Sequences* inputSeqs = new Sequences(parser, cmdReader->getSequenceType(),cmdReader->isFixedAlignment());
-		if (cmdReader->isFdist() || cmdReader->isVdist())
-		{
-			vector<double> indelParams;
-			vector<double> substParams;
-			substParams = cmdReader->getSubstParams();
-			indelParams = cmdReader->getIndelParams();
 
-			Optimizer* bfgs;
-			Dictionary* dict;
-			SubstitutionModelBase* substModel;
-			IndelModel* indelModel;
-			Maths* maths;
-			Definitions::AlgorithmType algorithm;
-			OptimizedModelParameters* modelParams;
+		//No indel or subst params!
+		Optimizer* bfgs;
+		Dictionary* dict;
+		SubstitutionModelBase* substModel;
+		IndelModel* indelModel;
+		Maths* maths;
+		Definitions::AlgorithmType algorithm;
+		OptimizedModelParameters* modelParams;
 
-			maths = new Maths();
-			dict = inputSeqs->getDictionary();
+		maths = new Maths();
+		dict = inputSeqs->getDictionary();
 
-			if (cmdReader->getModelType() == Definitions::ModelType::GTR)
-			{
-				substModel = new GTRModel(dict, maths,1);
-			}
-			else if (cmdReader->getModelType() == Definitions::ModelType::HKY85)
-			{
-				substModel = new HKY85Model(dict, maths,1);
-			}
-			else if (cmdReader->getModelType() == Definitions::ModelType::LG)
-			{
-					substModel = new AminoacidSubstitutionModel(dict, maths,1,Definitions::aaLgModel);
-			}
+		//no gamma with codon models
+		substModel = new CodonModel(dict, maths,1);
+		indelModel = new NegativeBinomialGapModel();
 
-			indelModel = new NegativeBinomialGapModel();
+		substModel->setObservedFrequencies(inputSeqs->getElementFrequencies());
 
-			modelParams = new OptimizedModelParameters(substModel, indelModel,2, 1, false,
-					false, false, true, maths);
+		modelParams = new OptimizedModelParameters(substModel, indelModel,2, 1, true,
+							true, false, true, maths);
 
+		modelParams->generateInitialDistanceParameters();
+		modelParams->generateInitialIndelParameters();
+		modelParams->generateInitialSubstitutionParameters();
 
-			modelParams->setUserIndelParams(indelParams);
-			modelParams->setUserSubstParams(substParams);
+		EvolutionaryPairHMM *hmm;
 
-			substModel->setObservedFrequencies(inputSeqs->getElementFrequencies());
-			substModel->setParameters(modelParams->getSubstParameters());
-			substModel->calculateModel();
+		bfgs = new Optimizer(modelParams, NULL, cmdReader->getOptimizationType());
 
+		PairHmmCalculationWrapper* wrapper = new PairHmmCalculationWrapper();
 
-			indelModel->setParameters(modelParams->getIndelParameters());
+		std::pair<unsigned int, unsigned int> idxs = inputSeqs->getPairOfSequenceIndices(0);
 
-			EvolutionaryPairHMM *hmm;
+		unsigned int len1, len2;
 
-			bfgs = new Optimizer(modelParams, NULL, cmdReader->getOptimizationType());
+		len1 = inputSeqs->getSequencesAt(idxs.first)->size();
+		len2 = inputSeqs->getSequencesAt(idxs.second)->size();
 
-			PairHmmCalculationWrapper* wrapper = new PairHmmCalculationWrapper();
+		//BAND it ?
+		hmm = new ForwardPairHMM(inputSeqs->getSequencesAt(idxs.first), inputSeqs->getSequencesAt(idxs.second),
+							substModel, indelModel, Definitions::DpMatrixType::Full, new Band(len1,len2,0.25));
 
-			std::pair<unsigned int, unsigned int> idxs = inputSeqs->getPairOfSequenceIndices(0);
+		wrapper->setTargetHMM(hmm);
+		wrapper->setIndelModel(indelModel);
+		wrapper->setSubstModel(substModel);
+		wrapper->setModelParameters(modelParams);
 
-			if (cmdReader->isVdist())
-			{
-				DEBUG("Creating Viterbi algorithm to optimize the pairwise divergence time...");
-				hmm = new ViterbiPairHMM(inputSeqs->getSequencesAt(idxs.first), inputSeqs->getSequencesAt(idxs.second),
-					substModel, indelModel, Definitions::DpMatrixType::Full, nullptr);
-			}
-			else if (cmdReader->isFdist())
-			{
-				DEBUG("Creating forward algorithm to optimize the pairwise divergence time...");
-				hmm = new ForwardPairHMM(inputSeqs->getSequencesAt(idxs.first), inputSeqs->getSequencesAt(idxs.second),
-					substModel, indelModel, Definitions::DpMatrixType::Full, nullptr);
-			}
+		bfgs->setTarget(wrapper);
+		bfgs->optimize();
 
-			//hmm->setDivergenceTime(modelParams->getDivergenceTime(0)); //zero as there's only one pair!
-			wrapper->setTargetHMM(hmm);
-			wrapper->setModelParameters(modelParams);
-
-			bfgs->setTarget(wrapper);
-			bfgs->optimize();
-
-			cout << modelParams->getDivergenceTime(0);
-
-
-		}
-
-		else if (cmdReader->isMLE())
-		{
-
-			//DISTANCE-BASED estimation using an alignment
-
-			//GuideTree gt(inputSeqs);
-			MlEstimator tme(inputSeqs, cmdReader->getModelType(), {}, {},
-							cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
-							false, {0.3}/*gt.getDistances()*/, false);
-
-
-			//BioNJ nj(inputSeqs->getSequenceCount(), tme.getOptimizedTimes(), inputSeqs);
-			//DEBUG("Final tree : " << nj.calculate());
-			//string treeStr = nj.calculate();
-
-			//treefile.open((string(cmdReader->getInputFileName()).append(".nj.tree")).c_str(),ios::out);
-			//treefile << treeStr << endl;
-			//treefile.close();
-
-			/*vector<double> indelParams;
-			vector<double> substParams;
-			double alpha = alpha = cmdReader->getAlpha();
-
-			double dist =  cmdReader->getDistance();
-			if (dist < 0)
-				dist = 1.0;
-
-			substParams = cmdReader->getSubstParams();
-			indelParams = cmdReader->getIndelParams();
-
-			//tme->getModelParameters();
-
-			//cerr << "Alpha " << alpha << endl;
-			//cerr << "Rate cat " << cmdReader->getCategories() << endl;
-			INFO("Creating Model Parameters heuristics...");
-
-			ModelEstimator* tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),
-					cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
-					cmdReader->estimateAlpha());
-
-			//tme->getModelParameters();
-			substParams = tme->getSubstitutionParameters();
-			indelParams = tme->getIndelParameters();
-			if(cmdReader->estimateAlpha())
-				alpha = tme->getAlpha();
-
-			cout << alpha << '\t' << indelParams[0] << '\t' << indelParams[1];
-			for (auto param : substParams)
-				cout  << '\t' << param;
-
-			delete tme;
-*/
-
-/*
-			HMMEstimator* tme = new HMMEstimator(inputSeqs, cmdReader->getModelType(),
-					cmdReader->getOptimizationType(), cmdReader->getCategories(), alpha,
-					cmdReader->estimateAlpha(), substParams, indelParams, dist);
-
-			substParams = tme->getSubstitutionParameters();
-			indelParams = tme->getIndelParameters();
-			//if(cmdReader->estimateAlpha())
-			//	alpha = tme->getAlpha();
-
-			//cout << "Final indel params" << endl;
-			//cout << (1.0-exp(indelParams[0]*-1.0*dist)) << "\t" << indelParams[1] << "\n";
-			//cout << "Final subst params" << endl;
-			//cout << substParams[0] << endl;
-
-			delete tme;
-*/
-		}
-
-		else
-		{
-
-
-
-			INFO("Creating Model Parameters heuristics...");
-			ModelEstimator* tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),
-					cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
-					cmdReader->estimateAlpha());
-
-			vector<double> indelParams;
-			vector<double> substParams;
-			double alpha = 100;
-
-			substParams = tme->getSubstitutionParameters();
-			indelParams = tme->getIndelParameters();
-			if(cmdReader->estimateAlpha())
-				alpha = tme->getAlpha();
-
-
-
-			//FileLogger::Logger() << "True indel paramteres     : ";
-			//FileLogger::Logger() << cmdReader->getIndelParams() << '\n';
-			//FileLogger::Logger() << "Estimated indel paramteres: ";
-			//FileLogger::Logger() << indelParams << '\n';
-			//FileLogger::Logger() << "True substitution paramteres     : ";
-			//FileLogger::Logger() << cmdReader->getSubstParams();
-			//FileLogger::Logger() << "Estimated substitution paramteres: ";
-			//FileLogger::Logger() << substParams;
-			//FileLogger::Logger() << "True alpha      : " << cmdReader->getAlpha() << "\n";
-			//FileLogger::Logger() << "Estimated alpha : " << alpha << "\n";
-
-
-
-
-			//FIXME - hardcoding substitution parameters and alpha to come from the estimator
-			BandingEstimator* be = new BandingEstimator(cmdReader->getAlgorithmType(), inputSeqs, cmdReader->getModelType() ,indelParams,
-					substParams, cmdReader->getOptimizationType(), cmdReader->getCategories(),alpha, tme->getGuideTree());
-			be->optimizePairByPair();
-
-			DEBUG ("Running BioNJ");
-
-			//change bionj init here!
-			BioNJ nj(inputSeqs->getSequenceCount(), be->getOptimizedTimes(), inputSeqs);
-			//DEBUG("Final tree : " << nj.calculate());
-			string treeStr = nj.calculate();
-
-
-			INFO("Indel parameters");
-			INFO(indelParams);
-			INFO("Substitution parameters");
-			INFO(substParams);
-			INFO("Gamma parameters (alpha and rate categories)");
-			INFO(alpha << '\t' << cmdReader->getCategories());
-			INFO("Newick tree");
-			INFO(treeStr);
-
-
-			treefile.open((string(cmdReader->getInputFileName()).append(".hmm.tree")).c_str(),ios::out);
-			treefile << treeStr << endl;
-			treefile.close();
-			delete be;
-			delete tme;
-
-		}
-
-
-		delete inputSeqs;
-		delete parser;
-		delete cmdReader;
-
-		//ForwardPairHMM* epHMM = new ForwardPairHMM(inputSeqs);
-
-		//ViterbiPairHMM* epHMM = new ViterbiPairHMM(inputSeqs);
-		//epHMM->runViterbiAlgorithm();
-		//epHMM->runForwardAlgorithm();
-		//epHMM->getResults();
-		//delete epHMM;
-		//ForwardPairHMM* fwdHMM = new ForwardPairHMM(inputSeqs,true);
-		//fwdHMM->summarize();
-
-
-		end = chrono::system_clock::now();
-	    chrono::duration<double> elapsed_seconds = end-start;
-	    std::time_t end_time = chrono::system_clock::to_time_t(end);
-
-	    INFO("Finished computation at " << std::ctime(&end_time) << " elapsed time: " << elapsed_seconds.count() << "s\n");
+		INFO("Divergence time " << modelParams->getDivergenceTime(0));
+		INFO(modelParams->getSubstParameters());
+		INFO(modelParams->getIndelParameters());
 
 	}
 	catch(HmmException& pe)

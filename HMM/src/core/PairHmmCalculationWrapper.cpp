@@ -38,7 +38,11 @@ PairHmmCalculationWrapper::~PairHmmCalculationWrapper() {
 
 double PairHmmCalculationWrapper::runIteration() {
 
+	substModel->setParameters(modelParams->getSubstParameters());
+	indelModel->setParameters(modelParams->getIndelParameters());
+	substModel->calculateModel();
 	this->phmm->setDivergenceTimeAndCalculateModels(modelParams->getDivergenceTime(0));
+	//this->phmm->summarize();
 	return this->phmm->runAlgorithm();
 }
 

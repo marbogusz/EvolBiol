@@ -161,7 +161,7 @@ void OptimizedModelParameters::generateInitialIndelParameters()
 {
 	for(unsigned int i=0; i< indelCount; i++)
 	{
-		indelParameters[i] = 0.05 + 0.1*maths->rndu();
+		indelParameters[i] = 0.02 + 0.1*maths->rndu();
 	}
 	DUMP("Model estimator initial indel parameters:");
 	DUMP(indelParameters);

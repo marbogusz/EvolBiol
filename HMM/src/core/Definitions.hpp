@@ -81,7 +81,7 @@ public:
 	constexpr static const double defaultGapPenalty = 0.5;
 
 	//model param estimation accuracy
-	constexpr static const double accuracyBFGS = 1e-8;
+	constexpr static const double accuracyBFGS = 1e-4;
 
 	constexpr static const int BrentMaxIter = 100;
 
@@ -111,9 +111,9 @@ public:
 	constexpr static const double samplingPathLnLDelta = 10.0;
 
 	//max divergence
-	constexpr static const double divergenceBound = 50;
+	constexpr static const double divergenceBound = 5;
 
-	constexpr static const double lambdaHiBound = 0.3;
+	constexpr static const double lambdaHiBound = 0.1;
 
 	constexpr static const double epsilonHiBound = 0.95;
 
@@ -121,9 +121,9 @@ public:
 	constexpr static const double initialLambda = 0.05;
 	constexpr static const double initialEpsilon = 0.5;
 
-	constexpr static const double kappaHiBound = 20;
+	constexpr static const double kappaHiBound = 50;
 
-	constexpr static const double omegaHiBound = 20;
+	constexpr static const double omegaHiBound = 50;
 
 	constexpr static const double standardLowBound = 0.00000001;
 
