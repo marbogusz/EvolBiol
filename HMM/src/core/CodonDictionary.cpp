@@ -127,7 +127,8 @@ vector<SequenceElement*>* CodonDictionary::translate(string& sequence, bool disr
 	if(sequence.size() % 3 != 0)
 		throw HmmException("Sequence length should be divisible by 3 for codon models! Quitting");
 
-	vector<SequenceElement*> *translatedVector = new vector<SequenceElement*>(sequence.size()/3);
+	vector<SequenceElement*> *translatedVector = new vector<SequenceElement*>();
+	translatedVector->reserve(sequence.size()/3);
 	unsigned short currentEl;
 
 	unsigned int pos = 0;
@@ -138,9 +139,11 @@ vector<SequenceElement*>* CodonDictionary::translate(string& sequence, bool disr
 	while(strpos < sequence.size()){
 		string cstrg = sequence.substr(strpos,3);
 		se = getSequenceElement(cstrg);
-		(*translatedVector)[pos] = se;
 		strpos +=3;
 		pos++;
+		if (se == NULL)  //STOP codon
+			continue;
+		translatedVector->push_back(se);
 		if (fScheme == Definitions::FrequencyScheme::Empirical){
 			simpleCount++;
 			elementFrequencies[se->getMatrixIndex()] += 1;

@@ -58,7 +58,12 @@ double Optimizer::objectiveFunction(const column_vector& bfgsParameters)
 {
 	//FIXME - address a potential issue of vector copying!
 	omp->fromDlibVector(bfgsParameters);
-	return target->runIteration();
+
+	omp->outputToConsole();
+
+	double likelihood = target->runIteration();
+	cout  << likelihood << "\n";
+	return likelihood;
 }
 
 
@@ -101,8 +106,6 @@ double Optimizer::optimize()
 	}
 	omp->fromDlibVector(initParams);
 	return likelihood;
-	//omp->outputParameters();
-	//cout  << likelihood << "\n";
 
 }
 
