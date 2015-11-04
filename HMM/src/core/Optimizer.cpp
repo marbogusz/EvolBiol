@@ -59,10 +59,16 @@ double Optimizer::objectiveFunction(const column_vector& bfgsParameters)
 	//FIXME - address a potential issue of vector copying!
 	omp->fromDlibVector(bfgsParameters);
 
-	omp->outputToConsole();
+	//omp->outputToConsole();
 
 	double likelihood = target->runIteration();
-	cout  << likelihood << "\n";
+
+	if (std::isnan(likelihood)){
+		cout << "NAN\t";
+		exit(0);
+	}
+
+	//cout  << likelihood << "\n";
 	return likelihood;
 }
 
@@ -87,7 +93,7 @@ double Optimizer::optimize()
 		case Definitions::OptimizationType::BFGS:
 		{
 			dlib::objective_delta_stop_strategy strt(accuracy);
-			strt.be_verbose();
+			//strt.be_verbose();
 			likelihood = dlib::find_min_box_constrained(dlib::bfgs_search_strategy(),
 					strt,  //changed the delta drastically
 					f_objective,

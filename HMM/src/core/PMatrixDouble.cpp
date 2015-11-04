@@ -99,7 +99,7 @@ void PMatrixDouble::calculate()
 			for (int j=0; j< matrixFullSize; j++)
 			{
 				fastPairGammaPt[j] += ptMatrices[i][j] * model->gammaFrequencies[i];
-				fastLogPairGammaPt[j] = log(fastPairGammaPt[j]);
+				fastLogPairGammaPt[j] = fastPairGammaPt[j] < Definitions::almostZero ? Definitions::minMatrixLikelihood : log(fastPairGammaPt[j]);
 			}
 
 		}

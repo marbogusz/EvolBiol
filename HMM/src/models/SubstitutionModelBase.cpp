@@ -180,7 +180,7 @@ void SubstitutionModelBase::setObservedFrequencies(double* observedFrequencies)
 		this->piLogFreqs = new double[this->matrixSize];
 	for(unsigned int i = 0; i< this->matrixSize; i++)
 	{
-		piLogFreqs[i] = log(piFreqs[i]);
+		piLogFreqs[i] = piFreqs[i] < Definitions::almostZero ? Definitions::minMatrixLikelihood : log(piFreqs[i]);
 	}
 }
 

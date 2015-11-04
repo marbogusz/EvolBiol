@@ -89,7 +89,7 @@ public:
 	constexpr static const double initialBandFactor = 0.33;
 
 	//small number close to zero for param estimation
-	constexpr static const double almostZero = 1e-8;
+	constexpr static const double almostZero = 1e-6;
 
 	constexpr static const double maxAlpha = 99.999999;
 
@@ -111,11 +111,11 @@ public:
 	constexpr static const double samplingPathLnLDelta = 10.0;
 
 	//max divergence
-	constexpr static const double divergenceBound = 5;
+	constexpr static const double divergenceBound = 3;
 
-	constexpr static const double lambdaHiBound = 0.1;
+	constexpr static const double lambdaHiBound = 0.2;
 
-	constexpr static const double epsilonHiBound = 0.95;
+	constexpr static const double epsilonHiBound = 0.99;
 
 
 	constexpr static const double initialLambda = 0.05;
@@ -125,7 +125,7 @@ public:
 
 	constexpr static const double omegaHiBound = 50;
 
-	constexpr static const double standardLowBound = 0.00000001;
+	constexpr static const double standardLowBound = 1e-6;
 
 	//This makes the min band width of 15 characters
 	constexpr static const unsigned int minBandDelta = 7;

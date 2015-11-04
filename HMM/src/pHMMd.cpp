@@ -47,8 +47,8 @@ int main(int argc, char ** argv) {
 
 	//Set output Precision to 2
 	//FIXME - should normally be set to >= 6
-	cout << fixed << setprecision(8);
-	cerr << fixed << setprecision(8);
+	cout << fixed << setprecision(6);
+	cerr << fixed << setprecision(6);
 
 	try
 	{
@@ -95,9 +95,13 @@ int main(int argc, char ** argv) {
 		modelParams = new OptimizedModelParameters(substModel, indelModel,2, 1, true,
 							true, false, true, maths);
 
-		modelParams->generateInitialDistanceParameters();
-		modelParams->generateInitialIndelParameters();
-		modelParams->generateInitialSubstitutionParameters();
+		//modelParams->generateInitialDistanceParameters();
+		//modelParams->generateInitialIndelParameters();
+		//modelParams->generateInitialSubstitutionParameters();
+		modelParams->setUserIndelParams({0.05,0.5});
+		modelParams->setUserDivergenceParams({0.1});
+		modelParams->setUserSubstParams({2.5, 0.5});
+
 
 		EvolutionaryPairHMM *hmm;
 
@@ -105,28 +109,47 @@ int main(int argc, char ** argv) {
 
 		PairHmmCalculationWrapper* wrapper = new PairHmmCalculationWrapper();
 
-		std::pair<unsigned int, unsigned int> idxs = inputSeqs->getPairOfSequenceIndices(0);
 
-		unsigned int len1, len2;
 
-		len1 = inputSeqs->getSequencesAt(idxs.first)->size();
-		len2 = inputSeqs->getSequencesAt(idxs.second)->size();
+		for (unsigned int pi = 0; pi<inputSeqs->getPairCount(); pi++){
+
+			std::pair<unsigned int, unsigned int> idxs = inputSeqs->getPairOfSequenceIndices(pi);
+
+			unsigned int len1, len2;
+
+			len1 = inputSeqs->getSequencesAt(idxs.first)->size();
+			len2 = inputSeqs->getSequencesAt(idxs.second)->size();
+
+			Band* band = new Band(len1,len2,0.3);
 
 		//BAND it ?
-		hmm = new ForwardPairHMM(inputSeqs->getSequencesAt(idxs.first), inputSeqs->getSequencesAt(idxs.second),
-							substModel, indelModel, Definitions::DpMatrixType::Full, new Band(len1,len2,0.25));
+			hmm = new ForwardPairHMM(inputSeqs->getSequencesAt(idxs.first), inputSeqs->getSequencesAt(idxs.second),
+							substModel, indelModel, Definitions::DpMatrixType::Full, band);
 
-		wrapper->setTargetHMM(hmm);
-		wrapper->setIndelModel(indelModel);
-		wrapper->setSubstModel(substModel);
-		wrapper->setModelParameters(modelParams);
 
-		bfgs->setTarget(wrapper);
-		bfgs->optimize();
 
-		INFO("Divergence time " << modelParams->getDivergenceTime(0));
-		INFO(modelParams->getSubstParameters());
-		INFO(modelParams->getIndelParameters());
+			wrapper->setTargetHMM(hmm);
+			wrapper->setIndelModel(indelModel);
+			wrapper->setSubstModel(substModel);
+			wrapper->setModelParameters(modelParams);
+
+			bfgs->setTarget(wrapper);
+			bfgs->optimize();
+
+
+			cout << modelParams->getSubstParameters()[0] << "\t" << modelParams->getSubstParameters()[1] <<
+			    "\t" <<  modelParams->getIndelParameters()[0] << "\t" <<  modelParams->getIndelParameters()[1] <<
+				"\t" << modelParams->getDivergenceTime(0) << "\t" << inputSeqs->getSequenceName(idxs.first) << "\t" << inputSeqs->getSequenceName(idxs.second) << "\t" << pi << "\n";
+
+			//INFO(inputSeqs->getSequenceName(idxs.first) << " " << inputSeqs->getSequenceName(idxs.second));
+
+			//INFO("Divergence time " << modelParams->getDivergenceTime(0));
+			//INFO(modelParams->getSubstParameters());
+			//INFO(modelParams->getIndelParameters());
+
+			delete hmm;
+			delete band;
+		}
 
 	}
 	catch(HmmException& pe)
