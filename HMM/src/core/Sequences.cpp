@@ -30,10 +30,10 @@
 namespace EBC
 {
 
-Sequences::Sequences(IParser* iParser,Definitions::SequenceType st, bool fa) throw (HmmException&)
+Sequences::Sequences(IParser* iParser,Definitions::SequenceType st, bool rg) throw (HmmException&)
 {
 	//use the file parser to get sequences and build the dictionary
-	fixedAlignment = fa;
+	removeGaps = rg;
 	observedFrequencies = NULL;
 
 	unsigned int size = iParser->getSequenceCount();
@@ -58,7 +58,7 @@ Sequences::Sequences(IParser* iParser,Definitions::SequenceType st, bool fa) thr
 	this->sequenceNames = iParser->getNames();
 
 	for (auto it = rawSequences->begin(); it != rawSequences->end(); it++)
-		this->translatedSequences.push_back(dict->translate(*it,fixedAlignment==false));
+		this->translatedSequences.push_back(dict->translate(*it,removeGaps));
 
 }
 

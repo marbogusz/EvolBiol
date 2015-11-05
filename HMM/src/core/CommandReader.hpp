@@ -44,71 +44,22 @@ public:
 	CommandReader(int argc, char** argv);
 	IParser* getParser() throw (HmmException&);
 
-	inline bool isViterbi()
-	{
-		return parser.option("V");
-	}
-
-	inline bool isForward()
-	{
-		return parser.option("F");
-	}
-
-	inline bool isMLE()
-	{
-		return parser.option("M");
-	}
-
-	//2 below are optional and new
-	inline bool isFdist()
-	{
-		return parser.option("X");
-	}
-	inline bool isVdist()
-	{
-		return parser.option("Y");
-	}
-
-	inline bool isFixedAlignment()
-	{
-		return parser.option("fa");
-	}
 
 	vector<double> getIndelParams();
 
 	vector<double> getSubstParams();
 
-	bool isOutputViterbiAlignment()
-	{
-		return parser.option("ov");
-	}
-
-	Definitions::AlgorithmType getAlgorithmType()
-		{
-			if (parser.option("V"))
-			{
-				return Definitions::AlgorithmType::Viterbi;
-			}
-			if (parser.option("F"))
-			{
-				return Definitions::AlgorithmType::Forward;
-			}
-			//default;
-			return Definitions::AlgorithmType::MLE;
-		}
-
-
 	Definitions::ModelType getModelType()
 	{
-		if (parser.option("rev"))
+		if (parser.option("GTR"))
 		{
 			return Definitions::ModelType::GTR;
 		}
-		if (parser.option("hky"))
+		if (parser.option("HKY"))
 		{
 			return Definitions::ModelType::HKY85;
 		}
-		if (parser.option("lg"))
+		if (parser.option("LG"))
 		{
 			return Definitions::ModelType::LG;
 		}
@@ -123,8 +74,7 @@ public:
 
 	Definitions::OptimizationType getOptimizationType()
 	{
-			unsigned int opt = get_option(parser,"o",0);
-			return (Definitions::OptimizationType) opt;
+			return (Definitions::OptimizationType::BFGS);
 	}
 
 	FileLogger::logType getLoggingLevel()
@@ -144,20 +94,6 @@ public:
 			FileLogger::L_INF;
 	}
 
-	bool getBanding()
-	{
-		if (parser.option("b"))
-			return true;
-		else
-			return false;
-	}
-
-	double getDistance()
-	{
-		double opt = get_option(parser,"d",-1.0);
-		return opt;
-	}
-
 	double getAlpha()
 	{
 		return get_option(parser,"initAlpha",0.5);
@@ -165,7 +101,7 @@ public:
 
 	double getCategories()
 	{
-		return get_option(parser,"rateCat",1);
+		return get_option(parser,"rateCat",4);
 	}
 
 	bool estimateAlpha()

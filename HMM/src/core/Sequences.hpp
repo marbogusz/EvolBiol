@@ -61,7 +61,7 @@ private:
 	unsigned int sequenceCount;
 	double* observedFrequencies;
 
-	bool fixedAlignment;
+	bool removeGaps;
 
 public:
 

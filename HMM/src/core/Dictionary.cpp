@@ -73,23 +73,22 @@ SequenceElement* Dictionary::getSequenceElement(char symbol)
 	return translator[symbol];
 }
 
-vector<SequenceElement*>* Dictionary::translate(string& sequence, bool disregardIndels)
+vector<SequenceElement*>* Dictionary::translate(string& sequence, bool removeGaps)
 {
 
-	vector<SequenceElement*> *translatedVector = new vector<SequenceElement*>(sequence.size());
+	vector<SequenceElement*> *translatedVector = new vector<SequenceElement*>();
+	translatedVector->reserve(sequence.size());
 	unsigned short currentEl;
 
 //	DEBUG("Transled: ");
 	unsigned int pos = 0;
 	for(string::iterator it = sequence.begin(); it < sequence.end(); it++)
 	{
-		(*translatedVector)[pos] = getSequenceElement(*it);
-		pos++;
-		//currentEl = getSymbolIndex(*it);
-		//if (currentEl == alphabetSize && disregardIndels)
-		//	continue;
-//		DEBUGN(currentEl);
-		//translatedVector.push_back(SequenceElement((currentEl == alphabetSize), currentEl,NULL, getSymbolAt(currentEl)));
+		auto el = getSequenceElement(*it);
+
+		if(el->isIsGap() && removeGaps)
+			continue;
+		translatedVector->push_back(el);
 		//translatedVector.push_back(SequenceElement((currentEl == alphabetSize), currentEl,NULL, getSymbolAt(currentEl)));
 	}
 //	DEBUGN(std::endl);
