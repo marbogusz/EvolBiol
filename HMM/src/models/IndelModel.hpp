@@ -72,6 +72,8 @@ public:
 
 	virtual void calculate()=0;
 
+	virtual void resetBounds()=0;
+
 	double getGapExtensionProbability() const
 	{
 		return gapExtensionProbability;

@@ -114,6 +114,8 @@ public:
 	void generateInitialSubstitutionParameters();
 	void generateInitialDistanceParameters();
 
+	void resetBounds();
+
 	double getAlpha() const
 	{
 		return alpha;

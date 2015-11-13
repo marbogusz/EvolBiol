@@ -38,6 +38,11 @@ namespace EBC
 NegativeBinomialGapModel::NegativeBinomialGapModel() : IndelModel(Definitions::NBIndelParamCount)
 {
 	//logMode = true;
+	resetBounds();
+}
+
+void NegativeBinomialGapModel::resetBounds()
+{
 	this->parameterLoBounds[0] = this->parameterLoBounds[1] = Definitions::almostZero;
 	this->parameterHiBounds[0] = Definitions::lambdaHiBound;
 	this->parameterHiBounds[1] = Definitions::epsilonHiBound;

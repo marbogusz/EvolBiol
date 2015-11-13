@@ -98,9 +98,13 @@ int main(int argc, char ** argv) {
 		//modelParams->generateInitialDistanceParameters();
 		//modelParams->generateInitialIndelParameters();
 		//modelParams->generateInitialSubstitutionParameters();
-		modelParams->setUserIndelParams({0.05,0.5});
+		modelParams->setUserIndelParams({0.01,0.2});
 		modelParams->setUserDivergenceParams({0.1});
-		modelParams->setUserSubstParams({2.5, 0.5});
+		modelParams->setUserSubstParams({2.5, 0.01});
+
+		//indelModel->setParameters({0.00001,0.00001});
+		//substModel->setParameters({16.4, 0.00352});
+		//substModel->calculateModel();
 
 
 		EvolutionaryPairHMM *hmm;
@@ -122,7 +126,7 @@ int main(int argc, char ** argv) {
 
 			Band* band = new Band(len1,len2,0.3);
 
-		//BAND it ?
+			//BAND it ?
 			hmm = new ForwardPairHMM(inputSeqs->getSequencesAt(idxs.first), inputSeqs->getSequencesAt(idxs.second),
 							substModel, indelModel, Definitions::DpMatrixType::Full, band);
 
@@ -135,6 +139,45 @@ int main(int argc, char ** argv) {
 
 			bfgs->setTarget(wrapper);
 			bfgs->optimize();
+
+			//detect if we're close to the bounds
+
+			double lambda, divergence;
+			bool runAgain;
+
+			do{
+
+				runAgain = false;
+				lambda = modelParams->getIndelParameters()[0];
+				divergence  = modelParams->getDivergenceTime(0);
+
+				//cerr << " L " << lambda << " D " << divergence << endl;
+
+
+				if(lambda > (Definitions::lambdaHiBound * 0.975)){
+					runAgain = true;
+					//cerr << " Lambda big \n";
+					Definitions::lambdaHiBound = Definitions::lambdaHiBound * 2.0;
+					Definitions::divergenceBound = Definitions::divergenceBound / 2.0;
+
+				}	//check if we're close to the band
+				else if(divergence > (Definitions::divergenceBound * 0.975)){
+					runAgain = true;
+					//cerr << " Divergence big \n";
+					Definitions::lambdaHiBound = Definitions::lambdaHiBound / 2.0;
+					Definitions::divergenceBound = Definitions::divergenceBound * 2.0;
+				}
+
+				if(runAgain){
+					//cerr << "Run again...\n";
+					//cerr << "New bounds " << Definitions::lambdaHiBound << " " << Definitions::divergenceBound << endl;
+					indelModel->resetBounds();
+					modelParams->resetBounds();
+					bfgs->optimize();
+				}
+
+			}
+			while(runAgain == true);
 
 
 			cout << modelParams->getSubstParameters()[0] << "\t" << modelParams->getSubstParameters()[1] <<

@@ -56,7 +56,16 @@ OptimizedModelParameters::OptimizedModelParameters(SubstitutionModelBase* sm, In
 		generateInitialDistanceParameters();
 }
 
+void OptimizedModelParameters::resetBounds()
+{
+	this->divergenceBound  = Definitions::divergenceBound;
 
+	if(im != NULL){
+		for (int i =0; i< indelCount; i++){
+			indelHiBounds[i] = im->getHiBound(i);
+		}
+	}
+}
 
 void OptimizedModelParameters::useSubstitutionModelInitialParameters()
 {

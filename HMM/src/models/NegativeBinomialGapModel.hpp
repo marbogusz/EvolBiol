@@ -60,6 +60,8 @@ public:
 	void calculate();
 
 	void summarize();
+
+	void resetBounds();
 };
 
 } /* namespace EBC */
