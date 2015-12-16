@@ -41,9 +41,9 @@ CommandReader::CommandReader(int argc, char** argv)
 	try
 	{
 		parser.add_option("in","This option takes one argument which specifies the name of the file we want to analyze",1);
-		parser.add_option("GTR", "REV Substitution Model");
-		parser.add_option("HKY", "HKY85 Substitution Model");
-		parser.add_option("LG", "Le & Gasquel AA Substitution Model");
+		parser.add_option("GTR", "General time reversible substitution model");
+		parser.add_option("HKY", "HKY85 substitution model");
+		parser.add_option("LG", "Le & Gasquel AA substitution sodel");
 		parser.add_option("indel_params","indel parameters (NB probability and rate)",2);
 		//FIXME - remove
 		parser.set_group_name("Miscellaneous Options");
@@ -52,9 +52,9 @@ CommandReader::CommandReader(int argc, char** argv)
 		parser.add_option("hky_params","HKY85 model parameters",1);
 		parser.add_option("rateCat", "Specify gamma rate categories, default is 4",1);
 
-		parser.add_option("initAlpha", "Specify initial alpha parameter, default is 0.5",1 );
+		parser.add_option("initAlpha", "Specify initial discrete Gamma shape parameter alpha , default is 0.5",1 );
 
-		parser.add_option("estimateAlpha", "Specify to estimate alpha 0|1, default is 1",1 );
+		parser.add_option("estimateAlpha", "Specify to estimate discrete Gamma shape parameter alpha 0|1, default is 1",1 );
 
 		parser.add_option("lE", "log error");
 		parser.add_option("lW", "log warning");
@@ -64,8 +64,8 @@ CommandReader::CommandReader(int argc, char** argv)
 
 		parser.parse(argc,argv);
 
-		const char* one_time_opts[] = {"in", "indel_params" ,"h","b"};
-		parser.check_one_time_options(one_time_opts);
+		//const char* one_time_opts[] = {"in", "indel_params" ,"h","b"};
+		//parser.check_one_time_options(one_time_opts);
 
 		parser.check_incompatible_options("GTR", "HKY");
 		//parser.check_incompatible_options("d", "F");
@@ -80,22 +80,50 @@ CommandReader::CommandReader(int argc, char** argv)
 		parser.check_option_arg_range("indel_params", 0.0, 0.99);
 		parser.check_option_arg_range("initAlpha", 0.00000001, 100.0);
 
+		if (parser.option("h"))
+		{
+			// display all the command line options
+
+			cout <<
+"paHMM-Tree - distance-based statistical phylogenetic tree estimation version 0.1512\n\
+Copyright (C) 2015  Marcin Bogusz\n\
+This program is free software: you can redistribute it and/or modify\n\
+it under the terms of the GNU General Public License as published by\n\
+the Free Software Foundation, either version 3 of the License, or\n\
+(at your option) any later version.\n\
+\n\
+This program is distributed in the hope that it will be useful,\n\but WITHOUT ANY WARRANTY; without even the implied warranty of\n\
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n\
+GNU General Public License for more details.\n\
+\n\
+You should have received a copy of the GNU General Public License\n\
+along with this program.  If not, see <http://www.gnu.org/licenses/>.\n\n";
+
+			cout << "Usage: HMM --in input_file --(GTR|HKY|LG) [--gtr_params ... | --hky_params ... --indel_params ...]\n";
+			parser.print_options();
+			throw HmmException("Exiting...\n");
+		}
+
 		if (!parser.option("in"))
 		{
+			cout << "paHMM-Tree - distance-based statistical phylogenetic tree estimation version 0.1512 \n\n";
 		    cout << "Usage: HMM --in input_file --(GTR|HKY|LG) [--gtr_params ... | --hky_params ... --indel_params ...]\n";
 		    parser.print_options();
-			throw HmmException("Please specify valid parameters\n");
+			throw HmmException("Please specify the input file\n");
+		}
+
+		if (!(parser.option("GTR") || parser.option("HKY") || parser.option("LG")))
+		{
+					cout << "paHMM-Tree - distance-based statistical phylogenetic tree estimation version 0.1512 \n\n";
+				    cout << "Usage: HMM --in input_file --(GTR|HKY|LG) [--gtr_params ... | --hky_params ... --indel_params ...]\n";
+				    parser.print_options();
+					throw HmmException("Please specify a valid substitution model \n");
 		}
 
 		parser.check_option_arg_range("estimateAlpha", 0, 1);
 		parser.check_option_arg_range("rateCat", 0, 1000);
 
-		if (parser.option("h"))
-		{
-			// display all the command line options
-		    cout << "Usage: HMM --in input_file --(GTR|HKY|LG) [--gtr_params ... | --hky_params ... --indel_params ...]\n";
-		    parser.print_options();
-		}
+
 	}
 	catch (exception& e)
 	{
@@ -113,7 +141,7 @@ vector<double> CommandReader::getSubstParams()
 		{
 			for (i=0; i< 1; i++)
 			{
-				DEBUG("hky parameter " << i <<  ": " << parser.option("hky_params").argument(i));
+				DEBUG("HKY parameter " << i <<  ": " << parser.option("hky_params").argument(i));
 				vec.push_back(atof(parser.option("hky_params").argument(i).c_str()));
 			}
 		}
@@ -124,7 +152,7 @@ vector<double> CommandReader::getSubstParams()
 		{
 			for (i=0; i< 5; i++)
 			{
-				DEBUG("Rev parameter " << i <<  ": " << parser.option("gtr_params").argument(i));
+				DEBUG("GTR parameter " << i <<  ": " << parser.option("gtr_params").argument(i));
 				vec.push_back(atof(parser.option("gtr_params").argument(i).c_str()));
 			}
 		}

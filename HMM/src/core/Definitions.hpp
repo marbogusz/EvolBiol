@@ -141,8 +141,8 @@ public:
 	constexpr static const unsigned int aminoacidCount = 20;
 
 	constexpr static auto distMatExt = ".hmm.distmat";
-	constexpr static auto treeExt = ".hmm.tree";
-	constexpr static auto logExt = ".hmm.log";
+	constexpr static auto treeExt = ".paHMM-Tree.tree";
+	constexpr static auto logExt = ".paHMM-Tree.log";
 
 
 	struct aaModelDefinition

@@ -111,7 +111,7 @@ public:
 	}
 	Definitions::SequenceType getSequenceType()
 	{
-		if (parser.option("rev") || parser.option("hky"))
+		if (parser.option("GTR") || parser.option("HKY"))
 			return Definitions::SequenceType::Nucleotide;
 		else return Definitions::SequenceType::Aminoacid;
 		//FIXME codons???

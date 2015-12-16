@@ -37,9 +37,11 @@ Sequences::Sequences(IParser* iParser,Definitions::SequenceType st, bool rg) thr
 	observedFrequencies = NULL;
 
 	unsigned int size = iParser->getSequenceCount();
-	if (size <= 0)
-	{
-		throw HmmException("No sequences found. Quitting");
+	if (size <= 0){
+		throw HmmException("No FASTA sequences found in the input file. Quitting");
+	}
+	else if (size < 3){
+		throw HmmException("paHMM-Tree requires at least 3 sequences to run. Quitting");
 	}
 
 	this->buildDictionary(st);
@@ -77,7 +79,7 @@ Dictionary* Sequences::getDictionary()
 	return dict;
 }
 
-//FIXME - RETURN A REFERENCE!
+
 string& Sequences::getRawSequenceAt(unsigned int pos)
 {
 	return (*rawSequences)[pos];
