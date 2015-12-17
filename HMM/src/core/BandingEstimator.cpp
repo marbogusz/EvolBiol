@@ -30,7 +30,6 @@
 #include "models/AminoacidSubstitutionModel.hpp"
 #include "models/NegativeBinomialGapModel.hpp"
 #include "hmm/DpMatrixFull.hpp"
-#include "extras/LikelihoodSurfacePlotter.hpp"
 
 namespace EBC
 {
