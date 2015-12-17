@@ -21,7 +21,7 @@
  * EvolutionaryPairHMM.hpp
  *
  *  Created on: Feb 25, 2014
- *      Author: root
+ *      Author: Marcin Bogusz
  */
 
 #ifndef EVOLUTIONARYPAIRHMM_HPP_
@@ -171,10 +171,6 @@ public:
 	{
 		return Y;
 	}
-
-	void getSample(vector<SequenceElement*>* s1, vector<SequenceElement*>* s2, HMMPathSample& sample);
-
-	double calculateSampleLnL(HMMPathSample& sample);
 
 	double getAlignmentLikelihood(vector<SequenceElement*>* s1, vector<SequenceElement*>* s2);
 

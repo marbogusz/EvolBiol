@@ -31,13 +31,13 @@ namespace EBC
 
 
 
-SequenceElement::SequenceElement(bool isGap, unsigned char index, short* alternativeIndexes, char sy) : symbol(sy)
+SequenceElement::SequenceElement(bool isGap, unsigned char index, unsigned char* alternativeIdx, char sy, unsigned short classSize)
+	: idcs(alternativeIdx), symbol(sy), clSize(classSize), fastaClass(clSize > 1)
 {
 	this->isGap = isGap;
-	//matrix index of -1 means gap or multiple options!
+
 	this->matrixIndex = index;
-	//FIXME - implememnt the following
-	//vector<short> alternativeIndexes
+
 }
 
 } /* namespace EBC */

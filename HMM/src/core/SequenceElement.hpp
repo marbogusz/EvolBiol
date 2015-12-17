@@ -43,13 +43,25 @@ protected:
 	bool isGap;
 	unsigned char matrixIndex;
 	char symbol;
-	//vector<short> alternativeIndexes;
+	unsigned short clSize;
+	bool fastaClass;
+	unsigned char* idcs;
 public:
-	SequenceElement(bool, unsigned char, short*, char smbl);
+	SequenceElement(bool isGap, unsigned char substMatrixIndex, unsigned char* altIdcs, char smbl, unsigned short classSize=1);
 
 	inline bool isIsGap() const
 	{
 		return isGap;
+	}
+
+	inline bool isFastaClass() const
+	{
+		return fastaClass;
+	}
+
+	inline unsigned short getClassSize()
+	{
+		return clSize;
 	}
 
 	inline unsigned char getMatrixIndex()
@@ -60,6 +72,11 @@ public:
 	inline char getSymbol()
 	{
 		return symbol;
+	}
+
+	inline unsigned char* getClassIndices()
+	{
+		return idcs;
 	}
 };
 

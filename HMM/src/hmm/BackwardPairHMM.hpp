@@ -61,11 +61,7 @@ public:
 
 	void calculatePosteriors(ForwardPairHMM* fwd);
 
-	double getAlignmentLikelihood(vector<SequenceElement*>* s1, vector<SequenceElement*>* s2, bool post, vector<vector<double> >& posteriors);
-
 	void calculateMaximumPosteriorMatrix();
-
-	void getAlignment(HMMPathSample& sample);
 
 	//maximum posteriori alignment
 	pair<string, string> getMPAlignment();

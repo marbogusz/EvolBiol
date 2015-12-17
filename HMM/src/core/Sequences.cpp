@@ -38,10 +38,10 @@ Sequences::Sequences(IParser* iParser,Definitions::SequenceType st, bool rg) thr
 
 	unsigned int size = iParser->getSequenceCount();
 	if (size <= 0){
-		throw HmmException("No FASTA sequences found in the input file. Quitting");
+		throw HmmException("No FASTA sequences found in the input file. Quitting...\n");
 	}
 	else if (size < 3){
-		throw HmmException("paHMM-Tree requires at least 3 sequences to run. Quitting");
+		throw HmmException("paHMM-Tree requires at least 3 sequences to run. Quitting...\n");
 	}
 
 	this->buildDictionary(st);
@@ -116,8 +116,17 @@ void Sequences::calculateObservedFrequencies()
 		{
 			if (!((*it2)->isIsGap()))
 			{
-				count++;
-				observedFrequencies[(*it2)->getMatrixIndex()]++;
+				auto elcount = (*it2)->getClassSize();
+				count += elcount;
+				if(elcount > 1){
+					auto ids = (*it2)->getClassIndices();
+					while(elcount > 0){
+						observedFrequencies[ids[elcount-1]]++;
+						elcount--;
+					}
+				}
+				else
+					observedFrequencies[(*it2)->getMatrixIndex()]++;
 			}
 		}
 	}

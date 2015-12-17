@@ -26,6 +26,7 @@
 
 #include "core/Dictionary.hpp"
 #include "core/Definitions.hpp"
+#include "core/HmmException.hpp"
 #include <algorithm>
 
 namespace EBC
@@ -42,12 +43,27 @@ void Dictionary::setAlphabet(char dict[], unsigned short size)
 	for(unsigned short i=0; i<=size; i++)
 	{
 		//this->alphabet.push_back(string(1,dict[i]));
-		this->translator.insert(std::make_pair(alphabet[i],new SequenceElement(i==gapId, i, NULL, alphabet[i])));
-		this->translator.insert(std::make_pair(tolower(alphabet[i]),new SequenceElement(i==gapId, i, NULL, alphabet[i])));
+		SequenceElement* sel  = new SequenceElement(i==gapId, i, NULL, alphabet[i]);
+		this->translator.insert(std::make_pair(alphabet[i],sel));
+		this->translator.insert(std::make_pair(tolower(alphabet[i]),sel));
 	}
 
 	//alphabet size does not include gap e.g. size is 4 for nucleotides
 	this->alphabetSize = size;
+}
+
+void Dictionary::addFastaClasses(const map<char,vector<char> >& classmap)
+{
+	unsigned char currId = this->alphabetSize + 1;
+	for(auto const &fcls : classmap){
+		unsigned char* ids = new unsigned char[fcls.second.size()];
+		SequenceElement* sel = new SequenceElement(false, currId, ids, fcls.first, fcls.second.size());
+		this->translator.insert(std::make_pair(fcls.first,sel));
+		this->translator.insert(std::make_pair(tolower(fcls.first),sel));
+		alphabet.append(fcls.first,currId);
+		currId++;
+	}
+
 }
 
 void Dictionary::outputAlphabet()
@@ -70,7 +86,14 @@ unsigned char Dictionary::getSymbolIndex(char symbol)
 
 SequenceElement* Dictionary::getSequenceElement(char symbol)
 {
-	return translator[symbol];
+	try {
+		return translator.at(symbol);      // vector::at throws an out-of-range
+	}
+	catch (const std::out_of_range& oor) {
+		string message = "Symbol not found in the dictionary: ";
+		message += symbol;
+	    throw HmmException(message);
+	}
 }
 
 vector<SequenceElement*>* Dictionary::translate(string& sequence, bool removeGaps)
@@ -102,17 +125,42 @@ const char Dictionary::aminoacids[] = {'A','R','N','D','C','Q','E','G','H','I','
 
 const char Dictionary::gapChar = '-';
 
+const map<char,vector<char> > Dictionary::nucFastaClasses = {
+		{'R',{'A','G'}},
+		{'Y',{'C','T'}},
+		{'K',{'G','T'}},
+		{'M',{'A','C'}}
+
+};
+
+const map<char,vector<char> > Dictionary::aaFastaClasses = {
+		{'B',{'D','N'}},
+		{'J',{'L','I'}},
+		{'Z',{'E','Q'}},
+		{'X',{'A','R','N','D','C','Q','E','G','H','I','L','K','M','F','P','S','T','W','Y','V'}}
+};
+
 unsigned short Dictionary::getAlphabetSize()
 {
 	return this->alphabetSize;
 }
 
 
+
+
 NucleotideDictionary::NucleotideDictionary()
 {
 	gapId = 4;
 	this->setAlphabet((char*)Dictionary::nucleotides,4);
+	this->handleTUequivalence();
+	this->addFastaClasses(Dictionary::nucFastaClasses);
 
+}
+
+void NucleotideDictionary::handleTUequivalence()
+{
+	this->translator.insert(std::make_pair('U',getSequenceElement('T')));
+	this->translator.insert(std::make_pair('u',getSequenceElement('t')));
 }
 
 
@@ -120,6 +168,7 @@ AminoacidDictionary::AminoacidDictionary()
 {
 	gapId = 20;
 	this->setAlphabet((char*)Dictionary::aminoacids,20);
+	this->addFastaClasses(Dictionary::aaFastaClasses);
 
 }
 

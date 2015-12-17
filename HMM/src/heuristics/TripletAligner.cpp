@@ -265,7 +265,7 @@ array<vector<unsigned char>*, 3> TripletAligner::alignPosteriors(pair<vector<uns
 	{
 		sp3 << dict->getSymbolAt((*tr3)[c]);
 	}
-	DUMP("Posterior riple alignment");
+	DUMP("Posterior triple alignment");
 	DUMP(sp1.str());
 	DUMP(sp2.str());
 	DUMP(sp3.str());
