@@ -43,7 +43,9 @@ void Dictionary::setAlphabet(char dict[], unsigned short size)
 	for(unsigned short i=0; i<=size; i++)
 	{
 		//this->alphabet.push_back(string(1,dict[i]));
-		SequenceElement* sel  = new SequenceElement(i==gapId, i, NULL, alphabet[i]);
+		unsigned char* idxptr = new unsigned char[1];
+		idxptr[0] = i;
+		SequenceElement* sel  = new SequenceElement(i==gapId, i, idxptr, alphabet[i]);
 		this->translator.insert(std::make_pair(alphabet[i],sel));
 		this->translator.insert(std::make_pair(tolower(alphabet[i]),sel));
 	}
@@ -57,6 +59,9 @@ void Dictionary::addFastaClasses(const map<char,vector<char> >& classmap)
 	unsigned char currId = this->alphabetSize + 1;
 	for(auto const &fcls : classmap){
 		unsigned char* ids = new unsigned char[fcls.second.size()];
+		for(unsigned int i = 0; i < fcls.second.size(); i++){
+			ids[i] = (translator[fcls.second[i]])->getMatrixIndex();
+		}
 		SequenceElement* sel = new SequenceElement(false, currId, ids, fcls.first, fcls.second.size());
 		this->translator.insert(std::make_pair(fcls.first,sel));
 		this->translator.insert(std::make_pair(tolower(fcls.first),sel));

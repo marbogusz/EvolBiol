@@ -30,6 +30,7 @@
 #include "models/SubstitutionModelBase.hpp"
 #include "core/HmmException.hpp"
 #include "core/PMatrix.hpp"
+#include "core/SequenceElement.hpp"
 #include <vector>
 #include <array>
 
@@ -66,6 +67,12 @@ public:
 	double getPairTransition(unsigned int xi, unsigned int yi);
 
 	double getLogPairTransition(unsigned int xi, unsigned int yi);
+
+	double getLogEquilibriumFreqClass(SequenceElement* se);
+
+	double getLogPairTransitionClass(SequenceElement* se1, SequenceElement* se2);
+
+
 
 	void summarize();
 

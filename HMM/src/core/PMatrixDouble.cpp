@@ -120,6 +120,42 @@ double PMatrixDouble::getLogPairTransition(unsigned int xi, unsigned int yi)
 	return model->getLogEquilibriumFrequencies(xi) + fastLogPairGammaPt[xi*matrixSize+yi];
 }
 
+double PMatrixDouble::getLogEquilibriumFreqClass(SequenceElement* se)
+{
+	if(se->isFastaClass()){
+		double pi = 0;
+		auto ids = se->getClassIndices();
+		auto sz = se->getClassSize();
+		while(sz > 0){
+			pi += getEquilibriumFreq(ids[sz-1]);
+			sz--;
+		}
+		return log(pi);
+	}
+	else return this->getLogEquilibriumFreq(se->getMatrixIndex());
+}
+
+double PMatrixDouble::getLogPairTransitionClass(SequenceElement* se1, SequenceElement* se2)
+{
+	auto sz1 = se1->getClassSize();
+	auto sz2 = se2->getClassSize();
+	auto ids1 = se1->getClassIndices();
+	auto ids2 = se2->getClassIndices();
+	double res = 0;
+	double tpi;
+	double tcz;
+
+	for (unsigned short i = 0; i < sz1; i++){
+		tpi = getEquilibriumFreq(ids1[i]);
+		tcz = 0;
+		for (unsigned short j = 0; j < sz2; j++)
+			tcz += getPairTransition(ids1[i],ids2[j]);
+		res += tpi*tcz;
+	}
+	return log(res);
+
+}
+
 void PMatrixDouble::summarize()
 {
 	cout << "P(t) matrix summary :" << endl;
