@@ -50,8 +50,6 @@
 
 #include "heuristics/Band.hpp"
 
-#include "sampling/HMMPathSample.hpp"
-
 namespace EBC
 {
 

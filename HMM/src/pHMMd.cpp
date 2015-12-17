@@ -37,7 +37,6 @@
 #include "hmm/ForwardPairHMM.hpp"
 #include "hmm/ViterbiPairHMM.hpp"
 
-#include "sampling/HMMEstimator.hpp";
 
 using namespace std;
 using namespace EBC;

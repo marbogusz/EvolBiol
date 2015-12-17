@@ -28,7 +28,6 @@
 #define VITERBIFULLPAIRHMM_HPP_
 
 #include "hmm/EvolutionaryPairHMM.hpp"
-#include "sampling/HMMPathSample.hpp"
 
 namespace EBC
 {
