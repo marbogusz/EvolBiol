@@ -149,7 +149,7 @@ double PMatrixDouble::getLogPairTransitionClass(SequenceElement* se1, SequenceEl
 		tpi = getEquilibriumFreq(ids1[i]);
 		tcz = 0;
 		for (unsigned short j = 0; j < sz2; j++)
-			tcz += getPairTransition(ids1[i],ids2[j]);
+			tcz += fastPairGammaPt[ids1[i]*matrixSize+ids2[j]];
 		res += tpi*tcz;
 	}
 	return log(res);

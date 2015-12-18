@@ -107,7 +107,8 @@ string FileParser::getSequenceName(string& s)
 
 void FileParser::trimWsChars(string& s)
 {
-		s.erase(std::remove_if( s.begin(), s.end(), [](char c){ return (c =='\r' || c =='\t' || c == ' ' || c == '\n');}), s.end() );
+	//FIXME - also trimming stars (stop codon) - is that OK ?
+	s.erase(std::remove_if( s.begin(), s.end(), [](char c){ return (c =='\r' || c =='\t' || c == ' ' || c == '\n' || c == '*');}), s.end() );
 }
 
 string FileParser::getNextSequence()

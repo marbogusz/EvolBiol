@@ -82,12 +82,14 @@ int main(int argc, char ** argv) {
 
 		vector<double> indelParams;
 		vector<double> substParams;
-		double alpha = 100;
+		double alpha = cmdReader->getAlpha();
 
 		substParams = tme->getSubstitutionParameters();
 		indelParams = tme->getIndelParameters();
-		if(cmdReader->estimateAlpha())
+
+		if(cmdReader->estimateAlpha()){
 			alpha = tme->getAlpha();
+		}
 
 
 
