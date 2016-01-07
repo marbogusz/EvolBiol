@@ -64,6 +64,7 @@ int main(int argc, char ** argv) {
 
 		IParser* parser = cmdReader->getParser();
 
+		//Remove gaps if the user provides a MSA file
 		bool removeGaps = true;
 
 		//FileLogger::DebugLogger().setCerr();
@@ -91,6 +92,22 @@ int main(int argc, char ** argv) {
 			alpha = tme->getAlpha();
 		}
 
+
+		try{
+			substParams = cmdReader->getSubstParams();
+		}
+		//do nothing - if exception, this means no user-specified params
+		catch(HmmException& pe){
+			substParams = tme->getSubstitutionParameters();
+		}
+
+		try{
+			indelParams = cmdReader->getIndelParams();
+		}
+		//do nothing - if exception, this means no user-specified params
+		catch(HmmException& pe){
+			indelParams = tme->getIndelParameters();
+		}
 
 
 		//FileLogger::Logger() << "True indel paramteres     : ";
@@ -179,11 +196,11 @@ int main(int argc, char ** argv) {
 	}
 	catch(HmmException& pe)
 	{
-		cerr << pe.what();
+		ERROR(pe.what());
 	}
 	catch(exception &ex)
 	{
-		cerr << ex.what();
+		ERROR(ex.what());
 	}
 
 	FileLogger::stop();

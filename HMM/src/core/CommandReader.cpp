@@ -145,6 +145,7 @@ vector<double> CommandReader::getSubstParams()
 				vec.push_back(atof(parser.option("hky_params").argument(i).c_str()));
 			}
 		}
+		else throw HmmException("Model parameters not specified");
 	}
 	else if (parser.option("GTR"))
 	{
@@ -156,6 +157,7 @@ vector<double> CommandReader::getSubstParams()
 				vec.push_back(atof(parser.option("gtr_params").argument(i).c_str()));
 			}
 		}
+		else throw HmmException("Model parameters not specified");
 	}
 	else if (parser.option("LG")){}
 	else throw HmmException("Model not specified");
@@ -175,6 +177,7 @@ vector<double> CommandReader::getIndelParams()
 			vec.push_back(atof(parser.option("i").argument(i).c_str()));
 		}
 	}
+	else throw HmmException("Indel model not specified");
 	return vec;
 }
 
