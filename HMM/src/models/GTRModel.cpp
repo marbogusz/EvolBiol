@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * GTRModel.cpp
- *
- *  Created on: Jan 17, 2014
- *      Author: root
- */
 
 #include "models/GTRModel.hpp"
 
@@ -34,9 +28,8 @@ GTRModel::GTRModel(Dictionary* dict, Maths* alg, unsigned int rates)
 {
 	for (int i=0;i<5;i++)
 	{
-		//FIXME - move magic numbers to definitions
-		this->parameterLoBounds[i] = 0.000001;
-		this->parameterHiBounds[i] = 5;
+		this->parameterLoBounds[i] = Definitions::almostZero;
+		this->parameterHiBounds[i] = Definitions::gtrMaxRate;
 	}
 }
 
@@ -73,10 +66,6 @@ void GTRModel::summarize()
 	cout << endl << "REV model summary:" << endl;
 	cout << "a\tb\tc\td\te" << endl;
 	cout << *a << "\t" << *b << "\t"<< *c << "\t"<< *d << "\t"<< *e << endl;
-	//cout << "Frequencies" << endl;
-	//cout << this->piFreqs[0] << '\t' << this->piFreqs[1] << '\t' << this->piFreqs[2] << '\t' << this->piFreqs[3] << '\t' << endl;
-	//cout << "Eigenvalues" << endl;
-	//cout << roots[0] << ' ' << roots[1] << ' ' << roots[2] << ' ' << roots[3] << endl << endl;
 
 	summarizeRates();
 }

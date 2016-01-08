@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * ViterbiPairHMM.hpp
- *
- *  Created on: Feb 26, 2014
- *      Author: root
- */
 
 #ifndef VITERBIFULLPAIRHMM_HPP_
 #define VITERBIFULLPAIRHMM_HPP_

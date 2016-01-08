@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * PairHmmCalcWrapper.hpp
- *
- *  Created on: Nov 12, 2014
- *      Author: marcin
- */
 
 #ifndef CORE_PAIRHMMCALCULATIONWRAPPER_HPP_
 #define CORE_PAIRHMMCALCULATIONWRAPPER_HPP_

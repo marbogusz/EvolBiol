@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * PairwiseHmmMatchState.hpp
- *
- *  Created on: Feb 26, 2014
- *      Author: root
- */
 
 #ifndef PAIRWISEHMMMATCHSTATE_HPP_
 #define PAIRWISEHMMMATCHSTATE_HPP_

@@ -17,13 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * EvolutionaryPairHMM.cpp
- *
- *  Created on: Feb 25, 2014
- *      Author: root
- */
-
 #include "hmm/EvolutionaryPairHMM.hpp"
 #include "hmm/DpMatrixFull.hpp"
 #include "models/NegativeBinomialGapModel.hpp"
@@ -229,7 +222,7 @@ EvolutionaryPairHMM::~EvolutionaryPairHMM()
 
 
 
-//FIXME OBSOLETE
+//OBSOLETE
 double EvolutionaryPairHMM::getAlignmentLikelihood(vector<unsigned char>* s1,
 		vector<unsigned char>* s2, Dictionary* dict)
 {

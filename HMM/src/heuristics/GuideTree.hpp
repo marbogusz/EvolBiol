@@ -17,13 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * GuideTree.h
- *
- *  Created on: Aug 28, 2014
- *      Author: root
- */
-
 #ifndef GUIDETREE_H_
 #define GUIDETREE_H_
 

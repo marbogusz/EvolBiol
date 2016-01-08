@@ -17,16 +17,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * CommandReader.cpp
- *
- *  Created on: Oct 7, 2013
- *      Author: Marcin Bogusz
- */
 
 #include "core/CommandReader.hpp"
 #include "core/FileParser.hpp"
-#include "core/TextInputParser.hpp"
 #include <sstream>
 #include <cstring>
 #include <cstdlib>
@@ -45,7 +38,6 @@ CommandReader::CommandReader(int argc, char** argv)
 		parser.add_option("HKY", "HKY85 substitution model");
 		parser.add_option("LG", "Le & Gasquel AA substitution sodel");
 		parser.add_option("indel_params","indel parameters (NB probability and rate)",2);
-		//FIXME - remove
 		parser.set_group_name("Miscellaneous Options");
 		parser.add_option("h","Display this help message.");
 		parser.add_option("gtr_params","GTR model parameters",5);
@@ -84,20 +76,8 @@ CommandReader::CommandReader(int argc, char** argv)
 		{
 			// display all the command line options
 
-			cout <<
-"paHMM-Tree - distance-based statistical phylogenetic tree estimation version 0.1512\n\
-Copyright (C) 2015  Marcin Bogusz\n\
-This program is free software: you can redistribute it and/or modify\n\
-it under the terms of the GNU General Public License as published by\n\
-the Free Software Foundation, either version 3 of the License, or\n\
-(at your option) any later version.\n\
-\n\
-This program is distributed in the hope that it will be useful,\n\but WITHOUT ANY WARRANTY; without even the implied warranty of\n\
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n\
-GNU General Public License for more details.\n\
-\n\
-You should have received a copy of the GNU General Public License\n\
-along with this program.  If not, see <http://www.gnu.org/licenses/>.\n\n";
+			cout << Definitions::notice;
+
 
 			cout << "Usage: HMM --in input_file --(GTR|HKY|LG) [--gtr_params ... | --hky_params ... --indel_params ...]\n";
 			parser.print_options();

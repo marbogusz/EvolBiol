@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * Sequences.hpp
- *
- *  Created on: Jan 13, 2014
- *      Author: root
- */
 
 #ifndef SEQUENCES_H_
 #define SEQUENCES_H_
@@ -47,8 +41,6 @@ class Sequences
 {
 private:
 
-
-	//FIXME - how about just copying from the parser or better, a pointer to the sequences instantiated in parser?
 	vector<string>* rawSequences;
 
 	vector<string>* sequenceNames;
@@ -74,7 +66,7 @@ public:
 	Dictionary* getDictionary();
 
 	//Get then in a dictionary order eg. T C A G, check the definitions in constants
-	//FIXME - change to A T C G
+	//TODO - change to A T C G
 	double* getElementFrequencies();
 
 	double* getElementFrequencies(array<unsigned int, 3>& triplet);

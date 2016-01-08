@@ -2,6 +2,21 @@
 // Pair-HMM phylogenetic tree estimator
 // 
 // Copyright (c) 2015 Marcin Bogusz.
+//
+// Core routines of BioNJ - Copyright 1997 Olivier Gascuel, Hoa Sien Cuong
+//
+//                         BioNJ program
+//
+//                         Olivier Gascuel
+//
+//                         GERAD - Montreal- Canada
+//                         olivierg@crt.umontreal.ca
+//
+//                         LIRMM - Montpellier- France
+//                         gascuel@lirmm.fr
+//
+//                         UNIX version, written in C
+//                         by Hoa Sien Cuong (Univ. Montreal)
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,13 +32,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * BioNJ.cpp
- *
- *  Created on: Jun 24, 2014
- *      Author: root
- */
-
 #include "core/BioNJ.hpp"
 #include "core/Definitions.hpp"
 #include <cstring>
@@ -34,7 +42,6 @@ using namespace std;
 namespace EBC
 {
 
-	//FIXME  - get rid of that reference to timesVec!!!
     BioNJ::BioNJ(unsigned int size, DistanceMatrix* divergenceTimes, Sequences* seqs) : names(size), times(divergenceTimes), timesVec(vector<double>())
     {
         taxas = size;
@@ -99,22 +106,6 @@ namespace EBC
         }
     }
 
-    /*;;;;;;;;;;;;;;;;;;;;;;;;;;; Print_output;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*\
-      ;                                                                           ;
-      ;                                                                           ;
-      ; Description : This function prints out the tree in the output file.       ;
-      ;
-      ;
-      ; input       :                                                             ;
-      ;              POINTERS *trees : pointer to the subtrees.                   ;
-      ;              int i          : indicate the subtree i to be printed.       ;
-      :              FILE *output   : pointer to the output file.                 ;
-      ;                                                                           ;
-      ; return value: The phylogenetic tree in the output file.                   ;
-      ;                                                                           ;
-      \*;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*/
-
-
     void BioNJ::Print_output(int i, POINTERS *trees, stringstream& output)
     {
         WORD *parcour;
@@ -126,22 +117,6 @@ namespace EBC
         }
 
     }
-
-
-    /*;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-      ;                                                                           ;
-      ;                         Main program                                      ;
-      ;                                                                           ;
-      ;                         argc is the number of arguments                   ;
-      ;                         **argv contains the arguments:                    ;
-      ;                         the first argument has to be BIONJ;               ;
-      ;                         the second is the inptu-file;                     ;
-      ;                         the third is the output-file.                     ;
-      ;                         When the input and output files are               ;
-      ;                         not given, the user is asked for them.            ;
-      ;                                                                           ;
-      \*;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*/
-
 
     string BioNJ::calculate()
     {
@@ -274,29 +249,6 @@ namespace EBC
         return output.str();
     }
 
-    /*;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*\
-      ;                                                                           ;
-      ;                             Utilities                                     ;
-      ;                                                                           ;
-      \*;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*/
-
-
-
-    /*;;;;;;;;;;;;;;;;;;;;;;;;;;; Symmetrize  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*\
-      ;                                                                           ;
-      ; Description : This function verifies if the delta matrix is symmetric;    ;
-      ;               if not the matrix is made symmetric.                        ;
-      ;                                                                           ;
-      ; input       :                                                             ;
-      ;              float **delta : delta matrix                                 ;
-      ;              int n          : number of taxa                              ;
-      ;                                                                           ;
-      ; return value:                                                             ;
-      ;              int symmetric  : indicate if the matrix has been made        ;
-      ;                               symmetric or not                            ;
-      ;                                                                           ;
-      \*;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*/
-
     int BioNJ::Symmetrize(float **delta, int n)
     {
         int lig;                                         /* matrix line        */
@@ -322,24 +274,6 @@ namespace EBC
             printf("The matrix is not symmetric");
         return(symmetric);
     }
-
-
-
-
-    /*;;;;;;;;;;;;;;;;;;;;;;;;;;; Concatenate ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*\
-      ;                                                                           ;
-      ;                                                                           ;
-      ; Description : This function concatenates a string to another.             ;
-      ;                                                                           ;
-      ; input       :                                                             ;
-      ;      char *chain1    : the string to be concatenated.                     ;
-      ;      int ind         : indicate the subtree to which concatenate the      ;
-      ;                        string                                             ;
-      ;      POINTERS *trees  : pointer to subtrees.                              ;
-      ;      int post        : position to which concatenate (front (0) or        ;
-      ;                        end (1))                                           ;
-      ;                                                                           ;
-      \*;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*/
 
     void BioNJ::Concatenate(char chain1[LEN], int ind, POINTERS *trees, int post)
     {
@@ -368,22 +302,6 @@ namespace EBC
         }
     }
 
-
-    /*;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Distance;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*\
-      ;                                                                           ;
-      ; Description : This function retrieve ant return de distance between taxa  ;
-      ;               i and j from the delta matrix.                              ;
-      ;                                                                           ;
-      ; input       :                                                             ;
-      ;               int i          : taxon i                                    ;
-      ;               int j          : taxon j                                    ;
-      ;               float **delta : the delta matrix                            ;
-      ;                                                                           ;
-      ; return value:                                                             ;
-      ;               float distance : dissimilarity between the two taxa         ;
-      ;                                                                           ;
-      \*;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*/
-
     float BioNJ::Distance(int i, int j, float **delta)
     {
         if(i > j)
@@ -393,21 +311,6 @@ namespace EBC
     }
 
 
-    /*;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Variance;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*\
-      ;                                                                           ;
-      ; Description : This function retrieve and return the variance of the       ;
-      ;               distance between i and j, from the delta matrix.            ;
-      ;                                                                           ;
-      ; input       :                                                             ;
-      ;               int i           : taxon i                                   ;
-      ;               int j           : taxon j                                   ;
-      ;               float **delta  : the delta matrix                           ;
-      ;                                                                           ;
-      ; return value:                                                             ;
-      ;               float distance : the variance of  Dij                       ;
-      ;                                                                           ;
-      \*;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*/
-
     float BioNJ::Variance(int i, int j, float **delta)
     {
         if(i > j)
@@ -416,57 +319,17 @@ namespace EBC
             return(delta[i][j]);
     }
 
-
-    /*;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Emptied ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*\
-      ;                                                                           ;
-      ; Description : This function verifie if a line is emptied or not.          ;
-      ;                                                                           ;
-      ; input       :                                                             ;
-      ;               int i          : subtree (or line) i                        ;
-      ;               float **delta : the delta matrix                            ;
-      ;                                                                           ;
-      ; return value:                                                             ;
-      ;               0              : if not emptied.                            ;
-      ;               1              : if emptied.                                ;
-      ;                                                                           ;
-      \*;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*/
-
     int BioNJ::Emptied(int i, float **delta)      /* test if the ith line is emptied */
     {
         return((int)delta[i][0]);
     }
 
 
-    /*;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Sum_S;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*\
-      ;                                                                           ;
-      ;  Description : This function retrieves the sum Sx from the diagonal       ;
-      ;                of the delta matrix.                                       ;
-      ;                                                                           ;
-      ;  input       :                                                            ;
-      ;               int i          : subtree i                                  ;
-      ;               float **delta : the delta matrix                            ;
-      ;                                                                           ;
-      ;  return value:                                                            ;
-      ;                float delta[i][i] : sum Si                                 ;
-      ;                                                                           ;
-      \*;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*/
-
     float BioNJ::Sum_S(int i, float **delta)          /* get sum Si form the diagonal */
     {
         return(delta[i][i]);
     }
 
-
-    /*;;;;;;;;;;;;;;;;;;;;;;;Compute_sums_Sx;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*\
-      ;                                                                           ;
-      ; Description : This function computes the sums Sx and store them in the    ;
-      ;               diagonal the delta matrix.                                  ;
-      ;                                                                           ;
-      ; input       :                                                             ;
-      ;     	         float **delta : the delta matrix.                      ;
-      ;     	         int n          : the number of taxa                    ;
-      ;                                                                           ;
-      \*;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*/
 
     void BioNJ::Compute_sums_Sx(float **delta, int n)
     {
@@ -490,23 +353,6 @@ namespace EBC
     }
 
 
-    /*;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Best_pair;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*\
-      ;                                                                           ;
-      ;  Description : This function finds the best pair to be agglomerated by    ;
-      ;                minimizing the agglomerative criterion (1).                ;
-      ;                                                                           ;
-      ;  input       :                                                            ;
-      ;                float **delta : the delta matrix                           ;
-      ;                int r          : number of subtrees                        ;
-      ;                int *a         : contain the first taxon of the pair       ;
-      ;                int *b         : contain the second taxon of the pair      ;
-      ;                int n          : number of taxa                            ;
-      ;                                                                           ;
-      ;  return value:                                                            ;
-      ;                int *a         : the first taxon of the pair               ;
-      ;                int *b         : the second taxon of the pair              ;
-      \*;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*/
-
     void BioNJ::Best_pair(float **delta, int r, int *a, int *b, int n)
     {
         float Qxy;                         /* value of the criterion calculated*/
@@ -523,7 +369,7 @@ namespace EBC
                     if(!Emptied(y,delta))
                     {
                         Qxy=Agglomerative_criterion(x,y,delta,r);
-                        if(Qxy < Qmin-0.000001)
+                        if(Qxy < Qmin-Definitions::almostZero)
                         {
                             Qmin=Qxy;
                             *a=x;
@@ -536,47 +382,17 @@ namespace EBC
     }
 
 
-    /*;;;;;;;;;;;;;;;;;;;;;;Finish_branch_length;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*\
-      ;                                                                           ;
-      ;  Description :  Compute the length of the branch attached                 ;
-      ;                 to the subtree i, during the final step                   ;
-      ;                                                                           ;
-      ;  input       :                                                            ;
-      ;                int i          : position of subtree i                     ;
-      ;                int j          : position of subtree j                     ;
-      ;                int k          : position of subtree k                     ;
-      ;                float **delta :                                            ;
-      ;                                                                           ;
-      ;  return value:                                                            ;
-      ;                float length  : The length of the branch                   ;
-      ;                                                                           ;
-      \*;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*/
-
     float BioNJ::Finish_branch_length(int i, int j, int k, float **delta)
     {
         float length;
         length=0.5*(Distance(i,j,delta) + Distance(i,k,delta)
                 -Distance(j,k,delta));
         if (length < 0){
-        	INFO("NEGATIVE BRANCH LENGTH IN BIONJ!!! setting branch to a zero");
-        	length = 0.000001;
+        	DEBUG("NEGATIVE BRANCH LENGTH IN BIONJ!!! setting branch to a zero");
+        	length = Definitions::almostZero;
         }
         return(length);
     }
-
-
-    /*;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Finish;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*\
-      ;                                                                           ;
-      ;  Description : This function compute the length of the lasts three        ;
-      ;                subtrees and write the tree in the output file.            ;
-      ;                                                                           ;
-      ;  input       :                                                            ;
-      ;                float **delta  : the delta matrix                          ;
-      ;                int n           : the number of taxa                       ;
-      ;                WORD *trees   : list of subtrees                           ;
-      ;                                                                           ;
-      ;                                                                           ;
-      \*;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*/
 
     void BioNJ::Finish(float **delta, int n, POINTERS *trees, stringstream& output)
     {
@@ -614,8 +430,8 @@ namespace EBC
         /*   fprintf(output,"%s,",str); */
         if(length < 0)
         {
-        	INFO("NEGATIVE BRANCH LENGTH IN BIONJ!!! setting branch to zero");
-        	output << std::fixed <<  setprecision(8) << 0.000001 << ",";
+        	DEBUG("NEGATIVE BRANCH LENGTH IN BIONJ!!! setting branch to zero");
+        	output << std::fixed <<  setprecision(8) << Definitions::almostZero << ",";
         }
         else
         	output<< std::fixed  << setprecision(8) << length << ",";
@@ -628,13 +444,11 @@ namespace EBC
         /*   fprintf(output,"%s,",str); */
         if(length < 0)
         {
-        	INFO("NEGATIVE BRANCH LENGTH IN BIONJ!!! setting branch to  zero");
-        	output << std::fixed <<  setprecision(8) << 0.000001 << ",";
+        	DEBUG("NEGATIVE BRANCH LENGTH IN BIONJ!!! setting branch to  zero");
+        	output << std::fixed <<  setprecision(8) << Definitions::almostZero << ",";
         }
         else
         	output << std::fixed <<  setprecision(8) << length << ",";
-
-        //FIXME - hacks on a negative length!!!
 
         length=Finish_branch_length(last[2],last[1],last[0],delta);
         this->treeLength += length;
@@ -666,13 +480,6 @@ namespace EBC
     }
 
 
-    /*;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*\
-      ;                                                                           ;
-      ;                          Formulae                                         ;
-      ;                                                                           ;
-      \*;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*/
-
-
     float BioNJ::Agglomerative_criterion(int i, int j, float **delta, int r)
     {
         float Qij;
@@ -692,8 +499,8 @@ namespace EBC
                     -Sum_S(b,delta))/(r-2));
         if (length < 0)
         {
-        	INFO("NEGATIVE BRANCH LENGTH IN BIONJ!!! setting branch to zero");
-        	length = length = 0.000001;;
+        	DEBUG("NEGATIVE BRANCH LENGTH IN BIONJ!!! setting branch to zero");
+        	length  = Definitions::almostZero;
         }
         return(length);
     }

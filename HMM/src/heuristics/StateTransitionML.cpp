@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * StateTransitionMatrix.cpp
- *
- *  Created on: Oct 6, 2014
- *      Author: root
- */
 
 #include <heuristics/StateTransitionML.hpp>
 #include <cmath>
@@ -168,8 +162,6 @@ double StateTransitionML::getLnL()
 		ERROR("NAN extension " << e);
 		ERROR("NAN opening " << g);
 		ERROR("ERROR - EXITING WITHOUT DOING CALCLULATIONS due to wrong extension/opening probabilities : " << e << " " << g);
-		//FIXME - remove this!!!!!
-		//FIXME - fix this estimation, don't exit like this - only for test purposes
 		cerr << "ERROR - EXITING WITHOUT DOING CALCLULATIONS due to wrong extension/opening probabilities : " << e << " " << g << endl;
 		exit(0);
 	}

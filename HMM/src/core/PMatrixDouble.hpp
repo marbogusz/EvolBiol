@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * PMatrix.hpp
- *
- *  Created on: Sep 17, 2014
- *      Author: root
- */
 
 #ifndef PMATRIXDB_HPP_
 #define PMATRIXDB_HPP_

@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * PairwiseHmmDeleteState.hpp
- *
- *  Created on: Feb 26, 2014
- *      Author: root
- */
 
 #ifndef PAIRWISEHMMDELETIONSTATE_HPP_
 #define PAIRWISEHMMDELETIONSTATE_HPP_

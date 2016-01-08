@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * SequenceElement.h
- *
- *  Created on: Jan 14, 2014
- *      Author: root
- */
 
 #ifndef SEQUENCEELEMENT_H_
 #define SEQUENCEELEMENT_H_
@@ -37,7 +31,6 @@ namespace EBC
 
 class SequenceElement
 {
-//FIXME - this is potentially slow - rework
 
 protected:
 	bool isGap;

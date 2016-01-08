@@ -3,6 +3,9 @@
 // 
 // Copyright (c) 2015 Marcin Bogusz.
 // 
+// Most of the methods of discerte gamma and eigen decomposition taken from
+// Ziheng Yang's PAML package, Copyright (c) Ziheng Yang
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -17,12 +20,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * Maths.h
- *
- *  Created on: Jan 13, 2014
- *      Author: root
- */
 
 #ifndef ALGEBRA_H_
 #define ALGEBRA_H_
@@ -53,10 +50,9 @@ public:
 	//Exponentiate a reversible model matrix Q, store the result in P
 	void revMatrixExponentiation(double* Q, double* P);
 
-	//Shamelessly copied from Ziheng Yang's PAML
+	//Ziheng Yang's PAML
 	int eigenRealSym(double A[], int n, double Root[], double work[]);
 
-	//Shamelessly copied from Ziheng Yang's PAML
 	int eigenQREV (double Q[], double pi[], int n,
 			double Root[], double U[], double V[], double spacesqrtpi[]);
 
@@ -94,8 +90,9 @@ public:
 
 	double logSum(double, double);
 
-	//PAML
+	//from PAML,
 	double IncompleteGamma (double x, double alpha, double ln_gamma_alpha);
+
 	//PAML
 	double QuantileNormal (double prob);
 	//PAML

@@ -17,13 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * BandCalculator.hpp
- *
- *  Created on: Oct 27, 2014
- *      Author: root
- */
-
 #ifndef HEURISTICS_BANDCALCULATOR_HPP_
 #define HEURISTICS_BANDCALCULATOR_HPP_
 

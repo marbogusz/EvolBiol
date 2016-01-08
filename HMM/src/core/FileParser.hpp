@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * FileParser.hpp
- *
- *  Created on: Oct 1, 2013
- *      Author: mbogusz
- */
 
 #ifndef FILEPARSER_H_
 #define FILEPARSER_H_

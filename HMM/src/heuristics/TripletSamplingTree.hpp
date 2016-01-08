@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * TripletSamplingTree.hpp
- *
- *  Created on: Sep 1, 2014
- *      Author: root
- */
 
 #ifndef TRIPLETSAMPLINGTREE_HPP_
 #define TRIPLETSAMPLINGTREE_HPP_

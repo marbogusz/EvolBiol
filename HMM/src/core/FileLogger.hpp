@@ -59,7 +59,6 @@ public:
 
 	static void start(logType priority, const std::string& fname)
 	{
-		//FIXME - file creation check
 		switch(priority)
 		{
 		case L_DMP:

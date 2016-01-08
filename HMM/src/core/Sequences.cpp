@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * Sequences.cpp
- *
- *  Created on: Jan 13, 2014
- *      Author: root
- */
 
 #include "core/Sequences.hpp"
 #include <algorithm>

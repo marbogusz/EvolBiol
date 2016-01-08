@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * AffineGeometricGapModel.cpp
- *
- *  Created on: Feb 25, 2014
- *      Author: root
- */
 
 #include "models/NegativeBinomialGapModel.hpp"
 #include <cmath>
@@ -74,7 +68,6 @@ void NegativeBinomialGapModel::calculate()
 
 void NegativeBinomialGapModel::calculateGeometricProbability(double lambda, double t)
 {
-	//FIXME - remove
 	double exponent = 1.0-exp(-1.0*lambda*t);
 	this->gapOpeningProbability = exponent;
 }

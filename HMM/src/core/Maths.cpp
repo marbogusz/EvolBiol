@@ -3,6 +3,9 @@
 // 
 // Copyright (c) 2015 Marcin Bogusz.
 // 
+// Most of the methods of discerte gamma and eigen decomposition taken from
+// Ziheng Yang's PAML package, Copyright (c) Ziheng Yang
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -16,13 +19,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
-
-/*
- * Maths.cpp
- *
- *  Created on: Jan 13, 2014
- *      Author: Marcin Bogusz
- */
 
 #include "core/Maths.hpp"
 #include <iostream>
@@ -58,7 +54,6 @@ double Maths::logSum(double a, double b)
 
 double* Maths::matrixMultiply(double *matA, double *matB, int size)
 {
-	//FIXME - make sure the resulting matrix is zeroed before multiplication!!!
 	double* matResult = new double[size*size];
 
 	for (int i=0; i<size; i++)

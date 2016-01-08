@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * TransitionProbabilities.cpp
- *
- *  Created on: Oct 7, 2014
- *      Author: root
- */
 
 #include <core/TransitionProbabilities.hpp>
 

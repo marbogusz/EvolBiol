@@ -78,8 +78,6 @@ public:
 	constexpr static const double ultraDivergenceAccuracyDelta = 1e-1;
 
 
-	constexpr static const double defaultGapPenalty = 0.5;
-
 	//model param estimation accuracy
 	constexpr static const double accuracyBFGS = 1e-8;
 
@@ -115,6 +113,8 @@ public:
 
 	//initial max lambda, however the max depends on divergence
 	constexpr static const double lambdaHiBound = 0.3;
+
+	constexpr static const double gtrMaxRate = 5;
 
 	constexpr static const double epsilonHiBound = 0.95;
 
@@ -164,9 +164,22 @@ public:
 
 	enum StateId {Match, Insert , Delete};
 
-
-
 	static aaModelDefinition aaLgModel;
+
+
+constexpr static const auto notice ="\npaHMM-Tree - distance-based statistical phylogenetic tree estimation version 0.1512\n\
+Copyright (C) 2016  Marcin Bogusz\n\
+This program is free software: you can redistribute it and/or modify\n\
+it under the terms of the GNU General Public License as published by\n\
+the Free Software Foundation, either version 3 of the License, or\n\
+(at your option) any later version.\n\
+\n\
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;\n\
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
+See the GNU General Public License for more details.\n\
+\n\
+You should have received a copy of the GNU General Public License\n\
+along with this program.  If not, see <http://www.gnu.org/licenses/>.\n\n";
 
 };
 

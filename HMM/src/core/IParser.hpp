@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * IParser.hpp
- *
- *  Created on: Oct 7, 2013
- *      Author: mbogusz
- */
 
 #ifndef IPARSER_H_
 #define IPARSER_H_

@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * Node.cpp
- *
- *  Created on: Sep 1, 2014
- *      Author: root
- */
 
 #include "heuristics/Node.hpp"
 #include "core/Definitions.hpp"

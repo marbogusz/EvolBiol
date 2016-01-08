@@ -2,6 +2,21 @@
 // Pair-HMM phylogenetic tree estimator
 // 
 // Copyright (c) 2015 Marcin Bogusz.
+//
+// Core routines of BioNJ - Copyright 1997 Olivier Gascuel, Hoa Sien Cuong
+//
+//                         BioNJ program
+//
+//                         Olivier Gascuel
+//
+//                         GERAD - Montreal- Canada
+//                         olivierg@crt.umontreal.ca
+//
+//                         LIRMM - Montpellier- France
+//                         gascuel@lirmm.fr
+//
+//                         UNIX version, written in C
+//                         by Hoa Sien Cuong (Univ. Montreal)
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,13 +31,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
-
-/*
- * BioNJ.hpp
- *
- *  Created on: Jun 24, 2014
- *      Author: root
- */
 
 #ifndef BIONJ_H_
 #define BIONJ_H_

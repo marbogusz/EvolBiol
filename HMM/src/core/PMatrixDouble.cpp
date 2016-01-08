@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * PMatrixDouble.cpp
- *
- *  Created on: Sep 17, 2014
- *      Author: root
- */
 
 #include <core/PMatrixDouble.hpp>
 
@@ -53,8 +47,6 @@ PMatrixDouble::~PMatrixDouble()
 	delete[] sitePatterns;
 }
 
-
-//FIXME - site pattern for -X is not PIx - check ??
 void PMatrixDouble::calculatePairSitePatterns()
 {
 	//includes gaps - does not discard missing data!

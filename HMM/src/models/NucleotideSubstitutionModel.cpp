@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * NucleotideSubstitutionMode.cpp
- *
- *  Created on: Jan 13, 2014
- *      Author: root
- */
 
 #include "models/NucleotideSubstitutionModel.hpp"
 
@@ -41,9 +35,6 @@ void NucleotideSubstitutionModel::calculateModel()
 	this->buildSmatrix();
 	this->setDiagonalMeans();
 	this->doEigenDecomposition();
-	//qMatrix, roots, u and v matrices
-
-	//calculateGammaPtMatrices();
 }
 
 NucleotideSubstitutionModel::~NucleotideSubstitutionModel()

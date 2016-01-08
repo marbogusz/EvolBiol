@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * GuideTree.cpp
- *
- *  Created on: Aug 28, 2014
- *      Author: root
- */
 
 #include "heuristics/GuideTree.hpp"
 #include "heuristics/TripletSamplingTree.hpp"
@@ -93,15 +87,6 @@ void GuideTree::constructTree()
 	//newickTree = nj.calculate();
 	newickTree = "";
 
-	/*
-	TripletSamplingTree tst(distMat);
-	tst.fromNewick(tree);
-	DEBUG("Created the tree from Newick");
-
-	//FIXME - do it nicely - guide tree returns a newick string, sampling tree build based on gt
-	sampledTriplets = tst.sampleFromDM();
-	DEBUG("Obtained triplets");
-	 */
 }
 
 void GuideTree::extractKmers(string& seq, unordered_map<string, short>* umap)

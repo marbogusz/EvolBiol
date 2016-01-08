@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * BandCalculator.cpp
- *
- *  Created on: Oct 27, 2014
- *      Author: root
- */
 
 #include <heuristics/BandCalculator.hpp>
 

@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * ParseException.h
- *
- *  Created on: Sep 23, 2013
- *      Author: mbogusz
- */
 
 #ifndef PARSEEXCEPTION_H_
 #define PARSEEXCEPTION_H_

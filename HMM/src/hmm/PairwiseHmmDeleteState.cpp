@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * PairwiseHmmDeletionState.cpp
- *
- *  Created on: Feb 26, 2014
- *      Author: root
- */
 
 #include "hmm/PairwiseHmmDeleteState.hpp"
 #include "hmm/DpMatrixFull.hpp"

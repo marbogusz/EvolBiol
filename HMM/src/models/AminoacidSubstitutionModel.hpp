@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * AminoacidSubstitutionModel.hpp
- *
- *  Created on: Jan 13, 2014
- *      Author: root
- */
 
 #ifndef AA_MODEL_H_
 #define AA_MODEL_H_

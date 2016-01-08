@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * TransitionProbabilities.hpp
- *
- *  Created on: Oct 7, 2014
- *      Author: root
- */
 
 #ifndef TRANSITIONPROBABILITIES_HPP_
 #define TRANSITIONPROBABILITIES_HPP_

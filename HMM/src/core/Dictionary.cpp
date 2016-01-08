@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * Dictionary.cpp
- *
- *  Created on: Jan 14, 2014
- *      Author: root
- */
 
 #include "core/Dictionary.hpp"
 #include "core/Definitions.hpp"

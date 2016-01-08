@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * NucleotideSubstitutionModel.hpp
- *
- *  Created on: Jan 13, 2014
- *      Author: root
- */
 
 #ifndef NUCL_MODEL_H_
 #define NUCL_MODEL_H_

@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * ForwardPairHMM.hpp
- *
- *  Created on: Feb 26, 2014
- *      Author: root
- */
 
 #ifndef FORWARDPAIRHMM_HPP_
 #define FORWARDPAIRHMM_HPP_

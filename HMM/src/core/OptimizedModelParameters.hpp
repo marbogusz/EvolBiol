@@ -17,13 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * OptimizedModelParameters.h
- *
- *  Created on: Jun 17, 2014
- *      Author: root
- */
-
 #ifndef OPTIMIZEDMODELPARAMETERS_H_
 #define OPTIMIZEDMODELPARAMETERS_H_
 
@@ -67,7 +60,6 @@ protected:
 	unsigned int seqCount;
 	unsigned int optCount;
 
-	//FIXME - static bound vectors!
 
 public:
 	double divergenceBound;

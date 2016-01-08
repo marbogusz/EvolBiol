@@ -17,14 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * FileLogger.cpp
-
- *
- *  Created on: Nov 11, 2014
- *      Author: marcin
- */
-
 #include "core/FileLogger.hpp"
 
 namespace EBC
@@ -40,7 +32,6 @@ FileLogger FileLogger::infL;
 FileLogger FileLogger::clnL;
 
 
-//FIXME Separate default logger?
 FileLogger& FileLogger::Logger()
 {
 	return clnL;

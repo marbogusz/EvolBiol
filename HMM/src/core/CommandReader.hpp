@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * CommandReader.hpp
- *
- *  Created on: Oct 7, 2013
- *      Author: mbogusz
- */
 
 #ifndef COMMANDREADER_H_
 #define COMMANDREADER_H_
@@ -114,7 +108,6 @@ public:
 		if (parser.option("GTR") || parser.option("HKY"))
 			return Definitions::SequenceType::Nucleotide;
 		else return Definitions::SequenceType::Aminoacid;
-		//FIXME codons???
 	}
 };
 

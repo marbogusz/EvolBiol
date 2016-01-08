@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * StateTransitionEstimator.cpp
- *
- *  Created on: Oct 6, 2014
- *      Author: root
- */
 
 #include "heuristics/StateTransitionEstimator.hpp"
 #include "models/NegativeBinomialGapModel.hpp"

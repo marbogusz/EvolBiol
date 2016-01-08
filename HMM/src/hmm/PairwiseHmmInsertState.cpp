@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * PairwiseHmmInsertionState.cpp
- *
- *  Created on: Feb 26, 2014
- *      Author: root
- */
 
 #include "hmm/PairwiseHmmInsertState.hpp"
 #include "hmm/DpMatrixFull.hpp"

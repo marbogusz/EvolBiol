@@ -24,6 +24,7 @@
  *      Author: marcin
  *
  *  Partially based on John D. Cook's implementation
+ *  Copyright (c) John D. Cook
  *  http://www.codeproject.com/Articles/30201/Optimizing-a-Function-of-One-Variable
  */
 

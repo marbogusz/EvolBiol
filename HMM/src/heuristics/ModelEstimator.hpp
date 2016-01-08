@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * ModelEstimator.hpp
- *
- *  Created on: Feb 26, 2014
- *      Author: root
- */
 
 #ifndef MODELESTIMATOR_HPP_
 #define MODELESTIMATOR_HPP_

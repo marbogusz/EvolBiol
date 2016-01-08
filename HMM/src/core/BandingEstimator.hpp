@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * BandingEstimator.hpp
- *
- *  Created on: Feb 26, 2014
- *      Author: root
- */
 
 #ifndef BANDINGESTIMATOR_HPP_
 #define BANDINGESTIMATOR_HPP_
@@ -61,10 +55,26 @@ using namespace std;
 namespace EBC
 {
 
+//Estimate pairwise distances using bands
 class BandingEstimator : public IOptimizable
 {
 
 private:
+	class ProgressBar
+	{
+	private:
+		//bar width
+		unsigned int bw;
+		//max no iter
+		unsigned int n;
+		//current iter;
+		unsigned int curr;
+	public:
+		ProgressBar(unsigned int width);
+		void tick();
+		void setIter(unsigned int);
+		void done();
+	};
 
 protected:
 

@@ -17,14 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * Node.hpp
- *
- *  Created on: Sep 1, 2014
- *      Author: Marcin
- *
- *      Tree node class
- */
 
 #include <vector>
 #include <string>

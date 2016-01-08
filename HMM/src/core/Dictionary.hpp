@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * Dictionary.hpp
- *
- *  Created on: Jan 13, 2014
- *      Author: root
- */
 
 #ifndef DICTIONARY_H_
 #define DICTIONARY_H_

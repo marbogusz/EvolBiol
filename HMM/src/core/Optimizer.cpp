@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * Optimizer.cpp
- *
- *  Created on: Oct 6, 2014
- *      Author: root
- */
 
 #include <core/Optimizer.hpp>
 
@@ -42,7 +36,6 @@ Optimizer::Optimizer(OptimizedModelParameters* mp, IOptimizable* opt, Definition
 	//omp->toDlibVector(initParams,lowerBounds,upperBounds);
 
 	DEBUG("Numeric optimizer with " << paramsCount << " parameter(s) created");
-	//cerr << "DLIB optimizer init with " << paramsCount << " parameters" << endl;
 }
 
 void Optimizer::setTarget(IOptimizable* opt)
@@ -56,7 +49,6 @@ Optimizer::~Optimizer()
 
 double Optimizer::objectiveFunction(const column_vector& bfgsParameters)
 {
-	//FIXME - address a potential issue of vector copying!
 	omp->fromDlibVector(bfgsParameters);
 	return target->runIteration();
 }

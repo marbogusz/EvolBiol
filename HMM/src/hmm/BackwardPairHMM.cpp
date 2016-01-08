@@ -17,13 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * BackwardPairHMM.cpp
- *
- *  Created on: Feb 26, 2014
- *      Author: root
- */
-
 #include "core/Definitions.hpp"
 #include "hmm/BackwardPairHMM.hpp"
 #include "models/GTRModel.hpp"
@@ -287,7 +280,7 @@ double BackwardPairHMM::runAlgorithm()
 		int iMin = xSize-2;
 		int iMax = 0;
 
-		//FIXME - I make a simplifying assumption that the band is the same for all 3 matrices!
+		//We make a simplifying assumption that the band is the same for all 3 matrices!
 		//Use bracket D bracket to calculate, but the first row for M and I needs to be zeroed!
 
 		for (j = ySize-2; j >= 0; j--){
@@ -341,7 +334,6 @@ double BackwardPairHMM::runAlgorithm()
 		X->getDpMatrix()->setWholeRow(0, Definitions::minMatrixLikelihood);
 	}
 
-	//FIXME - remove to improve performance by 0.000000001% :)
 	bmp  = M->getValueAt(1,1) + ptmatrix->getLogPairTransitionClass((*seq1)[0], (*seq2)[0]);
 	bxp  = X->getValueAt(1,0) + ptmatrix->getLogEquilibriumFreqClass((*seq1)[0]);
 	byp  = Y->getValueAt(0,1) + ptmatrix->getLogEquilibriumFreqClass((*seq2)[0]);
@@ -394,8 +386,6 @@ BackwardPairHMM::getMPDWithPosteriors(){
 
 	unsigned int i = xSize-1;
 	unsigned int j = ySize-1;
-
-	//FIXME - which index should I consider while performing a readback ???
 
 	while(i > 0 && j > 0)
 	{

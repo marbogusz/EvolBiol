@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * OptimizedModelParameters.cpp
- *
- *  Created on: Jun 17, 2014
- *      Author: root
- */
 
 #include "core/OptimizedModelParameters.hpp"
 

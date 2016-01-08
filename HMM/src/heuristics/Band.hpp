@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * Band.hpp
- *
- *  Created on: Oct 29, 2014
- *      Author: root
- */
 
 #ifndef HEURISTICS_BAND_HPP_
 #define HEURISTICS_BAND_HPP_

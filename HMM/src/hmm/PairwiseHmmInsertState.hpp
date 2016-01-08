@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * PairwiseHmmInsertionState.hpp
- *
- *  Created on: Feb 26, 2014
- *      Author: root
- */
 
 #ifndef PAIRWISEHMMINSERTIONSTATE_HPP_
 #define PAIRWISEHMMINSERTIONSTATE_HPP_

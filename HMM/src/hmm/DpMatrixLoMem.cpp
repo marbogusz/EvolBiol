@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * DpMatrixLoMem.cpp
- *
- *  Created on: Feb 10, 2014
- *      Author: root
- */
 
 #include "hmm/DpMatrixLoMem.hpp"
 #include <iostream>

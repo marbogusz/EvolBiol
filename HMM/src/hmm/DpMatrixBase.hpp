@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * DpMatrixBase.h
- *
- *  Created on: Feb 10, 2014
- *      Author: root
- */
 
 #ifndef DPMATRIXBASE_H_
 #define DPMATRIXBASE_H_

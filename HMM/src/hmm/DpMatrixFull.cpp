@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * DpMatrixFull.cpp
- *
- *  Created on: Feb 10, 2014
- *      Author: root
- */
 
 #include "hmm/DpMatrixFull.hpp"
 #include <iostream>

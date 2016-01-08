@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * PMatrixTriple.hpp
- *
- *  Created on: Sep 17, 2014
- *      Author: root
- */
 
 #ifndef PMATRIXTR_HPP_
 #define PMATRIXTR_HPP_

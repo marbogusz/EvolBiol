@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * IndelModel.hpp
- *
- *  Created on: Feb 25, 2014
- *      Author: root
- */
 
 #ifndef INDELMODEL_HPP_
 #define INDELMODEL_HPP_

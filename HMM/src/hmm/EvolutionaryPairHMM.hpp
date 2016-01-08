@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * EvolutionaryPairHMM.hpp
- *
- *  Created on: Feb 25, 2014
- *      Author: Marcin Bogusz
- */
 
 #ifndef EVOLUTIONARYPAIRHMM_HPP_
 #define EVOLUTIONARYPAIRHMM_HPP_

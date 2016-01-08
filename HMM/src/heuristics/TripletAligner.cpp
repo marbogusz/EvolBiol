@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * TripletAligner.cpp
- *
- *  Created on: Sep 8, 2014
- *      Author: root
- */
 
 #include <heuristics/TripletAligner.hpp>
 #include <vector>
@@ -37,36 +31,6 @@ array<vector<SequenceElement*>*, 3>* TripletAligner::align(pair<vector<SequenceE
 {
 	stringstream sp1, sp2, sp3, sp4;
 
-
-/*
-	for (auto i1 : p1.first)
-	{
-		sp1 << i1.getSymbol();
-	}
-	for (auto i2 : p1.second)
-	{
-		sp2 << i2.getSymbol();
-	}
-	for (auto i3 : p2.first)
-	{
-		sp3 << i3.getSymbol();
-	}
-	for (auto i4 : p2.second)
-	{
-		sp4 << i4.getSymbol();
-	}
-	//cout << "TRIPLET ALIGNER " << endl;
-	//cout << sp1.str() << endl;
-	//cout << sp2.str() << endl;
-	//cout << sp3.str() << endl;
-	//cout << sp4.str() << endl<<endl;
-
-	DUMP("TRIPLET ALIGNER ");
-	DUMP(sp1.str());
-	DUMP(sp2.str());
-	DUMP(sp3.str());
-	DUMP(sp4.str());
-*/
 	vector<SequenceElement*>* tr1 = new vector<SequenceElement*>();
 	vector<SequenceElement*>* tr2 = new vector<SequenceElement*>();
 	vector<SequenceElement*>* tr3 = new vector<SequenceElement*>();
@@ -78,29 +42,7 @@ array<vector<SequenceElement*>*, 3>* TripletAligner::align(pair<vector<SequenceE
 	vector<SequenceElement*>* p2al = p2->second;
 
 	int c;
-	/*
-	for (c=0; c < p1al->size(); c++)
-	{
-		cerr << (*p1al)[c]->getSymbol();
-	}
-	cerr << endl;
-	for (c=0; c < anch1->size(); c++)
-	{
-		cerr << (*anch1)[c]->getSymbol();
-	}
-	cerr << endl;
-	for (c=0; c < anch2->size(); c++)
-	{
-		cerr << (*anch2)[c]->getSymbol();
-	}
-	cerr << endl;
-	for (c=0; c < p2al->size(); c++)
-	{
-		cerr << (*p2al)[c]->getSymbol();
-	}
-	cerr << endl;
-	cerr << anch1->size() << endl << anch2->size() << endl;
-*/
+
 	unsigned int alSize = std::max(anch1->size(), anch2->size());
 	alSize *= 1.2;  // make it 20% longer to avoid reallocations
 
@@ -189,8 +131,6 @@ array<vector<unsigned char>*, 3> TripletAligner::alignPosteriors(pair<vector<uns
 	vector<unsigned char>* p2al = p2.second;
 
 	//posterior prob limit
-
-	//FIXME - magic number
 
 	double postLim = Definitions::minMatrixLikelihood;
 	if (this->usePosteriors){

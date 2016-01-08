@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * SequenceElement.cpp
- *
- *  Created on: Jan 14, 2014
- *      Author: mbogusz
- */
 
 #include "core/SequenceElement.hpp"
 

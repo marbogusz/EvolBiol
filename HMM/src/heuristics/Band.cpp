@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * Band.cpp
- *
- *  Created on: Oct 29, 2014
- *      Author: root
- */
 
 #include <heuristics/Band.hpp>
 

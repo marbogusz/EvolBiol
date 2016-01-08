@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * BackwardPairHMM.hpp
- *
- *  Created on: Feb 26, 2014
- *      Author: root
- */
 
 #ifndef BACKWARDPAIRHMM_HPP_
 #define BACKWARDPAIRHMM_HPP_

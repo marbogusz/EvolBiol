@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * IndelModel.cpp
- *
- *  Created on: Feb 25, 2014
- *      Author: root
- */
 
 #include "models/IndelModel.hpp"
 

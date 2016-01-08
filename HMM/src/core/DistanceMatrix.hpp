@@ -17,13 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * DistanceMatrix.hpp
- *
- *  Created on: Sep 2, 2014
- *      Author: root
- */
-
 #ifndef DISTANCEMATRIX_HPP_
 #define DISTANCEMATRIX_HPP_
 

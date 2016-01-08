@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * SubstitutionModelBase.cpp
- *
- *  Created on: Jan 13, 2014
- *      Author: root
- */
 
 #include "models/SubstitutionModelBase.hpp"
 #include <sstream>
@@ -44,8 +38,6 @@ SubstitutionModelBase::SubstitutionModelBase(Dictionary* dict, Maths* alg, unsig
 	this->piFreqs = NULL;
 	this->piLogFreqs = NULL;
 	this->parameters = NULL;
-
-	//FIXME - maybe initial alpha set to a value ?
 }
 
 

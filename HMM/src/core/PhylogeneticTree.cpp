@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * PhylogeneticTree.cpp
- *
- *  Created on: Sep 1, 2014
- *      Author: root
- */
 
 #include "core/PhylogeneticTree.hpp"
 #include <regex>
@@ -93,7 +87,6 @@ void PhylogeneticTree::fromNewick(const string& newick)
 	unsigned int ids = 0;
 	unsigned int sequenceNo;
 	string seqName;
-	//FIXME - write a regex that accepts any string
 	regex regDescDist("((S[0-9]+):([0-9\\.]+)).*");
 	//regex regDescDist("((.?+):([0-9\\.]+)).*");
 	regex regInterDist(":([0-9\\.]+).*");

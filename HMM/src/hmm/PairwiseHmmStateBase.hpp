@@ -17,13 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * PairwiseHMMstate.h
- *
- *  Created on: Feb 25, 2014
- *      Author: root
- */
-
 #ifndef PAIRWISEHMMSTATEBASE_H_
 #define PAIRWISEHMMSTATEBASE_H_
 

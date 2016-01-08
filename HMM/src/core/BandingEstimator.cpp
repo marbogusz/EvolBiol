@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * BandingEstimator.cpp
- *
- *  Created on: Feb 26, 2014
- *      Author: root
- */
 
 #include "core/BandingEstimator.hpp"
 #include "models/GTRModel.hpp"
@@ -33,6 +27,33 @@
 
 namespace EBC
 {
+
+BandingEstimator::ProgressBar::ProgressBar(unsigned int width) : bw(width) {
+}
+
+void BandingEstimator::ProgressBar::tick() {
+	curr++;
+
+	if ( (curr != n) && (curr % (n/100+1) != 0) ) return;
+
+    float ratio  =  curr/(float)n;
+    int   c      =  ratio * bw;
+
+    cout << setw(3) << (int)(ratio*100) << "% [";
+    for (int x=0; x<c; x++) cout << "=";
+    for (int x=c; x<bw; x++) cout << " ";
+    cout << "]\r" << flush;
+}
+
+void BandingEstimator::ProgressBar::setIter(unsigned int iters){
+	n = iters;
+	this->curr =0;
+	//cout << setw(3) <<  "0% [";
+}
+
+void BandingEstimator::ProgressBar::done(){
+	cout << endl;
+}
 
 BandingEstimator::BandingEstimator(Definitions::AlgorithmType at, Sequences* inputSeqs, Definitions::ModelType model ,std::vector<double> indel_params,
 		std::vector<double> subst_params, Definitions::OptimizationType ot, unsigned int rateCategories, double alpha, GuideTree* g) :
@@ -67,8 +88,6 @@ BandingEstimator::BandingEstimator(Definitions::AlgorithmType at, Sequences* inp
 	/*
 	estimateSubstitutionParams = subst_params.size() != substModel->getParamsNumber();
 	estimateIndelParams = indel_params.size() == 0;
-	//Do not estimate alpha here. Alpha needs to be estimated beforehand
-	this->estimateAlpha = false;
 
 	DEBUG("Pairwise banding model estimator starting");
 	DEBUG("Estimate substitution parameters set to : " << estimateSubstitutionParams << " Estimate indel parameters set to : " << estimateIndelParams);
@@ -104,44 +123,10 @@ BandingEstimator::BandingEstimator(Definitions::AlgorithmType at, Sequences* inp
 		indelModel->setParameters(modelParams->getIndelParameters());
 	}
 
-	//let's assume that we have all the parameters estimated
-	//need to get times!
 
 	EvolutionaryPairHMM *hmm;
-//non banden probs
-//	vector<EvolutionaryPairHMM*> hmmsNB(pairCount);
 
-/*
-	for(unsigned int i =0; i< pairCount; i++)
-		{
-			std::pair<unsigned int, unsigned int> idxs = inputSequences->getPairOfSequenceIndices(i);
-			DEBUG("Running band calculator for sequence " << idxs.first << " and " << idxs.second);
-			FileLogger::InfoLogger() << "Running band calculator for sequence " << idxs.first << " and " << idxs.second << "\n";
-			BandCalculator* bc = new BandCalculator(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
-					substModel, indelModel, gt->getDistanceMatrix()->getDistance(idxs.first,idxs.second));
-			bands[i] = bc->getBand();
-			if (at == Definitions::AlgorithmType::Viterbi)
-			{
-				hmm = hmms[i] = new ViterbiPairHMM(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
-					substModel, indelModel, Definitions::DpMatrixType::Full, bands[i]);
-			}
-			else if (at == Definitions::AlgorithmType::Forward)
-			{
-				hmm = hmms[i] = new ForwardPairHMM(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
-						substModel, indelModel, Definitions::DpMatrixType::Full, bands[i]);
-				//hmmsNB[i] = new ForwardPairHMM(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
-				//						substModel, indelModel, Definitions::DpMatrixType::Full, NULL);
-			}
-			else
-			{
-				throw HmmException("Wrong algorithm type - use either Forward or viterbi\n");
-			}
-			delete bc;
-		}
-*/
 	numopt = new BrentOptimizer(modelParams, NULL);
-	//bfgs->optimize();
-	//this->modelParams->logParameters();
 
 }
 
@@ -165,6 +150,9 @@ void BandingEstimator::optimizePairByPair()
 	DistanceMatrix* dm = gt->getDistanceMatrix();
 	PairHmmCalculationWrapper* wrapper = new PairHmmCalculationWrapper();
 	double result;
+
+	ProgressBar pb(80);
+	pb.setIter(pairCount);
 
 	for(unsigned int i =0; i< pairCount; i++)
 	{
@@ -216,10 +204,14 @@ void BandingEstimator::optimizePairByPair()
 		}
 		this->divergenceTimes[i] = modelParams->getDivergenceTime(0);
 
+		pb.tick();
+
 		delete band;
 		delete bc;
 		delete hmm;
 	}
+
+	pb.done();
 
 	DEBUG("Optimized divergence times:");
 	DEBUG(this->divergenceTimes);
@@ -253,4 +245,5 @@ void BandingEstimator::outputDistanceMatrix(stringstream& ss)
 }
 
 } /* namespace EBC */
+
 

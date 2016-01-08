@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * SubstitutionModelEstimator.hpp
- *
- *  Created on: Feb 26, 2014
- *      Author: root
- */
 
 #ifndef SUBSTMODELESTIMATOR_HPP_
 #define SUBSTMODELESTIMATOR_HPP_

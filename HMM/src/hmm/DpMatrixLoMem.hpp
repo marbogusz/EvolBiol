@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * DpMatrixLoMem.h
- *
- *  Created on: Feb 10, 2014
- *      Author: root
- */
 
 #ifndef DPLOMEMMATRIX_H_
 #define DPLOMEMMATRIX_H_

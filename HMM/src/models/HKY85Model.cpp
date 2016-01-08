@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * HKY85Model.cpp
- *
- *  Created on: Jan 17, 2014
- *      Author: root
- */
 
 #include "models/HKY85Model.hpp"
 
@@ -32,11 +26,8 @@ namespace EBC
 HKY85Model::HKY85Model(Dictionary* dict, Maths* alg, unsigned int rates)
 	: NucleotideSubstitutionModel(dict, alg, rates, Definitions::HKY85ParamCount)
 {
-	//FIXME - magic numbers to definitions
-	this->parameterHiBounds[0] = 5;
-	this->parameterLoBounds[0] = 0.000001;
-
-	//TODO - set within the model
+	this->parameterHiBounds[0] = Definitions::gtrMaxRate;
+	this->parameterLoBounds[0] = Definitions::almostZero;
 }
 
 

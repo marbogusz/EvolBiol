@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * StateTransitionEstimator.hpp
- *
- *  Created on: Oct 6, 2014
- *      Author: root
- */
 
 #ifndef STATETRANSITIONESTIMATOR_HPP_
 #define STATETRANSITIONESTIMATOR_HPP_

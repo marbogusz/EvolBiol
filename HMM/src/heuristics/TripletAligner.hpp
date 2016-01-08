@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * TripletAligner.hpp
- *
- *  Created on: Sep 8, 2014
- *      Author: root
- */
 
 #ifndef TRIPLETALIGNER_HPP_
 #define TRIPLETALIGNER_HPP_

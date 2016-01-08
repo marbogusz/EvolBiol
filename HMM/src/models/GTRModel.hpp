@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * GTRModel.h
- *
- *  Created on: Jan 17, 2014
- *      Author: root
- */
 
 #ifndef GTRMODEL_H_
 #define GTRMODEL_H_

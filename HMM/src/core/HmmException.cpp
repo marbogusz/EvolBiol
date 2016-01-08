@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * ParseException.cpp
- *
- *  Created on: Sep 23, 2013
- *      Author: mbogusz
- */
 
 #include "core/HmmException.hpp"
 #include "core/Definitions.hpp"

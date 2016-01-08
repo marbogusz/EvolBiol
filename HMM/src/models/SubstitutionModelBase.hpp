@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * SubstitutionModelBase.hpp
- *
- *  Created on: Jan 13, 2014
- *      Author:mbogusz
- */
 
 #ifndef S_MODEL_BASE_H_
 #define S_MODEL_BASE_H_

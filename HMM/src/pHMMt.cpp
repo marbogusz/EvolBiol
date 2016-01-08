@@ -46,13 +46,13 @@ int main(int argc, char ** argv) {
 	cout << fixed << setprecision(8);
 	cerr << fixed << setprecision(8);
 
+	cout << Definitions::notice;
+
 	try
 	{
 		//Get some time statistics
 	    chrono::time_point<chrono::system_clock> start, end;
 	    start = chrono::system_clock::now();
-
-		//FIXME - nothing happens when the model does not get specified!
 
 		CommandReader* cmdReader = new CommandReader(argc, argv);
 		ofstream treefile;
@@ -77,6 +77,9 @@ int main(int argc, char ** argv) {
 		Sequences* inputSeqs = new Sequences(parser, cmdReader->getSequenceType(),removeGaps);
 
 		INFO("Creating Model Parameters heuristics...");
+
+		cout << "Estimating evolutionary model parameters..." << endl;
+
 		ModelEstimator* tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),
 				cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
 				cmdReader->estimateAlpha());
@@ -109,19 +112,8 @@ int main(int argc, char ** argv) {
 			indelParams = tme->getIndelParameters();
 		}
 
+		cout << "Estimating pairwise distances..." << endl;
 
-		//FileLogger::Logger() << "True indel paramteres     : ";
-		//FileLogger::Logger() << cmdReader->getIndelParams() << '\n';
-		//FileLogger::Logger() << "Estimated indel paramteres: ";
-		//FileLogger::Logger() << indelParams << '\n';
-		//FileLogger::Logger() << "True substitution paramteres     : ";
-		//FileLogger::Logger() << cmdReader->getSubstParams();
-		//FileLogger::Logger() << "Estimated substitution paramteres: ";
-		//FileLogger::Logger() << substParams;
-		//FileLogger::Logger() << "True alpha      : " << cmdReader->getAlpha() << "\n";
-		//FileLogger::Logger() << "Estimated alpha : " << alpha << "\n";
-
-		//FIXME - hardcoding substitution parameters and alpha to come from the estimator
 		BandingEstimator* be = new BandingEstimator(Definitions::AlgorithmType::Forward, inputSeqs, cmdReader->getModelType() ,indelParams,
 				substParams, cmdReader->getOptimizationType(), cmdReader->getCategories(),alpha, tme->getGuideTree());
 		be->optimizePairByPair();
@@ -146,6 +138,8 @@ int main(int argc, char ** argv) {
 
 
 		DEBUG ("Running BioNJ");
+
+		cout << "Running neighbour joining..." << endl;
 		//change bionj init here!
 		BioNJ nj(inputSeqs->getSequenceCount(), be->getOptimizedTimes(), inputSeqs);
 		//DEBUG("Final tree : " << nj.calculate());
@@ -192,6 +186,8 @@ int main(int argc, char ** argv) {
 	    std::time_t end_time = chrono::system_clock::to_time_t(end);
 
 	    INFO("Finished computation at " << std::ctime(&end_time) << " elapsed time: " << elapsed_seconds.count() << "s\n");
+
+	    cout << "Done. Elapsed time: " << elapsed_seconds.count() << "s" << endl;
 
 	}
 	catch(HmmException& pe)

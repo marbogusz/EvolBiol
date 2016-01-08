@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * SubstitutionModelEstimator.cpp
- *
- *  Created on: Feb 26, 2014
- *      Author: root
- */
 
 #include "heuristics/SubstitutionModelEstimator.hpp"
 #include "models/GTRModel.hpp"

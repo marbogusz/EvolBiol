@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * FileParser.cpp
- *
- *  Created on: Oct 1, 2013
- *      Author: mbogusz
- */
 
 #include "core/FileParser.hpp"
 #include <iostream>
@@ -107,7 +101,7 @@ string FileParser::getSequenceName(string& s)
 
 void FileParser::trimWsChars(string& s)
 {
-	//FIXME - also trimming stars (stop codon) - is that OK ?
+	//Trimming stars (stop codon)
 	s.erase(std::remove_if( s.begin(), s.end(), [](char c){ return (c =='\r' || c =='\t' || c == ' ' || c == '\n' || c == '*');}), s.end() );
 }
 

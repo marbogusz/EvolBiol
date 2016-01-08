@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * ModelEstimator.cpp
- *
- *  Created on: Feb 26, 2014
- *      Author: root
- */
 
 #include "core/Dictionary.hpp"
 #include "heuristics/ModelEstimator.hpp"
@@ -280,7 +274,6 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 	ForwardPairHMM *f1, *f2;
 
 	if (model == Definitions::ModelType::HKY85){
-			//FIXME - make model idiotproof by checking if parameters are set;
 			DEBUG("Setting HKY85");
 			this->substModel = new HKY85Model(dict, maths,gammaRateCategories);
 			substModel->setParameters({initKappa});
@@ -474,8 +467,6 @@ ModelEstimator::~ModelEstimator()
 		delete fwdHMMs[i][0];
 		delete fwdHMMs[i][1];
 	}
-
-//FIXME - clean up!
 
     delete maths;
     delete sme;

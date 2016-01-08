@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * ForwardPairHMM.cpp
- *
- *  Created on: Feb 26, 2014
- *      Author: root
- */
 
 #include "core/Definitions.hpp"
 #include "hmm/ForwardPairHMM.hpp"
@@ -57,7 +51,7 @@ double ForwardPairHMM::runAlgorithm()
 	double emissionX;
 	double emissionY;
 
-	//FIXME - multiple runs using the same hmm object do not require dp matrix zeroing as long as the band stays the same!
+	//TODO - multiple runs using the same hmm object do not require dp matrix zeroing as long as the band stays the same!
 
 	//DUMP("Forward equilibriums : PiM\t" << piM << "\tPiI\t" << piI << "\tPiD\t" << piD);
 
@@ -141,7 +135,7 @@ double ForwardPairHMM::runAlgorithm()
 		}
 		for(j=1; j<ySize; j++)
 		{
-			//FIXME - range should be a reference perhaps
+			//TODO - range should use a reference perhaps
 			auto bracketI = band->getInsertRangeAt(j);
 			auto bracketD = band->getDeleteRangeAt(j);
 			auto bracketM = band->getMatchRangeAt(j);

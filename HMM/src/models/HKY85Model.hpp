@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * HKY85Model.h
- *
- *  Created on: Jan 17, 2014
- *      Author: root
- */
 
 #ifndef HKY85MODEL_H_
 #define HKY85MODEL_H_
