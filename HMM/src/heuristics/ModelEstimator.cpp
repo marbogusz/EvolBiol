@@ -218,7 +218,7 @@ void ModelEstimator::estimateParameters()
 		if(tb1 <= 1.1*Definitions::almostZero || tb2 <= 1.1*Definitions::almostZero || tb3 <= 1.1 * Definitions::almostZero){
 			ERROR("Triplet estimator zero length branch " << tb1 << " " << tb2 << " " << tb3);
 			WARN("Problem while estimating substitution model parameters: zero length branch in the estimator triplet tree. Model parameters might be inaccurate");
-			cout << "Problem while estimating substitution model parameters: zero length branch in the estimator triplet tree.n\ Model parameters might be inaccurate\n";
+			cout << "Problem while estimating substitution model parameters: zero length branch in the estimator triplet tree.\n Model parameters might be inaccurate\n";
 			steT1 = tripletDistances[trp][0] * bestFwdTm;
 			steT2 = tripletDistances[trp][1] * bestFwdTm;
 			alpha = bestFwdAlpha;

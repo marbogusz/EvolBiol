@@ -28,6 +28,11 @@ namespace dlib
                 shape_predictor_trainer object defined below to train a shape_predictor
                 using a set of training images, each annotated with shapes you want to
                 predict.
+
+            THREAD SAFETY
+                No synchronization is required when using this object.  In particular, a
+                single instance of this object can be used from multiple threads at the
+                same time.  
         !*/
 
     public:
@@ -37,6 +42,7 @@ namespace dlib
         /*!
             ensures
                 - #num_parts() == 0
+                - #num_features() == 0
         !*/
 
         unsigned long num_parts (
@@ -46,15 +52,27 @@ namespace dlib
                 - returns the number of parts in the shapes predicted by this object.
         !*/
 
-        template <typename image_type>
+        unsigned long num_features (
+        ) const;
+        /*!
+            ensures
+                - Returns the dimensionality of the feature vector output by operator().
+                  This number is the total number of trees in this object times the number
+                  of leaves on each tree.  
+        !*/
+
+        template <typename image_type, typename T, typename U>
         full_object_detection operator()(
             const image_type& img,
-            const rectangle& rect
+            const rectangle& rect,
+            std::vector<std::pair<T,U> >& feats
         ) const;
         /*!
             requires
                 - image_type == an image object that implements the interface defined in
                   dlib/image_processing/generic_image.h 
+                - T is some unsigned integral type (e.g. unsigned int).
+                - U is any scalar type capable of storing the value 1 (e.g. float).
             ensures
                 - Runs the shape prediction algorithm on the part of the image contained in
                   the given bounding rectangle.  So it will try and fit the shape model to
@@ -68,6 +86,29 @@ namespace dlib
                     - for all valid i:
                         - DET.part(i) == the location in img for the i-th part of the shape
                           predicted by this object.
+                - #feats == a sparse vector that records which leaf each tree used to make
+                  the shape prediction.   Moreover, it is an indicator vector, Therefore,
+                  for all valid i:
+                    - #feats[i].second == 1
+                  Further, #feats is a vector from the space of num_features() dimensional
+                  vectors.  The output shape positions can be represented as the dot
+                  product between #feats and a weight vector.  Therefore, #feats encodes
+                  all the information from img that was used to predict the returned shape
+                  object.
+        !*/
+
+        template <typename image_type>
+        full_object_detection operator()(
+            const image_type& img,
+            const rectangle& rect
+        ) const;
+        /*!
+            requires
+                - image_type == an image object that implements the interface defined in
+                  dlib/image_processing/generic_image.h 
+            ensures
+                - Calling this function is equivalent to calling (*this)(img, rect, ignored)
+                  where the 3d argument is discarded.
         !*/
 
     };
@@ -180,7 +221,7 @@ namespace dlib
         );
         /*!
             requires
-                - nu > 0
+                - 0 < nu <= 1
             ensures
                 - #get_nu() == nu
         !*/
@@ -265,7 +306,7 @@ namespace dlib
                   of the box.  So a padding of 0.5 would cause the algorithm to sample
                   pixels from a box that was 2x2, effectively multiplying the area pixels
                   are sampled from by 4.  Similarly, setting the padding to -0.2 would
-                  cause it to sample from a box 0.8x0.8 in size.
+                  cause it to sample from a box 0.6x0.6 in size.
         !*/
 
         void set_feature_pool_region_padding (
@@ -354,6 +395,9 @@ namespace dlib
                 - images.size() > 0
                 - for some i: objects[i].size() != 0
                   (i.e. there has to be at least one full_object_detection in the training set)
+                - for all valid p, there must exist i and j such that: 
+                  objects[i][j].part(p) != OBJECT_PART_NOT_PRESENT.
+                  (i.e. You can't define a part that is always set to OBJECT_PART_NOT_PRESENT.)
                 - for all valid i,j,k,l:
                     - objects[i][j].num_parts() == objects[k][l].num_parts()
                       (i.e. all objects must agree on the number of parts)
@@ -365,6 +409,10 @@ namespace dlib
                   shape_predictor, SP, such that:
                     SP(images[i], objects[i][j].get_rect()) == objects[i][j]
                   This learned SP object is then returned.
+                - Not all parts are required to be observed for all objects.  So if you
+                  have training instances with missing parts then set the part positions
+                  equal to OBJECT_PART_NOT_PRESENT and this algorithm will basically ignore
+                  those missing parts.
         !*/
     };
 
@@ -403,6 +451,8 @@ namespace dlib
               and compare the result with the truth part positions in objects[i][j].  We
               then return the average distance (measured in pixels) between a predicted
               part location and its true position.  
+            - Note that any parts in objects that are set to OBJECT_PART_NOT_PRESENT are
+              simply ignored.
             - if (scales.size() != 0) then
                 - Each time we compute the distance between a predicted part location and
                   its true location in objects[i][j] we divide the distance by

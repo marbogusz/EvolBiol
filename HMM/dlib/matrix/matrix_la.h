@@ -6,6 +6,7 @@
 #include "matrix_la_abstract.h"
 #include "matrix_utilities.h"
 #include "../sparse_vector.h"
+#include "../optimization/optimization_line_search.h"
 
 // The 4 decomposition objects described in the matrix_la_abstract.h file are
 // actually implemented in the following 4 files.  
@@ -1832,6 +1833,137 @@ convergence:
             // has the appropriate type.
             return eigenvalue_decomposition<EXP>(m.ref()).get_real_eigenvalues();
         }
+    }
+
+// ----------------------------------------------------------------------------------------
+
+    template <
+        typename EXP 
+        >
+    dlib::vector<double,2> max_point_interpolated (
+        const matrix_exp<EXP>& m
+    )
+    {
+        DLIB_ASSERT(m.size() > 0, 
+            "\tdlib::vector<double,2> point max_point_interpolated(const matrix_exp& m)"
+            << "\n\tm can't be empty"
+            << "\n\tm.size():   " << m.size() 
+            << "\n\tm.nr():     " << m.nr() 
+            << "\n\tm.nc():     " << m.nc() 
+            );
+        const point p = max_point(m);
+
+        // If this is a column vector then just do interpolation along a line.
+        if (m.nc()==1)
+        {
+            const long pos = p.y();
+            if (0 < pos && pos+1 < m.nr())
+            {
+                double v1 = dlib::impl::magnitude(m(pos-1));
+                double v2 = dlib::impl::magnitude(m(pos));
+                double v3 = dlib::impl::magnitude(m(pos+1));
+                double y = lagrange_poly_min_extrap(pos-1,pos,pos+1, -v1, -v2, -v3);
+                return vector<double,2>(0,y);
+            }
+        }
+        // If this is a row vector then just do interpolation along a line.
+        if (m.nr()==1)
+        {
+            const long pos = p.x();
+            if (0 < pos && pos+1 < m.nc())
+            {
+                double v1 = dlib::impl::magnitude(m(pos-1));
+                double v2 = dlib::impl::magnitude(m(pos));
+                double v3 = dlib::impl::magnitude(m(pos+1));
+                double x = lagrange_poly_min_extrap(pos-1,pos,pos+1, -v1, -v2, -v3);
+                return vector<double,2>(x,0);
+            }
+        }
+
+
+        // If it's on the border then just return the regular max point.
+        if (shrink_rect(get_rect(m),1).contains(p) == false)
+            return p;
+
+        //matrix<double> A(9,6);
+        //matrix<double,0,1> G(9);
+
+        matrix<double,9,1> pix;
+        long i = 0;
+        for (long r = -1; r <= +1; ++r)
+        {
+            for (long c = -1; c <= +1; ++c)
+            {
+                pix(i) = dlib::impl::magnitude(m(p.y()+r,p.y()+c));
+                /*
+                A(i,0) = c*c;
+                A(i,1) = c*r;
+                A(i,2) = r*r;
+                A(i,3) = c;
+                A(i,4) = r;
+                A(i,5) = 1;
+                G(i) = std::exp(-1*(r*r+c*c)/2.0); // Use a gaussian windowing function around p.
+                */
+                ++i;
+            }
+        }
+
+        // This bit of code is how we generated the derivative_filters matrix below.  
+        //A = diagm(G)*A; 
+        //std::cout << std::setprecision(20) << inv(trans(A)*A)*trans(A)*diagm(G) << std::endl; exit(1);
+
+        const double m10 = 0.10597077880854270659;
+        const double m21 = 0.21194155761708535768;
+        const double m28 = 0.28805844238291455905;
+        const double m57 = 0.57611688476582878504;
+        // So this derivative_filters finds the parameters of the quadratic surface that best fits
+        // the 3x3 region around p.  Then we find the maximizer of that surface within that
+        // small region and return that as the maximum location.
+        const double derivative_filters[] = {
+                // xx
+                m10,-m21,m10,
+                m28,-m57,m28,
+                m10,-m21,m10,
+
+                // xy
+                0.25 ,0,-0.25,
+                0    ,0, 0,
+                -0.25,0,0.25,
+
+                // yy
+                m10,  m28, m10,
+                -m21,-m57,-m21,
+                m10,  m28, m10,
+
+                // x
+                -m10,0,m10,
+                -m28,0,m28,
+                -m10,0,m10,
+
+                // y
+                -m10,-m28,-m10,
+                0,   0,   0,
+                m10, m28, m10
+            };
+        const matrix<double,5,9> filt(derivative_filters);
+        // Now w contains the parameters of the quadratic surface
+        const matrix<double,5,1> w = filt*pix;
+
+
+        // Now newton step to the max point on the surface
+        matrix<double,2,2> H;
+        matrix<double,2,1> g;
+        H = 2*w(0), w(1),
+              w(1), 2*w(2);
+        g = w(3), 
+            w(4);
+        const dlib::vector<double,2> delta = -inv(H)*g;
+
+        // if delta isn't in an ascent direction then just use the normal max point.
+        if (dot(delta, g) < 0)
+            return p;
+        else
+            return vector<double,2>(p)+clamp(delta, -1, 1);
     }
 
 // ----------------------------------------------------------------------------------------

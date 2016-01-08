@@ -70,6 +70,17 @@ namespace dlib
         const log_level& new_level
     );
 
+    typedef void (*print_header_type)(
+        std::ostream& out, 
+        const std::string& logger_name, 
+        const log_level& l,
+        const uint64 thread_id
+    );
+
+    void set_all_logging_headers (
+        const print_header_type& new_header
+    );
+
 // ----------------------------------------------------------------------------------------
 
     void print_default_logger_header (
@@ -227,7 +238,7 @@ namespace dlib
                                         const uint64, const char*> hook_mfp;
 
         logger (  
-            const char* name_
+            const std::string& name_
         );
 
         virtual ~logger (
@@ -351,13 +362,6 @@ namespace dlib
             hook.clear();
             gd.set_output_hook(logger_name, hook);
         }
-
-        typedef void (*print_header_type)(
-            std::ostream& out, 
-            const std::string& logger_name, 
-            const log_level& l,
-            const uint64 thread_id
-        );
 
         print_header_type logger_header (
         ) const { return print_header; }
@@ -600,6 +604,10 @@ namespace dlib
 
         friend void set_all_logging_levels (
             const log_level& new_level
+        );
+
+        friend void set_all_logging_headers (
+            const print_header_type& new_header 
         );
 
         friend void set_all_logging_output_streams (
