@@ -99,8 +99,8 @@ int main(int argc, char ** argv) {
 		//modelParams->generateInitialIndelParameters();
 		//modelParams->generateInitialSubstitutionParameters();
 		modelParams->setUserIndelParams({0.01,0.2});
-		modelParams->setUserDivergenceParams({0.1});
-		modelParams->setUserSubstParams({2.5, 0.01});
+		modelParams->setUserDivergenceParams({0.2});
+		modelParams->setUserSubstParams({2.0, 1.0});
 
 		//indelModel->setParameters({0.00001,0.00001});
 		//substModel->setParameters({16.4, 0.00352});
@@ -124,7 +124,7 @@ int main(int argc, char ** argv) {
 			len1 = inputSeqs->getSequencesAt(idxs.first)->size();
 			len2 = inputSeqs->getSequencesAt(idxs.second)->size();
 
-			Band* band = new Band(len1,len2,0.3);
+			Band* band = NULL;//new Band(len1,len2,0.3);
 
 			//BAND it ?
 			hmm = new ForwardPairHMM(inputSeqs->getSequencesAt(idxs.first), inputSeqs->getSequencesAt(idxs.second),
