@@ -60,6 +60,7 @@ CommandReader::CommandReader(int argc, char** argv)
 		parser.add_option("o","Set optimizer, 0- BFGS, 1- BOBYQA default is 0",1);
 		parser.add_option("param_rev","GTR model parameters",5);
 		parser.add_option("param_hky","HKY85 model parameters",1);
+		parser.add_option("param_m0","M0 model parameters",2);
 		parser.add_option("ov","Output viterbi alignment for estimated parameters");
 		parser.add_option("rateCat", "Specify gamma rate categories, default is 5",1);
 		parser.add_option("initAlpha", "Specify initial alpha parameter, default is 0.5",1 );
@@ -87,9 +88,11 @@ CommandReader::CommandReader(int argc, char** argv)
 		const char* f_sub_opts[] = {"b","o","ov"};
 		const char* rev_sub_opts[] = {"param_rev"};
 		const char* hky_sub_opts[] = {"param_hky"};
+		const char* m0_sub_opts[] = {"param_m0"};
 		parser.check_sub_options("F", f_sub_opts);
 		parser.check_sub_options("rev", rev_sub_opts);
 		parser.check_sub_options("hky", hky_sub_opts);
+		parser.check_sub_options("m0", m0_sub_opts);
 
 		parser.check_option_arg_range("param_hky", 0.0000001, 20.0);
 		parser.check_option_arg_range("param_rev", 0.0, 10.0);
@@ -146,6 +149,17 @@ vector<double> CommandReader::getSubstParams()
 				vec.push_back(atof(parser.option("param_rev").argument(i).c_str()));
 			}
 		}
+	}
+	else if (parser.option("m0"))
+	{
+			if (parser.option("param_m0"))
+			{
+				for (i=0; i< 2; i++)
+				{
+					DEBUG("m0 parameter " << i <<  ": " << parser.option("param_m0").argument(i));
+					vec.push_back(atof(parser.option("param_m0").argument(i).c_str()));
+				}
+			}
 	}
 	else if (parser.option("lg")){}
 	else throw HmmException("Model not specified");

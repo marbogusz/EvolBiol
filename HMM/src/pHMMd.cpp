@@ -90,6 +90,8 @@ int main(int argc, char ** argv) {
 		substModel = new CodonModel(dict, maths,1);
 		indelModel = new NegativeBinomialGapModel();
 
+		//indelModel->setParameters({Definitions::almostZero,0.5});
+
 		substModel->setObservedFrequencies(inputSeqs->getElementFrequencies());
 
 		modelParams = new OptimizedModelParameters(substModel, indelModel,2, 1, true,
@@ -98,9 +100,9 @@ int main(int argc, char ** argv) {
 		//modelParams->generateInitialDistanceParameters();
 		//modelParams->generateInitialIndelParameters();
 		//modelParams->generateInitialSubstitutionParameters();
-		modelParams->setUserIndelParams({0.01,0.2});
+		modelParams->setUserIndelParams({0.01,0.5});
 		modelParams->setUserDivergenceParams({0.2});
-		modelParams->setUserSubstParams({2.0, 1.0});
+		modelParams->setUserSubstParams({2.0, 0.1});
 
 		//indelModel->setParameters({0.00001,0.00001});
 		//substModel->setParameters({16.4, 0.00352});
@@ -124,13 +126,43 @@ int main(int argc, char ** argv) {
 			len1 = inputSeqs->getSequencesAt(idxs.first)->size();
 			len2 = inputSeqs->getSequencesAt(idxs.second)->size();
 
-			Band* band = NULL;//new Band(len1,len2,0.3);
+			Band* band = new Band(len1,len2,0.3);
 
+
+/*
+			auto ip =  cmdReader->getIndelParams();
+
+			substModel->setParameters(cmdReader->getSubstParams());
+			substModel->calculateModel();
 			//BAND it ?
+
+
 			hmm = new ForwardPairHMM(inputSeqs->getSequencesAt(idxs.first), inputSeqs->getSequencesAt(idxs.second),
 							substModel, indelModel, Definitions::DpMatrixType::Full, band);
 
 
+			double lam = Definitions::almostZero;
+			double tim = 0.1;//Definitions::almostZero;
+			double lnl = 0;
+
+			cout << "Time\tLambda\tLnL" << endl;
+			while(tim < 1.5){
+				lam = Definitions::almostZero;
+				while(lam < 0.1){
+					indelModel->setParameters({lam,ip[1]});
+					hmm->setDivergenceTimeAndCalculateModels(tim);
+					lnl = hmm->runAlgorithm() * -1.0;
+					lam += (0.0025);
+					//lam += (Definitions::almostZero)*4;
+					cout << tim << "\t" << lam << "\t" << lnl << endl;
+				}
+				tim += 0.025;
+			}
+*/
+
+
+			hmm = new ForwardPairHMM(inputSeqs->getSequencesAt(idxs.first), inputSeqs->getSequencesAt(idxs.second),
+					substModel, indelModel, Definitions::DpMatrixType::Full, band);
 
 			wrapper->setTargetHMM(hmm);
 			wrapper->setIndelModel(indelModel);
@@ -180,6 +212,19 @@ int main(int argc, char ** argv) {
 			while(runAgain == true);
 
 
+
+			auto vh = new ViterbiPairHMM(inputSeqs->getSequencesAt(idxs.first), inputSeqs->getSequencesAt(idxs.second),
+					substModel, indelModel, Definitions::DpMatrixType::Full, NULL);
+
+			vh->setDivergenceTimeAndCalculateModels(modelParams->getDivergenceTime(0));
+			vh->runAlgorithm();
+			auto al = vh->getStringAlignment();
+
+			cout << al.first << endl;
+			cout << al.second << endl;
+
+			delete vh;
+			/*
 			cout << modelParams->getSubstParameters()[0] << "\t" << modelParams->getSubstParameters()[1] <<
 			    "\t" <<  modelParams->getIndelParameters()[0] << "\t" <<  modelParams->getIndelParameters()[1] <<
 				"\t" << modelParams->getDivergenceTime(0) << "\t" << inputSeqs->getSequenceName(idxs.first) << "\t" << inputSeqs->getSequenceName(idxs.second) << "\t" << pi << "\n";
@@ -190,8 +235,10 @@ int main(int argc, char ** argv) {
 			//INFO(modelParams->getSubstParameters());
 			//INFO(modelParams->getIndelParameters());
 
+
+*/
 			delete hmm;
-			delete band;
+			//delete band;
 		}
 
 	}
