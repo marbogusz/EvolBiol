@@ -212,7 +212,7 @@ int main(int argc, char ** argv) {
 			while(runAgain == true);
 
 
-
+/*
 			auto vh = new ViterbiPairHMM(inputSeqs->getSequencesAt(idxs.first), inputSeqs->getSequencesAt(idxs.second),
 					substModel, indelModel, Definitions::DpMatrixType::Full, NULL);
 
@@ -224,7 +224,7 @@ int main(int argc, char ** argv) {
 			cout << al.second << endl;
 
 			delete vh;
-			/*
+			*/
 			cout << modelParams->getSubstParameters()[0] << "\t" << modelParams->getSubstParameters()[1] <<
 			    "\t" <<  modelParams->getIndelParameters()[0] << "\t" <<  modelParams->getIndelParameters()[1] <<
 				"\t" << modelParams->getDivergenceTime(0) << "\t" << inputSeqs->getSequenceName(idxs.first) << "\t" << inputSeqs->getSequenceName(idxs.second) << "\t" << pi << "\n";
@@ -236,9 +236,9 @@ int main(int argc, char ** argv) {
 			//INFO(modelParams->getIndelParameters());
 
 
-*/
+
 			delete hmm;
-			//delete band;
+			delete band;
 		}
 
 	}
