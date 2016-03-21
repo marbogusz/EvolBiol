@@ -35,7 +35,7 @@
 									<listOptionValue builtIn="false" value="/home/marcin/dlib-18.6"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HMM/src}&quot;"/>
 								</option>
-								<option id="gnu.cpp.compiler.option.other.other.892140316" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0 -std=c++11" valueType="string"/>
+								<option id="gnu.cpp.compiler.option.other.other.892140316" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0 -std=c++11 -msse2 -mfpmath=sse" valueType="string"/>
 								<option id="gnu.cpp.compiler.option.dialect.std.1272364118" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.debugging.other.1742796179" name="Other debugging flags" superClass="gnu.cpp.compiler.option.debugging.other" useByScannerDiscovery="false" value="-ggdb" valueType="string"/>
 								<option id="gnu.cpp.compiler.option.debugging.prof.294585722" name="Generate prof information (-p)" superClass="gnu.cpp.compiler.option.debugging.prof" useByScannerDiscovery="false" value="false" valueType="boolean"/>

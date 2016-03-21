@@ -30,6 +30,7 @@
 #include <array>
 #include <chrono>
 #include <ctime>
+#include <thread>
 
 #include "core/FileLogger.hpp"
 
@@ -45,10 +46,17 @@ using namespace EBC;
 
 int main(int argc, char ** argv) {
 
+	cerr << "Starting dm\n";
 	//Set output Precision to 2
 	//FIXME - should normally be set to >= 6
 	cout << fixed << setprecision(6);
 	cerr << fixed << setprecision(6);
+
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(30000));
+	cerr << " ELLO\n";
+	cout << " Should not be here!\n";
+	return 0;
 
 	try
 	{
