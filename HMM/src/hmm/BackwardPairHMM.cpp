@@ -30,6 +30,7 @@
 #include "models/HKY85Model.hpp"
 #include "models/AminoacidSubstitutionModel.hpp"
 #include "hmm/DpMatrixFull.hpp"
+#include <sstream>
 
 
 namespace EBC
@@ -143,6 +144,36 @@ void BackwardPairHMM::getAlignment(HMMPathSample& sample)
 		}
 	}
 	sample.setLastState(currentState);
+}
+
+string BackwardPairHMM::getAlignmentPosteriors(vector<SequenceElement*>* s1,
+		vector<SequenceElement*>* s2)
+{
+	stringstream oss;
+	int k =0;
+	int l =0;
+
+	for(unsigned int i=1; i< s1->size(); i++){
+		if((*s1)[i]->isIsGap() && (*s1)[i]->isIsGap()){
+			//both gaps, posterior non applicable
+			oss << "NA\t";
+		}
+		else if((*s2)[0]->isIsGap()){
+			k++;
+			oss << X->getValueAt(k,l) << "\t";
+		}
+		else if((*s1)[0]->isIsGap()){
+			l++;
+			oss << Y->getValueAt(k,l) << "\t";
+		}
+		else{
+			k++;
+			l++;
+			oss << M->getValueAt(k,l) << "\t";
+		}
+	}
+	oss << endl;
+	return oss.str();
 }
 
 void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)

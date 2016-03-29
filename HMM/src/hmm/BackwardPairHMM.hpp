@@ -73,6 +73,8 @@ public:
 	pair<vector<double>*, pair<vector<unsigned char>*, vector<unsigned char>*> >
 	getMPDWithPosteriors();
 
+	string getAlignmentPosteriors(vector<SequenceElement*>* s1,vector<SequenceElement*>* s2);
+
 };
 
 } /* namespace EBC */
