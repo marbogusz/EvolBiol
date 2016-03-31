@@ -44,18 +44,17 @@ using namespace EBC;
 
 int main(int argc, char ** argv) {
 
-	//Set output Precision to 2
-	//FIXME - should normally be set to >= 6
+
 	cout << fixed << setprecision(8);
 	cerr << fixed << setprecision(8);
+
+	cout << Definitions::notice;
 
 	try
 	{
 		//Get some time statistics
 	    chrono::time_point<chrono::system_clock> start, end;
 	    start = chrono::system_clock::now();
-
-		//FIXME - nothing happens when the model does not get specified!
 
 		CommandReader* cmdReader = new CommandReader(argc, argv);
 		ofstream treefile;
@@ -67,6 +66,9 @@ int main(int argc, char ** argv) {
 
 		IParser* parser = cmdReader->getParser();
 
+		//Remove gaps if the user provides a MSA file
+		bool removeGaps = true;
+
 		//FileLogger::DebugLogger().setCerr();
 		//FileLogger::DumpLogger().setCerr();
 		//FileLogger::InfoLogger().setCerr();
@@ -74,216 +76,96 @@ int main(int argc, char ** argv) {
 		INFO("Reading input sequences...");
 		DEBUG("Creating alignment object...");
 
-		Sequences* inputSeqs = new Sequences(parser, cmdReader->getSequenceType(),cmdReader->isFixedAlignment());
-		if (cmdReader->isFdist() || cmdReader->isVdist())
-		{
-			vector<double> indelParams;
-			vector<double> substParams;
-			substParams = cmdReader->getSubstParams();
-			indelParams = cmdReader->getIndelParams();
-			double alpha = cmdReader->getAlpha();
+		Sequences* inputSeqs = new Sequences(parser, cmdReader->getSequenceType(),removeGaps);
 
-			Optimizer* bfgs;
-			Dictionary* dict;
-			SubstitutionModelBase* substModel;
-			IndelModel* indelModel;
-			Maths* maths;
-			Definitions::AlgorithmType algorithm;
-			OptimizedModelParameters* modelParams;
+		INFO("Creating Model Parameters heuristics...");
 
-			maths = new Maths();
-			dict = inputSeqs->getDictionary();
+		cout << "Estimating evolutionary model parameters..." << endl;
 
-			if (cmdReader->getModelType() == Definitions::ModelType::GTR)
-			{
-				substModel = new GTRModel(dict, maths,cmdReader->getCategories());
-			}
-			else if (cmdReader->getModelType() == Definitions::ModelType::HKY85)
-			{
-				substModel = new HKY85Model(dict, maths,cmdReader->getCategories());
-			}
-			else if (cmdReader->getModelType() == Definitions::ModelType::LG)
-			{
-					substModel = new AminoacidSubstitutionModel(dict, maths,cmdReader->getCategories(),Definitions::aaLgModel);
-			}
+		ModelEstimator* tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),
+				cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
+				cmdReader->estimateAlpha());
 
-			indelModel = new NegativeBinomialGapModel();
+		vector<double> indelParams;
+		vector<double> substParams;
+		double alpha = cmdReader->getAlpha();
 
-			modelParams = new OptimizedModelParameters(substModel, indelModel,2, 1, false,
-					false, false, true, maths);
+		substParams = tme->getSubstitutionParameters();
+		indelParams = tme->getIndelParameters();
 
-			modelParams->generateInitialDistanceParameters();
-
-
-			//modelParams->setUserIndelParams(indelParams);
-			//modelParams->setUserSubstParams(substParams);
-
-			substModel->setObservedFrequencies(inputSeqs->getElementFrequencies());
-			substModel->setAlpha(alpha);
-			substModel->setParameters(substParams);
-			substModel->calculateModel();
-
-
-			indelModel->setParameters(indelParams);
-
-			EvolutionaryPairHMM *hmm;
-
-			bfgs = new Optimizer(modelParams, NULL, cmdReader->getOptimizationType());
-
-			PairHmmCalculationWrapper* wrapper = new PairHmmCalculationWrapper();
-
-			std::pair<unsigned int, unsigned int> idxs = inputSeqs->getPairOfSequenceIndices(0);
-
-			if (cmdReader->isVdist())
-			{
-				DEBUG("Creating Viterbi algorithm to optimize the pairwise divergence time...");
-				hmm = new ViterbiPairHMM(inputSeqs->getSequencesAt(idxs.first), inputSeqs->getSequencesAt(idxs.second),
-					substModel, indelModel, Definitions::DpMatrixType::Full, nullptr);
-			}
-			else if (cmdReader->isFdist())
-			{
-				DEBUG("Creating forward algorithm to optimize the pairwise divergence time...");
-				hmm = new ForwardPairHMM(inputSeqs->getSequencesAt(idxs.first), inputSeqs->getSequencesAt(idxs.second),
-					substModel, indelModel, Definitions::DpMatrixType::Full, nullptr);
-			}
-
-			//hmm->setDivergenceTime(modelParams->getDivergenceTime(0)); //zero as there's only one pair!
-			wrapper->setTargetHMM(hmm);
-			wrapper->setModelParameters(modelParams);
-			bfgs->setTarget(wrapper);
-			bfgs->optimize();
-			cout << modelParams->getDivergenceTime(0);
+		if(cmdReader->estimateAlpha()){
+			alpha = tme->getAlpha();
 		}
 
-		else if (cmdReader->isMLE())
-		{
 
-			//DISTANCE-BASED estimation using an alignment
-
-			vector<double> indelParams;
-			vector<double> substParams;
-			double alpha;
-
+		try{
 			substParams = cmdReader->getSubstParams();
-			indelParams = cmdReader->getIndelParams();
-			alpha = cmdReader->getAlpha();
-
-			ModelEstimator* tme;
-/*
-			if (substParams.size() == 0){
-				tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),
-								cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
-								false);
-
-				substParams = tme->getSubstitutionParameters();
-
-			}
-*/
-
-			GuideTree gt(inputSeqs);
-
-
-			MlEstimator mle(inputSeqs, cmdReader->getModelType(), indelParams, substParams,
-							cmdReader->getOptimizationType(), cmdReader->getCategories(), alpha,
-							false, gt.getDistances(), false);
-
-
-			//cout << tme.getOptimizedTimes()[0];
-
-			BioNJ nj(inputSeqs->getSequenceCount(), mle.getOptimizedTimes(), inputSeqs);
-			DEBUG("Final tree : " << nj.calculate());
-			string treeStr = nj.calculate();
-
-			treefile.open((string(cmdReader->getInputFileName()).append(".nj.tree")).c_str(),ios::out);
-			treefile << treeStr << endl;
-			treefile.close();
-
 		}
-
-		else
-		{
-
-
-
-			INFO("Creating Model Parameters heuristics...");
-			ModelEstimator* tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),
-					cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
-					cmdReader->estimateAlpha());
-
-			vector<double> indelParams;
-			vector<double> substParams;
-			double alpha = 100;
-
+		//do nothing - if exception, this means no user-specified params
+		catch(HmmException& pe){
 			substParams = tme->getSubstitutionParameters();
-			indelParams = tme->getIndelParameters();
-			if(cmdReader->estimateAlpha())
-				alpha = tme->getAlpha();
-
-
-
-			//FileLogger::Logger() << "True indel paramteres     : ";
-			//FileLogger::Logger() << cmdReader->getIndelParams() << '\n';
-			//FileLogger::Logger() << "Estimated indel paramteres: ";
-			//FileLogger::Logger() << indelParams << '\n';
-			//FileLogger::Logger() << "True substitution paramteres     : ";
-			//FileLogger::Logger() << cmdReader->getSubstParams();
-			//FileLogger::Logger() << "Estimated substitution paramteres: ";
-			//FileLogger::Logger() << substParams;
-			//FileLogger::Logger() << "True alpha      : " << cmdReader->getAlpha() << "\n";
-			//FileLogger::Logger() << "Estimated alpha : " << alpha << "\n";
-
-			//FIXME - hardcoding substitution parameters and alpha to come from the estimator
-			BandingEstimator* be = new BandingEstimator(cmdReader->getAlgorithmType(), inputSeqs, cmdReader->getModelType() ,indelParams,
-					substParams, cmdReader->getOptimizationType(), cmdReader->getCategories(),alpha, tme->getGuideTree());
-			be->optimizePairByPair();
-
-
-			auto distances = be->getOptimizedTimes();
-			auto seqCount =  inputSeqs->getSequenceCount();
-
-			//output distance matrix
-			distfile.open((string(cmdReader->getInputFileName()).append(Definitions::distMatExt)).c_str(),ios::out);
-			distfile << inputSeqs->getSequenceCount() << endl;
-			for (unsigned int seqId = 0; seqId < seqCount; seqId++){
-				distfile << inputSeqs->getSequenceName(seqId) << "        ";
-				for(unsigned int j = 0; j<seqId; j++)
-				{
-
-					distfile << " " << distances[(seqId - j - 1) + (j*seqCount) - (((1+j)/2.0)*(j*1.0))];
-				}
-				distfile << endl;
-			}
-			distfile.close();
-
-
-			DEBUG ("Running BioNJ");
-			//change bionj init here!
-			BioNJ nj(inputSeqs->getSequenceCount(), be->getOptimizedTimes(), inputSeqs);
-			//DEBUG("Final tree : " << nj.calculate());
-			string treeStr = nj.calculate();
-
-
-			INFO("Indel parameters");
-			INFO(indelParams);
-			INFO("Substitution parameters");
-			INFO(substParams);
-			INFO("Gamma parameters (alpha and rate categories)");
-			INFO(alpha << '\t' << cmdReader->getCategories());
-			INFO("Newick tree");
-			INFO(treeStr);
-
-
-			treefile.open((string(cmdReader->getInputFileName()).append(Definitions::treeExt)).c_str(),ios::out);
-			treefile << treeStr << endl;
-			treefile.close();
-
-
-
-			delete be;
-
-			delete tme;
-
 		}
+
+		try{
+			indelParams = cmdReader->getIndelParams();
+		}
+		//do nothing - if exception, this means no user-specified params
+		catch(HmmException& pe){
+			indelParams = tme->getIndelParameters();
+		}
+
+		cout << "Estimating pairwise distances..." << endl;
+
+		BandingEstimator* be = new BandingEstimator(Definitions::AlgorithmType::Forward, inputSeqs, cmdReader->getModelType() ,indelParams,
+				substParams, cmdReader->getOptimizationType(), cmdReader->getCategories(),alpha, tme->getGuideTree());
+		be->optimizePairByPair();
+
+
+		auto distances = be->getOptimizedTimes();
+		auto seqCount =  inputSeqs->getSequenceCount();
+
+		//output distance matrix
+		distfile.open((string(cmdReader->getInputFileName()).append(Definitions::distMatExt)).c_str(),ios::out);
+		distfile << inputSeqs->getSequenceCount() << endl;
+		for (unsigned int seqId = 0; seqId < seqCount; seqId++){
+			distfile << inputSeqs->getSequenceName(seqId) << "        ";
+			for(unsigned int j = 0; j<seqId; j++)
+			{
+
+				distfile << " " << distances[(seqId - j - 1) + (j*seqCount) - (((1+j)/2.0)*(j*1.0))];
+			}
+			distfile << endl;
+		}
+		distfile.close();
+
+
+		DEBUG ("Running BioNJ");
+
+		cout << "Running neighbour joining..." << endl;
+		//change bionj init here!
+		BioNJ nj(inputSeqs->getSequenceCount(), be->getOptimizedTimes(), inputSeqs);
+		//DEBUG("Final tree : " << nj.calculate());
+		string treeStr = nj.calculate();
+
+
+		INFO("Indel parameters");
+		INFO(indelParams);
+		INFO("Substitution parameters");
+		INFO(substParams);
+		INFO("Gamma parameters (alpha and rate categories)");
+		INFO(alpha << '\t' << cmdReader->getCategories());
+		INFO("Newick tree");
+		INFO(treeStr);
+
+
+		treefile.open((string(cmdReader->getInputFileName()).append(Definitions::treeExt)).c_str(),ios::out);
+		treefile << treeStr << endl;
+		treefile.close();
+
+
+		delete be;
+
+		delete tme;
 
 
 		delete inputSeqs;
@@ -307,14 +189,16 @@ int main(int argc, char ** argv) {
 
 	    INFO("Finished computation at " << std::ctime(&end_time) << " elapsed time: " << elapsed_seconds.count() << "s\n");
 
+	    cout << "Done. Elapsed time: " << elapsed_seconds.count() << "s" << endl;
+
 	}
 	catch(HmmException& pe)
 	{
-		cerr << pe.what();
+		ERROR(pe.what());
 	}
 	catch(exception &ex)
 	{
-		cerr << ex.what();
+		ERROR(ex.what());
 	}
 
 	FileLogger::stop();

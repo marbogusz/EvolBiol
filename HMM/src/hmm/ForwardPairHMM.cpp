@@ -26,6 +26,7 @@
 
 #include "core/Definitions.hpp"
 #include "hmm/ForwardPairHMM.hpp"
+#include <random>
 
 namespace EBC
 {
