@@ -38,7 +38,7 @@ namespace EBC
 BandingEstimator::BandingEstimator(Definitions::AlgorithmType at, Sequences* inputSeqs, Definitions::ModelType model ,std::vector<double> indel_params,
 		std::vector<double> subst_params, Definitions::OptimizationType ot, unsigned int rateCategories, double alpha, GuideTree* g) :
 				inputSequences(inputSeqs), gammaRateCategories(rateCategories), pairCount(inputSequences->getPairCount()),
-				/*hmms(pairCount), bands(pairCount),*/ divergenceTimes(pairCount), algorithm(at), gt(g)
+				/*hmms(pairCount), bands(pairCount),*/ divergenceTimes(pairCount), algorithm(at)//, gt(g)
 {
 	//Banding estimator means banding enabled!
 
@@ -161,9 +161,10 @@ BandingEstimator::~BandingEstimator()
 
 void BandingEstimator::optimizePairByPair()
 {
-	EvolutionaryPairHMM* hmm;
+	ForwardPairHMM* fhmm;
+	BackwardPairHMM* bhmm;
 	Band* band;
-	DistanceMatrix* dm = gt->getDistanceMatrix();
+	//DistanceMatrix* dm = gt->getDistanceMatrix();
 	PairHmmCalculationWrapper* wrapper = new PairHmmCalculationWrapper();
 	double result;
 
@@ -173,21 +174,16 @@ void BandingEstimator::optimizePairByPair()
 		std::pair<unsigned int, unsigned int> idxs = inputSequences->getPairOfSequenceIndices(i);
 		INFO("Running pairwise calculator for sequence id " << idxs.first << " and " << idxs.second
 				<< " ,number " << i+1 <<" out of " << pairCount << " pairs" );
-		BandCalculator* bc = new BandCalculator(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
-				substModel, indelModel, gt->getDistanceMatrix()->getDistance(idxs.first,idxs.second));
-		band = bc->getBand();
-		if (algorithm == Definitions::AlgorithmType::Viterbi)
-		{
-			DEBUG("Creating Viterbi algorithm to optimize the pairwise divergence time...");
-			hmm = new ViterbiPairHMM(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
-					substModel, indelModel, Definitions::DpMatrixType::Full, band);
-		}
-		else if (algorithm == Definitions::AlgorithmType::Forward)
-		{
-			DEBUG("Creating forward algorithm to optimize the pairwise divergence time...");
-			hmm = new ForwardPairHMM(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
-					substModel, indelModel, Definitions::DpMatrixType::Full, band);
-		}
+		//BandCalculator* bc = new BandCalculator(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
+		//		substModel, indelModel, gt->getDistanceMatrix()->getDistance(idxs.first,idxs.second));
+		band = NULL;//bc->getBand();
+
+		DEBUG("Creating forward algorithm to optimize the pairwise divergence time...");
+		fhmm = new ForwardPairHMM(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
+				substModel, indelModel, Definitions::DpMatrixType::Full, band);
+		bhmm = new BackwardPairHMM(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
+				substModel, indelModel, Definitions::DpMatrixType::Full, band);
+
 
 		//hmm->setDivergenceTimeAndCalculateModels(modelParams->getDivergenceTime(0)); //zero as there's only one pair!
 
@@ -196,30 +192,38 @@ void BandingEstimator::optimizePairByPair()
 		//lsp.getLikelihoodSurface();
 
 
-		wrapper->setTargetHMM(hmm);
+		wrapper->setTargetHMM(fhmm);
 		DUMP("Set model parameter in the hmm...");
 		wrapper->setModelParameters(modelParams);
-		modelParams->setUserDivergenceParams({bc->getClosestDistance()});
+		modelParams->setUserDivergenceParams({0.2});
 		numopt->setTarget(wrapper);
-		numopt->setAccuracy(bc->getBrentAccuracy());
-		numopt->setBounds(bc->getLeftBound(), bc->getRightBound() < 0 ? modelParams->divergenceBound : bc->getRightBound());
+		numopt->setAccuracy(Definitions::highDivergenceAccuracyDelta);
+		//FIXME - hardcoded right bound
+		numopt->setBounds(Definitions::almostZero, 5.0);
 
 
 		result = numopt->optimize() * -1.0;
+
+		bhmm->setDivergenceTimeAndCalculateModels(modelParams->getDivergenceTime(0));
+		bhmm->runAlgorithm();
+		bhmm->calculatePosteriors(fhmm);
+
+
+		cout << inputSequences->getSequenceName(idxs.first) << "\t" <<  inputSequences->getSequenceName(idxs.second) << "\t" << bhmm->getAlignmentPosteriors(inputSequences->getAlignmentsAt(idxs.first), inputSequences->getAlignmentsAt(idxs.second));
+
 		DEBUG("Likelihood after pairwise optimization: " << result);
 		if (result <= (Definitions::minMatrixLikelihood /2.0))
 		{
-			DEBUG("Optimization failed for pair #" << i << " Zero probability FWD");
-			band->output();
-			dynamic_cast<DpMatrixFull*>(hmm->M->getDpMatrix())->outputValuesWithBands(band->getMatchBand() ,band->getInsertBand(),band->getDeleteBand(),'|', '-');
-			dynamic_cast<DpMatrixFull*>(hmm->X->getDpMatrix())->outputValuesWithBands(band->getInsertBand(),band->getMatchBand() ,band->getDeleteBand(),'\\', '-');
-			dynamic_cast<DpMatrixFull*>(hmm->Y->getDpMatrix())->outputValuesWithBands(band->getDeleteBand(),band->getMatchBand() ,band->getInsertBand(),'\\', '|');
+			ERROR("Optimization failed for pair #" << i << " Zero probability FWD");
 		}
 		this->divergenceTimes[i] = modelParams->getDivergenceTime(0);
 
 		delete band;
-		delete bc;
-		delete hmm;
+		//delete bc;
+		delete fhmm;
+		delete bhmm;
+
+		return;
 	}
 
 	DEBUG("Optimized divergence times:");

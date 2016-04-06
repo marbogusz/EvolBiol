@@ -54,6 +54,7 @@ private:
 	vector<string>* sequenceNames;
 
 	vector<vector<SequenceElement*>* > translatedSequences;
+	vector<vector<SequenceElement*>* > translatedAlignments;
 	vector<std::pair<unsigned int, unsigned int> > pairs;
 	vector<std::pair<unsigned int, unsigned int> >::iterator pairIterator;
 
@@ -81,6 +82,8 @@ public:
 
 	//void getSequencePair(vector<SequenceElement> s1, vector<SequenceElement> s2 );
 	vector<SequenceElement*>* getSequencesAt(unsigned int pos);
+
+	vector<SequenceElement*>* getAlignmentsAt(unsigned int pos);
 
 	inline unsigned int getPairCount()
 	{

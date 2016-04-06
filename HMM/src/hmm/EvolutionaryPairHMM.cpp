@@ -76,6 +76,8 @@ void EvolutionaryPairHMM::setDivergenceTimeAndCalculateModels(double time)
 	if (this->equilibriumFreqs)
 		this->getStateEquilibriums();
 
+	DEBUG("Time and decimal equilibriums : time\t" << time << "\tPiM\t" << piM << "\tPiI\t" << piI << "\tPiD\t" << piD);
+
 
 }
 
@@ -96,11 +98,15 @@ void EvolutionaryPairHMM::getStateEquilibriums()
 	md[2][1] = (1.0-e)*g;
 	md[1][2] = (1.0-e)*g;
 
-	piD = ((1.0-md[0][0])+(md[0][1]*(1.0-md[0][0]+md[1][0])/(md[1][1]-1.0-md[0][1])))/(((md[0][1]-md[2][1])*(1.0-md[0][0]+md[1][0])/(md[1][1]-1.0-md[0][1]))+md[2][0]-md[0][0]+1);
-	piI = ((piD*(md[0][1]-md[2][1]))-md[0][1])/(md[1][1]-1.0-md[0][1]);
-	piM = 1.0 -piI - piD;
+	//piD = ((1.0-md[0][0])+(md[0][1]*(1.0-md[0][0]+md[1][0])/(md[1][1]-1.0-md[0][1])))/(((md[0][1]-md[2][1])*(1.0-md[0][0]+md[1][0])/(md[1][1]-1.0-md[0][1]))+md[2][0]-md[0][0]+1);
+	//piI = ((piD*(md[0][1]-md[2][1]))-md[0][1])/(md[1][1]-1.0-md[0][1]);
+	//piM = 1.0 -piI - piD;
 
-	DUMP("Decimal equilibriums : PiM\t" << piM << "\tPiI\t" << piI << "\tPiD\t" << piD);
+	piM = 1-g;
+	piD = piI = g/2.0;
+
+
+
 
 	//substract xi/3 prob
 	//double xx, yy;

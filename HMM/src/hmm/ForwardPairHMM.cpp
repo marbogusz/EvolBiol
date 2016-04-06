@@ -758,8 +758,8 @@ double ForwardPairHMM::runAlgorithm()
 	this->setTotalLikelihood(sS);
 
 	//cerr << "\t" << sX << "\t" << sY << "\t"<< sM << "\t" << sS << endl;
-
-	DUMP ("Forward lnls I, D, M, Total " << sX << "\t" << sY << "\t" << sM << "\t" << sS);
+	DEBUG("!!!!!!!!!!!!!Forward results:");
+	DEBUG ("Forward lnls I, D, M, Total " << sX << "\t" << sY << "\t" << sM << "\t" << sS);
 
 	return sS* -1.0;
 }

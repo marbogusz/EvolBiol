@@ -57,13 +57,20 @@ Sequences::Sequences(IParser* iParser,Definitions::SequenceType st, bool fa) thr
 	this->rawSequences = iParser->getSequences();
 	this->sequenceNames = iParser->getNames();
 
-	for (auto it = rawSequences->begin(); it != rawSequences->end(); it++)
-		this->translatedSequences.push_back(dict->translate(*it,fixedAlignment==false));
+	for (auto it = rawSequences->begin(); it != rawSequences->end(); it++){
+		this->translatedSequences.push_back(dict->translate(*it,true));
+		this->translatedAlignments.push_back(dict->translate(*it,false));
+	}
 
 }
 
 vector<SequenceElement*>* Sequences::getSequencesAt(unsigned int pos){
 		return translatedSequences[pos];
+}
+
+
+vector<SequenceElement*>* Sequences::getAlignmentsAt(unsigned int pos){
+		return translatedAlignments[pos];
 }
 
 Sequences::~Sequences()

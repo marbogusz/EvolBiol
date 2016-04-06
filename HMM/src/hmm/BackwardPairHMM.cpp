@@ -149,31 +149,44 @@ void BackwardPairHMM::getAlignment(HMMPathSample& sample)
 string BackwardPairHMM::getAlignmentPosteriors(vector<SequenceElement*>* s1,
 		vector<SequenceElement*>* s2)
 {
+
+	DUMP("************************GET ALIGNMENT POSTERIORS*******************************");
+
+	DUMP("#####Match posteriors########");
+	dynamic_cast<DpMatrixFull*>(M->getDpMatrix())->outputValues(0);
+	DUMP("#####Insert posteriors########");
+	dynamic_cast<DpMatrixFull*>(X->getDpMatrix())->outputValues(0);
+	DUMP("#####Delete posteriors########");
+	dynamic_cast<DpMatrixFull*>(Y->getDpMatrix())->outputValues(0);
+
+	DUMP("************************GET ALIGNMENT POSTERIORS STARTS*******************************");
 	stringstream oss;
 	int k =0;
 	int l =0;
 
-	for(unsigned int i=1; i< s1->size(); i++){
-		if((*s1)[i]->isIsGap() && (*s1)[i]->isIsGap()){
+	for(unsigned int i=0; i< s1->size(); i++){
+		if((*s1)[i]->isIsGap() && (*s2)[i]->isIsGap()){
 			//both gaps, posterior non applicable
 			oss << "NA\t";
 		}
-		else if((*s2)[0]->isIsGap()){
+		else if((*s2)[i]->isIsGap()){
 			k++;
-			oss << X->getValueAt(k,l) << "\t";
+			oss << exp(X->getValueAt(k,l))<</*(*s1)[i]->getSymbol()<<(*s2)[i]->getSymbol()<< */"\t";
 		}
-		else if((*s1)[0]->isIsGap()){
+		else if((*s1)[i]->isIsGap()){
 			l++;
-			oss << Y->getValueAt(k,l) << "\t";
+			oss << exp(Y->getValueAt(k,l))<</*(*s1)[i]->getSymbol()<<(*s2)[i]->getSymbol() <<*/ "\t";
 		}
 		else{
 			k++;
 			l++;
-			oss << M->getValueAt(k,l) << "\t";
+			oss << exp(M->getValueAt(k,l))<</*(*s1)[i]->getSymbol()<<(*s2)[i]->getSymbol() <<',' <<  k << ',' << l <<*/"\t";
 		}
 	}
 	oss << endl;
 	return oss.str();
+
+	DUMP("************************GET ALIGNMENT POSTERIORS ENDS*******************************");
 }
 
 void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
@@ -187,7 +200,7 @@ void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 
 	fwdT = fwd->getTotalLikelihood();
 
-/*
+
 	DUMP("MATCH");
 	DUMP("FORWARD MATRICES");
 	dynamic_cast<DpMatrixFull*>(fwd->M->getDpMatrix())->outputValues(0);
@@ -214,7 +227,7 @@ void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 	//dynamic_cast<DpMatrixFull*>(Y->getDpMatrix())->outputValues(0);
 
 	DUMP("POSTERIORS MATRICES");
-*/
+
 	for (i = 1; i<=xSize-1; i++)
 	{
 		for (j = 1; j<=ySize-1; j++)
@@ -553,8 +566,8 @@ double BackwardPairHMM::runAlgorithm()
 	M->setValueAt(0, 0, maths->logSum(bm,bx,by));
 	sS = maths->logSum(bm,bx,by);
 
-	//DUMP("Backward results:");
-	//DUMP(" sX, sY, sM, sS " << sX << "\t" << sY << "\t" << sM << "\t" << sS);
+	DEBUG("!!!!!!!!!!!!!Backward results:");
+	DEBUG(" bX, bY, bM, bS " << bx << "\t" << by << "\t" << bm << "\t" << sS);
 
 	return sS* -1.0;
 }

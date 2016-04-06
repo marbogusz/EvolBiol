@@ -48,7 +48,7 @@ int main(int argc, char ** argv) {
 	cout << fixed << setprecision(8);
 	cerr << fixed << setprecision(8);
 
-	cout << Definitions::notice;
+	//cout << Definitions::notice;
 
 	try
 	{
@@ -80,7 +80,7 @@ int main(int argc, char ** argv) {
 
 		INFO("Creating Model Parameters heuristics...");
 
-		cout << "Estimating evolutionary model parameters..." << endl;
+		//cout << "Estimating evolutionary model parameters..." << endl;
 
 		ModelEstimator* tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),
 				cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
@@ -114,58 +114,22 @@ int main(int argc, char ** argv) {
 			indelParams = tme->getIndelParameters();
 		}
 
-		cout << "Estimating pairwise distances..." << endl;
+		//cout << "Estimating pairwise distances..." << endl;
+
+
+
 
 		BandingEstimator* be = new BandingEstimator(Definitions::AlgorithmType::Forward, inputSeqs, cmdReader->getModelType() ,indelParams,
-				substParams, cmdReader->getOptimizationType(), cmdReader->getCategories(),alpha, tme->getGuideTree());
+				substParams, cmdReader->getOptimizationType(), cmdReader->getCategories(),alpha, NULL);
 		be->optimizePairByPair();
 
 
-		auto distances = be->getOptimizedTimes();
-		auto seqCount =  inputSeqs->getSequenceCount();
-
-		//output distance matrix
-		distfile.open((string(cmdReader->getInputFileName()).append(Definitions::distMatExt)).c_str(),ios::out);
-		distfile << inputSeqs->getSequenceCount() << endl;
-		for (unsigned int seqId = 0; seqId < seqCount; seqId++){
-			distfile << inputSeqs->getSequenceName(seqId) << "        ";
-			for(unsigned int j = 0; j<seqId; j++)
-			{
-
-				distfile << " " << distances[(seqId - j - 1) + (j*seqCount) - (((1+j)/2.0)*(j*1.0))];
-			}
-			distfile << endl;
-		}
-		distfile.close();
-
-
-		DEBUG ("Running BioNJ");
-
-		cout << "Running neighbour joining..." << endl;
-		//change bionj init here!
-		BioNJ nj(inputSeqs->getSequenceCount(), be->getOptimizedTimes(), inputSeqs);
-		//DEBUG("Final tree : " << nj.calculate());
-		string treeStr = nj.calculate();
-
-
-		INFO("Indel parameters");
-		INFO(indelParams);
-		INFO("Substitution parameters");
-		INFO(substParams);
-		INFO("Gamma parameters (alpha and rate categories)");
-		INFO(alpha << '\t' << cmdReader->getCategories());
-		INFO("Newick tree");
-		INFO(treeStr);
-
-
-		treefile.open((string(cmdReader->getInputFileName()).append(Definitions::treeExt)).c_str(),ios::out);
-		treefile << treeStr << endl;
-		treefile.close();
-
+		//auto distances = be->getOptimizedTimes();
+		//auto seqCount =  inputSeqs->getSequenceCount();
 
 		delete be;
 
-		delete tme;
+		//delete tme;
 
 
 		delete inputSeqs;
@@ -188,8 +152,6 @@ int main(int argc, char ** argv) {
 	    std::time_t end_time = chrono::system_clock::to_time_t(end);
 
 	    INFO("Finished computation at " << std::ctime(&end_time) << " elapsed time: " << elapsed_seconds.count() << "s\n");
-
-	    cout << "Done. Elapsed time: " << elapsed_seconds.count() << "s" << endl;
 
 	}
 	catch(HmmException& pe)
