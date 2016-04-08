@@ -204,6 +204,8 @@ void BandingEstimator::optimizePairByPair()
 
 		result = numopt->optimize() * -1.0;
 
+		fhmm->setDivergenceTimeAndCalculateModels(modelParams->getDivergenceTime(0));
+		fhmm->runAlgorithm();
 		bhmm->setDivergenceTimeAndCalculateModels(modelParams->getDivergenceTime(0));
 		bhmm->runAlgorithm();
 		bhmm->calculatePosteriors(fhmm);
@@ -223,7 +225,6 @@ void BandingEstimator::optimizePairByPair()
 		delete fhmm;
 		delete bhmm;
 
-		return;
 	}
 
 	DEBUG("Optimized divergence times:");

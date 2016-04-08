@@ -199,23 +199,19 @@ void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 	double fwdT;
 
 	fwdT = fwd->getTotalLikelihood();
+	//fwdT = fwd->M->getValueAt(xSize-1,ySize-1) + log(xi);
 
-
-	DUMP("MATCH");
-	DUMP("FORWARD MATRICES");
+	DUMP("MAtch FORWARD MATRICES");
 	dynamic_cast<DpMatrixFull*>(fwd->M->getDpMatrix())->outputValues(0);
-	DUMP("BACKWARD MATRICES");
+	DUMP("MATCH BACKWARD MATRICES");
 	dynamic_cast<DpMatrixFull*>(M->getDpMatrix())->outputValues(0);
-	DUMP("\nINSERT");
-	DUMP("FORWARD MATRICES");
+	DUMP("Insert FORWARD MATRICES");
 	dynamic_cast<DpMatrixFull*>(fwd->X->getDpMatrix())->outputValues(0);
-	DUMP("BACKWARD MATRICES");
+	DUMP("INSERT BACKWARD MATRICES");
 	dynamic_cast<DpMatrixFull*>(X->getDpMatrix())->outputValues(0);
-
-	DUMP("\nDELETE");
-	DUMP("FORWARD MATRICES");
+	DUMP("DELETE FORWARD MATRICES");
 	dynamic_cast<DpMatrixFull*>(fwd->Y->getDpMatrix())->outputValues(0);
-	DUMP("BACKWARD MATRICES");
+	DUMP("DELETE BACKWARD MATRICES");
 	dynamic_cast<DpMatrixFull*>(Y->getDpMatrix())->outputValues(0);
 	//DUMP("#####Match posteriors########");
 
@@ -228,19 +224,27 @@ void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 
 	DUMP("POSTERIORS MATRICES");
 
-	for (i = 1; i<=xSize-1; i++)
+	for (i = 1; i<xSize; i++)
 	{
-		for (j = 1; j<=ySize-1; j++)
+		for (j = 1; j<ySize; j++)
 		{
 			xval = X->getValueAt(i,j) + fwd->X->getValueAt(i,j) - fwdT;
 			yval = Y->getValueAt(i,j) + fwd->Y->getValueAt(i,j) - fwdT;
 			mval = M->getValueAt(i,j) + fwd->M->getValueAt(i,j) - fwdT;
-
 			X->setValueAt(i,j,xval);
 			Y->setValueAt(i,j,yval);
 			M->setValueAt(i,j,mval);
 		}
 	}
+	for (i = 1; i<xSize; i++){
+		xval = X->getValueAt(i,0) + fwd->X->getValueAt(i,0) - fwdT;
+		X->setValueAt(i,0,xval);
+	}
+	for (j = 1; j<ySize; j++){
+		yval = Y->getValueAt(0,j) + fwd->Y->getValueAt(0,j) - fwdT;
+		Y->setValueAt(0,j,yval);
+	}
+
 /*
 	DUMP("#####Match posteriors########");
 	dynamic_cast<DpMatrixFull*>(M->getDpMatrix())->outputValues(0);
@@ -431,6 +435,8 @@ double BackwardPairHMM::runAlgorithm()
 		}
 	}
 
+
+	//FIXME here perhaps - missing other states boundaries ??
 	//FIRST INSERTION boundary
 	X->setValueAt(xSize-1,0,ptmatrix->getLogEquilibriumFreq((*seq2)[0]->getMatrixIndex())+
 			Y->getTransitionProbabilityFromInsert()+Y->getValueAt(xSize-1,1));

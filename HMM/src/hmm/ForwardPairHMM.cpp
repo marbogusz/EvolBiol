@@ -759,7 +759,7 @@ double ForwardPairHMM::runAlgorithm()
 
 	//cerr << "\t" << sX << "\t" << sY << "\t"<< sM << "\t" << sS << endl;
 	DEBUG("!!!!!!!!!!!!!Forward results:");
-	DEBUG ("Forward lnls I, D, M, Total " << sX << "\t" << sY << "\t" << sM << "\t" << sS);
+	DEBUG ("Forward lnls tau, I, D, M, Total "<< log(xi) << "\t" << sX << "\t" << sY << "\t" << sM << "\t" << sS);
 
 	return sS* -1.0;
 }
