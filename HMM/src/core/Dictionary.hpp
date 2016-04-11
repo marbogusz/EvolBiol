@@ -50,6 +50,8 @@ namespace EBC
 		static const char nucleotides[5];
 		static const char aminoacids[21];
 		static const char gapChar;
+		static const map<char,vector<char> > nucFastaClasses;
+		static const map<char,vector<char> > aaFastaClasses;
 
 		//virtual short getSymbolIndex(string &symbol);
 		virtual unsigned char getSymbolIndex(char symbol);
@@ -69,6 +71,7 @@ namespace EBC
 
 	protected:
 		virtual void setAlphabet(char alphabet[], unsigned short size);
+		void addFastaClasses(const map<char,vector<char> >& classmap);
 
 	};
 
@@ -76,6 +79,7 @@ namespace EBC
 	{
 	public:
 		NucleotideDictionary();
+		void handleTUequivalence();
 	};
 
 	class AminoacidDictionary : public Dictionary

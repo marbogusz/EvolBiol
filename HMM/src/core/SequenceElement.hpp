@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * SequenceElement.h
- *
- *  Created on: Jan 14, 2014
- *      Author: root
- */
 
 #ifndef SEQUENCEELEMENT_H_
 #define SEQUENCEELEMENT_H_
@@ -37,19 +31,30 @@ namespace EBC
 
 class SequenceElement
 {
-//FIXME - this is potentially slow - rework
 
 protected:
 	bool isGap;
 	unsigned char matrixIndex;
 	char symbol;
-	//vector<short> alternativeIndexes;
+	unsigned short clSize;
+	bool fastaClass;
+	unsigned char* idcs;
 public:
-	SequenceElement(bool, unsigned char, short*, char smbl);
+	SequenceElement(bool isGap, unsigned char substMatrixIndex, unsigned char* altIdcs, char smbl, unsigned short classSize=1);
 
 	inline bool isIsGap() const
 	{
 		return isGap;
+	}
+
+	inline bool isFastaClass() const
+	{
+		return fastaClass;
+	}
+
+	inline unsigned short getClassSize()
+	{
+		return clSize;
 	}
 
 	inline unsigned char getMatrixIndex()
@@ -60,6 +65,11 @@ public:
 	inline char getSymbol()
 	{
 		return symbol;
+	}
+
+	inline unsigned char* getClassIndices()
+	{
+		return idcs;
 	}
 };
 
