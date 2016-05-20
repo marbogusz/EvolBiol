@@ -62,6 +62,9 @@ Sequences::Sequences(IParser* iParser,Definitions::SequenceType st, bool fa) thr
 		this->translatedAlignments.push_back(dict->translate(*it,false));
 	}
 
+	for(string& str : *rawSequences){
+		str.erase(std::remove(str.begin(), str.end(), '-'), str.end());
+	}
 }
 
 vector<SequenceElement*>* Sequences::getSequencesAt(unsigned int pos){
