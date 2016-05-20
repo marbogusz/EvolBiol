@@ -204,6 +204,8 @@ void BandingEstimator::optimizePairByPair()
 
 		result = numopt->optimize() * -1.0;
 
+		DEBUG("*#*#*#*#*# Final forward and backward calculation for divergence " << modelParams->getDivergenceTime(0));
+
 		fhmm->setDivergenceTimeAndCalculateModels(modelParams->getDivergenceTime(0));
 		fhmm->runAlgorithm();
 		bhmm->setDivergenceTimeAndCalculateModels(modelParams->getDivergenceTime(0));
