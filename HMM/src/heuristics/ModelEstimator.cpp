@@ -101,88 +101,6 @@ vector<double> ModelEstimator::getInitialModelParameters()
 
 void ModelEstimator::recalculateHMMs()
 {//Fwd + bwd + MPD
-
-	ForwardPairHMM *f1, *f2;
-	double tb1, tb2, tb3;
-
-	substModel->calculateModel();
-
-	for (int i = 0; i < tripletIdxsSize; i++){
-
-		delete tripleAlignments[i][0];
-		delete tripleAlignments[i][1];
-		delete tripleAlignments[i][2];
-
-		delete pairAlignments[i][0];
-		delete pairAlignments[i][1];
-		delete pairAlignments[i][2];
-		delete pairAlignments[i][3];
-
-		delete pairwisePosteriors[i][0];
-		delete pairwisePosteriors[i][1];
-
-		f1 = fwdHMMs[i][0];
-		f2 = fwdHMMs[i][1];
-
-		tb1 = sme->getTripletDivergence(i,0);
-		tb2 = sme->getTripletDivergence(i,1);
-		tb3 = sme->getTripletDivergence(i,2);
-
-		f1->setDivergenceTimeAndCalculateModels(tb1+tb2);
-		f2->setDivergenceTimeAndCalculateModels(tb2+tb3);
-
-		f1->runAlgorithm();
-		f2->runAlgorithm();
-
-		BackwardPairHMM b1(inputSequences->getSequencesAt(tripletIdxs[i][0]),inputSequences->getSequencesAt(tripletIdxs[i][1]),
-				substModel, indelModel, Definitions::DpMatrixType::Full, nullptr);
-		BackwardPairHMM b2(inputSequences->getSequencesAt(tripletIdxs[i][1]),inputSequences->getSequencesAt(tripletIdxs[i][2]),
-				substModel, indelModel, Definitions::DpMatrixType::Full, nullptr);
-
-		b1.setDivergenceTimeAndCalculateModels(tb1+tb2);
-		b2.setDivergenceTimeAndCalculateModels(tb2+tb3);
-
-		b1.runAlgorithm();
-		b2.runAlgorithm();
-
-		b1.calculatePosteriors(f1);
-		b2.calculatePosteriors(f2);
-
-		b1.calculateMaximumPosteriorMatrix();
-		b2.calculateMaximumPosteriorMatrix();
-
-		auto mp1 = b1.getMPAlignment();
-		auto mp2 = b2.getMPAlignment();
-
-		DUMP("Pair 1 MPD alignment recalc");
-		DUMP(mp1.first);
-		DUMP(mp1.second);
-		DUMP("Pair 2 MPD alignment recalc");
-		DUMP(mp2.first);
-		DUMP(mp2.second);
-
-
-		//delete f1;
-		//delete f2;
-
-		//store pairs, align triplets
-		pair<vector<double>*, pair<vector<unsigned char>*, vector<unsigned char>*> > alP1 = b1.getMPDWithPosteriors();
-		pair<vector<double>*, pair<vector<unsigned char>*, vector<unsigned char>*> > alP2 = b2.getMPDWithPosteriors();
-
-		pairAlignments[i][0] = alP1.second.first;
-		pairAlignments[i][1] = alP1.second.second;
-		pairAlignments[i][2] = alP2.second.first;
-		pairAlignments[i][3] = alP2.second.second;
-
-		pairwisePosteriors[i][0] = alP1.first;
-		pairwisePosteriors[i][1] = alP2.first;
-
-		tripleAlignments[i] = tal->alignPosteriors(alP1.second, alP2.second, alP1.first, alP2.first);
-
-	}
-
-	sme->clean();
-	ste->clean();
 }
 
 void ModelEstimator::estimateParameters()
@@ -338,14 +256,18 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 		DUMP("Triplet " << i << " guide distance between seq 2 and 3 " << tmpd);
 		tripletDistances[i][1] = tmpd;
 		//0-2
+
 		tmpd = gtree->getDistanceMatrix()->getDistance(tripletIdxs[i][0],tripletIdxs[i][2]);
+
 		DUMP("Triplet " << i << " guide distance between seq 1 and 3 " << tmpd);
 		tripletDistances[i][2] = tmpd;
+
 		bandPairs[i] = make_pair(new Band(len1,len2,0.1),new Band(len2,len3,0.1));
 		//bandPairs[i] = make_pair(nullptr,nullptr);
 
 		fwdHMMs[i][0] = new ForwardPairHMM(seqsA[i][0],seqsA[i][1], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].first,true);
 		fwdHMMs[i][1] = new ForwardPairHMM(seqsA[i][1],seqsA[i][2], substModel, indelModel, Definitions::DpMatrixType::Full, bandPairs[i].second,true);
+
 	}
 	double bestLnl = Definitions::minMatrixLikelihood;
 	double currentLnl;
@@ -454,7 +376,7 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 
 ModelEstimator::~ModelEstimator()
 {
-
+/*
 	for (int i =0; i < tripletIdxsSize; i++)
 	{
 		delete tripleAlignments[i][0];
@@ -472,14 +394,16 @@ ModelEstimator::~ModelEstimator()
 		delete fwdHMMs[i][0];
 		delete fwdHMMs[i][1];
 	}
-
+*/
 //FIXME - clean up!
 
-    delete maths;
-    delete sme;
-    delete ste;
-    delete gtree;
-    delete tal;
+
+   // delete ste;
+    //delete sme;
+    //delete tal;
+    //delete maths;
+    //delete gtree;
+
 
 }
 

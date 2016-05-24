@@ -200,7 +200,7 @@ void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 
 	fwdT = fwd->getTotalLikelihood();
 	//fwdT = fwd->M->getValueAt(xSize-1,ySize-1) + log(xi);
-
+/*
 	DUMP("MAtch FORWARD MATRICES");
 	dynamic_cast<DpMatrixFull*>(fwd->M->getDpMatrix())->outputValues(0);
 	DUMP("MATCH BACKWARD MATRICES");
@@ -221,7 +221,7 @@ void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 	//DUMP("#####Delete posteriors########");
 
 	//dynamic_cast<DpMatrixFull*>(Y->getDpMatrix())->outputValues(0);
-
+*/
 	DUMP("POSTERIORS MATRICES");
 
 	for (i = 1; i<xSize; i++)
@@ -693,8 +693,8 @@ pair<string, string> BackwardPairHMM::getMPAlignment() {
 	//unsigned char gapElem = this->substModel->getMatrixSize();
 
 	//reserve memory for out strings (20% of gaps should be ok)
-	alignment.first.reserve(max(xSize,ySize)*1.2);
-	alignment.second.reserve(max(xSize,ySize)*1.2);
+	alignment.first.reserve(2*max(xSize,ySize)*1.2);
+	alignment.second.reserve(2*max(xSize,ySize)*1.2);
 
 
 	double tm, ti, td;
@@ -732,6 +732,8 @@ pair<string, string> BackwardPairHMM::getMPAlignment() {
 			alignment.second += (*seq2)[j-1]->getSymbol();
 			j--;
 		}
+		alignment.first += '\t';
+		alignment.second += '\t';
 	}
 
 

@@ -169,6 +169,7 @@ void BandingEstimator::optimizePairByPair()
 	double result;
 
 	for(unsigned int i =0; i< pairCount; i++)
+	//int i = 16;
 	{
 		DEBUG("Optimizing distance for pair #" << i);
 		std::pair<unsigned int, unsigned int> idxs = inputSequences->getPairOfSequenceIndices(i);
@@ -199,7 +200,7 @@ void BandingEstimator::optimizePairByPair()
 		numopt->setTarget(wrapper);
 		numopt->setAccuracy(Definitions::highDivergenceAccuracyDelta);
 		//FIXME - hardcoded right bound
-		numopt->setBounds(Definitions::almostZero, 5.0);
+		numopt->setBounds(Definitions::almostZero, modelParams->divergenceBound);
 
 
 		result = numopt->optimize() * -1.0;
@@ -212,6 +213,15 @@ void BandingEstimator::optimizePairByPair()
 		bhmm->runAlgorithm();
 		bhmm->calculatePosteriors(fhmm);
 
+		bhmm->calculateMaximumPosteriorMatrix();
+
+		auto mp1 = bhmm->getMPAlignment();
+
+
+		DUMP("MPD aligment for sequence id " << idxs.first << " and " << idxs.second);
+		DUMP(mp1.first);
+		DUMP(mp1.second);
+
 
 		cout << inputSequences->getSequenceName(idxs.first) << "\t" <<  inputSequences->getSequenceName(idxs.second) << "\t" << bhmm->getAlignmentPosteriors(inputSequences->getAlignmentsAt(idxs.first), inputSequences->getAlignmentsAt(idxs.second));
 
@@ -222,7 +232,8 @@ void BandingEstimator::optimizePairByPair()
 		}
 		this->divergenceTimes[i] = modelParams->getDivergenceTime(0);
 
-		delete band;
+		if (band != NULL)
+			delete band;
 		//delete bc;
 		delete fhmm;
 		delete bhmm;
