@@ -376,7 +376,7 @@ void ModelEstimator::calculateInitialHMMs(Definitions::ModelType model)
 
 ModelEstimator::~ModelEstimator()
 {
-/*
+
 	for (int i =0; i < tripletIdxsSize; i++)
 	{
 		delete tripleAlignments[i][0];
@@ -394,15 +394,15 @@ ModelEstimator::~ModelEstimator()
 		delete fwdHMMs[i][0];
 		delete fwdHMMs[i][1];
 	}
-*/
+
 //FIXME - clean up!
 
 
-   // delete ste;
-    //delete sme;
-    //delete tal;
-    //delete maths;
-    //delete gtree;
+    delete ste;
+    delete sme;
+    delete tal;
+    delete maths;
+    delete gtree;
 
 
 }
