@@ -17,12 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses>.
 //==============================================================================
 
-/*
- * ForwardPairHMM.cpp
- *
- *  Created on: Feb 26, 2014
- *      Author: root
- */
 
 #include "core/Definitions.hpp"
 #include "hmm/ForwardPairHMM.hpp"
@@ -613,7 +607,7 @@ double ForwardPairHMM::runAlgorithm()
 	double emissionX;
 	double emissionY;
 
-	//FIXME - multiple runs using the same hmm object do not require dp matrix zeroing as long as the band stays the same!
+	//TODO - multiple runs using the same hmm object do not require dp matrix zeroing as long as the band stays the same!
 
 	//DUMP("Forward equilibriums : PiM\t" << piM << "\tPiI\t" << piI << "\tPiD\t" << piD);
 
@@ -625,22 +619,22 @@ double ForwardPairHMM::runAlgorithm()
 	{
 		//handle 0-index rows and columns separately!
 		//1st col
-		X->setValueAt(1,0, ptmatrix->getLogEquilibriumFreq((*seq1)[0]->getMatrixIndex()) + initTransX);
+		X->setValueAt(1,0, ptmatrix->getLogEquilibriumFreqClass((*seq1)[0]) + initTransX);
 
 		for(i=2,j=0; i< xSize; i++)
 		{
 			k = i-1;
-			emissionX = ptmatrix->getLogEquilibriumFreq((*seq1)[i-1]->getMatrixIndex());
+			emissionX = ptmatrix->getLogEquilibriumFreqClass((*seq1)[i-1]);
 			xx = X->getValueAt(k,j) + X->getTransitionProbabilityFromInsert();
 			X->setValueAt(i,j, emissionX + xx);
 		}
 		//1st row
 
-		Y->setValueAt(0,1, ptmatrix->getLogEquilibriumFreq((*seq2)[0]->getMatrixIndex()) + initTransY);
+		Y->setValueAt(0,1, ptmatrix->getLogEquilibriumFreqClass((*seq2)[0]) + initTransY);
 		for(j=2,i=0; j< ySize; j++)
 		{
 			k = j-1;
-			emissionY = ptmatrix->getLogEquilibriumFreq((*seq2)[j-1]->getMatrixIndex());
+			emissionY = ptmatrix->getLogEquilibriumFreqClass((*seq2)[j-1]);
 			yy = Y->getValueAt(i,k) + Y->getTransitionProbabilityFromDelete();
 			Y->setValueAt(i,j, emissionY + yy);
 		}
@@ -652,14 +646,14 @@ double ForwardPairHMM::runAlgorithm()
 			{
 
 				k = i-1;
-				emissionX = ptmatrix->getLogEquilibriumFreq((*seq1)[i-1]->getMatrixIndex());
+				emissionX = ptmatrix->getLogEquilibriumFreqClass((*seq1)[i-1]);
 				xm = M->getValueAt(k,j) + X->getTransitionProbabilityFromMatch();
 				xx = X->getValueAt(k,j) + X->getTransitionProbabilityFromInsert();
 				xy = Y->getValueAt(k,j) + X->getTransitionProbabilityFromDelete();
 				X->setValueAt(i,j, emissionX + maths->logSum(xm,xx,xy));
 
 				k = j-1;
-				emissionY = ptmatrix->getLogEquilibriumFreq((*seq2)[j-1]->getMatrixIndex());
+				emissionY = ptmatrix->getLogEquilibriumFreqClass((*seq2)[j-1]);
 				ym = M->getValueAt(i,k) + Y->getTransitionProbabilityFromMatch();
 				yx = X->getValueAt(i,k) + Y->getTransitionProbabilityFromInsert();
 				yy = Y->getValueAt(i,k) + Y->getTransitionProbabilityFromDelete();
@@ -667,7 +661,7 @@ double ForwardPairHMM::runAlgorithm()
 
 				k = i-1;
 				l = j-1;
-				emissionM = ptmatrix->getLogPairTransition((*seq1)[i-1]->getMatrixIndex(), (*seq2)[j-1]->getMatrixIndex());
+				emissionM = ptmatrix->getLogPairTransitionClass((*seq1)[i-1], (*seq2)[j-1]);
 				mm = M->getValueAt(k,l) + M->getTransitionProbabilityFromMatch();
 				mx = X->getValueAt(k,l) + M->getTransitionProbabilityFromInsert();
 				my = Y->getValueAt(k,l) + M->getTransitionProbabilityFromDelete();
@@ -688,7 +682,7 @@ double ForwardPairHMM::runAlgorithm()
 			for(i=loI,j=0; i<= hiI; i++)
 			{
 				k = i-1;
-				emissionX = ptmatrix->getLogEquilibriumFreq((*seq1)[i-1]->getMatrixIndex());
+				emissionX = ptmatrix->getLogEquilibriumFreqClass((*seq1)[i-1]);
 				xm = M->getValueAt(k,j) + X->getTransitionProbabilityFromMatch();
 				xx = X->getValueAt(k,j) + X->getTransitionProbabilityFromInsert();
 				xy = Y->getValueAt(k,j) + X->getTransitionProbabilityFromDelete();
@@ -697,7 +691,7 @@ double ForwardPairHMM::runAlgorithm()
 		}
 		for(j=1; j<ySize; j++)
 		{
-			//FIXME - range should be a reference perhaps
+			//TODO - range should use a reference perhaps
 			auto bracketI = band->getInsertRangeAt(j);
 			auto bracketD = band->getDeleteRangeAt(j);
 			auto bracketM = band->getMatchRangeAt(j);
@@ -711,7 +705,7 @@ double ForwardPairHMM::runAlgorithm()
 				for(i = loD; i <= hiD; i++)
 				{
 					k = j-1;
-					emissionY = ptmatrix->getLogEquilibriumFreq((*seq2)[j-1]->getMatrixIndex());
+					emissionY = ptmatrix->getLogEquilibriumFreqClass((*seq2)[j-1]);
 					ym = M->getValueAt(i,k) + Y->getTransitionProbabilityFromMatch();
 					yx = X->getValueAt(i,k) + Y->getTransitionProbabilityFromInsert();
 					yy = Y->getValueAt(i,k) + Y->getTransitionProbabilityFromDelete();
@@ -725,7 +719,7 @@ double ForwardPairHMM::runAlgorithm()
 				{
 					k = i-1;
 					l = j-1;
-					emissionM = ptmatrix->getLogPairTransition((*seq1)[i-1]->getMatrixIndex(), (*seq2)[j-1]->getMatrixIndex());
+					emissionM = ptmatrix->getLogPairTransitionClass((*seq1)[i-1], (*seq2)[j-1]);
 					mm = M->getValueAt(k,l) + M->getTransitionProbabilityFromMatch();
 					mx = X->getValueAt(k,l) + M->getTransitionProbabilityFromInsert();
 					my = Y->getValueAt(k,l) + M->getTransitionProbabilityFromDelete();
@@ -739,7 +733,7 @@ double ForwardPairHMM::runAlgorithm()
 				for(i = loI; i <= hiI; i++)
 				{
 					k = i-1;
-					emissionX = ptmatrix->getLogEquilibriumFreq((*seq1)[i-1]->getMatrixIndex());
+					emissionX = ptmatrix->getLogEquilibriumFreqClass((*seq1)[i-1]);
 					xm = M->getValueAt(k,j) + X->getTransitionProbabilityFromMatch();
 					xx = X->getValueAt(k,j) + X->getTransitionProbabilityFromInsert();
 					xy = Y->getValueAt(k,j) + X->getTransitionProbabilityFromDelete();
@@ -758,8 +752,8 @@ double ForwardPairHMM::runAlgorithm()
 	this->setTotalLikelihood(sS);
 
 	//cerr << "\t" << sX << "\t" << sY << "\t"<< sM << "\t" << sS << endl;
-	DEBUG("!!!!!!!!!!!!!Forward results:");
-	DEBUG ("Forward lnls tau, I, D, M, Total "<< log(xi) << "\t" << sX << "\t" << sY << "\t" << sM << "\t" << sS);
+
+	DUMP ("Forward lnls I, D, M, Total " << sX << "\t" << sY << "\t" << sM << "\t" << sS);
 
 	return sS* -1.0;
 }

@@ -360,9 +360,9 @@ double BackwardPairHMM::runAlgorithm()
 	//Last ROW
 	for (j = ySize-1, i=xSize-1; j > 0; j--)
 	{
-		bxp = (i==xSize-1) ? xL : X->getValueAt(i+1,j) + ptmatrix->getLogEquilibriumFreq((*seq1)[i]->getMatrixIndex());
-		byp = (j==ySize-1) ? yL : Y->getValueAt(i,j+1) + ptmatrix->getLogEquilibriumFreq((*seq2)[j]->getMatrixIndex());
-		bmp = (i==xSize-1 ||j==ySize-1) ? mL : M->getValueAt(i+1,j+1) + ptmatrix->getLogPairTransition((*seq1)[i]->getMatrixIndex(), (*seq2)[j]->getMatrixIndex());
+		bxp = (i==xSize-1) ? xL : X->getValueAt(i+1,j) + ptmatrix->getLogEquilibriumFreqClass((*seq1)[i]);
+		byp = (j==ySize-1) ? yL : Y->getValueAt(i,j+1) + ptmatrix->getLogEquilibriumFreqClass((*seq2)[j]);
+		bmp = (i==xSize-1 ||j==ySize-1) ? mL : M->getValueAt(i+1,j+1) + ptmatrix->getLogPairTransitionClass((*seq1)[i], (*seq2)[j]);
 
 		bx = maths->logSum(M->getTransitionProbabilityFromInsert() +  bmp,
 				X->getTransitionProbabilityFromInsert() + bxp,
@@ -398,9 +398,9 @@ double BackwardPairHMM::runAlgorithm()
 	//LAST COLUMN
 	for (i = xSize-1, j=ySize-1; i > 0; i--)
 	{
-		bxp = (i==xSize-1) ? xL : X->getValueAt(i+1,j) + ptmatrix->getLogEquilibriumFreq((*seq1)[i]->getMatrixIndex());
-		byp = (j==ySize-1) ? yL : Y->getValueAt(i,j+1) + ptmatrix->getLogEquilibriumFreq((*seq2)[j]->getMatrixIndex());
-		bmp = (i==xSize-1 ||j==ySize-1) ? mL : M->getValueAt(i+1,j+1) + ptmatrix->getLogPairTransition((*seq1)[i]->getMatrixIndex(), (*seq2)[j]->getMatrixIndex());
+		bxp = (i==xSize-1) ? xL : X->getValueAt(i+1,j) + ptmatrix->getLogEquilibriumFreqClass((*seq1)[i]);
+		byp = (j==ySize-1) ? yL : Y->getValueAt(i,j+1) + ptmatrix->getLogEquilibriumFreqClass((*seq2)[j]);
+		bmp = (i==xSize-1 ||j==ySize-1) ? mL : M->getValueAt(i+1,j+1) + ptmatrix->getLogPairTransitionClass((*seq1)[i], (*seq2)[j]);
 
 		bx = maths->logSum(M->getTransitionProbabilityFromInsert() + bmp,
 				X->getTransitionProbabilityFromInsert() + bxp,
@@ -435,14 +435,12 @@ double BackwardPairHMM::runAlgorithm()
 		}
 	}
 
-
-	//FIXME here perhaps - missing other states boundaries ??
 	//FIRST INSERTION boundary
-	X->setValueAt(xSize-1,0,ptmatrix->getLogEquilibriumFreq((*seq2)[0]->getMatrixIndex())+
+	X->setValueAt(xSize-1,0,ptmatrix->getLogEquilibriumFreqClass((*seq2)[0])+
 			Y->getTransitionProbabilityFromInsert()+Y->getValueAt(xSize-1,1));
 
 	//FIRST DELETION boundary
-	Y->setValueAt(0,ySize-1,ptmatrix->getLogEquilibriumFreq((*seq1)[0]->getMatrixIndex())+
+	Y->setValueAt(0,ySize-1,ptmatrix->getLogEquilibriumFreqClass((*seq1)[0])+
 				X->getTransitionProbabilityFromDelete()+X->getValueAt(1,ySize-1));
 
 
@@ -453,9 +451,9 @@ double BackwardPairHMM::runAlgorithm()
 			for (j = ySize-2; j > 0; j--)
 			{
 
-				bxp = X->getValueAt(i+1,j) + ptmatrix->getLogEquilibriumFreq((*seq1)[i]->getMatrixIndex());
-				byp = Y->getValueAt(i,j+1) + ptmatrix->getLogEquilibriumFreq((*seq2)[j]->getMatrixIndex());
-				bmp = M->getValueAt(i+1,j+1) + ptmatrix->getLogPairTransition((*seq1)[i]->getMatrixIndex(), (*seq2)[j]->getMatrixIndex());
+				bxp = X->getValueAt(i+1,j) + ptmatrix->getLogEquilibriumFreqClass((*seq1)[i]);
+				byp = Y->getValueAt(i,j+1) + ptmatrix->getLogEquilibriumFreqClass((*seq2)[j]);
+				bmp = M->getValueAt(i+1,j+1) + ptmatrix->getLogPairTransitionClass((*seq1)[i], (*seq2)[j]);
 
 				bx = maths->logSum(M->getTransitionProbabilityFromInsert() + bmp,
 						X->getTransitionProbabilityFromInsert() + bxp,
@@ -481,9 +479,9 @@ double BackwardPairHMM::runAlgorithm()
 		//first X col
 		for (j=0,i=xSize-2; i > 0; i--){
 
-			bxp = X->getValueAt(i+1,j) + ptmatrix->getLogEquilibriumFreq((*seq1)[i]->getMatrixIndex());
-			byp = Y->getValueAt(i,j+1) + ptmatrix->getLogEquilibriumFreq((*seq2)[j]->getMatrixIndex());
-			bmp = M->getValueAt(i+1,j+1) + ptmatrix->getLogPairTransition((*seq1)[i]->getMatrixIndex(), (*seq2)[j]->getMatrixIndex());
+			bxp = X->getValueAt(i+1,j) + ptmatrix->getLogEquilibriumFreqClass((*seq1)[i]);
+			byp = Y->getValueAt(i,j+1) + ptmatrix->getLogEquilibriumFreqClass((*seq2)[j]);
+			bmp = M->getValueAt(i+1,j+1) + ptmatrix->getLogPairTransitionClass((*seq1)[i], (*seq2)[j]);
 
 			bx = maths->logSum(M->getTransitionProbabilityFromInsert() + bmp,
 					X->getTransitionProbabilityFromInsert() + bxp,
@@ -492,9 +490,9 @@ double BackwardPairHMM::runAlgorithm()
 		}
 		//first Y row
 		for (i=0,j=ySize-2; j > 0; j--){
-			bxp = X->getValueAt(i+1,j) + ptmatrix->getLogEquilibriumFreq((*seq1)[i]->getMatrixIndex());
-			byp = Y->getValueAt(i,j+1) + ptmatrix->getLogEquilibriumFreq((*seq2)[j]->getMatrixIndex());
-			bmp = M->getValueAt(i+1,j+1) + ptmatrix->getLogPairTransition((*seq1)[i]->getMatrixIndex(), (*seq2)[j]->getMatrixIndex());
+			bxp = X->getValueAt(i+1,j) + ptmatrix->getLogEquilibriumFreqClass((*seq1)[i]);
+			byp = Y->getValueAt(i,j+1) + ptmatrix->getLogEquilibriumFreqClass((*seq2)[j]);
+			bmp = M->getValueAt(i+1,j+1) + ptmatrix->getLogPairTransitionClass((*seq1)[i], (*seq2)[j]);
 
 			by = maths->logSum(M->getTransitionProbabilityFromDelete() + bmp,
 								X->getTransitionProbabilityFromDelete() + bxp,
@@ -508,7 +506,7 @@ double BackwardPairHMM::runAlgorithm()
 		int iMin = xSize-2;
 		int iMax = 0;
 
-		//FIXME - I make a simplifying assumption that the band is the same for all 3 matrices!
+		//We make a simplifying assumption that the band is the same for all 3 matrices!
 		//Use bracket D bracket to calculate, but the first row for M and I needs to be zeroed!
 
 		for (j = ySize-2; j >= 0; j--){
@@ -519,9 +517,9 @@ double BackwardPairHMM::runAlgorithm()
 
 
 			for (int i = hiD; i >= loD; i--){
-				bxp = X->getValueAt(i+1,j) + ptmatrix->getLogEquilibriumFreq((*seq1)[i]->getMatrixIndex());
-				byp = Y->getValueAt(i,j+1) + ptmatrix->getLogEquilibriumFreq((*seq2)[j]->getMatrixIndex());
-				bmp = M->getValueAt(i+1,j+1) + ptmatrix->getLogPairTransition((*seq1)[i]->getMatrixIndex(), (*seq2)[j]->getMatrixIndex());
+				bxp = X->getValueAt(i+1,j) + ptmatrix->getLogEquilibriumFreqClass((*seq1)[i]);
+				byp = Y->getValueAt(i,j+1) + ptmatrix->getLogEquilibriumFreqClass((*seq2)[j]);
+				bmp = M->getValueAt(i+1,j+1) + ptmatrix->getLogPairTransitionClass((*seq1)[i], (*seq2)[j]);
 
 				bx = maths->logSum(M->getTransitionProbabilityFromInsert() + bmp,
 						X->getTransitionProbabilityFromInsert() + bxp,
@@ -547,9 +545,9 @@ double BackwardPairHMM::runAlgorithm()
 
 
 		for (j=0,i=hiI; i >= loI; i--){
-			bxp = X->getValueAt(i+1,j) + ptmatrix->getLogEquilibriumFreq((*seq1)[i]->getMatrixIndex());
-			byp = Y->getValueAt(i,j+1) + ptmatrix->getLogEquilibriumFreq((*seq2)[j]->getMatrixIndex());
-			bmp = M->getValueAt(i+1,j+1) + ptmatrix->getLogPairTransition((*seq1)[i]->getMatrixIndex(), (*seq2)[j]->getMatrixIndex());
+			bxp = X->getValueAt(i+1,j) + ptmatrix->getLogEquilibriumFreqClass((*seq1)[i]);
+			byp = Y->getValueAt(i,j+1) + ptmatrix->getLogEquilibriumFreqClass((*seq2)[j]);
+			bmp = M->getValueAt(i+1,j+1) + ptmatrix->getLogPairTransitionClass((*seq1)[i], (*seq2)[j]);
 
 			bx = maths->logSum(M->getTransitionProbabilityFromInsert() + bmp,
 					X->getTransitionProbabilityFromInsert() + bxp,
@@ -562,18 +560,17 @@ double BackwardPairHMM::runAlgorithm()
 		X->getDpMatrix()->setWholeRow(0, Definitions::minMatrixLikelihood);
 	}
 
-	//FIXME - remove to improve performance by 0.000000001% :)
-	bmp  = M->getValueAt(1,1) + ptmatrix->getLogPairTransition((*seq1)[0]->getMatrixIndex(), (*seq2)[0]->getMatrixIndex());
-	bxp  = X->getValueAt(1,0) + ptmatrix->getLogEquilibriumFreq((*seq1)[0]->getMatrixIndex());
-	byp  = Y->getValueAt(0,1) + ptmatrix->getLogEquilibriumFreq((*seq2)[0]->getMatrixIndex());
+	bmp  = M->getValueAt(1,1) + ptmatrix->getLogPairTransitionClass((*seq1)[0], (*seq2)[0]);
+	bxp  = X->getValueAt(1,0) + ptmatrix->getLogEquilibriumFreqClass((*seq1)[0]);
+	byp  = Y->getValueAt(0,1) + ptmatrix->getLogEquilibriumFreqClass((*seq2)[0]);
 	bm = bmp + initTransM;
 	bx = bxp + initTransX;
 	by = byp + initTransY;
 	M->setValueAt(0, 0, maths->logSum(bm,bx,by));
 	sS = maths->logSum(bm,bx,by);
 
-	DEBUG("!!!!!!!!!!!!!Backward results:");
-	DEBUG(" bX, bY, bM, bS " << bx << "\t" << by << "\t" << bm << "\t" << sS);
+	//DUMP("Backward results:");
+	//DUMP(" sX, sY, sM, sS " << sX << "\t" << sY << "\t" << sM << "\t" << sS);
 
 	return sS* -1.0;
 }
