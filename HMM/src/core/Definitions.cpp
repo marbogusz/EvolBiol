@@ -22,9 +22,9 @@
 namespace EBC
 {
 
-double Definitions::divergenceBound = 4.0;
+double Definitions::divergenceBound = 1.75;
 
-double Definitions::lambdaHiBound = 0.15;
+double Definitions::lambdaHiBound = 0.35;
 
 Definitions::aaModelDefinition Definitions::aaLgModel =
 			{	10.649107,

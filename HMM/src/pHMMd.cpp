@@ -46,17 +46,17 @@ using namespace EBC;
 
 int main(int argc, char ** argv) {
 
-	cerr << "Starting dm\n";
+	//cerr << "Starting dm\n";
 	//Set output Precision to 2
 	//FIXME - should normally be set to >= 6
 	cout << fixed << setprecision(6);
 	cerr << fixed << setprecision(6);
 
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(30000));
-	cerr << " ELLO\n";
-	cout << " Should not be here!\n";
-	return 0;
+	//std::this_thread::sleep_for(std::chrono::milliseconds(30000));
+	//cerr << " ELLO\n";
+	//cout << " Should not be here!\n";
+	//return 0;
 
 	try
 	{
@@ -187,6 +187,11 @@ int main(int argc, char ** argv) {
 
 			do{
 
+				//cout << modelParams->getSubstParameters()[0] << "\t" << modelParams->getSubstParameters()[1] <<
+				//			    "\t" <<  modelParams->getIndelParameters()[0] << "\t" <<  modelParams->getIndelParameters()[1] <<
+				//				"\t" << modelParams->getDivergenceTime(0) << "\t" << inputSeqs->getSequenceName(idxs.first) << "\t" << inputSeqs->getSequenceName(idxs.second) << "\t" << pi << "\n";
+
+
 				runAgain = false;
 				lambda = modelParams->getIndelParameters()[0];
 				divergence  = modelParams->getDivergenceTime(0);
@@ -194,14 +199,14 @@ int main(int argc, char ** argv) {
 				//cerr << " L " << lambda << " D " << divergence << endl;
 
 
-				if(lambda > (Definitions::lambdaHiBound * 0.975)){
+				if(lambda > (Definitions::lambdaHiBound * 0.995)){
 					runAgain = true;
 					//cerr << " Lambda big \n";
 					Definitions::lambdaHiBound = Definitions::lambdaHiBound * 2.0;
 					Definitions::divergenceBound = Definitions::divergenceBound / 2.0;
 
 				}	//check if we're close to the band
-				else if(divergence > (Definitions::divergenceBound * 0.975)){
+				else if(divergence > (Definitions::divergenceBound * 0.995)){
 					runAgain = true;
 					//cerr << " Divergence big \n";
 					Definitions::lambdaHiBound = Definitions::lambdaHiBound / 2.0;
@@ -209,6 +214,7 @@ int main(int argc, char ** argv) {
 				}
 
 				if(runAgain){
+					//cerr << "Lambda was " << lambda << "\tand divergence " << divergence << endl;
 					//cerr << "Run again...\n";
 					//cerr << "New bounds " << Definitions::lambdaHiBound << " " << Definitions::divergenceBound << endl;
 					indelModel->resetBounds();

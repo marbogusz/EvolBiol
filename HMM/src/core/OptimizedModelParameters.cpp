@@ -58,6 +58,7 @@ OptimizedModelParameters::OptimizedModelParameters(SubstitutionModelBase* sm, In
 
 void OptimizedModelParameters::resetBounds()
 {
+	//cerr << "Resetting divergence bounds to " << Definitions::divergenceBound << endl;
 	this->divergenceBound  = Definitions::divergenceBound;
 
 	if(im != NULL){
