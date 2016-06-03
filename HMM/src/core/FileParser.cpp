@@ -89,6 +89,19 @@ FileParser::FileParser(const char* filename)
 	infile.close();
 	it=sequences->begin();
 	itN=names->begin();
+
+	for(int i = 0; i < sequences->size(); i++){
+		this->mappedSeqs.insert(make_pair(names->at(i),sequences->at(i)));
+	}
+
+	sequences->clear();
+	names->clear();
+
+	for(auto itmap : mappedSeqs){
+		names->push_back(itmap.first);
+		sequences->push_back(itmap.second);
+	}
+
 }
 
 bool FileParser::isDefinitionLine(string& s)

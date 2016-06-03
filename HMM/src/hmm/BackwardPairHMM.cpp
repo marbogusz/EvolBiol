@@ -163,6 +163,7 @@ string BackwardPairHMM::getAlignmentPosteriors(vector<SequenceElement*>* s1,
 	stringstream oss;
 	int k =0;
 	int l =0;
+	double post = 0.0;
 
 	for(unsigned int i=0; i< s1->size(); i++){
 		if((*s1)[i]->isIsGap() && (*s2)[i]->isIsGap()){
@@ -171,15 +172,27 @@ string BackwardPairHMM::getAlignmentPosteriors(vector<SequenceElement*>* s1,
 		}
 		else if((*s2)[i]->isIsGap()){
 			k++;
+			post = X->getValueAt(k,l);
+			if (post > 0.0){
+				throw HmmException("Posterior > 1");
+			}
 			oss << exp(X->getValueAt(k,l))<</*(*s1)[i]->getSymbol()<<(*s2)[i]->getSymbol()<< */"\t";
 		}
 		else if((*s1)[i]->isIsGap()){
 			l++;
+			post = Y->getValueAt(k,l);
+			if (post > 0.0){
+				throw HmmException("Posterior > 1");
+			}
 			oss << exp(Y->getValueAt(k,l))<</*(*s1)[i]->getSymbol()<<(*s2)[i]->getSymbol() <<*/ "\t";
 		}
 		else{
 			k++;
 			l++;
+			post = M->getValueAt(k,l);
+			if (post > 0.0){
+				throw HmmException("Posterior > 1");
+			}
 			oss << exp(M->getValueAt(k,l))<</*(*s1)[i]->getSymbol()<<(*s2)[i]->getSymbol() <<',' <<  k << ',' << l <<*/"\t";
 		}
 	}
@@ -200,12 +213,12 @@ void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 
 	fwdT = fwd->getTotalLikelihood();
 	//fwdT = fwd->M->getValueAt(xSize-1,ySize-1) + log(xi);
-/*
-	DUMP("MAtch FORWARD MATRICES");
+
+	DUMP("MATCH FORWARD MATRICES");
 	dynamic_cast<DpMatrixFull*>(fwd->M->getDpMatrix())->outputValues(0);
 	DUMP("MATCH BACKWARD MATRICES");
 	dynamic_cast<DpMatrixFull*>(M->getDpMatrix())->outputValues(0);
-	DUMP("Insert FORWARD MATRICES");
+	DUMP("INSERT FORWARD MATRICES");
 	dynamic_cast<DpMatrixFull*>(fwd->X->getDpMatrix())->outputValues(0);
 	DUMP("INSERT BACKWARD MATRICES");
 	dynamic_cast<DpMatrixFull*>(X->getDpMatrix())->outputValues(0);
@@ -213,6 +226,7 @@ void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 	dynamic_cast<DpMatrixFull*>(fwd->Y->getDpMatrix())->outputValues(0);
 	DUMP("DELETE BACKWARD MATRICES");
 	dynamic_cast<DpMatrixFull*>(Y->getDpMatrix())->outputValues(0);
+/*
 	//DUMP("#####Match posteriors########");
 
 	//DUMP("#####Insert posteriors########");

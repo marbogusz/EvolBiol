@@ -79,7 +79,7 @@ CommandReader::CommandReader(int argc, char** argv)
 			//cout << Definitions::notice;
 
 
-			cout << "Usage: HMM --in input_file --(GTR|HKY|LG) [--gtr_params ... | --hky_params ... --indel_params ...]\n";
+			cout << "version 03_06_2016; Usage: HMM --in input_file --(GTR|HKY|LG) [--gtr_params ... | --hky_params ... --indel_params ...]\n";
 			parser.print_options();
 			throw HmmException("Exiting...\n");
 		}
