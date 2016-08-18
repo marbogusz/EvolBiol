@@ -82,22 +82,24 @@ int main(int argc, char ** argv) {
 
 		//cout << "Estimating evolutionary model parameters..." << endl;
 
-		ModelEstimator* tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),
-				cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
-				cmdReader->estimateAlpha());
+		//ModelEstimator* tme = new ModelEstimator(inputSeqs, cmdReader->getModelType(),
+		//		cmdReader->getOptimizationType(), cmdReader->getCategories(), cmdReader->getAlpha(),
+		//		cmdReader->estimateAlpha());
 
 		vector<double> indelParams;
 		vector<double> substParams;
 		double alpha = cmdReader->getAlpha();
 
-		substParams = tme->getSubstitutionParameters();
-		indelParams = tme->getIndelParameters();
+		substParams = {};//tme->getSubstitutionParameters();
+		indelParams = {0.01,0.5};//tme->getIndelParameters();
+
+		alpha = 2;
 
 		if(cmdReader->estimateAlpha()){
-			alpha = tme->getAlpha();
+			alpha = 2; //tme->getAlpha();
 		}
 
-
+/*
 		try{
 			substParams = cmdReader->getSubstParams();
 		}
@@ -113,10 +115,12 @@ int main(int argc, char ** argv) {
 		catch(HmmException& pe){
 			indelParams = tme->getIndelParameters();
 		}
-
+*/
 		//cout << "Estimating pairwise distances..." << endl;
 
 
+
+		//get epsilon, lambda and times from zorro code
 
 
 		BandingEstimator* be = new BandingEstimator(Definitions::AlgorithmType::Forward, inputSeqs, cmdReader->getModelType() ,indelParams,

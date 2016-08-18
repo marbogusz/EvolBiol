@@ -192,7 +192,7 @@ void BandingEstimator::optimizePairByPair()
 		//lsp.setTargetHMM(hmm);
 		//lsp.getLikelihoodSurface();
 
-
+/*
 		wrapper->setTargetHMM(fhmm);
 		DUMP("Set model parameter in the hmm...");
 		wrapper->setModelParameters(modelParams);
@@ -204,12 +204,12 @@ void BandingEstimator::optimizePairByPair()
 
 
 		result = numopt->optimize() * -1.0;
-
+*/
 		DEBUG("*#*#*#*#*# Final forward and backward calculation for divergence " << modelParams->getDivergenceTime(0));
 
-		fhmm->setDivergenceTimeAndCalculateModels(modelParams->getDivergenceTime(0));
+		fhmm->setDivergenceTimeAndCalculateModels(0.5);//modelParams->getDivergenceTime(0));
 		fhmm->runAlgorithm();
-		bhmm->setDivergenceTimeAndCalculateModels(modelParams->getDivergenceTime(0));
+		bhmm->setDivergenceTimeAndCalculateModels(0.5);//modelParams->getDivergenceTime(0));
 		bhmm->runAlgorithm();
 		bhmm->calculatePosteriors(fhmm);
 

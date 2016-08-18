@@ -38,7 +38,7 @@ EvolutionaryPairHMM::EvolutionaryPairHMM(vector<SequenceElement*>* s1, vector<Se
 {
 	//TODO - unfix the xi terminal probability  ????
 	//length distribution fixed
-	xi = 0.001;
+	xi = 1e-18; //0.001;
 
 	M = X = Y = NULL;
 	this->seq1 = s1;
@@ -64,6 +64,10 @@ EvolutionaryPairHMM::EvolutionaryPairHMM(vector<SequenceElement*>* s1, vector<Se
 	initTransX = initTransY = initTransM = 0;
 
 	initializeStates(mt);
+
+
+
+
 }
 
 void EvolutionaryPairHMM::setDivergenceTimeAndCalculateModels(double time)
@@ -84,7 +88,7 @@ void EvolutionaryPairHMM::setDivergenceTimeAndCalculateModels(double time)
 void EvolutionaryPairHMM::getStateEquilibriums()
 {
 	double minPi = exp(Definitions::minMatrixLikelihood);
-
+/*
 	//TODO - change indices to state ids from the enum!!!
 	md[0][0] = (1.0-2*g);
 	md[1][1] = e+((1.0-e)*g);
@@ -119,12 +123,12 @@ void EvolutionaryPairHMM::getStateEquilibriums()
 	piD = (piD- (xi/3.0)) < minPi ? Definitions::minMatrixLikelihood : log(piD- (xi/3.0));
 	piI = (piI- (xi/3.0)) < minPi ? Definitions::minMatrixLikelihood : log(piI- (xi/3.0));
 	piM = (piM- (xi/3.0)) < minPi ? Definitions::minMatrixLikelihood : log(piM- (xi/3.0));
+*/
+	initTransX = initDistribDefault[1]; // maths->logSum(X->getTransitionProbabilityFromInsert() + piI, X->getTransitionProbabilityFromDelete() + piD, X->getTransitionProbabilityFromMatch() + piM);
+	initTransY = initDistribDefault[2]; //maths->logSum(Y->getTransitionProbabilityFromInsert() + piI, Y->getTransitionProbabilityFromDelete() + piD, Y->getTransitionProbabilityFromMatch() + piM);
+	initTransM = initDistribDefault[0]; //maths->logSum(M->getTransitionProbabilityFromInsert() + piI, M->getTransitionProbabilityFromDelete() + piD, M->getTransitionProbabilityFromMatch() + piM);
 
-	initTransX = maths->logSum(X->getTransitionProbabilityFromInsert() + piI, X->getTransitionProbabilityFromDelete() + piD, X->getTransitionProbabilityFromMatch() + piM);
-	initTransY = maths->logSum(Y->getTransitionProbabilityFromInsert() + piI, Y->getTransitionProbabilityFromDelete() + piD, Y->getTransitionProbabilityFromMatch() + piM);
-	initTransM = maths->logSum(M->getTransitionProbabilityFromInsert() + piI, M->getTransitionProbabilityFromDelete() + piD, M->getTransitionProbabilityFromMatch() + piM);
-
-
+/*
 
 	md[0][0] = log(md[0][0]);
 	md[1][1] = log(md[1][1]);
@@ -139,12 +143,13 @@ void EvolutionaryPairHMM::getStateEquilibriums()
 	md[1][2] = log(md[1][2]);
 
 	//DUMP("Initial transition likelihood component : M\t" << initTransM << "\tI\t" << initTransX << "\tD\t" << initTransY);
+*/
 }
 
 void EvolutionaryPairHMM::setTransitionProbabilities()
 {
-	e = tpb->getGapExtension();
-	g = tpb->getGapOpening();
+	e = gapExtendDefault;  //tpb->getGapExtension();
+	g = gapOpenDefault;  // tpb->getGapOpening();
 
 	M->setTransitionProbabilityFromMatch(log((1-2*g)*(1-xi)));
 	M->setTransitionProbabilityFromInsert(log((1-e-xi)*(1-2*g)));

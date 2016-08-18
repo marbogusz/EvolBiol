@@ -88,6 +88,12 @@ protected:
 	double initTransX;
 	double initTransY;
 
+	double initDistribDefault[3] = { 0.6080327034f, 0.1959836632f, 0.1959836632f };
+
+	double gapOpenDefault = 0.01993141696f ;
+	double gapExtendDefault =  0.7943345308f;
+
+
 	vector<SequenceElement*>* seq1;
 	vector<SequenceElement*>* seq2;
 	//vector<SequenceElement>::iterator itS1, itS2;

@@ -33,6 +33,42 @@ PMatrixDouble::PMatrixDouble(SubstitutionModelBase* m) : PMatrix(m)
 		sitePatterns[i] = new double[matrixSize+1];
 	}
 
+	int i, j;
+	double f;
+
+	  for(i=0;i<20;i++){
+	    for(j=i+1;j<20;j++){
+	      emitPairsDefault[i][j] = emitPairsDefault[j][i];
+	    }
+	  }
+
+	  f = 0.0;
+	  for(i=0;i<20;i++){
+	    for(j=0;j< 20;j++){
+	      f = f+emitPairsDefault[i][j];
+	    }
+	  }
+
+	  for(i=0;i<20;i++){
+	    for(j=0;j<=i;j++){
+	      emitPairsDefault[i][j] /= f;
+	    }
+	  }
+
+
+	  f = 0.0;
+
+
+	  for(i=0;i<20;i++){
+	    f +=  emitSingleDefault[i];
+	  }
+
+
+	  for(i=0;i<20;i++){
+	    emitSingleDefault[i] =  emitSingleDefault[i]/f;
+	  }
+
+
 }
 
 PMatrixDouble::~PMatrixDouble()
@@ -119,12 +155,12 @@ double PMatrixDouble::getLogEquilibriumFreqClass(SequenceElement* se)
 		auto ids = se->getClassIndices();
 		auto sz = se->getClassSize();
 		while(sz > 0){
-			pi += getEquilibriumFreq(ids[sz-1]);
+			pi += emitSingleDefault[ids[sz-1]] ;//getEquilibriumFreq(ids[sz-1]);
 			sz--;
 		}
 		return log(pi);
 	}
-	else return this->getLogEquilibriumFreq(se->getMatrixIndex());
+	else return log(emitSingleDefault[se->getMatrixIndex()]);
 }
 
 double PMatrixDouble::getLogPairTransitionClass(SequenceElement* se1, SequenceElement* se2)
@@ -138,10 +174,10 @@ double PMatrixDouble::getLogPairTransitionClass(SequenceElement* se1, SequenceEl
 	double tcz;
 
 	for (unsigned short i = 0; i < sz1; i++){
-		tpi = getEquilibriumFreq(ids1[i]);
+		tpi = emitSingleDefault[ids1[i]];
 		tcz = 0;
 		for (unsigned short j = 0; j < sz2; j++)
-			tcz += fastPairGammaPt[ids1[i]*matrixSize+ids2[j]];
+			tcz += emitPairsDefault[ids1[i]][ids2[j]];
 		res += tpi*tcz;
 	}
 	return log(res);
