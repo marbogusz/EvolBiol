@@ -166,7 +166,7 @@ void BandingEstimator::optimizePairByPair()
 	Band* band;
 	//DistanceMatrix* dm = gt->getDistanceMatrix();
 	PairHmmCalculationWrapper* wrapper = new PairHmmCalculationWrapper();
-	double result;
+	double result1, result2;
 
 	for(unsigned int i =0; i< pairCount; i++)
 	//int i = 16;
@@ -208,9 +208,9 @@ void BandingEstimator::optimizePairByPair()
 		DEBUG("*#*#*#*#*# Final forward and backward calculation for divergence " << modelParams->getDivergenceTime(0));
 
 		fhmm->setDivergenceTimeAndCalculateModels(0.5);//modelParams->getDivergenceTime(0));
-		fhmm->runAlgorithm();
+		result1 = fhmm->runAlgorithm();
 		bhmm->setDivergenceTimeAndCalculateModels(0.5);//modelParams->getDivergenceTime(0));
-		bhmm->runAlgorithm();
+		result2 = bhmm->runAlgorithm();
 		bhmm->calculatePosteriors(fhmm);
 
 		bhmm->calculateMaximumPosteriorMatrix();
@@ -225,8 +225,8 @@ void BandingEstimator::optimizePairByPair()
 
 		cout << inputSequences->getSequenceName(idxs.first) << "\t" <<  inputSequences->getSequenceName(idxs.second) << "\t" << bhmm->getAlignmentPosteriors(inputSequences->getAlignmentsAt(idxs.first), inputSequences->getAlignmentsAt(idxs.second));
 
-		DEBUG("Likelihood after pairwise optimization: " << result);
-		if (result <= (Definitions::minMatrixLikelihood /2.0))
+		//DEBUG("Likelihood after pairwise optimization: " << result);
+		if (result1 <= (Definitions::minMatrixLikelihood /2.0) || result2 <= (Definitions::minMatrixLikelihood /2.0))
 		{
 			ERROR("Optimization failed for pair #" << i << " Zero probability FWD");
 		}
