@@ -38,7 +38,7 @@ EvolutionaryPairHMM::EvolutionaryPairHMM(vector<SequenceElement*>* s1, vector<Se
 {
 	//TODO - unfix the xi terminal probability  ????
 	//length distribution fixed
-	xi = 1e-18; //0.001;
+	xi = 0.001;
 
 	M = X = Y = NULL;
 	this->seq1 = s1;
@@ -164,6 +164,21 @@ void EvolutionaryPairHMM::setTransitionProbabilities()
 	X->setTransitionProbabilityFromMatch(log(g*(1-xi)));
 	Y->setTransitionProbabilityFromMatch(log(g*(1-xi)));
 
+
+/*
+	M->setTransitionProbabilityFromMatch(log((1.0-(2*g))));
+	M->setTransitionProbabilityFromInsert(log((1-e)));
+	M->setTransitionProbabilityFromDelete(log((1-e)));
+
+	X->setTransitionProbabilityFromInsert(log(e));
+	Y->setTransitionProbabilityFromDelete(log(e));
+
+	X->setTransitionProbabilityFromDelete(Definitions::minMatrixLikelihood);
+	Y->setTransitionProbabilityFromInsert(Definitions::minMatrixLikelihood);
+
+	X->setTransitionProbabilityFromMatch(log(g));
+	Y->setTransitionProbabilityFromMatch(log(g));
+*/
 	/*
 	DUMP(" Transition probabilities: ");
 	DUMP("M->M : " << log(1-2*g));

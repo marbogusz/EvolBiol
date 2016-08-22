@@ -178,7 +178,7 @@ double PMatrixDouble::getLogPairTransitionClass(SequenceElement* se1, SequenceEl
 		tcz = 0;
 		for (unsigned short j = 0; j < sz2; j++)
 			tcz += emitPairsDefault[ids1[i]][ids2[j]];
-		res += tpi*tcz;
+		res += tcz;
 	}
 	return log(res);
 

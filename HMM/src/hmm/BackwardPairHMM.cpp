@@ -365,6 +365,7 @@ double BackwardPairHMM::runAlgorithm()
 
 	double bmp, bxp,byp;
 
+	//double initProb = -1000000.0;//log(xi);
 	double initProb = log(xi);
 
 	M->initializeData(true);

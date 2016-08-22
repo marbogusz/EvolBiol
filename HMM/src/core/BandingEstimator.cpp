@@ -213,14 +213,14 @@ void BandingEstimator::optimizePairByPair()
 		result2 = bhmm->runAlgorithm();
 		bhmm->calculatePosteriors(fhmm);
 
-		bhmm->calculateMaximumPosteriorMatrix();
+		//bhmm->calculateMaximumPosteriorMatrix();
 
-		auto mp1 = bhmm->getMPAlignment();
+		//auto mp1 = bhmm->getMPAlignment();
 
 
-		DUMP("MPD aligment for sequence id " << idxs.first << " and " << idxs.second);
-		DUMP(mp1.first);
-		DUMP(mp1.second);
+		//DUMP("MPD aligment for sequence id " << idxs.first << " and " << idxs.second);
+		//DUMP(mp1.first);
+		//DUMP(mp1.second);
 
 
 		cout << inputSequences->getSequenceName(idxs.first) << "\t" <<  inputSequences->getSequenceName(idxs.second) << "\t" << bhmm->getAlignmentPosteriors(inputSequences->getAlignmentsAt(idxs.first), inputSequences->getAlignmentsAt(idxs.second));
