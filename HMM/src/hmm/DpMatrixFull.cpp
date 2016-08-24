@@ -28,6 +28,7 @@
 #include <iostream>
 #include <cmath>
 #include <sstream>
+#include <iomanip>
 
 using namespace std;
 
@@ -127,6 +128,54 @@ void EBC::DpMatrixFull::outputTrace(unsigned int bound=0)
 	*/
 }
 
+void EBC::DpMatrixFull::outputValues(unsigned int bound, vector<vector<bool> >& aln)
+{
+	unsigned int xl = bound !=0 ? bound : xSize;
+	unsigned int yl = bound !=0 ? bound : ySize;
+
+	double bndlim = Definitions::bandPosteriorLikelihoodLimit + Definitions::bandPosteriorLikelihoodDelta;
+
+	stringstream sstr;
+	bool found;
+
+	string sfx;
+
+	unsigned int numbers[] = {196,202,208,214,220,226,190,154,118,82,46,47,48,49,50,51,45,39,33,27,21,57,93,129,165,201};
+
+	sstr << endl;
+	for(unsigned int k=0; k < yl; k++)
+		sstr << k << "\t";
+	sstr << endl;
+
+	for(unsigned int i=0; i < xl; i++)
+	{
+		for(unsigned int j=0; j < yl; j++)
+		{
+
+			found = false;
+			if (aln[i][j] == true){
+				sfx  = "mX";
+			}
+			else sfx = "m ";
+			for (int k = 0; k<=24; k++){
+				if (matrixData[i][j] > -0.3333333*(k+1)){
+					sstr << "\e[30;48;5;"<<numbers[k]<< sfx;
+					found = true;
+					break;
+				}
+			}
+			if(!found){
+
+				sstr << "\e[30;48;5;7"<< sfx;
+			}
+
+		}
+		sstr << endl;
+	}
+	INFO(sstr.str());
+}
+
+
 void EBC::DpMatrixFull::outputValues(unsigned int bound=0)
 {
 	unsigned int xl = bound !=0 ? bound : xSize;
@@ -146,7 +195,7 @@ void EBC::DpMatrixFull::outputValues(unsigned int bound=0)
 
 
 			//if (ts.score > -5.0)
-				sstr << matrixData[i][j] *-1.0 << "\t";
+				sstr << std::fixed << std::setprecision(2) << matrixData[i][j] *-1.0 << "\t";
 			//else sstr << ".";
 
 		}

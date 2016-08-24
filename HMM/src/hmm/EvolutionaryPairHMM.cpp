@@ -66,9 +66,9 @@ EvolutionaryPairHMM::EvolutionaryPairHMM(vector<SequenceElement*>* s1, vector<Se
 	initializeStates(mt);
 }
 
-void EvolutionaryPairHMM::setDivergenceTimeAndCalculateModels(double time)
+void EvolutionaryPairHMM::setDivergenceTimeAndCalculateModels(double time, double factor)
 {
-	ptmatrix->setTime(time);
+	ptmatrix->setTime(time/factor);
 	tpb->setTime(time);
 
 	calculateModels();

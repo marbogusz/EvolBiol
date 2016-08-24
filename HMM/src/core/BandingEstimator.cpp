@@ -31,6 +31,7 @@
 #include "models/NegativeBinomialGapModel.hpp"
 #include "hmm/DpMatrixFull.hpp"
 #include "extras/LikelihoodSurfacePlotter.hpp"
+#include <iomanip>
 
 namespace EBC
 {
@@ -207,12 +208,17 @@ void BandingEstimator::optimizePairByPair()
 
 		DEBUG("*#*#*#*#*# Final forward and backward calculation for divergence " << modelParams->getDivergenceTime(0));
 
-		fhmm->setDivergenceTimeAndCalculateModels(modelParams->getDivergenceTime(0));
+		double tim = modelParams->getDivergenceTime(0);
+
+		//if(idxs.first == 3 || idxs.second == 3)
+		//	tim = tim /8.0;
+
+		fhmm->setDivergenceTimeAndCalculateModels(tim);
 		fhmm->runAlgorithm();
-		bhmm->setDivergenceTimeAndCalculateModels(modelParams->getDivergenceTime(0));
+		bhmm->setDivergenceTimeAndCalculateModels(tim);
 		bhmm->runAlgorithm();
 		bhmm->calculatePosteriors(fhmm);
-
+/*
 		bhmm->calculateMaximumPosteriorMatrix();
 
 		auto mp1 = bhmm->getMPAlignment();
@@ -221,8 +227,7 @@ void BandingEstimator::optimizePairByPair()
 		DUMP("MPD aligment for sequence id " << idxs.first << " and " << idxs.second);
 		DUMP(mp1.first);
 		DUMP(mp1.second);
-
-
+*/
 		cout << inputSequences->getSequenceName(idxs.first) << "\t" <<  inputSequences->getSequenceName(idxs.second) << "\t" << bhmm->getAlignmentPosteriors(inputSequences->getAlignmentsAt(idxs.first), inputSequences->getAlignmentsAt(idxs.second));
 
 		DEBUG("Likelihood after pairwise optimization: " << result);

@@ -93,6 +93,8 @@ public:
 
 	void outputValues(unsigned int);
 
+	void outputValues(unsigned int, vector<vector<bool> >& aln);
+
 	void outputValuesWithBands(const vector<pair<int, int> >& band, const vector<pair<int, int> >& oband1, const vector<pair<int, int> >& oband2, char os1, char os2);
 
 

@@ -529,6 +529,9 @@ vector<array<unsigned int, 3> > TripletSamplingTree::sampleFromTree()
 
 	}
 	INFO(treeNo << " triplets sampled");
+
+
+	//result.push_back({0,3,1});
 	return result;
 }
 

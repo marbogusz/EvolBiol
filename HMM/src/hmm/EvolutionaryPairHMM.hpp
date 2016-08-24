@@ -140,7 +140,7 @@ public:
 
 	void summarize();
 
-	void setDivergenceTimeAndCalculateModels(double time);
+	void setDivergenceTimeAndCalculateModels(double time, double factor = 1.0);
 
 	unsigned int getIndelParameterCount()
 	{

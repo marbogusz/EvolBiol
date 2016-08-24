@@ -45,8 +45,8 @@ using namespace EBC;
 int main(int argc, char ** argv) {
 
 
-	cout << fixed << setprecision(8);
-	cerr << fixed << setprecision(8);
+	cout << fixed << setprecision(4);
+	cerr << fixed << setprecision(4);
 
 	//cout << Definitions::notice;
 

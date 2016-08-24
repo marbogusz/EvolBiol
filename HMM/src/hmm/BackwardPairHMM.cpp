@@ -31,6 +31,9 @@
 #include "models/AminoacidSubstitutionModel.hpp"
 #include "hmm/DpMatrixFull.hpp"
 #include <sstream>
+#include <iomanip>
+#include <vector>
+#include <array>
 
 
 namespace EBC
@@ -150,20 +153,16 @@ string BackwardPairHMM::getAlignmentPosteriors(vector<SequenceElement*>* s1,
 		vector<SequenceElement*>* s2)
 {
 
-	DUMP("************************GET ALIGNMENT POSTERIORS*******************************");
-
-	DUMP("#####Match posteriors########");
-	dynamic_cast<DpMatrixFull*>(M->getDpMatrix())->outputValues(0);
-	DUMP("#####Insert posteriors########");
-	dynamic_cast<DpMatrixFull*>(X->getDpMatrix())->outputValues(0);
-	DUMP("#####Delete posteriors########");
-	dynamic_cast<DpMatrixFull*>(Y->getDpMatrix())->outputValues(0);
 
 	DUMP("************************GET ALIGNMENT POSTERIORS STARTS*******************************");
 	stringstream oss;
 	int k =0;
 	int l =0;
 	double post = 0.0;
+
+	std::vector<std::vector<bool > > pairalM(this->xSize, std::vector<bool>(this->ySize, false));
+	std::vector<std::vector<bool > > pairalI(this->xSize, std::vector<bool>(this->ySize, false));
+	std::vector<std::vector<bool > > pairalD(this->xSize, std::vector<bool>(this->ySize, false));
 
 	for(unsigned int i=0; i< s1->size(); i++){
 		if((*s1)[i]->isIsGap() && (*s2)[i]->isIsGap()){
@@ -176,7 +175,8 @@ string BackwardPairHMM::getAlignmentPosteriors(vector<SequenceElement*>* s1,
 			if (post > 0.0){
 				throw HmmException("Posterior > 1");
 			}
-			oss << exp(X->getValueAt(k,l))<</*(*s1)[i]->getSymbol()<<(*s2)[i]->getSymbol()<< */"\t";
+			oss << std::fixed << std::setprecision(4) << exp(X->getValueAt(k,l))<</*(*s1)[i]->getSymbol()<<(*s2)[i]->getSymbol()<< */"\t";
+			pairalI[k][l] = true;
 		}
 		else if((*s1)[i]->isIsGap()){
 			l++;
@@ -184,7 +184,8 @@ string BackwardPairHMM::getAlignmentPosteriors(vector<SequenceElement*>* s1,
 			if (post > 0.0){
 				throw HmmException("Posterior > 1");
 			}
-			oss << exp(Y->getValueAt(k,l))<</*(*s1)[i]->getSymbol()<<(*s2)[i]->getSymbol() <<*/ "\t";
+			oss << std::fixed << std::setprecision(4) << exp(Y->getValueAt(k,l))<</*(*s1)[i]->getSymbol()<<(*s2)[i]->getSymbol() <<*/ "\t";
+			pairalD[k][l] = true;
 		}
 		else{
 			k++;
@@ -193,10 +194,19 @@ string BackwardPairHMM::getAlignmentPosteriors(vector<SequenceElement*>* s1,
 			if (post > 0.0){
 				throw HmmException("Posterior > 1");
 			}
-			oss << exp(M->getValueAt(k,l))<</*(*s1)[i]->getSymbol()<<(*s2)[i]->getSymbol() <<',' <<  k << ',' << l <<*/"\t";
+			oss << std::fixed << std::setprecision(4) << exp(M->getValueAt(k,l))<</*(*s1)[i]->getSymbol()<<(*s2)[i]->getSymbol() <<',' <<  k << ',' << l <<*/"\t";
+			pairalM[k][l] = true;
 		}
 	}
 	oss << endl;
+
+	DUMP("#####Match posteriors########");
+	dynamic_cast<DpMatrixFull*>(M->getDpMatrix())->outputValues(0,pairalM);
+	DUMP("#####Insert posteriors########");
+	dynamic_cast<DpMatrixFull*>(X->getDpMatrix())->outputValues(0,pairalI);
+	DUMP("#####Delete posteriors########");
+	dynamic_cast<DpMatrixFull*>(Y->getDpMatrix())->outputValues(0,pairalD);
+
 	return oss.str();
 
 	DUMP("************************GET ALIGNMENT POSTERIORS ENDS*******************************");
@@ -213,7 +223,7 @@ void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 
 	fwdT = fwd->getTotalLikelihood();
 	//fwdT = fwd->M->getValueAt(xSize-1,ySize-1) + log(xi);
-
+/*
 	DUMP("MATCH FORWARD MATRICES");
 	dynamic_cast<DpMatrixFull*>(fwd->M->getDpMatrix())->outputValues(0);
 	DUMP("MATCH BACKWARD MATRICES");
@@ -226,7 +236,7 @@ void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 	dynamic_cast<DpMatrixFull*>(fwd->Y->getDpMatrix())->outputValues(0);
 	DUMP("DELETE BACKWARD MATRICES");
 	dynamic_cast<DpMatrixFull*>(Y->getDpMatrix())->outputValues(0);
-/*
+
 	//DUMP("#####Match posteriors########");
 
 	//DUMP("#####Insert posteriors########");
