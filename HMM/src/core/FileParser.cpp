@@ -97,7 +97,11 @@ FileParser::FileParser(const char* filename)
 	sequences->clear();
 	names->clear();
 
+	unsigned int nid = 0;
+
 	for(auto itmap : mappedSeqs){
+		DEBUG("Found sequence named " << itmap.first << "\t\twith an index of " << nid );
+		nid ++;
 		names->push_back(itmap.first);
 		sequences->push_back(itmap.second);
 	}
@@ -114,7 +118,6 @@ string FileParser::getSequenceName(string& s)
 {
 	//string name(s);
 	s.erase(std::remove_if( s.begin(), s.end(), [](char c){ return (c =='>' || c =='\r' || c =='\t' || c == ' ' || c == '\n');}), s.end() );
-	DEBUG("Found sequence named " << s);
 	return s;//name;
 }
 
