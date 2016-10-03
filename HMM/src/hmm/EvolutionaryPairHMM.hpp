@@ -182,9 +182,10 @@ public:
 
 	double calculateSampleLnL(HMMPathSample& sample);
 
-	double getAlignmentLikelihood(vector<SequenceElement*>* s1, vector<SequenceElement*>* s2);
+	double getAlignmentLikelihood();
 
-	double getAlignmentLikelihood(vector<unsigned char>* s1, vector<unsigned char>* s2, Dictionary* dict);
+	double getAlignmentLikelihood(vector<SequenceElement*>* s1,
+			vector<SequenceElement*>* s2);
 
 	double getTotalLikelihood() const {
 		return totalLikelihood;

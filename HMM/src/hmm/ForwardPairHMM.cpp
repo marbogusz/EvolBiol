@@ -395,7 +395,7 @@ pair<vector<unsigned char>*, vector<unsigned char>* >* ForwardPairHMM::sampleAli
 	reverse(alignment->first->begin(), alignment->first->end());
 	reverse(alignment->second->begin(), alignment->second->end());
 
-	lnl = this->getAlignmentLikelihood(alignment->first,alignment->second, dictionary);
+	lnl = -124.34;//this->getAlignmentLikelihood(alignment->first,alignment->second, dictionary);
 
 	return alignment;
 }

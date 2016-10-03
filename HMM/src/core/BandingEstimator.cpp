@@ -168,6 +168,8 @@ void BandingEstimator::optimizePairByPair()
 	PairHmmCalculationWrapper* wrapper = new PairHmmCalculationWrapper();
 	double result1, result2;
 
+	double totLnL = 0;
+
 	for(unsigned int i =0; i< pairCount; i++)
 	//int i = 16;
 	{
@@ -207,11 +209,15 @@ void BandingEstimator::optimizePairByPair()
 */
 		DEBUG("*#*#*#*#*# Final forward and backward calculation for divergence " << modelParams->getDivergenceTime(0));
 
+		/*
 		fhmm->setDivergenceTimeAndCalculateModels(0.5);//modelParams->getDivergenceTime(0));
 		result1 = fhmm->runAlgorithm();
 		bhmm->setDivergenceTimeAndCalculateModels(0.5);//modelParams->getDivergenceTime(0));
 		result2 = bhmm->runAlgorithm();
 		bhmm->calculatePosteriors(fhmm);
+		 */
+
+		totLnL += result1 = fhmm->getAlignmentLikelihood();
 
 		//bhmm->calculateMaximumPosteriorMatrix();
 
@@ -222,8 +228,9 @@ void BandingEstimator::optimizePairByPair()
 		//DUMP(mp1.first);
 		//DUMP(mp1.second);
 
+		cout  << result1 << endl;
 
-		cout << inputSequences->getSequenceName(idxs.first) << "\t" <<  inputSequences->getSequenceName(idxs.second) << "\t" << bhmm->getAlignmentPosteriors(inputSequences->getAlignmentsAt(idxs.first), inputSequences->getAlignmentsAt(idxs.second));
+		//cout << inputSequences->getSequenceName(idxs.first) << "\t" <<  inputSequences->getSequenceName(idxs.second) << "\t" << bhmm->getAlignmentPosteriors(inputSequences->getAlignmentsAt(idxs.first), inputSequences->getAlignmentsAt(idxs.second));
 
 		//DEBUG("Likelihood after pairwise optimization: " << result);
 		if (result1 <= (Definitions::minMatrixLikelihood /2.0) || result2 <= (Definitions::minMatrixLikelihood /2.0))
@@ -240,8 +247,9 @@ void BandingEstimator::optimizePairByPair()
 
 	}
 
-	DEBUG("Optimized divergence times:");
-	DEBUG(this->divergenceTimes);
+	cout << totLnL << endl;
+	//DEBUG("Optimized divergence times:");
+	//DEBUG(this->divergenceTimes);
 }
 
 

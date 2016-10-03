@@ -371,10 +371,17 @@ double EvolutionaryPairHMM::calculateSampleLnL(HMMPathSample& sample)
 }
 
 //FIXME OBSOLETE
-double EvolutionaryPairHMM::getAlignmentLikelihood(vector<unsigned char>* s1,
-		vector<unsigned char>* s2, Dictionary* dict)
+double EvolutionaryPairHMM::getAlignmentLikelihood()
 {
 	double lnl = 0;
+
+	for(unsigned int i=0; i< seq1->size(); i++){
+		lnl += ptmatrix->getLogEquilibriumFreq((*seq1)[i]->getMatrixIndex());
+	}
+	for(unsigned int j=0; j< seq2->size(); j++){
+		lnl += ptmatrix->getLogEquilibriumFreq((*seq2)[j]->getMatrixIndex());
+	}
+
 /*
 	cerr << endl;
 	for (auto sq1 : *s1)
