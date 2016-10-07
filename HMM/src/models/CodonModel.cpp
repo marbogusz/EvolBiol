@@ -91,21 +91,25 @@ void CodonModel::calculateModel()
 	for(auto pi : piCodons){
 		qpos = pi.first * matrixSize + pi.second;
 		qMatrix[qpos] = this->piFreqs[pi.second];
+		desArray[pi.first][pi.second] = desArray[pi.second][pi.first] = "S Tv";
 	}
 
 	for(auto kappa : kCodons){
 			qpos = kappa.first * matrixSize + kappa.second;
 			qMatrix[qpos] = k * this->piFreqs[kappa.second];
+			desArray[kappa.first][kappa.second] = desArray[kappa.second][kappa.first] = "S Ts";
 	}
 
 	for(auto omega : wCodons){
 			qpos = omega.first * matrixSize + omega.second;
 			qMatrix[qpos] = w * this->piFreqs[omega.second];
+			desArray[omega.first][omega.second] = desArray[omega.second][omega.first] = "N Tv";
 	}
 
 	for(auto komega : kwCodons){
 			qpos = komega.first * matrixSize + komega.second;
 			qMatrix[qpos] = k* w * this->piFreqs[komega.second];
+			desArray[komega.first][komega.second] = desArray[komega.second][komega.first] = "N Ts";
 	}
 
 	for (i=0; i< this->matrixSize; i++)

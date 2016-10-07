@@ -62,11 +62,11 @@ class EvolutionaryPairHMM
 protected:
 	SubstitutionModelBase* substModel;
 
-	PMatrixDouble* ptmatrix;
+
 
 	IndelModel* indelModel;
 	Sequences* inputSequences;
-	TransitionProbabilities* tpb;
+
 	Maths* maths;
 
 	double * mlParameters;
@@ -118,6 +118,9 @@ protected:
 
 
 public:
+
+	PMatrixDouble* ptmatrix;
+	TransitionProbabilities* tpb;
 
 	//Match state
 	PairwiseHmmStateBase* M;

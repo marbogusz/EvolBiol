@@ -29,6 +29,7 @@ protected:
 	vector<pair<unsigned int, unsigned int> > wCodons;
 	vector<pair<unsigned int, unsigned int> > kwCodons;
 
+
 	//now we can check for syn/nonsyn/ti/tv
 	CodonDictionary* cdict = dynamic_cast<CodonDictionary*>(dictionary);
 
@@ -38,6 +39,8 @@ protected:
 	void buildInitialQmatrix();
 
 public:
+
+	std::string desArray[64][64];
 
 	CodonModel(Dictionary*, Maths*i, unsigned int);
 

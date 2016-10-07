@@ -41,7 +41,7 @@ class PMatrix
 {
 protected:
 
-	SubstitutionModelBase* model;
+
 
 	unsigned int matrixSize;
 
@@ -54,6 +54,9 @@ protected:
 	unsigned int matrixFullSize;
 
 public:
+
+	SubstitutionModelBase* model;
+
 	PMatrix(SubstitutionModelBase* m);
 	virtual ~PMatrix();
 

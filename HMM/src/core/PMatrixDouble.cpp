@@ -25,6 +25,7 @@
  */
 
 #include <core/PMatrixDouble.hpp>
+#include "models/CodonModel.hpp"
 
 namespace EBC
 {
@@ -128,19 +129,27 @@ double PMatrixDouble::getLogPairTransition(unsigned int xi, unsigned int yi)
 
 void PMatrixDouble::summarize()
 {
-	cout << "P(t) matrix summary :" << endl;
-	cout << "Divergence time : " << time << endl;
+	//cout << "P(t) matrix summary :" << endl;
+	//cout << "Divergence time : " << time << endl;
 
-	cout << "Pairwise Site patterns " << endl;
+	//cout << "Pairwise Site patterns " << endl;
+
+
+	CodonModel* cm =  static_cast<CodonModel*>(this->model);
+
+	INFO("Pairwise Site patterns ");
+
 	for (int i =0; i<= matrixSize; i++ )
 	{
 		for (int j =0; j<= matrixSize; j++ )
 		{
-			cout << sitePatterns[i][j] << "\t\t";
+			//cout << sitePatterns[i][j] << "\t\t";
+			INFO(cm->desArray[i][j] << "\t" << i << "\t" << j << "\t" << sitePatterns[i][j]);
 		}
-		cout << endl;
+		//cout << endl;
 	}
 
+	/*
 	cout << endl << "Averaged gamma cat P(t) matrix" << endl;
 	for (int i =0; i< matrixSize; i++ )
 	{
@@ -151,7 +160,7 @@ void PMatrixDouble::summarize()
 		cout << endl;
 	}
 	cout << endl;
-
+	 */
 }
 
 } /* namespace EBC */

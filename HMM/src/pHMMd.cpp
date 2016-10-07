@@ -53,18 +53,11 @@ int main(int argc, char ** argv) {
 	cerr << fixed << setprecision(6);
 
 
-	//std::this_thread::sleep_for(std::chrono::milliseconds(30000));
-	//cerr << " ELLO\n";
-	//cout << " Should not be here!\n";
-	//return 0;
-
 	try
 	{
 		//Get some time statistics
 	    chrono::time_point<chrono::system_clock> start, end;
 	    start = chrono::system_clock::now();
-
-		//FIXME - nothing happens when the model does not get specified!
 
 		CommandReader* cmdReader = new CommandReader(argc, argv);
 		ofstream treefile;
@@ -73,16 +66,16 @@ int main(int argc, char ** argv) {
 
 		IParser* parser = cmdReader->getParser();
 
-		//FileLogger::DebugLogger().setCerr();
-		//FileLogger::DumpLogger().setCerr();
-		FileLogger::InfoLogger().setCerr();
+		//FileLogger::InfoLogger().setCerr();
 
 		INFO("Reading input sequences...");
 		DEBUG("Creating alignment object...");
 
+		//*********************************************************************************************************/
+		//Fixed alignment "FIX"
+		//*********************************************************************************************************/
 		Sequences* inputSeqs = new Sequences(parser, cmdReader->getSequenceType(),cmdReader->isFixedAlignment());
 
-		//No indel or subst params!
 		Optimizer* bfgs;
 		Dictionary* dict;
 		SubstitutionModelBase* substModel;
@@ -105,25 +98,15 @@ int main(int argc, char ** argv) {
 		modelParams = new OptimizedModelParameters(substModel, indelModel,2, 1, true,
 							true, false, true, maths);
 
-		//modelParams->generateInitialDistanceParameters();
-		//modelParams->generateInitialIndelParameters();
-		//modelParams->generateInitialSubstitutionParameters();
 		modelParams->setUserIndelParams({0.01,0.5});
 		modelParams->setUserDivergenceParams({0.2});
 		modelParams->setUserSubstParams({2.0, 0.1});
-
-		//indelModel->setParameters({0.00001,0.00001});
-		//substModel->setParameters({16.4, 0.00352});
-		//substModel->calculateModel();
-
 
 		EvolutionaryPairHMM *hmm;
 
 		bfgs = new Optimizer(modelParams, NULL, cmdReader->getOptimizationType());
 
 		PairHmmCalculationWrapper* wrapper = new PairHmmCalculationWrapper();
-
-
 
 		for (unsigned int pi = 0; pi<inputSeqs->getPairCount(); pi++){
 
@@ -134,40 +117,10 @@ int main(int argc, char ** argv) {
 			len1 = inputSeqs->getSequencesAt(idxs.first)->size();
 			len2 = inputSeqs->getSequencesAt(idxs.second)->size();
 
-			Band* band = new Band(len1,len2,0.3);
-
-
-/*
-			auto ip =  cmdReader->getIndelParams();
-
-			substModel->setParameters(cmdReader->getSubstParams());
-			substModel->calculateModel();
-			//BAND it ?
-
-
-			hmm = new ForwardPairHMM(inputSeqs->getSequencesAt(idxs.first), inputSeqs->getSequencesAt(idxs.second),
-							substModel, indelModel, Definitions::DpMatrixType::Full, band);
-
-
-			double lam = Definitions::almostZero;
-			double tim = 0.1;//Definitions::almostZero;
-			double lnl = 0;
-
-			cout << "Time\tLambda\tLnL" << endl;
-			while(tim < 1.5){
-				lam = Definitions::almostZero;
-				while(lam < 0.1){
-					indelModel->setParameters({lam,ip[1]});
-					hmm->setDivergenceTimeAndCalculateModels(tim);
-					lnl = hmm->runAlgorithm() * -1.0;
-					lam += (0.0025);
-					//lam += (Definitions::almostZero)*4;
-					cout << tim << "\t" << lam << "\t" << lnl << endl;
-				}
-				tim += 0.025;
-			}
-*/
-
+			/***********************************************************************/
+			//REMOVING BAND
+			//**************************************************************************
+			Band* band = NULL;//new Band(len1,len2,0.3);
 
 			hmm = new ForwardPairHMM(inputSeqs->getSequencesAt(idxs.first), inputSeqs->getSequencesAt(idxs.second),
 					substModel, indelModel, Definitions::DpMatrixType::Full, band);
@@ -180,24 +133,14 @@ int main(int argc, char ** argv) {
 			bfgs->setTarget(wrapper);
 			bfgs->optimize();
 
-			//detect if we're close to the bounds
-
 			double lambda, divergence;
 			bool runAgain;
 
 			do{
 
-				//cout << modelParams->getSubstParameters()[0] << "\t" << modelParams->getSubstParameters()[1] <<
-				//			    "\t" <<  modelParams->getIndelParameters()[0] << "\t" <<  modelParams->getIndelParameters()[1] <<
-				//				"\t" << modelParams->getDivergenceTime(0) << "\t" << inputSeqs->getSequenceName(idxs.first) << "\t" << inputSeqs->getSequenceName(idxs.second) << "\t" << pi << "\n";
-
-
 				runAgain = false;
 				lambda = modelParams->getIndelParameters()[0];
 				divergence  = modelParams->getDivergenceTime(0);
-
-				//cerr << " L " << lambda << " D " << divergence << endl;
-
 
 				if(lambda > (Definitions::lambdaHiBound * 0.995)){
 					runAgain = true;
@@ -216,7 +159,7 @@ int main(int argc, char ** argv) {
 				if(runAgain){
 					//cerr << "Lambda was " << lambda << "\tand divergence " << divergence << endl;
 					//cerr << "Run again...\n";
-					//cerr << "New bounds " << Definitions::lambdaHiBound << " " << Definitions::divergenceBound << endl;
+					INFO("R U N   A G A I N   New bounds " << Definitions::lambdaHiBound << " " << Definitions::divergenceBound);
 					indelModel->resetBounds();
 					modelParams->resetBounds();
 					bfgs->optimize();
@@ -225,30 +168,24 @@ int main(int argc, char ** argv) {
 			}
 			while(runAgain == true);
 
-
-/*
-			auto vh = new ViterbiPairHMM(inputSeqs->getSequencesAt(idxs.first), inputSeqs->getSequencesAt(idxs.second),
-					substModel, indelModel, Definitions::DpMatrixType::Full, NULL);
-
-			vh->setDivergenceTimeAndCalculateModels(modelParams->getDivergenceTime(0));
-			vh->runAlgorithm();
-			auto al = vh->getStringAlignment();
-
-			cout << al.first << endl;
-			cout << al.second << endl;
-
-			delete vh;
-			*/
 			cout << modelParams->getSubstParameters()[0] << "\t" << modelParams->getSubstParameters()[1] <<
 			    "\t" <<  modelParams->getIndelParameters()[0] << "\t" <<  modelParams->getIndelParameters()[1] <<
 				"\t" << modelParams->getDivergenceTime(0) << "\t" << inputSeqs->getSequenceName(idxs.first) << "\t" << inputSeqs->getSequenceName(idxs.second) << "\t" << pi << "\n";
 
-			//INFO(inputSeqs->getSequenceName(idxs.first) << " " << inputSeqs->getSequenceName(idxs.second));
+			INFO(inputSeqs->getSequenceName(idxs.first) << " " << inputSeqs->getSequenceName(idxs.second));
+			INFO("Divergence time " << modelParams->getDivergenceTime(0));
+			INFO("Substitution Model");
+			INFO(modelParams->getSubstParameters());
+			INFO("Indel Model");
+			INFO(modelParams->getIndelParameters());
 
-			//INFO("Divergence time " << modelParams->getDivergenceTime(0));
-			//INFO(modelParams->getSubstParameters());
-			//INFO(modelParams->getIndelParameters());
+			substModel->setParameters(modelParams->getSubstParameters());
+			substModel->calculateModel();
+			indelModel->setParameters(modelParams->getIndelParameters());
+			hmm->setDivergenceTimeAndCalculateModels(modelParams->getDivergenceTime(0));
 
+			hmm->ptmatrix->summarize();
+			INFO("Gap opening prob\t" << log(hmm->tpb->getGapOpening()));
 
 
 			delete hmm;
