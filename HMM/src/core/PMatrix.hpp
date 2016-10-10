@@ -39,9 +39,11 @@ namespace EBC
 
 class PMatrix
 {
+public:
+
+	SubstitutionModelBase* model;
+
 protected:
-
-
 
 	unsigned int matrixSize;
 
@@ -54,8 +56,6 @@ protected:
 	unsigned int matrixFullSize;
 
 public:
-
-	SubstitutionModelBase* model;
 
 	PMatrix(SubstitutionModelBase* m);
 	virtual ~PMatrix();

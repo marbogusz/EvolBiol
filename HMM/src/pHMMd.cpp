@@ -122,6 +122,8 @@ int main(int argc, char ** argv) {
 			//**************************************************************************
 			Band* band = NULL;//new Band(len1,len2,0.3);
 
+			double lnl = 0.0;
+
 			hmm = new ForwardPairHMM(inputSeqs->getSequencesAt(idxs.first), inputSeqs->getSequencesAt(idxs.second),
 					substModel, indelModel, Definitions::DpMatrixType::Full, band);
 
@@ -131,7 +133,7 @@ int main(int argc, char ** argv) {
 			wrapper->setModelParameters(modelParams);
 
 			bfgs->setTarget(wrapper);
-			bfgs->optimize();
+			lnl = bfgs->optimize();
 
 			double lambda, divergence;
 			bool runAgain;
@@ -141,6 +143,9 @@ int main(int argc, char ** argv) {
 				runAgain = false;
 				lambda = modelParams->getIndelParameters()[0];
 				divergence  = modelParams->getDivergenceTime(0);
+
+
+				INFO("Optimization LnL : "<< lnl);
 
 				if(lambda > (Definitions::lambdaHiBound * 0.995)){
 					runAgain = true;
@@ -162,7 +167,7 @@ int main(int argc, char ** argv) {
 					INFO("R U N   A G A I N   New bounds " << Definitions::lambdaHiBound << " " << Definitions::divergenceBound);
 					indelModel->resetBounds();
 					modelParams->resetBounds();
-					bfgs->optimize();
+					lnl = bfgs->optimize();
 				}
 
 			}
@@ -186,6 +191,7 @@ int main(int argc, char ** argv) {
 
 			hmm->ptmatrix->summarize();
 			INFO("Gap opening prob\t" << log(hmm->tpb->getGapOpening()));
+			INFO("Match toM   prob\t" << log(1.0 - 2 * hmm->tpb->getGapOpening()));
 
 
 			delete hmm;

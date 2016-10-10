@@ -144,7 +144,9 @@ void PMatrixDouble::summarize()
 		for (int j =0; j<= matrixSize; j++ )
 		{
 			//cout << sitePatterns[i][j] << "\t\t";
-			INFO(cm->desArray[i][j] << "\t" << i << "\t" << j << "\t" << sitePatterns[i][j]);
+			auto dsc = cm->desArray[i][j];
+			if (dsc != "")
+				INFO(dsc << "\t" << i << "\t" << j << "\t" << sitePatterns[i][j]);
 		}
 		//cout << endl;
 	}
