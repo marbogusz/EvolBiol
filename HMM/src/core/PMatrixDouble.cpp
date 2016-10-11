@@ -146,7 +146,7 @@ void PMatrixDouble::summarize()
 			//cout << sitePatterns[i][j] << "\t\t";
 			auto dsc = cm->desArray[i][j];
 			if (dsc != "")
-				INFO(dsc << "\t" << i << "\t" << j << "\t" << sitePatterns[i][j]);
+				INFO(dsc << "\t" << i << "\t" << j << "\t" << (sitePatterns[i][j]  - getLogEquilibriumFreq(i)));
 		}
 		//cout << endl;
 	}
