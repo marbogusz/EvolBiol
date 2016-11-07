@@ -44,6 +44,177 @@
 using namespace std;
 using namespace EBC;
 
+class Derivator
+{
+public:
+
+	double uTime;
+	vector<double> uIndelParams;
+	vector<double> uSubstParams;
+
+	vector<double> tempIndelParams;
+	vector<double> tempSubstParams;
+	vector<double> tempIndelParamsD;
+	vector<double> tempSubstParamsD;
+
+
+	SubstitutionModelBase* substModel;
+	IndelModel* indelModel;
+	ForwardPairHMM *hmm;
+
+	double lDelta = 0.000001;
+	double wDelta = 0.000001;
+
+	void resetIndelParams(){
+		tempIndelParams = uIndelParams;
+		tempIndelParamsD = uIndelParams;
+	}
+	void resetSubstParams(){
+		tempSubstParams = uSubstParams;
+		tempSubstParamsD = uSubstParams;
+	}
+
+	void init(){
+		for(int i = 0; i <=1; i++){
+					if(uIndelParams[i] == 0.0){
+						uIndelParams[i] = Definitions::almostZero;
+					}
+					if(uSubstParams[i] == 0.0){
+						uSubstParams[i] = Definitions::almostZero;
+					}
+				}
+
+				resetIndelParams();
+				resetSubstParams();
+	}
+
+	double getGradient(){
+		init();
+		auto fpl0 = getDerivativeL(uIndelParams[0]);
+		indelModel->setParameters(uIndelParams);
+		auto fpw0 = getDerivativeW(uSubstParams[1]);
+		cout  << fpl0 << '\t' << fpw0;
+	}
+
+	double getHessian(){
+		init();
+
+/*
+		cout << uTime << endl;
+		cout << uIndelParams[0] << endl;
+		cout << uIndelParams[1] << endl;
+		cout << uSubstParams[0] << endl;
+		cout << uSubstParams[1] << endl;
+*/
+
+		auto fpl0 = getDerivativeL(uIndelParams[0]);
+		auto fpld = getDerivativeL(uIndelParams[0] + lDelta);
+
+
+		auto h11 = (fpld  - fpl0) / lDelta;
+
+
+		tempIndelParams[0] = tempIndelParams[0] + lDelta;
+		indelModel->setParameters(tempIndelParams);
+
+		auto h21  = (getDerivativeW(uSubstParams[1]) - fpl0) /wDelta;
+
+		resetIndelParams();
+		indelModel->setParameters(uIndelParams);
+
+		auto fpw0 = getDerivativeW(uSubstParams[1]);
+		auto fpwd = getDerivativeW(uSubstParams[1] + wDelta);
+
+		auto h22 = (fpwd  - fpw0) / wDelta;
+
+		tempSubstParams[1] = tempSubstParams[1] + wDelta;
+		substModel->setParameters(tempSubstParams);
+		substModel->calculateModel();
+
+		auto h12 = (getDerivativeL(uIndelParams[0]) - fpw0) /lDelta;
+
+		cout << h11 << '\t' << h12 << '\t' << h21 << '\t' << h22;
+
+		//cout << fpl0 << endl;
+		//cout << fpld << endl;
+
+		//cout << "MARCIN 11 " << h11 << endl;
+		//cout << "MARCIN 21 " << h21 << endl;
+		//cout << "MARCIN 22 " << h22 << endl;
+		//cout << "MARCIN 12 " << h12 << endl;
+	}
+
+
+	double getDerivativeL(double point){
+		tempIndelParams[0] = point;
+		tempIndelParamsD[0] = point + lDelta;
+
+		indelModel->setParameters(tempIndelParams);
+		hmm->setDivergenceTimeAndCalculateModels(uTime);
+
+		auto dp = -hmm->runAlgorithm();
+
+		//cout << "lnl L point " << dp << endl;
+
+		indelModel->setParameters(tempIndelParamsD);
+		hmm->setDivergenceTimeAndCalculateModels(uTime);
+
+		auto dpd = -hmm->runAlgorithm();
+
+		//cout << "lnl L delta " << dpd << endl;
+		resetIndelParams();
+		return (dpd - dp)/lDelta;
+	}
+
+	double getDerivativeW(double point){
+		tempSubstParams[1] = point;
+		tempSubstParamsD[1] = point + wDelta;
+
+		substModel->setParameters(tempSubstParams);
+		substModel->calculateModel();
+		hmm->setDivergenceTimeAndCalculateModels(uTime);
+
+		auto dp = -hmm->runAlgorithm();
+
+		substModel->setParameters(tempSubstParamsD);
+		substModel->calculateModel();
+
+		hmm->setDivergenceTimeAndCalculateModels(uTime);
+
+		auto dpd = -hmm->runAlgorithm();
+		resetSubstParams();
+		return (dpd - dp)/wDelta;
+	}
+
+/*
+			auto f_L_W = hmm->setDivergenceTimeAndCalculateModels(uTime);
+
+			auto tmpSubstParams = uSubstParams;
+			auto tmpIndelParams = uIndelParams;
+
+			tmpIndelParams[0] = tmpIndelParams[0] + lDelta;
+			indelModel->setParameters(tmpIndelParams);
+
+			auto f_Ld_W = hmm->setDivergenceTimeAndCalculateModels(uTime);
+
+			auto d1l = (f_Ld_W - f_L_W) / lDelta;
+
+			tmpIndelParams[0] = tmpIndelParams[0] + lDelta;
+			indelModel->setParameters(tmpIndelParams);
+
+			auto f_L2d_W = hmm->setDivergenceTimeAndCalculateModels(uTime);
+
+			//2nd lambda derivative
+			auto d2l = (f_L2d_W - f_Ld_W) / lDelta;
+
+			tmpIndelParams = uIndelParams;
+			indelModel->setParameters(tmpIndelParams);
+
+			tmpSubstParams[1] = tmpSubstParams[1] + wDelta;
+*/
+
+};
+
 int main(int argc, char ** argv) {
 
 	//cerr << "Starting dm\n";
@@ -75,7 +246,7 @@ int main(int argc, char ** argv) {
 
 		//FileLogger::DebugLogger().setCerr();
 		//FileLogger::DumpLogger().setCerr();
-		FileLogger::InfoLogger().setCerr();
+		//FileLogger::InfoLogger().setCerr();
 
 		INFO("Reading input sequences...");
 		DEBUG("Creating alignment object...");
@@ -83,179 +254,64 @@ int main(int argc, char ** argv) {
 		Sequences* inputSeqs = new Sequences(parser, cmdReader->getSequenceType(),cmdReader->isFixedAlignment());
 
 		//No indel or subst params!
-		Optimizer* bfgs;
 		Dictionary* dict;
 		SubstitutionModelBase* substModel;
 		IndelModel* indelModel;
 		Maths* maths;
 		Definitions::AlgorithmType algorithm;
-		OptimizedModelParameters* modelParams;
 
 		maths = new Maths();
 		dict = inputSeqs->getDictionary();
+
+		double lDelta = 0.000001;
+		double wDelta = 0.0001;
 
 		//no gamma with codon models
 		substModel = new CodonModel(dict, maths,1);
 		indelModel = new NegativeBinomialGapModel();
 
-		//indelModel->setParameters({Definitions::almostZero,0.5});
-
 		substModel->setObservedFrequencies(inputSeqs->getElementFrequencies());
 
-		modelParams = new OptimizedModelParameters(substModel, indelModel,2, 1, true,
-							true, false, true, maths);
 
-		//modelParams->generateInitialDistanceParameters();
-		//modelParams->generateInitialIndelParameters();
-		//modelParams->generateInitialSubstitutionParameters();
-		modelParams->setUserIndelParams({0.01,0.5});
-		modelParams->setUserDivergenceParams({0.2});
-		modelParams->setUserSubstParams({2.0, 0.1});
+		double uTime = cmdReader->getDistance();
+		auto uIndelParams = cmdReader->getIndelParams();
+		auto uSubstParams = cmdReader->getSubstParams();
+		double lnl0 = 0.0;
 
-		//indelModel->setParameters({0.00001,0.00001});
-		//substModel->setParameters({16.4, 0.00352});
-		//substModel->calculateModel();
-
-
-		EvolutionaryPairHMM *hmm;
-
-		bfgs = new Optimizer(modelParams, NULL, cmdReader->getOptimizationType());
-
-		PairHmmCalculationWrapper* wrapper = new PairHmmCalculationWrapper();
+		indelModel->setParameters(uIndelParams);
+		substModel->setParameters(uSubstParams);
+		substModel->calculateModel();
 
 
 
-		for (unsigned int pi = 0; pi<inputSeqs->getPairCount(); pi++){
+		ForwardPairHMM *hmm;
 
-			std::pair<unsigned int, unsigned int> idxs = inputSeqs->getPairOfSequenceIndices(pi);
+		std::pair<unsigned int, unsigned int> idxs = inputSeqs->getPairOfSequenceIndices(0);
 
-			unsigned int len1, len2;
+		Band* band = NULL;
 
-			len1 = inputSeqs->getSequencesAt(idxs.first)->size();
-			len2 = inputSeqs->getSequencesAt(idxs.second)->size();
-
-			Band* band = new Band(len1,len2,0.3);
-
-
-/*
-			auto ip =  cmdReader->getIndelParams();
-
-			substModel->setParameters(cmdReader->getSubstParams());
-			substModel->calculateModel();
-			//BAND it ?
-
-
-			hmm = new ForwardPairHMM(inputSeqs->getSequencesAt(idxs.first), inputSeqs->getSequencesAt(idxs.second),
-							substModel, indelModel, Definitions::DpMatrixType::Full, band);
-
-
-			double lam = Definitions::almostZero;
-			double tim = 0.1;//Definitions::almostZero;
-			double lnl = 0;
-
-			cout << "Time\tLambda\tLnL" << endl;
-			while(tim < 1.5){
-				lam = Definitions::almostZero;
-				while(lam < 0.1){
-					indelModel->setParameters({lam,ip[1]});
-					hmm->setDivergenceTimeAndCalculateModels(tim);
-					lnl = hmm->runAlgorithm() * -1.0;
-					lam += (0.0025);
-					//lam += (Definitions::almostZero)*4;
-					cout << tim << "\t" << lam << "\t" << lnl << endl;
-				}
-				tim += 0.025;
-			}
-*/
-
-
-			hmm = new ForwardPairHMM(inputSeqs->getSequencesAt(idxs.first), inputSeqs->getSequencesAt(idxs.second),
-					substModel, indelModel, Definitions::DpMatrixType::Full, band);
-
-			wrapper->setTargetHMM(hmm);
-			wrapper->setIndelModel(indelModel);
-			wrapper->setSubstModel(substModel);
-			wrapper->setModelParameters(modelParams);
-
-			bfgs->setTarget(wrapper);
-			bfgs->optimize();
-
-			//detect if we're close to the bounds
-
-			double lambda, divergence;
-			bool runAgain;
-
-			do{
-
-				//cout << modelParams->getSubstParameters()[0] << "\t" << modelParams->getSubstParameters()[1] <<
-				//			    "\t" <<  modelParams->getIndelParameters()[0] << "\t" <<  modelParams->getIndelParameters()[1] <<
-				//				"\t" << modelParams->getDivergenceTime(0) << "\t" << inputSeqs->getSequenceName(idxs.first) << "\t" << inputSeqs->getSequenceName(idxs.second) << "\t" << pi << "\n";
-
-
-				runAgain = false;
-				lambda = modelParams->getIndelParameters()[0];
-				divergence  = modelParams->getDivergenceTime(0);
-
-				//cerr << " L " << lambda << " D " << divergence << endl;
-
-
-				if(lambda > (Definitions::lambdaHiBound * 0.995)){
-					runAgain = true;
-					//cerr << " Lambda big \n";
-					Definitions::lambdaHiBound = Definitions::lambdaHiBound * 2.0;
-					Definitions::divergenceBound = Definitions::divergenceBound / 2.0;
-
-				}	//check if we're close to the band
-				else if(divergence > (Definitions::divergenceBound * 0.995)){
-					runAgain = true;
-					//cerr << " Divergence big \n";
-					Definitions::lambdaHiBound = Definitions::lambdaHiBound / 2.0;
-					Definitions::divergenceBound = Definitions::divergenceBound * 2.0;
-				}
-
-				if(runAgain){
-					//cerr << "Lambda was " << lambda << "\tand divergence " << divergence << endl;
-					//cerr << "Run again...\n";
-					//cerr << "New bounds " << Definitions::lambdaHiBound << " " << Definitions::divergenceBound << endl;
-					indelModel->resetBounds();
-					modelParams->resetBounds();
-					bfgs->optimize();
-				}
-
-			}
-			while(runAgain == true);
-
-
-/*
-			auto vh = new ViterbiPairHMM(inputSeqs->getSequencesAt(idxs.first), inputSeqs->getSequencesAt(idxs.second),
-					substModel, indelModel, Definitions::DpMatrixType::Full, NULL);
-
-			vh->setDivergenceTimeAndCalculateModels(modelParams->getDivergenceTime(0));
-			vh->runAlgorithm();
-			auto al = vh->getStringAlignment();
-
-			cout << al.first << endl;
-			cout << al.second << endl;
-
-			delete vh;
-			*/
-			cout << modelParams->getSubstParameters()[0] << "\t" << modelParams->getSubstParameters()[1] <<
-			    "\t" <<  modelParams->getIndelParameters()[0] << "\t" <<  modelParams->getIndelParameters()[1] <<
-				"\t" << modelParams->getDivergenceTime(0) << "\t" << inputSeqs->getSequenceName(idxs.first) << "\t" << inputSeqs->getSequenceName(idxs.second) << "\t" << pi << "\n";
-
-			//INFO(inputSeqs->getSequenceName(idxs.first) << " " << inputSeqs->getSequenceName(idxs.second));
-
-			//INFO("Divergence time " << modelParams->getDivergenceTime(0));
-			//INFO(modelParams->getSubstParameters());
-			//INFO(modelParams->getIndelParameters());
+		hmm = new ForwardPairHMM(inputSeqs->getSequencesAt(idxs.first), inputSeqs->getSequencesAt(idxs.second),
+									substModel, indelModel, Definitions::DpMatrixType::Full, band);
 
 
 
-			delete hmm;
-			delete band;
-		}
+		Derivator dv;
 
+		dv.hmm = hmm;
+		dv.substModel = substModel;
+		dv.indelModel = indelModel;
+		dv.uTime = uTime;
+		dv.uIndelParams = uIndelParams;
+		dv.uSubstParams = uSubstParams;
+
+		//dv.getHessian();
+		dv.getGradient();
+
+
+		delete hmm;
 	}
+
+
 	catch(HmmException& pe)
 	{
 		cerr << pe.what();
@@ -268,3 +324,12 @@ int main(int argc, char ** argv) {
 	FileLogger::stop();
 	return 0;
 }
+
+
+
+
+
+
+
+
+
