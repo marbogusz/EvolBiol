@@ -43,6 +43,198 @@ ForwardPairHMM::~ForwardPairHMM()
 }
 
 
+pair<vector<double>*, pair<vector<SequenceElement*>*, vector<SequenceElement*>*> >
+ForwardPairHMM::sampleAlignmentFromForward(Dictionary* dict, EvolutionaryPairHMM* bhmm){
+	pair<vector<double>*, pair<vector<SequenceElement*>*, vector<SequenceElement*>*> >
+	ret = make_pair(new vector<double>(),make_pair(new vector<SequenceElement*>(), new vector<SequenceElement*>()));
+	//FIXME hack for codons
+	string sgap = "---" ;
+	SequenceElement* gapElem = dict->getSequenceElement(sgap);
+
+	std::random_device rd;
+		std::mt19937_64 gen(rd());
+		std::uniform_real_distribution<double> dis(0, 1.0);
+
+		unsigned int i = xSize-1;
+		unsigned int j = ySize-1;
+
+		double mtProb,inProb,currProb, rnbr,tmp;
+		double emission = 0.0;
+
+		//choose initial state
+		PairwiseHmmStateBase* currentState;
+
+		mtProb = M->getValueAt(xSize-1, ySize-1) - this->getTotalLikelihood();
+		inProb = X->getValueAt(xSize-1, ySize-1) - this->getTotalLikelihood();
+		//dlProb = Y->getValueAt(xSize-1, ySize-1) - this->getTotalLikelihood();
+
+		while(i > 0 && j > 0)
+		{
+			rnbr = dis(gen);
+			tmp  = exp(mtProb);
+			if(rnbr < tmp)
+				currentState = M;
+			else if (rnbr < (tmp + exp(inProb)))
+				currentState = X;
+			else currentState = Y;
+
+			currProb = currentState->getValueAt(i,j);
+			if (currentState->stateId == Definitions::StateId::Match)
+			{
+				emission = ptmatrix->getLogPairTransition((*seq1)[i-1]->getMatrixIndex(), (*seq2)[j-1]->getMatrixIndex());
+				ret.second.first->push_back((*seq1)[i-1]);
+				ret.second.second->push_back((*seq2)[j-1]);
+				ret.first->push_back(bhmm->M->getValueAt(i,j));
+				i--;
+				j--;
+			}
+			else if (currentState->stateId == Definitions::StateId::Delete)
+			{
+				ptmatrix->getLogEquilibriumFreq((*seq2)[j-1]->getMatrixIndex());
+				ret.second.first->push_back(gapElem);//gapElem;
+				ret.second.second->push_back((*seq2)[j-1]);
+				ret.first->push_back(bhmm->Y->getValueAt(i,j));
+				j--;
+			}
+			else //Insert
+			{
+				emission = ptmatrix->getLogEquilibriumFreq((*seq1)[i-1]->getMatrixIndex());
+				ret.second.first->push_back((*seq1)[i-1]);
+				ret.second.second->push_back(gapElem);//gapElem;
+				ret.first->push_back(bhmm->X->getValueAt(i,j));
+				i--;
+			}
+			mtProb = emission + currentState->getTransitionProbabilityFromMatch() + M->getValueAt(i,j) - currProb;
+			inProb = emission + currentState->getTransitionProbabilityFromInsert() + X->getValueAt(i,j) - currProb;
+			//dlProb = emission + currentState->getTransitionProbabilityFromDelete() + Y->getValueAt(i,j) - currProb;
+
+		}
+
+		if (j==0)
+		{
+			while(i > 0){
+				ret.second.first->push_back((*seq1)[i-1]);
+				ret.second.second->push_back(gapElem);//gapElem;
+				ret.first->push_back(bhmm->X->getValueAt(i,j));
+				i--;
+			}
+		}
+		else if (i==0)
+		{
+			while(j > 0){
+				ret.second.first->push_back(gapElem);//gapElem;
+				ret.second.second->push_back((*seq2)[j-1]);
+				ret.first->push_back(bhmm->Y->getValueAt(i,j));
+				j--;
+			}
+		}
+		//deal with the last row or column
+
+		reverse(ret.second.first->begin(), ret.second.first->end());
+		reverse(ret.second.second->begin(), ret.second.second->end());
+		reverse(ret.first->begin(), ret.first->end());
+
+		return ret;
+
+}
+
+
+pair<vector<double>*, pair<vector<SequenceElement*>*, vector<SequenceElement*>*> >
+ForwardPairHMM::getBestAlignmentFromForward(Dictionary* dict, EvolutionaryPairHMM* bhmm)
+{
+
+	pair<vector<double>*, pair<vector<SequenceElement*>*, vector<SequenceElement*>*> >
+	ret = make_pair(new vector<double>(),make_pair(new vector<SequenceElement*>(), new vector<SequenceElement*>()));
+		//FIXME hack for codons
+		string sgap = "---" ;
+		SequenceElement* gapElem = dict->getSequenceElement(sgap);
+
+	DUMP("Forward HMM getBestAlignment");
+
+	//std::random_device rd;
+	//std::mt19937 gen(rd());
+	//std::uniform_real_distribution<> dis(0, 1.0);
+
+	unsigned int i = xSize-1;
+	unsigned int j = ySize-1;
+
+	double mtProb,inProb,dlProb,currProb;
+	double emission = 0.0;
+
+	//choose initial state
+	PairwiseHmmStateBase* currentState;
+
+	mtProb = M->getValueAt(xSize-1, ySize-1) - this->getTotalLikelihood();
+	inProb = X->getValueAt(xSize-1, ySize-1) - this->getTotalLikelihood();
+	dlProb = Y->getValueAt(xSize-1, ySize-1) - this->getTotalLikelihood();
+
+	while(i > 0 && j > 0)
+	{
+
+		if(mtProb >= inProb && mtProb >= dlProb )
+			currentState = M;
+		else if (inProb >= dlProb)
+			currentState = X;
+		else currentState = Y;
+
+		currProb = currentState->getValueAt(i,j);
+		if (currentState->stateId == Definitions::StateId::Match)
+		{
+			emission = ptmatrix->getLogPairTransition((*seq1)[i-1]->getMatrixIndex(), (*seq2)[j-1]->getMatrixIndex());
+			ret.second.first->push_back((*seq1)[i-1]);
+			ret.second.second->push_back((*seq2)[j-1]);
+			ret.first->push_back(bhmm->M->getValueAt(i,j));
+
+			i--;
+			j--;
+		}
+		else if (currentState->stateId == Definitions::StateId::Delete)
+		{
+			ret.second.first->push_back(gapElem);//gapElem;
+			ret.second.second->push_back((*seq2)[j-1]);
+			ret.first->push_back(bhmm->Y->getValueAt(i,j));
+			j--;
+		}
+		else //Insert
+		{
+			ret.second.first->push_back((*seq1)[i-1]);
+			ret.second.second->push_back(gapElem);//gapElem;
+			ret.first->push_back(bhmm->X->getValueAt(i,j));
+			i--;
+		}
+		mtProb = emission + currentState->getTransitionProbabilityFromMatch() + M->getValueAt(i,j) - currProb;
+		inProb = emission + currentState->getTransitionProbabilityFromInsert() + X->getValueAt(i,j) - currProb;
+		dlProb = emission + currentState->getTransitionProbabilityFromDelete() + Y->getValueAt(i,j) - currProb;
+	}
+
+	if (j==0)
+	{
+		while(i > 0){
+			ret.second.first->push_back((*seq1)[i-1]);
+			ret.second.second->push_back(gapElem);//gapElem;
+			ret.first->push_back(bhmm->X->getValueAt(i,j));
+			i--;
+		}
+	}
+	else if (i==0)
+	{
+		while(j > 0){
+			ret.second.first->push_back(gapElem);//gapElem;
+			ret.second.second->push_back((*seq2)[j-1]);
+			ret.first->push_back(bhmm->Y->getValueAt(i,j));
+			j--;
+		}
+	}
+	//deal with the last row or column
+
+	reverse(ret.second.first->begin(), ret.second.first->end());
+	reverse(ret.second.second->begin(), ret.second.second->end());
+	reverse(ret.first->begin(), ret.first->end());
+
+	return ret;
+}
+
+
 pair<string, string> ForwardPairHMM::getBestAlignment(string&seq_a, string& seq_b)
 {
 	DUMP("Forward HMM getBestAlignment");
@@ -307,6 +499,8 @@ void ForwardPairHMM::sampleAlignment(HMMPathSample& sample)
 	return lnl;
 */
 }
+
+
 
 
 pair<vector<unsigned char>*, vector<unsigned char>* >* ForwardPairHMM::sampleAlignment(Dictionary* dictionary, double& lnl)

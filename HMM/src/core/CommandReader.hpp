@@ -160,6 +160,7 @@ public:
 	double getDistance()
 	{
 		double opt = get_option(parser,"d",-1.0);
+		opt = opt == 0.0 ? 0.000001 : opt;
 		return opt;
 	}
 

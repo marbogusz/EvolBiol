@@ -61,6 +61,12 @@ public:
 
 	void sampleAlignment(HMMPathSample& sample);
 
+	pair<vector<double>*, pair<vector<SequenceElement*>*, vector<SequenceElement*>*> >
+	getBestAlignmentFromForward(Dictionary* dict, EvolutionaryPairHMM* bhmm);
+
+	pair<vector<double>*, pair<vector<SequenceElement*>*, vector<SequenceElement*>*> >
+	sampleAlignmentFromForward(Dictionary* dict, EvolutionaryPairHMM* bhmm);
+
 };
 
 } /* namespace EBC */

@@ -49,8 +49,8 @@ int main(int argc, char ** argv) {
 	//cerr << "Starting dm\n";
 	//Set output Precision to 2
 	//FIXME - should normally be set to >= 6
-	cout << fixed << setprecision(6);
-	cerr << fixed << setprecision(6);
+	cout << fixed << setprecision(8);
+	cerr << fixed << setprecision(8);
 
 
 	//std::this_thread::sleep_for(std::chrono::milliseconds(30000));
@@ -64,8 +64,6 @@ int main(int argc, char ** argv) {
 	    chrono::time_point<chrono::system_clock> start, end;
 	    start = chrono::system_clock::now();
 
-		//FIXME - nothing happens when the model does not get specified!
-
 		CommandReader* cmdReader = new CommandReader(argc, argv);
 		ofstream treefile;
 
@@ -75,7 +73,7 @@ int main(int argc, char ** argv) {
 
 		//FileLogger::DebugLogger().setCerr();
 		//FileLogger::DumpLogger().setCerr();
-		FileLogger::InfoLogger().setCerr();
+		//FileLogger::InfoLogger().setCerr();
 
 		INFO("Reading input sequences...");
 		DEBUG("Creating alignment object...");
@@ -83,14 +81,12 @@ int main(int argc, char ** argv) {
 		Sequences* inputSeqs = new Sequences(parser, cmdReader->getSequenceType(),cmdReader->isFixedAlignment());
 
 		//No indel or subst params!
-		Optimizer* bfgs;
+
 		Dictionary* dict;
 		SubstitutionModelBase* substModel;
 		IndelModel* indelModel;
 		Maths* maths;
 		Definitions::AlgorithmType algorithm;
-		OptimizedModelParameters* modelParams;
-
 		maths = new Maths();
 		dict = inputSeqs->getDictionary();
 
@@ -102,158 +98,207 @@ int main(int argc, char ** argv) {
 
 		substModel->setObservedFrequencies(inputSeqs->getElementFrequencies());
 
-		modelParams = new OptimizedModelParameters(substModel, indelModel,2, 1, true,
-							true, false, true, maths);
 
-		//modelParams->generateInitialDistanceParameters();
-		//modelParams->generateInitialIndelParameters();
-		//modelParams->generateInitialSubstitutionParameters();
-		modelParams->setUserIndelParams({0.01,0.5});
-		modelParams->setUserDivergenceParams({0.2});
-		modelParams->setUserSubstParams({2.0, 0.1});
+		double uTime = cmdReader->getDistance();
+		auto uIndelParams = cmdReader->getIndelParams();
+		auto uSubstParams = cmdReader->getSubstParams();
+		double lnl0 = 0.0;
 
-		//indelModel->setParameters({0.00001,0.00001});
-		//substModel->setParameters({16.4, 0.00352});
-		//substModel->calculateModel();
+		indelModel->setParameters(uIndelParams);
+		substModel->setParameters(uSubstParams);
+		substModel->calculateModel();
 
 
-		EvolutionaryPairHMM *hmm;
+		ForwardPairHMM *fhmm;
+		BackwardPairHMM *bhmm;
 
-		bfgs = new Optimizer(modelParams, NULL, cmdReader->getOptimizationType());
+		double totlnl;
 
-		PairHmmCalculationWrapper* wrapper = new PairHmmCalculationWrapper();
+		std::pair<unsigned int, unsigned int> idxs = inputSeqs->getPairOfSequenceIndices(0);
+
+		Band* band = nullptr;
+
+		fhmm = new ForwardPairHMM(inputSeqs->getSequencesAt(idxs.first), inputSeqs->getSequencesAt(idxs.second),
+									substModel, indelModel, Definitions::DpMatrixType::Full, band);
+		fhmm->setDivergenceTimeAndCalculateModels(uTime);
+
+		totlnl = fhmm->runAlgorithm();
+
+		bhmm = new BackwardPairHMM(inputSeqs->getSequencesAt(idxs.first), inputSeqs->getSequencesAt(idxs.second),
+											substModel, indelModel, Definitions::DpMatrixType::Full, band);
+		bhmm->setDivergenceTimeAndCalculateModels(uTime);
+
+		bhmm->runAlgorithm();
+
+		bhmm->calculatePosteriors(fhmm);
+
+		bhmm->calculateMaximumPosteriorMatrix();
+
+		//auto mp1 = bhmm->getMPAlignment();
 
 
+		//DUMP("MPD aligment for sequence id " << idxs.first << " and " << idxs.second);
+		//DUMP(mp1.first);
+		//DUMP(mp1.second);
 
-		for (unsigned int pi = 0; pi<inputSeqs->getPairCount(); pi++){
+		//cout << inputSequences->getSequenceName(idxs.first) << "\t" <<  inputSequences->getSequenceName(idxs.second) << "\t" << bhmm->getAlignmentPosteriors(inputSequences->getAlignmentsAt(idxs.first), inputSequences->getAlignmentsAt(idxs.second));
 
-			std::pair<unsigned int, unsigned int> idxs = inputSeqs->getPairOfSequenceIndices(pi);
 
-			unsigned int len1, len2;
+		//cout << mp1.first << endl;
+		//cout << mp1.second << endl;
 
-			len1 = inputSeqs->getSequencesAt(idxs.first)->size();
-			len2 = inputSeqs->getSequencesAt(idxs.second)->size();
 
-			Band* band = new Band(len1,len2,0.3);
-
+		vector<SequenceElement*>* ssq1;
+		vector<SequenceElement*>* ssq2;
 
 /*
-			auto ip =  cmdReader->getIndelParams();
+		cout << "FWD   lnL\t" << totlnl << endl;
 
-			substModel->setParameters(cmdReader->getSubstParams());
-			substModel->calculateModel();
-			//BAND it ?
-
-
-			hmm = new ForwardPairHMM(inputSeqs->getSequencesAt(idxs.first), inputSeqs->getSequencesAt(idxs.second),
-							substModel, indelModel, Definitions::DpMatrixType::Full, band);
+		cout << "MPD" << endl;
+		cout << "MPD" << endl;
 
 
-			double lam = Definitions::almostZero;
-			double tim = 0.1;//Definitions::almostZero;
-			double lnl = 0;
+*/
 
-			cout << "Time\tLambda\tLnL" << endl;
-			while(tim < 1.5){
-				lam = Definitions::almostZero;
-				while(lam < 0.1){
-					indelModel->setParameters({lam,ip[1]});
-					hmm->setDivergenceTimeAndCalculateModels(tim);
-					lnl = hmm->runAlgorithm() * -1.0;
-					lam += (0.0025);
-					//lam += (Definitions::almostZero)*4;
-					cout << tim << "\t" << lam << "\t" << lnl << endl;
-				}
-				tim += 0.025;
-			}
+		ofstream mpdfile;
+
+		mpdfile << fixed << setprecision(8);
+
+		mpdfile.open ((string(cmdReader->getInputFileName()).append(".hmm.msa.samples")));
+
+		std::map<double,pair<string, pair<vector<double>*, pair<vector<SequenceElement*>*, vector<SequenceElement*>*> >*> >  smap;
+
+		pair<vector<double>*, pair<vector<SequenceElement*>*, vector<SequenceElement*>*> > combo1  = bhmm->getMPDPosteriors(dict);
+
+		ssq1 = combo1.second.first;
+		ssq2 = combo1.second.second;
+
+		smap.insert(std::make_pair(-1.0 * bhmm->getAlignmentLikelihood(ssq1,ssq2),std::make_pair("MPD alignment" ,&combo1)));
+
+
+
+		//cout << "MPD  lnL\t" << bhmm->getAlignmentLikelihood(ssq1,ssq2) << endl;
+/*
+		mpdfile << "MPD" <<endl;
+		mpdfile << bhmm->getAlignmentLikelihood(ssq1,ssq2) << endl;
+
+		for(auto val : *ssq1){
+			mpdfile << val->getSymbol();
+		}
+		mpdfile << endl;
+		for(auto val : *ssq2){
+			mpdfile << val->getSymbol();
+		}
+		mpdfile << endl;
+
+		for(auto val : *(combo1.first)){
+			mpdfile << val << "\t";
+		}
+		mpdfile << endl;
+*/
+
+		pair<vector<double>*, pair<vector<SequenceElement*>*, vector<SequenceElement*>*> > combo2 = fhmm->getBestAlignmentFromForward(dict,bhmm);
+		ssq1 = combo2.second.first;
+		ssq2 = combo2.second.second;
+
+		smap.insert(std::make_pair(-1.0 * bhmm->getAlignmentLikelihood(ssq1,ssq2),std::make_pair("BEST FWD alignment" ,&combo2)));
+
+/*
+		mpdfile << "Best fwd" << endl;
+		mpdfile << bhmm->getAlignmentLikelihood(ssq1,ssq2) << endl;
+*/
+/*
+		cout << "BEST FWD" << endl;
+		cout << "BEST FWD" << endl;
+
+		cout << "BEST fwd lnL\t" << bhmm->getAlignmentLikelihood(ssq1,ssq2) << endl;
+*/
+/*
+		for(auto val : *ssq1){
+			mpdfile << val->getSymbol();
+		}
+			mpdfile << endl;
+		for(auto val : *ssq2){
+			mpdfile << val->getSymbol();
+		}
+			mpdfile << endl;
+
+		for(auto val : *(combo2.first)){
+			mpdfile << val << "\t";
+		}
+*/
+/*
+		cout << "SAMPLES" << endl;
+		cout << "SAMPLES" << endl;
 */
 
 
-			hmm = new ForwardPairHMM(inputSeqs->getSequencesAt(idxs.first), inputSeqs->getSequencesAt(idxs.second),
-					substModel, indelModel, Definitions::DpMatrixType::Full, band);
-
-			wrapper->setTargetHMM(hmm);
-			wrapper->setIndelModel(indelModel);
-			wrapper->setSubstModel(substModel);
-			wrapper->setModelParameters(modelParams);
-
-			bfgs->setTarget(wrapper);
-			bfgs->optimize();
-
-			//detect if we're close to the bounds
-
-			double lambda, divergence;
-			bool runAgain;
-
-			do{
-
-				//cout << modelParams->getSubstParameters()[0] << "\t" << modelParams->getSubstParameters()[1] <<
-				//			    "\t" <<  modelParams->getIndelParameters()[0] << "\t" <<  modelParams->getIndelParameters()[1] <<
-				//				"\t" << modelParams->getDivergenceTime(0) << "\t" << inputSeqs->getSequenceName(idxs.first) << "\t" << inputSeqs->getSequenceName(idxs.second) << "\t" << pi << "\n";
-
-
-				runAgain = false;
-				lambda = modelParams->getIndelParameters()[0];
-				divergence  = modelParams->getDivergenceTime(0);
-
-				//cerr << " L " << lambda << " D " << divergence << endl;
-
-
-				if(lambda > (Definitions::lambdaHiBound * 0.995)){
-					runAgain = true;
-					//cerr << " Lambda big \n";
-					Definitions::lambdaHiBound = Definitions::lambdaHiBound * 2.0;
-					Definitions::divergenceBound = Definitions::divergenceBound / 2.0;
-
-				}	//check if we're close to the band
-				else if(divergence > (Definitions::divergenceBound * 0.995)){
-					runAgain = true;
-					//cerr << " Divergence big \n";
-					Definitions::lambdaHiBound = Definitions::lambdaHiBound / 2.0;
-					Definitions::divergenceBound = Definitions::divergenceBound * 2.0;
-				}
-
-				if(runAgain){
-					//cerr << "Lambda was " << lambda << "\tand divergence " << divergence << endl;
-					//cerr << "Run again...\n";
-					//cerr << "New bounds " << Definitions::lambdaHiBound << " " << Definitions::divergenceBound << endl;
-					indelModel->resetBounds();
-					modelParams->resetBounds();
-					bfgs->optimize();
-				}
-
-			}
-			while(runAgain == true);
 
 
 /*
-			auto vh = new ViterbiPairHMM(inputSeqs->getSequencesAt(idxs.first), inputSeqs->getSequencesAt(idxs.second),
-					substModel, indelModel, Definitions::DpMatrixType::Full, NULL);
+		for(int s=0; s<200; s++){
+			//cout << "SAMPLE " << s << endl;
+			pair<vector<double>*, pair<vector<SequenceElement*>*, vector<SequenceElement*>*> > combo = fhmm->sampleAlignmentFromForward(dict,bhmm);
+			ssq1 = combo.second.first;
+			ssq2 = combo.second.second;
 
-			vh->setDivergenceTimeAndCalculateModels(modelParams->getDivergenceTime(0));
-			vh->runAlgorithm();
-			auto al = vh->getStringAlignment();
+			string sname = "sample " + std::to_string(s+1);
 
-			cout << al.first << endl;
-			cout << al.second << endl;
+			smap.insert(std::make_pair(-1.0 *  bhmm->getAlignmentLikelihood(ssq1,ssq2),std::make_pair(sname,&combo)));
 
-			delete vh;
-			*/
-			cout << modelParams->getSubstParameters()[0] << "\t" << modelParams->getSubstParameters()[1] <<
-			    "\t" <<  modelParams->getIndelParameters()[0] << "\t" <<  modelParams->getIndelParameters()[1] <<
-				"\t" << modelParams->getDivergenceTime(0) << "\t" << inputSeqs->getSequenceName(idxs.first) << "\t" << inputSeqs->getSequenceName(idxs.second) << "\t" << pi << "\n";
-
-			//INFO(inputSeqs->getSequenceName(idxs.first) << " " << inputSeqs->getSequenceName(idxs.second));
-
-			//INFO("Divergence time " << modelParams->getDivergenceTime(0));
-			//INFO(modelParams->getSubstParameters());
-			//INFO(modelParams->getIndelParameters());
-
-
-
-			delete hmm;
-			delete band;
 		}
+*/
+		int ctr = 1;
+
+		for(auto el : smap){
+			if(ctr > 20){
+				break;
+			}
+			mpdfile << el.second.first << endl;
+			mpdfile << (-1.0 * el.first) << endl;
+
+			ssq1 = (*(el.second.second)).second.first;
+			ssq2 = (*(el.second.second)).second.second;
+
+			for(auto val : *ssq1){
+					mpdfile << val->getSymbol();
+			}
+					mpdfile << endl;
+			for(auto val : *ssq2){
+					mpdfile << val->getSymbol();
+			}
+			mpdfile << endl;
+
+			for(auto val : *((*(el.second.second)).first)){
+						mpdfile << val << "\t";
+					}
+			mpdfile << endl;
+			ctr++;
+		}
+/*
+		cout << "sample lnL\t" << bhmm->getAlignmentLikelihood(ssq1,ssq2) << endl;
+
+							for(auto val : *ssq1){
+									cout << val->getSymbol();
+							}
+								cout << endl;
+							for(auto val : *ssq2){
+								cout << val->getSymbol();
+							}
+							cout << endl;
+
+							for(auto val : *(combo.first)){
+								cout << val << "\t";
+							}
+							cout << endl;
+							*/
+
+		mpdfile.close();
+
+		delete fhmm;
+		delete bhmm;
+
+
 
 	}
 	catch(HmmException& pe)

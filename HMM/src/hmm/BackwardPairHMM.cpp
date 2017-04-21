@@ -209,9 +209,10 @@ void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 
 
 double BackwardPairHMM::getAlignmentLikelihood(vector<SequenceElement*>* s1,
-		vector<SequenceElement*>* s2, bool post, vector<vector<double> >& posteriors)
+		vector<SequenceElement*>* s2/*, bool post, vector<vector<double> >& posteriors*/)
 {
-	double lnl = 0;
+	//terminal transition
+	double lnl = log(xi);
 	double avp = 0;
 	int k =0;
 	int l =0;
@@ -230,7 +231,7 @@ double BackwardPairHMM::getAlignmentLikelihood(vector<SequenceElement*>* s1,
 		previous = M;
 		k++;
 		l++;
-		posteriors[k][l] += 1.0;
+		//posteriors[k][l] += 1.0;
 		lnl += ptmatrix->getLogPairTransition((*s1)[0]->getMatrixIndex(), (*s2)[0]->getMatrixIndex()) + initTransM;
 	}
 
@@ -246,7 +247,7 @@ double BackwardPairHMM::getAlignmentLikelihood(vector<SequenceElement*>* s1,
 			else
 				lnl+=X->getTransitionProbabilityFromMatch();
 			lnl += ptmatrix->getLogEquilibriumFreq((*s1)[i]->getMatrixIndex());
-			if (post) DUMP("I " << i << "\tlnl\t" << lnl << "\tposterior\t" << exp(previous->getValueAt(k,l)));
+			//if (post) DUMP("I " << i << "\tlnl\t" << lnl << "\tposterior\t" << exp(previous->getValueAt(k,l)));
 			previous = X;
 		}
 		else if((*s1)[i]->isIsGap()){
@@ -259,7 +260,7 @@ double BackwardPairHMM::getAlignmentLikelihood(vector<SequenceElement*>* s1,
 			else
 				lnl+=Y->getTransitionProbabilityFromMatch();
 			lnl += ptmatrix->getLogEquilibriumFreq((*s2)[i]->getMatrixIndex());
-			if (post) DUMP("D " << i << "\tlnl\t" << lnl << "\tposterior\t" << exp(previous->getValueAt(k,l)));
+			//if (post) DUMP("D " << i << "\tlnl\t" << lnl << "\tposterior\t" << exp(previous->getValueAt(k,l)));
 			previous = Y;
 		}
 		else{
@@ -273,13 +274,13 @@ double BackwardPairHMM::getAlignmentLikelihood(vector<SequenceElement*>* s1,
 			else
 				lnl+=M->getTransitionProbabilityFromMatch();
 			lnl += ptmatrix->getLogPairTransition((*s1)[i]->getMatrixIndex(), (*s2)[i]->getMatrixIndex());
-			posteriors[k][l] += 1;
-			if (post) DUMP("M " << i << "\tlnl\t" << lnl << "\tposterior\t" << exp(previous->getValueAt(k,l)));
+			//posteriors[k][l] += 1;
+			//if (post) DUMP("M " << i << "\tlnl\t" << lnl << "\tposterior\t" << exp(previous->getValueAt(k,l)));
 			previous = M;
 		}
 
 	}
-	if (post) DUMP("Average posterior prob: " << (avp/s1->size()));
+	//if (post) DUMP("Average posterior prob: " << (avp/s1->size()));
 	//cerr << endl;
 	return lnl;
 
@@ -553,6 +554,90 @@ void BackwardPairHMM::calculateMaximumPosteriorMatrix() {
 
 
 }
+
+pair<vector<double>*, pair<vector<SequenceElement*>*, vector<SequenceElement*>*> >
+BackwardPairHMM::getMPDPosteriors(Dictionary* dict){
+	pair<vector<double>*, pair<vector<SequenceElement*>*, vector<SequenceElement*>*> >
+	ret = make_pair(new vector<double>(),make_pair(new vector<SequenceElement*>(), new vector<SequenceElement*>()));
+	//FIXME hack for codons
+	string sgap = "---" ;
+	SequenceElement* gapElem = dict->getSequenceElement(sgap);
+
+	double tm, ti, td;
+
+		unsigned int i = xSize-1;
+		unsigned int j = ySize-1;
+
+		//FIXME - which index should I consider while performing a readback ???
+
+		while(i > 0 && j > 0)
+		{
+			tm = MPstate->getValueAt(i-1,j-1);
+			ti = MPstate->getValueAt(i-1,j);
+			td = MPstate->getValueAt(i,j-1);
+
+			//DUMP(tm << "\t" << ti << "\t" << td);
+
+			if (tm >= ti && tm >= td){
+				//MATCH
+				//DUMP("M");
+				ret.second.first->push_back((*seq1)[i-1]);
+				ret.second.second->push_back((*seq2)[j-1]);
+				ret.first->push_back(M->getValueAt(i,j));
+				i--;
+				j--;
+
+			}
+			else if (ti >= td){
+				//INSERT
+				//DUMP("I");
+				ret.second.first->push_back((*seq1)[i-1]);
+				ret.second.second->push_back(gapElem);//gapElem;
+				ret.first->push_back(X->getValueAt(i,j));
+				i--;
+
+			}
+			else{
+				//DELETE
+				//DUMP("D");
+				ret.second.first->push_back(gapElem);//gapElem;
+				ret.second.second->push_back((*seq2)[j-1]);
+				ret.first->push_back(Y->getValueAt(i,j));
+				j--;
+
+			}
+		}
+
+
+		if (j==0)
+		{
+			while(i > 0){
+				ret.second.first->push_back((*seq1)[i-1]);
+				ret.second.second->push_back(gapElem);
+				ret.first->push_back(X->getValueAt(i,j));
+				i--;
+
+			}
+		}
+		else if (i==0)
+		{
+			while(j > 0){
+				ret.second.second->push_back((*seq2)[j-1]);
+				ret.second.first->push_back(gapElem);
+				ret.first->push_back(Y->getValueAt(i,j));
+				j--;
+			}
+		}
+		//deal with the last row or column
+
+		reverse(ret.second.first->begin(), ret.second.first->end());
+		reverse(ret.second.second->begin(), ret.second.second->end());
+		reverse(ret.first->begin(), ret.first->end());
+
+	return ret;
+}
+
+
 pair<vector<double>*, pair<vector<unsigned char>*, vector<unsigned char>*> >
 BackwardPairHMM::getMPDWithPosteriors(){
 	DUMP("Backward HMM get MPD alignment with posteriors");
@@ -635,6 +720,8 @@ BackwardPairHMM::getMPDWithPosteriors(){
 }
 
 pair<string, string> BackwardPairHMM::getMPAlignment() {
+
+	//FIXME -- HACKED GAP LENGTH (ONE NEEDS TO ADD GAP CHAR TO the dictionay (probably done in another branc)
 	//tarceback through MPstate matrix
 	//similar to viterbi traceback !
 	DUMP("Backward HMM get MP alignment");
@@ -672,13 +759,13 @@ pair<string, string> BackwardPairHMM::getMPAlignment() {
 			//INSERT
 			//DUMP("I");
 			alignment.first += (*seq1)[i-1]->getSymbol();
-			alignment.second += '-';//gapElem;
+			alignment.second += "---";//gapElem;
 			i--;
 		}
 		else{
 			//DELETE
 			//DUMP("D");
-			alignment.first += '-';//gapElem;
+			alignment.first += "---";//gapElem;
 			alignment.second += (*seq2)[j-1]->getSymbol();
 			j--;
 		}
@@ -689,7 +776,7 @@ pair<string, string> BackwardPairHMM::getMPAlignment() {
 	{
 		while(i > 0){
 			alignment.first += (*seq1)[i-1]->getSymbol();
-			alignment.second += '-';
+			alignment.second += "---";
 			i--;
 		}
 	}
@@ -697,7 +784,7 @@ pair<string, string> BackwardPairHMM::getMPAlignment() {
 	{
 		while(j > 0){
 			alignment.second += (*seq2)[j-1]->getSymbol();
-			alignment.first += '-';
+			alignment.first += "---";
 			j--;
 		}
 	}
