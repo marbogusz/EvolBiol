@@ -114,15 +114,25 @@ int main(int argc, char ** argv) {
 
 		cout << "Estimating pairwise distances..." << endl;
 
+		auto seqCount =  inputSeqs->getSequenceCount();
+		for (unsigned int seqId = 0; seqId < seqCount; seqId++){
+					cerr  << inputSeqs->getSequenceName(seqId) << '\t' << inputSeqs->getRawSequenceAt(seqId).length() << endl;
+		}
+
 		BandingEstimator* be = new BandingEstimator(Definitions::AlgorithmType::Forward, inputSeqs, cmdReader->getModelType() ,indelParams,
 				substParams, cmdReader->getOptimizationType(), cmdReader->getCategories(),alpha, tme->getGuideTree());
 		be->optimizePairByPair();
 
 
 		auto distances = be->getOptimizedTimes();
-		auto seqCount =  inputSeqs->getSequenceCount();
+
 
 		//output distance matrix
+
+
+
+
+/*
 		distfile.open((string(cmdReader->getInputFileName()).append(Definitions::distMatExt)).c_str(),ios::out);
 		distfile << inputSeqs->getSequenceCount() << endl;
 		for (unsigned int seqId = 0; seqId < seqCount; seqId++){
@@ -137,6 +147,8 @@ int main(int argc, char ** argv) {
 		distfile.close();
 
 
+
+
 		DEBUG ("Running BioNJ");
 
 		cout << "Running neighbour joining..." << endl;
@@ -145,13 +157,14 @@ int main(int argc, char ** argv) {
 		//DEBUG("Final tree : " << nj.calculate());
 		string treeStr = nj.calculate();
 
-
+*/
 		INFO("Indel parameters");
 		INFO(indelParams);
 		INFO("Substitution parameters");
 		INFO(substParams);
 		INFO("Gamma parameters (alpha and rate categories)");
 		INFO(alpha << '\t' << cmdReader->getCategories());
+/*
 		INFO("Newick tree");
 		INFO(treeStr);
 
@@ -159,7 +172,7 @@ int main(int argc, char ** argv) {
 		treefile.open((string(cmdReader->getInputFileName()).append(Definitions::treeExt)).c_str(),ios::out);
 		treefile << treeStr << endl;
 		treefile.close();
-
+*/
 
 		delete be;
 
