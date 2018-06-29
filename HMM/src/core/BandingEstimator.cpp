@@ -174,7 +174,7 @@ void BandingEstimator::optimizePairByPair()
 
 			//FIXME - manually set the band to null!!!
 
-			cerr << "[ " << idxs.first << " , " << idxs.second << " ]\t" << endl;
+
 
 			DEBUG("Creating forward algorithm to optimize the pairwise divergence time...");
 			hmm = new ForwardPairHMM(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
@@ -209,11 +209,24 @@ void BandingEstimator::optimizePairByPair()
 		}
 		this->divergenceTimes[i] = modelParams->getDivergenceTime(0);
 
+		hmm->setDivergenceTimeAndCalculateModels(modelParams->getDivergenceTime(0));
+		hmm->runAlgorithm();
+
+		BackwardPairHMM* bmm = new BackwardPairHMM(inputSequences->getSequencesAt(idxs.first), inputSequences->getSequencesAt(idxs.second),
+				substModel, indelModel, Definitions::DpMatrixType::Full, nullptr);
+		bmm->setDivergenceTimeAndCalculateModels(modelParams->getDivergenceTime(0));
+		bmm->runAlgorithm();
+
+		bmm->calculatePosteriors(static_cast<ForwardPairHMM*>(hmm));
+		cerr << "[ " << idxs.first << " , " << idxs.second << " ]";
+		bmm->ov();
+
 		pb.tick();
 
 		delete band;
 		delete bc;
 		delete hmm;
+		delete bmm;
 	}
 
 	pb.done();

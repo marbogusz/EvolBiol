@@ -95,7 +95,10 @@ void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 			M->setValueAt(i,j,mval);
 		}
 	}
+
+
 /*
+ * dynamic_cast<DpMatrixFull*>(M->getDpMatrix())->outputValues(0);
 	DUMP("#####Match posteriors########");
 	dynamic_cast<DpMatrixFull*>(M->getDpMatrix())->outputValues(0);
 	DUMP("#####Insert posteriors########");
@@ -105,7 +108,10 @@ void BackwardPairHMM::calculatePosteriors(ForwardPairHMM* fwd)
 */
 }
 
-
+void BackwardPairHMM::ov()
+{
+	dynamic_cast<DpMatrixFull*>(M->getDpMatrix())->outputValues(0);
+}
 
 double BackwardPairHMM::runAlgorithm()
 {

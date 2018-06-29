@@ -63,6 +63,8 @@ public:
 	pair<vector<double>*, pair<vector<unsigned char>*, vector<unsigned char>*> >
 	getMPDWithPosteriors();
 
+	void ov();
+
 };
 
 } /* namespace EBC */

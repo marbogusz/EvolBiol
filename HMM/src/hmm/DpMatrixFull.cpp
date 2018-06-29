@@ -127,26 +127,23 @@ void EBC::DpMatrixFull::outputValues(unsigned int bound=0)
 	unsigned int yl = bound !=0 ? bound : ySize;
 
 	stringstream sstr;
+	sstr.precision(5);
 
-	sstr << endl;
-	for(unsigned int k=0; k < yl; k++)
-		sstr << k << "\t";
-	sstr << endl;
 
-	for(unsigned int i=0; i < xl; i++)
+
+	for(unsigned int i=1; i < xl; i++)
 	{
-		for(unsigned int j=0; j < yl; j++)
+		for(unsigned int j=1; j < yl; j++)
 		{
 
-
-			//if (ts.score > -5.0)
-				sstr << matrixData[i][j] *-1.0 << "\t";
-			//else sstr << ".";
+				sstr << "\t" << exp(matrixData[i][j]);
 
 		}
-		sstr << endl;
+
 	}
-	DUMP(sstr.str());
+	sstr << endl;
+
+	cerr << sstr.str();
 }
 
 void EBC::DpMatrixFull::outputValuesWithBands(const vector<pair<int, int> >& band, const vector<pair<int, int> >& oband1, const vector<pair<int, int> >& oband2, char os1, char os2) {
